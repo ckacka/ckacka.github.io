@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线电视播放器</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #87CEFA, #00BFFF);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #scrollMessage {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            background: #808080;
+            color: #FF0000;
+            font-size: 14px;
+            line-height: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            padding: 5px 0;
+            text-align: center;
+        }
+        #scrollMessage span {
+            display: inline-block;
+            animation: scrollText 15s linear infinite;
+        }
+        @keyframes scrollText {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(-100%);
+            }
+        }
+        #timeDisplay {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            font-size: 14px;
+            color: #d3d3d3;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+            max-width: 900px;
+            width: 90%;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            font-weight: bold;
+            color: #fff;
+            transition: background 0.3s ease;
+        }
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .tab.active {
+            background: #ffffff;
+            color: #00BFFF;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .controls button {
+            cursor: pointer;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            margin: 0 10px;
+            background: #ffffff;
+            color: #00BFFF;
+            font-weight: bold;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        .controls button:hover {
+            transform: scale(1.1);
+            background: #f0f0f0;
+        }
+        .playlist {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: left;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .playlist-item {
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            color: #fff;
+            transition: background 0.3s ease;
+        }
+        .playlist-item:hover, .playlist-item.active {
+            background: #ffffff;
+            color: #00BFFF;
+        }
+        iframe {
+            width: 100%;
+            height: 349px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        #videoPlayer {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 10px;
+            margin: 20px auto;
+            object-fit: cover;
+            background-color: black;
+        }
+        #currentChannel {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        #refreshButton {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #00BFFF;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        #footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            color: #d3d3d3;
+            font-size: 12px;
+            text-align: center;
+        }
+        #loadingMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        #errorMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        #playHint {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            display: none;
+        }
+        .controls button:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="scrollMessage">
+        <span>请勿相信本网页任何广告，注意保护个人隐私信息，谨防诈骗。</span>
+    </div>
+    <div id="timeDisplay"></div>
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="tab1">看电视</div>
+            <div class="tab" data-tab="tab2">听广播</div>
+        </div>
+        <div class="tab-content active" id="tab1">
+            <div id="playHint">点击视频继续播放</div>
+            <video id="videoPlayer" controls="controls"></video>
+            <div id="currentChannel">当前频道：央视综合频道</div>
+            <div class="controls">
+                <button onclick="prevChannel()">上一台</button>
+                <button onclick="nextChannel()">下一台</button>
+            </div>
+            <div class="playlist" id="playlist"></div>
+        </div>
+        <div class="tab-content" id="tab2">
+            <iframe src="https://m.cnr.cn/#/pages/broadcast/broadcast" allowfullscreen></iframe>
+            <button id="refreshButton" onclick="refreshIframe()">刷新</button>
+        </div>
+    </div>
+    <div id="loadingMessage">加载中，请稍候...</div>
+    <div id="errorMessage">哎呦喂～播放失败！请稍后重试。</div>
+    <div id="footer">
+        本网页仅供个人学习，信息来源于互联网。
+    </div>
+
+    <script>
+        // 更新实时时间
+        function updateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('timeDisplay').textContent = `现在是 ${year}年${month}月${date}日 ${hours}时${minutes}分${seconds}秒`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Tab 切换逻辑
+        const tabs = document.querySelectorAll('.tab');
+        const contents = document.querySelectorAll('.tab-content');
+        tabs.forEach((tab, index) => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                contents.forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                contents[index].classList.add('active');
+            });
+        });
+
+        // 电视台播放逻辑
+        const channels = [
+            { name: '央视综合频道', url: 'https://tvpull.careryun.com/tv/cctv1.m3u8' },
+            { name: '央视新闻频道', url: 'https://tvpull.careryun.com/tv/cctv13.m3u8' },
+            { name: '湖南卫视', url: 'http://tvpull.careryun.com/tv/cn_hunws.m3u8' },
+            { name: '浙江卫视', url: 'https://ali-m-l.cztv.com/channels/lantian/channel001/1080p.m3u8' },
+            { name: '东方卫视', url: 'http://tvpull.careryun.com/tv/dfws.m3u8' }
+        ];
+        let currentChannelIndex = 0;
+        const videoPlayer = document.getElementById('videoPlayer');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const playHint = document.getElementById('playHint');
+
+        function loadHLS(url) {
+            loadingMessage.style.display = 'block'; // 显示加载提示
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(videoPlayer);
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    loadingMessage.style.display = 'none'; // 隐藏加载提示
+                });
+                hls.on(Hls.Events.ERROR, function () {
+                    loadingMessage.style.display = 'none'; // 隐藏加载提示
+                    errorMessage.style.display = 'block'; // 显示错误提示
+                    setTimeout(() => errorMessage.style.display = 'none', 3000); // 3秒后自动隐藏
+                });
+            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                videoPlayer.src = url;
+                loadingMessage.style.display = 'none'; // 隐藏加载提示
+            } else {
+                alert('您的浏览器不支持播放此视频源。');
+                loadingMessage.style.display = 'none'; // 隐藏加载提示
+                errorMessage.style.display = 'block'; // 显示错误提示
+                setTimeout(() => errorMessage.style.display = 'none', 3000); // 3秒后自动隐藏
+            }
+        }
+
+        function loadPlaylist() {
+            const playlist = document.getElementById('playlist');
+            playlist.innerHTML = '';
+            channels.forEach((channel, index) => {
+                const item = document.createElement('div');
+                item.textContent = channel.name;
+                item.className = 'playlist-item' + (index === currentChannelIndex ? ' active' : '');
+                item.onclick = () => changeChannel(index);
+                playlist.appendChild(item);
+            });
+        }
+
+        function changeChannel(index) {
+            currentChannelIndex = index;
+            document.getElementById('currentChannel').textContent = `当前频道：${channels[currentChannelIndex].name}`;
+            loadHLS(channels[currentChannelIndex].url);
+            loadPlaylist();
+        }
+
+        function prevChannel() {
+            currentChannelIndex = (currentChannelIndex - 1 + channels.length) % channels.length;
+            changeChannel(currentChannelIndex);
+        }
+
+        function nextChannel() {
+            currentChannelIndex = (currentChannelIndex + 1) % channels.length;
+            changeChannel(currentChannelIndex);
+        }
+
+        function refreshIframe() {
+            const iframe = document.querySelector('iframe');
+            iframe.src = iframe.src;
+        }
+
+        // 默认加载频道
+        loadPlaylist();
+        changeChannel(0);
+
+// 监听视频的播放和暂停
+videoPlayer.addEventListener('canplay', () => {
+    playHint.style.display = 'none'; // 视频加载完成后隐藏提示
+});
+
+videoPlayer.addEventListener('pause', () => {
+    playHint.style.display = 'block'; // 视频暂停时显示提示
+});
+
+// 点击视频继续播放
+videoPlayer.addEventListener('click', () => {
+    if (videoPlayer.paused) {
+        videoPlayer.play();
+        playHint.style.display = 'none'; // 视频播放时隐藏提示
+    }
+});
+    </script>
+</body>
+</html>
