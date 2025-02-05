@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二维码生成器</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 350px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        input, select {
+            width: 90%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .qr-code {
+            margin-top: 15px;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>二维码生成器</h2>
+        <input type="text" id="urlInput" placeholder="输入文字或网址生成二维码">
+        <select id="frameSelect">
+            <option value="1">边框样式 1</option>
+            <option value="2">边框样式 2</option>
+            <option value="3">边框样式 3</option>
+        </select>
+        <select id="errorCorrection">
+            <option value="L">低纠错 (L)</option>
+            <option value="M">中纠错 (M)</option>
+            <option value="Q">高纠错 (Q)</option>
+            <option value="H">最高纠错 (H)</option>
+        </select>
+        <select id="sizeSelect">
+            <option value="150">150px</option>
+            <option value="200" selected>200px</option>
+            <option value="250">250px</option>
+            <option value="300">300px</option>
+        </select>
+        <button onclick="generateQRCode()">生成二维码</button>
+        <p class="error" id="errorMsg"></p>
+        <div class="qr-code" id="qrCode"></div>
+        <button id="saveBtn" style="display:none;" onclick="saveQRCode()">保存二维码</button>
+    </div>
+
+    <script>
+        function generateQRCode() {
+            const url = document.getElementById('urlInput').value.trim();
+            const frame = document.getElementById('frameSelect').value;
+            const errorCorrection = document.getElementById('errorCorrection').value;
+            const size = document.getElementById('sizeSelect').value;
+            const qrCodeDiv = document.getElementById('qrCode');
+            const errorMsg = document.getElementById('errorMsg');
+            const saveBtn = document.getElementById('saveBtn');
+
+            if (!url) {
+                errorMsg.textContent = "请输入有效的文字或网址！";
+                qrCodeDiv.innerHTML = "";
+                saveBtn.style.display = "none";
+                return;
+            }
+
+            errorMsg.textContent = "";
+            const qrCodeUrl = `https://api.kuleu.com/api/qrcode?frame=${frame}&e=${errorCorrection}&text=${encodeURIComponent(url)}&size=${size}`;
+            qrCodeDiv.innerHTML = `<img id="qrImage" src="${qrCodeUrl}" alt="二维码" width="${size}">`;
+            saveBtn.style.display = "inline-block";
+        }
+
+        function saveQRCode() {
+            const qrImage = document.getElementById('qrImage');
+            if (!qrImage) return;
+
+            const link = document.createElement('a');
+            link.href = qrImage.src;
+            link.download = '二维码.png';
+            link.click();
+        }
+    </script>
+</body>
+</html>

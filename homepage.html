@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ckacka</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #3f51b5;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header .left {
+            font-size: 24px;
+        }
+        .header .right {
+            font-size: 16px;
+        }
+        .music-player {
+            width: 100%;
+            max-width: 660px;
+            margin: 20px auto;
+            border-radius: 10px;
+        }
+        .container {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 双排布局 */
+            gap: 20px;
+        }
+        .tool-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+        }
+        .tool-card h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+        .tool-card p {
+            font-size: 14px;
+            color: #555;
+        }
+        .tool-card a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #3f51b5;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .tool-card a:hover {
+            background-color: #303f9f;
+        }
+        footer {
+            background-color: #3f51b5;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            /* 去掉 position: fixed; */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="left">ckacka</div>
+        <div class="right" id="current-time"></div>
+    </div>
+
+    <!-- Music Player iframe embedded below the header -->
+    <div class="music-player">
+        <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/cn/album/off-the-record/1724309228?i=1724309231"></iframe>
+    </div>
+
+    <div class="container">
+        <div class="tool-card">
+            <h3>数字电视</h3>
+            <p>在线看电视、听广播。</p>
+            <a href="#">使用工具</a>
+        </div>
+        <div class="tool-card">
+            <h3>在线视频播放器</h3>
+            <p>输入播放地址播放视频。</p>
+            <a href="#">使用工具</a>
+        </div>
+        <div class="tool-card">
+            <h3>二维码生成器</h3>
+            <p>在线二维码生成器。</p>
+            <a href="#">使用工具</a>
+        </div>
+        <div class="tool-card">
+            <h3>敬请期待</h3>
+            <p></p>
+            <a href="#">comming soon～</a>
+        </div>
+    </div>
+
+    <footer>
+        &copy; ckacka V1.0
+    </footer>
+
+    <script>
+        function updateTime() {
+            const currentTime = new Date();
+            const year = currentTime.getFullYear();
+            const month = String(currentTime.getMonth() + 1).padStart(2, '0');
+            const date = String(currentTime.getDate()).padStart(2, '0');
+            const hours = String(currentTime.getHours()).padStart(2, '0');
+            const minutes = String(currentTime.getMinutes()).padStart(2, '0');
+            const seconds = String(currentTime.getSeconds()).padStart(2, '0');  // 获取秒数
+            const formattedTime = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;  // 显示秒数
+            document.getElementById('current-time').textContent = formattedTime;
+        }
+        setInterval(updateTime, 1000);  // 每秒更新一次时间
+        updateTime();  // 页面加载时立即显示时间
+    </script>
+
+</body>
+</html>
