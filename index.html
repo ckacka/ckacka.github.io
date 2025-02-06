@@ -25,16 +25,16 @@
         .header .right {
             font-size: 16px;
         }
-        .music-player {
-            width: 100%;
+        .image-container {
+            width: 90%;
             max-width: 660px;
             margin: 20px auto;
-            border-radius: 10px;
+            text-align: center;
         }
         .container {
             padding: 20px;
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 双排布局 */
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
         }
         .tool-card {
@@ -74,7 +74,35 @@
             color: white;
             text-align: center;
             padding: 10px;
-            /* 去掉 position: fixed; */
+        }
+        #wallpaper {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+        .download-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+        .download-btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .loading {
+            font-size: 18px;
+            color: #666;
+            margin: 20px;
         }
     </style>
 </head>
@@ -85,9 +113,11 @@
         <div class="right" id="current-time"></div>
     </div>
 
-    <!-- Music Player iframe embedded below the header -->
-    <div class="music-player">
-        <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/cn/album/off-the-record/1724309228?i=1724309231"></iframe>
+    <!-- Bing 每日壁纸 -->
+    <div class="image-container">
+        <img id="wallpaper" src="https://bing.img.run/uhd.php?t=<?php echo date('Ymd'); ?>" alt="Bing每日壁纸" />
+        <button class="download-btn" onclick="downloadImage()">⬇ 下载高清壁纸</button>
+        <div id="loading" class="loading"></div>
     </div>
 
     <div class="container">
@@ -109,7 +139,7 @@
         <div class="tool-card">
             <h3>敬请期待</h3>
             <p></p>
-            <a href="#">comming soon～</a>
+            <a href="#">coming soon～</a>
         </div>
     </div>
 
@@ -125,12 +155,40 @@
             const date = String(currentTime.getDate()).padStart(2, '0');
             const hours = String(currentTime.getHours()).padStart(2, '0');
             const minutes = String(currentTime.getMinutes()).padStart(2, '0');
-            const seconds = String(currentTime.getSeconds()).padStart(2, '0');  // 获取秒数
-            const formattedTime = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;  // 显示秒数
+            const seconds = String(currentTime.getSeconds()).padStart(2, '0');
+            const formattedTime = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
             document.getElementById('current-time').textContent = formattedTime;
         }
-        setInterval(updateTime, 1000);  // 每秒更新一次时间
-        updateTime();  // 页面加载时立即显示时间
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 自动处理图片加载状态
+        const img = document.getElementById('wallpaper');
+        const loading = document.getElementById('loading');
+
+        img.onload = function() {
+            loading.textContent = '';
+        }
+
+        img.onerror = function() {
+            loading.textContent = '图片加载失败，请稍后刷新重试';
+        }
+
+        // 下载功能
+        function downloadImage() {
+            const imageUrl = img.src.split('?')[0];
+            const fileName = 'BingWallpaper_' + new Date().toISOString().slice(0,10) + '.jpg';
+            
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 避免缓存问题
+        img.src += (img.src.includes('?') ? '&' : '?') + 't=' + Date.now();
     </script>
 
 </body>
