@@ -137,8 +137,6 @@
             margin: 20px;
         }
     </style>
-</head>
-<body>
     <div class="container">
         <img id="wallpaper" src="https://bing.img.run/uhd.php?t=<?php echo date('Ymd'); ?>" alt="Bing每日壁纸" />
         <button class="download-btn" onclick="downloadImage()">
@@ -176,8 +174,7 @@
 
         // 添加随机参数避免缓存
         img.src += (img.src.includes('?') ? '&' : '?') + 't=' + Date.now();
-    </script>
-</body>
+    <script>
     </div>
 
     <div class="container">
