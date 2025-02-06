@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ckacka</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-components-web/14.0.0/material-components-web.min.css">
+    <style>
+        :root {
+            --primary-color: #2196F3;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .image-container {
+            width: 90%;
+            max-width: 660px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+        }
+        .tool-card {
+            background-color: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .tool-card:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        .tool-card h3 {
+            margin-top: 0;
+            font-size: 20px;
+            color: var(--primary-color);
+        }
+        .tool-card p {
+            font-size: 14px;
+            color: #666;
+        }
+        .mdc-button {
+            width: 100%;
+            justify-content: center;
+            --mdc-theme-primary: var(--primary-color);
+        }
+        #wallpaper {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 16px;
+        }
+        .loading {
+            font-size: 16px;
+            color: #777;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Bing 每日壁纸 -->
+    <div class="image-container">
+        <img id="wallpaper" src="https://bing.img.run/uhd.php?t=<?php echo date('Ymd'); ?>" alt="Bing每日壁纸" />
+        <button class="mdc-button mdc-button--raised" onclick="downloadImage()">
+            <i class="material-icons mdc-button__icon">cloud_download</i>
+            下载高清壁纸
+        </button>
+        <div id="loading" class="loading"></div>
+    </div>
+
+    <!-- 工具卡片 -->
+    <div class="container">
+        <div class="tool-card">
+            <h3>数字电视</h3>
+            <p>在线看电视、听广播。</p>
+            <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/tvradio.html">
+                <i class="material-icons mdc-button__icon">tv</i>
+                使用工具
+            </a>
+        </div>
+        <div class="tool-card">
+            <h3>在线视频播放器</h3>
+            <p>输入播放地址播放视频。</p>
+            <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/videoplayer.html">
+                <i class="material-icons mdc-button__icon">play_circle_filled</i>
+                使用工具
+            </a>
+        </div>
+        <div class="tool-card">
+            <h3>二维码生成器</h3>
+            <p>在线二维码生成器。</p>
+            <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/qrcode.html">
+                <i class="material-icons mdc-button__icon">qr_code</i>
+                使用工具
+            </a>
+        </div>
+        <div class="tool-card">
+            <h3>敬请期待</h3>
+            <p>更多工具即将上线！</p>
+            <a class="mdc-button mdc-button--outlined" href="#">
+                <i class="material-icons mdc-button__icon">hourglass_empty</i>
+                Coming Soon
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 自动处理图片加载状态
+        const img = document.getElementById('wallpaper');
+        const loading = document.getElementById('loading');
+
+        img.onload = function() {
+            loading.textContent = '';
+        }
+
+        img.onerror = function() {
+            loading.textContent = '图片加载失败，请稍后刷新重试';
+        }
+
+        // 下载功能
+        function downloadImage() {
+            const imageUrl = img.src.split('?')[0];
+            const fileName = 'BingWallpaper_' + new Date().toISOString().slice(0,10) + '.jpg';
+            
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 避免缓存问题
+        img.src += (img.src.includes('?') ? '&' : '?') + 't=' + Date.now();
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/material-components-web/14.0.0/material-components-web.min.js"></script>
+</body>
+</html>
