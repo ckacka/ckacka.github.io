@@ -1,0 +1,404 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>是女人就扇他一百耳光</title>
+    <style>
+        :root {
+            --main-color: #ff3b7d;
+            --bg-color: #fff0f6;
+            --text-color: #4a4a4a;
+        }
+
+        body {
+            background: var(--bg-color);
+            margin: 0;
+            padding: 15px;
+            font-family: 'Segoe UI', '微软雅黑', sans-serif;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--main-color);
+            font-size: 2.2rem;
+            margin: 10px 0 20px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+            align-items: center;
+        }
+
+        #startBtn {
+            width: 200px;
+            height: 60px;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, #ff3b7d, #ff2a6b);
+            box-shadow: 0 6px 12px rgba(255,59,125,0.3);
+            transition: all 0.3s ease;
+            border: none;
+            color: white;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        #startBtn:active {
+            transform: scale(0.95);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .game-btn {
+            background: var(--main-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex: 1;
+        }
+
+        #gameArea {
+            position: relative;
+            width: 95%;
+            max-width: 400px;
+            height: 45vh;
+            min-height: 250px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        #targetFace {
+            width: 140px;
+            height: 140px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 4px solid var(--main-color);
+            transition: all 0.1s ease-out;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* 新增扇耳光动画 */
+        @keyframes slap {
+            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            30% { transform: translate(-50%, -50%) rotate(25deg) scale(1.2); }
+            70% { transform: translate(-50%, -50%) rotate(-25deg) scale(1.3); }
+            100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+        }
+
+        .slap-animation {
+            animation: slap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            color: var(--main-color);
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        #uploadInput {
+            display: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            #gameArea {
+                height: 40vh;
+                min-height: 200px;
+            }
+
+            #targetFace {
+                width: 120px;
+                height: 120px;
+            }
+
+            .game-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+
+            .stats-panel {
+                padding: 12px;
+                gap: 10px;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>是女人就扇他一百耳光</h1>
+    
+    <div class="main-container">
+        <div class="stats-panel">
+            <div class="stat-item">
+                <div class="stat-value" id="score">0</div>
+                <div>得分</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="timer">30</div>
+                <div>剩余时间</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="combo">x1</div>
+                <div>连击</div>
+            </div>
+        </div>
+
+        <div id="gameArea">
+            <img src="https://cdn.pixabay.com/photo/2016/03/31/19/58/avatar-1295429_960_720.png" 
+                 id="targetFace" 
+                 alt="默认人脸">
+        </div>
+
+        <div class="button-container">
+            <button id="startBtn" class="game-btn" onclick="startGame()">开始游戏</button>
+            <div class="action-buttons">
+                <label id="uploadLabel" class="game-btn" for="uploadInput">
+                    上传你想扇的人的照片
+                    <input type="file" id="uploadInput" accept="image/*">
+                </label>
+                <button id="restartBtn" class="game-btn hidden" onclick="startGame()">再来一局</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="hitSound" src="https://ckacka.github.io/shan.mp3"></audio>
+    <audio id="bgMusic" loop src="https://ckacka.github.io/bgm.mp3"></audio>
+
+    <script>
+        const CONFIG = {
+            initTime: 30,
+            baseScore: 1
+        };
+
+        let gameState = {
+            score: 0,
+            timeLeft: CONFIG.initTime,
+            combo: 1,
+            isActive: false,
+            comboTimeout: null,
+            gameTimer: null
+        };
+
+        const elements = {
+            face: document.getElementById('targetFace'),
+            startBtn: document.getElementById('startBtn'),
+            uploadLabel: document.getElementById('uploadLabel'),
+            restartBtn: document.getElementById('restartBtn'),
+            score: document.getElementById('score'),
+            timer: document.getElementById('timer'),
+            combo: document.getElementById('combo'),
+            hitSound: document.getElementById('hitSound'),
+            bgMusic: document.getElementById('bgMusic')
+        };
+
+        function initGame() {
+            resetGameState();
+            updateUI();
+            setupEventListeners();
+        }
+
+        function resetGameState() {
+            clearInterval(gameState.gameTimer);
+            clearTimeout(gameState.comboTimeout);
+            
+            gameState = {
+                score: 0,
+                timeLeft: CONFIG.initTime,
+                combo: 1,
+                isActive: false,
+                comboTimeout: null,
+                gameTimer: null
+            };
+        }
+
+        function updateUI() {
+            elements.score.textContent = gameState.score;
+            elements.timer.textContent = gameState.timeLeft;
+            elements.combo.textContent = `x${gameState.combo}`;
+            elements.face.style.transform = 'translate(-50%, -50%) scale(1)';
+        }
+
+        function setupEventListeners() {
+            elements.face.addEventListener('click', handleFaceClick);
+            elements.face.addEventListener('animationend', () => {
+                elements.face.classList.remove('slap-animation');
+            });
+            document.getElementById('uploadInput').addEventListener('change', handleFileUpload);
+        }
+
+        function startGame() {
+            if (gameState.isActive) return;
+            
+            resetGameState();
+            gameState.isActive = true;
+            
+            // 更新按钮状态
+            elements.startBtn.classList.add('hidden');
+            elements.uploadLabel.parentElement.classList.add('hidden');
+            elements.restartBtn.classList.add('hidden');
+            
+            // 启动游戏
+            startTimers();
+            elements.bgMusic.play().catch(() => {/* 处理自动播放限制 */});
+        }
+
+        function handleFaceClick() {
+            if (!gameState.isActive) return;
+            
+            // 移除旧动画，添加新动画
+            elements.face.classList.remove('slap-animation');
+            void elements.face.offsetWidth; // 触发重绘
+            elements.face.classList.add('slap-animation');
+
+            // 更新分数
+            gameState.score += gameState.combo;
+            
+            // 连击系统
+            gameState.combo++;
+            clearTimeout(gameState.comboTimeout);
+            gameState.comboTimeout = setTimeout(() => {
+                gameState.combo = 1;
+                elements.combo.textContent = 'x1';
+            }, 1500);
+
+            // 播放效果
+            playHitEffect();
+            updateUI();
+        }
+
+        function playHitEffect() {
+            // 音效和震动
+            elements.hitSound.currentTime = 0;
+            elements.hitSound.play().catch(() => {/* 处理自动播放限制 */});
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                elements.face.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function startTimers() {
+            // 游戏计时器
+            gameState.gameTimer = setInterval(() => {
+                gameState.timeLeft--;
+                elements.timer.textContent = gameState.timeLeft;
+
+                if (gameState.timeLeft <= 0) endGame();
+                if (gameState.timeLeft % 5 === 0) moveFace();
+            }, 1000);
+        }
+
+        function moveFace() {
+            const gameRect = elements.face.parentElement.getBoundingClientRect();
+            const maxX = gameRect.width - elements.face.offsetWidth;
+            const maxY = gameRect.height - elements.face.offsetHeight;
+
+            elements.face.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+            elements.face.style.left = `${Math.random() * maxX}px`;
+            elements.face.style.top = `${Math.random() * maxY}px`;
+
+            setTimeout(() => {
+                elements.face.style.transition = 'all 0.1s ease-out';
+            }, 500);
+        }
+
+        function endGame() {
+            gameState.isActive = false;
+            clearInterval(gameState.gameTimer);
+            elements.bgMusic.pause();
+            
+            // 更新按钮状态
+            elements.startBtn.classList.add('hidden');
+            elements.uploadLabel.parentElement.classList.remove('hidden');
+            elements.restartBtn.classList.remove('hidden');
+            
+            showResult();
+        }
+
+        function showResult() {
+            const results = [
+                [100, '👑 耳光之神！'],
+                [80, '💥 专业打手！'],
+                [50, '👍 再接再厉！'],
+                [0, '😅 需要加油哦～']
+            ];
+            const result = results.find(([threshold]) => gameState.score >= threshold)[1];
+            alert(`游戏结束！\n得分：${gameState.score}\n评价：${result}`);
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
