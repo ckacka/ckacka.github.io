@@ -77,7 +77,7 @@
 
     <!-- Bing 每日壁纸 -->
     <div class="image-container">
-        <img id="wallpaper" src="https://bing.img.run/uhd.php?t=<?php echo date('Ymd'); ?>" alt="Bing每日壁纸" />
+        <img id="wallpaper" src="https://bing.img.run/uhd.php?t=<?php echo date('Ymd'); ?>" alt="Bing每日壁纸">
         <button class="mdc-button mdc-button--raised" onclick="downloadImage()">
             <i class="material-icons mdc-button__icon">cloud_download</i>
             下载高清壁纸
@@ -112,9 +112,16 @@
             </a>
         </div>
         <div class="tool-card">
+            <h3>是女人就扇他一百耳光</h3>
+            <p>挑战你的反应速度！</p>
+            <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/game.html" target="_blank">
+                <i class="material-icons mdc-button__icon">sports_esports</i>
+                开始游戏
+            </a>
+        </div>
+        <div class="tool-card">
             <h3>敬请期待</h3>
             <p>更多工具即将上线！</p>
-            <!-- 删除链接，只保留按钮 -->
             <button class="mdc-button mdc-button--outlined" disabled>
                 <i class="material-icons mdc-button__icon">hourglass_empty</i>
                 Coming Soon
@@ -139,8 +146,6 @@
         function downloadImage() {
             const imageUrl = img.src.split('?')[0];
             const fileName = 'BingWallpaper_' + new Date().toISOString().slice(0,10) + '.jpg';
-            
-            // 在新标签页打开图片
             window.open(imageUrl, '_blank');
         }
 
