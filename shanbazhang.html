@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -6,186 +6,186 @@
     <title>是女人就扇他一百耳光</title>
     <style>
         :root {
-            --main-color: #ff3b7d;
+            --main-color: #ff5a79;
+            --secondary-color: #7d8aff;
             --bg-color: #fff0f6;
             --text-color: #4a4a4a;
         }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             background: var(--bg-color);
-            margin: 0;
-            padding: 15px;
             font-family: 'Segoe UI', '微软雅黑', sans-serif;
             color: var(--text-color);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: 15px;
+            overflow: hidden;
         }
 
         h1 {
             color: var(--main-color);
-            font-size: 2.2rem;
-            margin: 10px 0 20px;
+            font-size: min(2.4rem, 6vw);
+            margin: 10px 0;
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            line-height: 1.2;
         }
 
         .main-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
+            height: calc(100vh - 100px);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
-            flex-grow: 1;
-        }
-
-        .button-container {
-            display: flex;
-            flex-direction: column;
             gap: 15px;
-            width: 100%;
-            max-width: 300px;
-            align-items: center;
-        }
-
-        #startBtn {
-            width: 200px;
-            height: 60px;
-            font-size: 1.4rem;
-            background: linear-gradient(135deg, #ff3b7d, #ff2a6b);
-            box-shadow: 0 6px 12px rgba(255,59,125,0.3);
-            transition: all 0.3s ease;
-            border: none;
-            color: white;
-            border-radius: 30px;
-            cursor: pointer;
-        }
-
-        #startBtn:active {
-            transform: scale(0.95);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .game-btn {
-            background: var(--main-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 30px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            flex: 1;
-        }
-
-        #gameArea {
-            position: relative;
-            width: 95%;
-            max-width: 400px;
-            height: 45vh;
-            min-height: 250px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
         }
 
         .stats-panel {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: min(2vw, 20px);
             width: 100%;
-            max-width: 500px;
-            padding: 15px;
+            padding: min(3vw, 15px);
             background: white;
             border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        #targetFace {
-            width: 140px;
-            height: 140px;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            object-fit: cover;
-            cursor: pointer;
-            border: 4px solid var(--main-color);
-            transition: all 0.1s ease-out;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        /* 新增扇耳光动画 */
-        @keyframes slap {
-            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-            30% { transform: translate(-50%, -50%) rotate(25deg) scale(1.2); }
-            70% { transform: translate(-50%, -50%) rotate(-25deg) scale(1.3); }
-            100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-        }
-
-        .slap-animation {
-            animation: slap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
 
         .stat-item {
             text-align: center;
-            padding: 8px;
+            padding: 5px;
         }
 
         .stat-value {
-            font-size: 1.8rem;
+            font-size: min(2rem, 6vw);
             color: var(--main-color);
-            font-weight: bold;
+            font-weight: 800;
             line-height: 1.2;
         }
 
-        #uploadInput {
-            display: none;
+        #gameArea {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+            border: 3px solid var(--main-color);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #targetFace {
+            width: min(160px, 30vw);
+            height: min(160px, 30vw);
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 4px solid var(--main-color);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
+            -webkit-touch-callout: none;
+            user-select: none;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation; /* 修复移动端点击 */
+        }
+
+        #uploadLabel {
+            position: absolute;
+            top: min(15px, 3vw);
+            right: min(15px, 3vw);
+            background: rgba(255, 255, 255, 0.95);
+            padding: min(8px, 2vw) min(15px, 3vw);
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border: 2px solid var(--main-color);
+            font-size: min(1rem, 3.5vw);
+            z-index: 100;
+        }
+
+        .button-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 0 15px;
+        }
+
+        .game-btn {
+            width: 100%;
+            max-width: 220px;
+            height: min(50px, 12vw);
+            font-size: min(1.3rem, 4vw);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #startBtn {
+            background: linear-gradient(135deg, var(--main-color), #ff3b5c);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,90,121,0.3);
+        }
+
+        #restartBtn {
+            background: linear-gradient(135deg, var(--secondary-color), #5a6bff);
+            color: white;
+            box-shadow: 0 4px 15px rgba(93,107,255,0.3);
+        }
+
+        .slap-effect {
+            position: absolute;
+            width: min(80px, 15vw);
+            height: min(80px, 15vw);
+            pointer-events: none;
+            background: url('https://ckacka.github.io/IMG_SEGMENT_20250224_163344.png') no-repeat center/contain;
+            animation: slapEffect 0.3s ease-out;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+            z-index: 999;
+        }
+
+        @keyframes slapEffect {
+            0% { opacity: 0; transform: scale(0.5) rotate(-30deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(10deg); }
+            100% { opacity: 0; transform: scale(0.8) rotate(30deg); }
+        }
+
+        @keyframes slap {
+            0% { transform: scale(1) rotate(0deg); }
+            30% { transform: scale(1.25) rotate(25deg); }
+            70% { transform: scale(1.3) rotate(-25deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .slap-animation {
+            animation: slap 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .hidden {
             display: none !important;
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            #gameArea {
-                height: 40vh;
-                min-height: 200px;
-            }
-
-            #targetFace {
-                width: 120px;
-                height: 120px;
-            }
-
-            .game-btn {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
-
-            .stats-panel {
-                padding: 12px;
-                gap: 10px;
-            }
-
-            .stat-value {
-                font-size: 1.5rem;
-            }
         }
     </style>
 </head>
@@ -209,19 +209,19 @@
         </div>
 
         <div id="gameArea">
+            <label id="uploadLabel" for="uploadInput">
+                上传你想扇的人的照片
+                <input type="file" id="uploadInput" accept="image/*" hidden>
+            </label>
+            
             <img src="https://cdn.pixabay.com/photo/2016/03/31/19/58/avatar-1295429_960_720.png" 
                  id="targetFace" 
-                 alt="默认人脸">
-        </div>
-
-        <div class="button-container">
-            <button id="startBtn" class="game-btn" onclick="startGame()">开始游戏</button>
-            <div class="action-buttons">
-                <label id="uploadLabel" class="game-btn" for="uploadInput">
-                    上传你想扇的人的照片
-                    <input type="file" id="uploadInput" accept="image/*">
-                </label>
-                <button id="restartBtn" class="game-btn hidden" onclick="startGame()">再来一局</button>
+                 alt="默认人脸"
+                 tabindex="-1">
+            
+            <div class="button-group">
+                <button id="startBtn" class="game-btn">开始挑战</button>
+                <button id="restartBtn" class="game-btn hidden">重新挑战</button>
             </div>
         </div>
     </div>
@@ -245,10 +245,11 @@
         };
 
         const elements = {
+            gameArea: document.getElementById('gameArea'),
             face: document.getElementById('targetFace'),
             startBtn: document.getElementById('startBtn'),
-            uploadLabel: document.getElementById('uploadLabel'),
             restartBtn: document.getElementById('restartBtn'),
+            uploadLabel: document.getElementById('uploadLabel'),
             score: document.getElementById('score'),
             timer: document.getElementById('timer'),
             combo: document.getElementById('combo'),
@@ -258,14 +259,13 @@
 
         function initGame() {
             resetGameState();
-            updateUI();
             setupEventListeners();
+            updateUI();
         }
 
         function resetGameState() {
             clearInterval(gameState.gameTimer);
             clearTimeout(gameState.comboTimeout);
-            
             gameState = {
                 score: 0,
                 timeLeft: CONFIG.initTime,
@@ -274,68 +274,94 @@
                 comboTimeout: null,
                 gameTimer: null
             };
+            elements.face.style.transform = '';
+            elements.face.style.left = '';
+            elements.face.style.top = '';
         }
 
         function updateUI() {
             elements.score.textContent = gameState.score;
             elements.timer.textContent = gameState.timeLeft;
             elements.combo.textContent = `x${gameState.combo}`;
-            elements.face.style.transform = 'translate(-50%, -50%) scale(1)';
         }
 
         function setupEventListeners() {
-            elements.face.addEventListener('click', handleFaceClick);
+            // 修复点击事件监听
+            const handleInteraction = (e) => {
+                e.preventDefault();
+                handleFaceClick(e);
+            };
+
+            elements.face.addEventListener('touchstart', handleInteraction, { passive: false });
+            elements.face.addEventListener('click', handleInteraction);
+            
+            elements.face.addEventListener('contextmenu', (e) => e.preventDefault());
             elements.face.addEventListener('animationend', () => {
                 elements.face.classList.remove('slap-animation');
             });
+            elements.startBtn.addEventListener('click', startGame);
+            elements.restartBtn.addEventListener('click', startGame);
             document.getElementById('uploadInput').addEventListener('change', handleFileUpload);
         }
 
         function startGame() {
             if (gameState.isActive) return;
-            
             resetGameState();
             gameState.isActive = true;
             
-            // 更新按钮状态
-            elements.startBtn.classList.add('hidden');
-            elements.uploadLabel.parentElement.classList.add('hidden');
             elements.restartBtn.classList.add('hidden');
+            elements.startBtn.classList.add('hidden');
+            elements.uploadLabel.classList.add('hidden');
             
-            // 启动游戏
             startTimers();
-            elements.bgMusic.play().catch(() => {/* 处理自动播放限制 */});
+            elements.bgMusic.play().catch(() => {});
         }
 
-        function handleFaceClick() {
+        function handleFaceClick(event) {
             if (!gameState.isActive) return;
             
-            // 移除旧动画，添加新动画
-            elements.face.classList.remove('slap-animation');
-            void elements.face.offsetWidth; // 触发重绘
-            elements.face.classList.add('slap-animation');
+            createSlapEffect(event);
+            triggerSlapAnimation();
+            updateScore();
+            playHitEffect();
+            updateUI();
+        }
 
-            // 更新分数
-            gameState.score += gameState.combo;
+        function createSlapEffect(event) {
+            const slap = document.createElement('div');
+            slap.className = 'slap-effect';
             
-            // 连击系统
+            const rect = elements.gameArea.getBoundingClientRect();
+            const x = event.clientX ? event.clientX - rect.left : event.touches[0].clientX - rect.left;
+            const y = event.clientY ? event.clientY - rect.top : event.touches[0].clientY - rect.top;
+            
+            slap.style.left = `${x - slap.offsetWidth/2}px`;
+            slap.style.top = `${y - slap.offsetHeight/2}px`;
+            elements.gameArea.appendChild(slap);
+            
+            setTimeout(() => slap.remove(), 300);
+        }
+
+        function triggerSlapAnimation() {
+            elements.face.classList.remove('slap-animation');
+            void elements.face.offsetWidth;
+            elements.face.classList.add('slap-animation');
+        }
+
+        function updateScore() {
+            gameState.score += gameState.combo;
             gameState.combo++;
             clearTimeout(gameState.comboTimeout);
             gameState.comboTimeout = setTimeout(() => {
                 gameState.combo = 1;
                 elements.combo.textContent = 'x1';
             }, 1500);
-
-            // 播放效果
-            playHitEffect();
-            updateUI();
         }
 
         function playHitEffect() {
-            // 音效和震动
             elements.hitSound.currentTime = 0;
-            elements.hitSound.play().catch(() => {/* 处理自动播放限制 */});
-            if (navigator.vibrate) navigator.vibrate(50);
+            elements.hitSound.play().catch(() => {});
+            navigator.vibrate?.(50);
         }
 
         function handleFileUpload(event) {
@@ -350,7 +376,6 @@
         }
 
         function startTimers() {
-            // 游戏计时器
             gameState.gameTimer = setInterval(() => {
                 gameState.timeLeft--;
                 elements.timer.textContent = gameState.timeLeft;
@@ -361,7 +386,7 @@
         }
 
         function moveFace() {
-            const gameRect = elements.face.parentElement.getBoundingClientRect();
+            const gameRect = elements.gameArea.getBoundingClientRect();
             const maxX = gameRect.width - elements.face.offsetWidth;
             const maxY = gameRect.height - elements.face.offsetHeight;
 
@@ -379,10 +404,9 @@
             clearInterval(gameState.gameTimer);
             elements.bgMusic.pause();
             
-            // 更新按钮状态
-            elements.startBtn.classList.add('hidden');
-            elements.uploadLabel.parentElement.classList.remove('hidden');
             elements.restartBtn.classList.remove('hidden');
+            elements.startBtn.classList.add('hidden');
+            elements.uploadLabel.classList.remove('hidden');
             
             showResult();
         }
