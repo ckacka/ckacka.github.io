@@ -1,475 +1,238 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>欢乐耳光挑战</title>
+    <title>怪物挑战赛</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        :root {
-            --main-color: #ff5a79;
-            --secondary-color: #ff97b5;
-            --bg-color: #fff0f6;
-            --text-color: #4a4a4a;
+        /* 新增闪烁动画 */
+        .blink {
+            animation: blink 1s infinite;
         }
 
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* 原有其他样式保持不变 */
         body {
-            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 15px;
-            font-family: 'Segoe UI', '微软雅黑', sans-serif;
-            color: var(--text-color);
+            padding: 20px;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h1 {
-            color: var(--main-color);
-            font-size: 2.4rem;
-            margin: 10px 0 25px;
-            text-align: center;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .main-container {
-            width: 100%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 25px;
-            flex-grow: 1;
-        }
-
-        .button-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 100%;
-            max-width: 320px;
-            align-items: center;
-        }
-
-        #startBtn {
-            width: 220px;
-            height: 65px;
-            font-size: 1.5rem;
-            background: var(--main-color);
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
             color: white;
-            border: none;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255,90,121,0.3);
-            position: relative;
-            overflow: hidden;
         }
 
-        #startBtn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #healthBar {
+            width: 90%;
+            max-width: 400px;
+            height: 25px;
+            background-color: #333;
+            border-radius: 15px;
+            margin: 15px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #health {
             width: 100%;
             height: 100%;
-            background: linear-gradient(
-                120deg,
-                transparent,
-                rgba(255,255,255,0.3),
-                transparent
-            );
-            transition: 0.5s;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            transition: width 0.3s ease;
         }
 
-        #startBtn:hover::before {
-            left: 100%;
+        #targetImage {
+            width: 90%;
+            max-width: 400px;
+            height: auto;
+            aspect-ratio: 1/1;
+            cursor: pointer;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            transition: all 0.1s;
+            background: #444;
+            position: relative;
         }
 
-        #startBtn:active {
-            transform: scale(0.95);
-            box-shadow: 0 2px 8px rgba(255,90,121,0.3);
+        .hit-effect {
+            animation: hitShake 0.3s ease, redFlash 0.2s linear;
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            width: 100%;
+        @keyframes hitShake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-3px); }
+            100% { transform: translateX(0); }
         }
 
-        .game-btn {
-            background: var(--secondary-color);
+        @keyframes redFlash {
+            0% { background-color: rgba(255,0,0,0); }
+            50% { background-color: rgba(255,0,0,0.3); }
+            100% { background-color: rgba(255,0,0,0); }
+        }
+
+        #restartBtn {
+            margin-top: 25px;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
             color: white;
             border: none;
-            padding: 14px 24px;
             border-radius: 30px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-            justify-content: center;
-            box-shadow: 0 3px 10px rgba(255,151,181,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: none;
+            transition: 0.3s all;
         }
 
-        .game-btn:hover {
-            background: #ff7a9b;
-            transform: translateY(-2px);
+        #status {
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #ffd700;
         }
 
-        #gameArea {
-            position: relative;
-            width: 98%;
-            max-width: 500px;
-            height: 60vh;
-            min-height: 300px;
-            background: white;
-            border-radius: 25px;
-            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
-            overflow: hidden;
-            border: 3px solid var(--main-color);
+        .combo {
+            position: fixed;
+            font-size: 2em;
+            color: #ff4500;
+            animation: pop 0.5s;
+            display: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
-        .stats-panel {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            width: 100%;
-            max-width: 500px;
-            padding: 18px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        @keyframes pop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
 
-        #targetFace {
-            width: 160px;
-            height: 160px;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            object-fit: cover;
-            cursor: pointer;
-            border: 4px solid var(--main-color);
-            transition: all 0.1s ease-out;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        }
-
-        .slap-effect {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNNTAgMTBjLTE4IDAtMzMgMTUtMzMgMzMgMCAxMCA0IDIwIDEwIDI3bDE1IDE1IDE1LTE1YzYtNyAxMC0xNyAxMC0yNyAwLTE4LTE1LTMzLTMzLTMzem0wIDQ1Yy0xMiAwLTIzIDktMjMgMjEgMCA1IDIgMTAgNiAxNGwxNyAxNyAxNy0xN2M0LTQgNi05IDYtMTQgMC0xMi0xMS0yMS0yMy0yMXoiIGZpbGw9IiNGRjVBNzlEIi8+PC9zdmc+');
-            background-size: cover;
-            animation: slapEffect 0.4s ease-out;
-            pointer-events: none;
-            z-index: 999;
-            transform-origin: center;
-        }
-
-        @keyframes slap {
-            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-            30% { transform: translate(-50%, -50%) rotate(25deg) scale(1.25); }
-            70% { transform: translate(-50%, -50%) rotate(-25deg) scale(1.3); }
-            100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-        }
-
-        @keyframes slapEffect {
-            0% { transform: scale(0.5) rotate(-30deg); opacity: 1; }
-            100% { transform: scale(1.8) rotate(15deg); opacity: 0; }
-        }
-
-        .slap-animation {
-            animation: slap 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 10px;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            color: var(--main-color);
-            font-weight: 800;
-            line-height: 1.2;
-            letter-spacing: 1px;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 2rem;
+        @media (max-width: 600px) {
+            #healthBar {
+                height: 20px;
             }
-
-            #gameArea {
-                height: 55vh;
-                min-height: 250px;
-                width: 96%;
-            }
-
-            #targetFace {
-                width: 140px;
-                height: 140px;
-            }
-
-            .game-btn {
-                padding: 12px 18px;
-                font-size: 1rem;
-            }
-
-            .stats-panel {
-                padding: 15px;
-                gap: 12px;
-            }
-
-            .stat-value {
-                font-size: 1.8rem;
-            }
-
-            #startBtn {
-                width: 200px;
-                height: 60px;
-                font-size: 1.3rem;
+            
+            #restartBtn {
+                padding: 12px 25px;
+                font-size: 1.1em;
             }
         }
     </style>
 </head>
 <body>
-    <h1>🎮 欢乐耳光挑战</h1>
-    
-    <div class="main-container">
-        <div class="stats-panel">
-            <div class="stat-item">
-                <div class="stat-value" id="score">0</div>
-                <div>得分</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="timer">30</div>
-                <div>剩余时间</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="combo">x1</div>
-                <div>连击</div>
-            </div>
-        </div>
-
-        <div id="gameArea">
-            <img src="https://cdn.pixabay.com/photo/2016/03/31/19/58/avatar-1295429_960_720.png" 
-                 id="targetFace" 
-                 alt="默认人脸">
-        </div>
-
-        <div class="button-container">
-            <button id="startBtn" class="game-btn" onclick="startGame()">🎮 开始游戏</button>
-            <div class="action-buttons">
-                <label id="uploadLabel" class="game-btn" for="uploadInput">
-                    📷 上传照片
-                    <input type="file" id="uploadInput" accept="image/*">
-                </label>
-                <button id="restartBtn" class="game-btn hidden">🔄 重新开始</button>
-            </div>
-        </div>
+    <div class="game-header">
+        <h1>怪物挑战赛</h1>
+        <div id="status">点击怪物开始游戏！</div>
     </div>
+    <div id="healthBar">
+        <div id="health"></div>
+    </div>
+    <img id="targetImage" src="https://ckacka.github.io/IMG_SEGMENT_20250306_174249.png" alt="怪物">
+    <button id="restartBtn">再来一局</button>
 
-    <audio id="hitSound" src="https://assets.mixkit.co/active_storage/sfx/3005/3005-preview.mp3"></audio>
-    <audio id="bgMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-happy-times-158.mp3"></audio>
+    <audio id="bgMusic" loop>
+        <source src="https://ckacka.github.io/bgm.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="hitSound">
+        <source src="https://ckacka.github.io/shan.mp3" type="audio/mpeg">
+    </audio>
 
     <script>
-        const CONFIG = {
-            initTime: 30,
-            baseScore: 1
-        };
-
-        let gameState = {
-            score: 0,
-            timeLeft: CONFIG.initTime,
-            combo: 1,
-            isActive: false,
-            comboTimeout: null,
-            gameTimer: null
-        };
+        let gameTimer;
+        let currentHealth = 100;
+        let timeLeft = 15;
+        let score = 0;
+        let combo = 0;
+        let lastHitTime = 0;
+        let isPlaying = false;
 
         const elements = {
-            face: document.getElementById('targetFace'),
-            startBtn: document.getElementById('startBtn'),
-            uploadLabel: document.getElementById('uploadLabel'),
+            health: document.getElementById('health'),
+            targetImage: document.getElementById('targetImage'),
             restartBtn: document.getElementById('restartBtn'),
-            score: document.getElementById('score'),
-            timer: document.getElementById('timer'),
-            combo: document.getElementById('combo'),
-            hitSound: document.getElementById('hitSound'),
-            bgMusic: document.getElementById('bgMusic')
+            status: document.getElementById('status'),
+            healthBar: document.getElementById('healthBar'),
+            bgMusic: document.getElementById('bgMusic'),
+            hitSound: document.getElementById('hitSound')
         };
 
+        // 初始化游戏
         function initGame() {
-            resetGameState();
-            updateUI();
-            setupEventListeners();
-        }
-
-        function resetGameState() {
-            clearInterval(gameState.gameTimer);
-            clearTimeout(gameState.comboTimeout);
+            clearInterval(gameTimer);
+            currentHealth = 100;
+            timeLeft = 15;
+            score = 0;
+            combo = 0;
+            isPlaying = false;
             
-            gameState = {
-                score: 0,
-                timeLeft: CONFIG.initTime,
-                combo: 1,
-                isActive: false,
-                comboTimeout: null,
-                gameTimer: null
-            };
+            elements.health.style.width = '100%';
+            elements.health.style.background = 'linear-gradient(90deg, #4CAF50, #45a049)';
+            elements.targetImage.style.filter = 'none';
+            elements.targetImage.style.cursor = 'pointer';
+            elements.restartBtn.style.display = 'none';
+            elements.status.textContent = '点击怪物开始游戏！';
+            elements.status.classList.add('blink'); // 添加闪烁效果
+            elements.healthBar.style.display = 'none';
+            
+            elements.bgMusic.pause();
+            elements.bgMusic.currentTime = 0;
         }
 
-        function updateUI() {
-            elements.score.textContent = gameState.score;
-            elements.timer.textContent = gameState.timeLeft;
-            elements.combo.textContent = `x${gameState.combo}`;
-            elements.face.style.transform = 'translate(-50%, -50%) scale(1)';
-        }
-
-        function setupEventListeners() {
-            elements.face.addEventListener('click', handleFaceClick);
-            elements.face.addEventListener('animationend', () => {
-                elements.face.classList.remove('slap-animation');
-            });
-            document.getElementById('uploadInput').addEventListener('change', handleFileUpload);
-            elements.restartBtn.addEventListener('click', startGame);
-        }
-
+        // 开始游戏
         function startGame() {
-            if (gameState.isActive) return;
+            if(isPlaying) return;
             
-            resetGameState();
-            gameState.isActive = true;
-            toggleButtonVisibility(true);
-            startTimers();
-            elements.bgMusic.play().catch(() => {});
-        }
-
-        function handleFaceClick(event) {
-            if (!gameState.isActive) return;
+            isPlaying = true;
+            elements.healthBar.style.display = 'block';
+            elements.status.classList.remove('blink'); // 移除闪烁效果
+            elements.status.textContent = `剩余时间: ${timeLeft}s | 得分: ${score}`;
             
-            createSlapEffect(event);
-            triggerSlapAnimation();
-            updateScore();
-            playHitEffect();
-            updateUI();
-        }
+            elements.bgMusic.play().catch(error => {
+                console.log("自动播放被阻止，需要用户交互");
+            });
 
-        function createSlapEffect(event) {
-            const slap = document.createElement('div');
-            slap.className = 'slap-effect';
-            
-            const gameArea = document.getElementById('gameArea');
-            const rect = gameArea.getBoundingClientRect();
-            
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            
-            slap.style.left = `${x - 60}px`;
-            slap.style.top = `${y - 60}px`;
-            
-            gameArea.appendChild(slap);
-            
-            setTimeout(() => {
-                slap.remove();
-            }, 400);
-        }
-
-        function triggerSlapAnimation() {
-            elements.face.classList.remove('slap-animation');
-            void elements.face.offsetWidth;
-            elements.face.classList.add('slap-animation');
-        }
-
-        function updateScore() {
-            gameState.score += gameState.combo;
-            gameState.combo++;
-            clearTimeout(gameState.comboTimeout);
-            gameState.comboTimeout = setTimeout(() => {
-                gameState.combo = 1;
-                elements.combo.textContent = 'x1';
-            }, 1500);
-        }
-
-        function playHitEffect() {
-            elements.hitSound.currentTime = 0;
-            elements.hitSound.play().catch(() => {});
-            if (navigator.vibrate) navigator.vibrate(50);
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                elements.face.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function startTimers() {
-            gameState.gameTimer = setInterval(() => {
-                gameState.timeLeft--;
-                elements.timer.textContent = gameState.timeLeft;
-
-                if (gameState.timeLeft <= 0) endGame();
-                if (gameState.timeLeft % 5 === 0) moveFace();
+            gameTimer = setInterval(() => {
+                timeLeft = Math.max(0, timeLeft - 1);
+                elements.status.textContent = `剩余时间: ${timeLeft}s | 得分: ${score}`;
+                
+                if(timeLeft <= 0) {
+                    endGame(false);
+                }
             }, 1000);
         }
 
-        function moveFace() {
-            const gameRect = elements.face.parentElement.getBoundingClientRect();
-            const maxX = gameRect.width - elements.face.offsetWidth;
-            const maxY = gameRect.height - elements.face.offsetHeight;
+        // 处理点击
+        function handleClick() {
+            if(!isPlaying) {
+                initGame(); // 修复bug：每次开始前重置游戏状态
+                startGame();
+                return;
+            }
 
-            elements.face.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-            elements.face.style.left = `${Math.random() * maxX}px`;
-            elements.face.style.top = `${Math.random() * maxY}px`;
+            if(currentHealth <= 0 || timeLeft <= 0) return;
 
-            setTimeout(() => {
-                elements.face.style.transition = 'all 0.1s ease-out';
-            }, 500);
-        }
+            const hitClone = elements.hitSound.cloneNode(true);
+            hitClone.play();
 
-        function endGame() {
-            gameState.isActive = false;
-            clearInterval(gameState.gameTimer);
-            elements.bgMusic.pause();
-            toggleButtonVisibility(false);
-            showResult();
-        }
+            if("vibrate" in navigator) {
+                navigator.vibrate(50);
+            }
 
-        function toggleButtonVisibility(gameRunning) {
-            elements.startBtn.classList.toggle('hidden', gameRunning);
-            elements.uploadLabel.parentElement.classList.toggle('hidden', gameRunning);
-            elements.restartBtn.classList.toggle('hidden', !gameRunning);
-        }
+            elements.targetImage.classList.add('hit-effect');
+            setTimeout(() => elements.targetImage.classList.remove('hit-effect'), 300);
 
-        function showResult() {
-            const results = [
-                [100, '👑 耳光之神！'],
-                [80, '💥 专业打手！'],
-                [50, '👍 再接再厉！'],
-                [0, '😅 需要加油哦～']
-            ];
-            const result = results.find(([threshold]) => gameState.score >= threshold)[1];
-            alert(`游戏结束！\n得分：${gameState.score}\n评价：${result}`);
-        }
+            currentHealth = Math.max(0, currentHealth - 8);
+            elements.health.style.width = currentHealth + '%';
 
-        initGame();
-    </script>
-</body>
-</html>
+            const now = Date.now();
+            combo = 
