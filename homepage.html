@@ -19,6 +19,40 @@
             flex-direction: column;
             align-items: center;
         }
+        /* 滚动通知栏 */
+        .announcement-bar {
+            width: 100%;
+            background-color: #eee;
+            color: red;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 0 0 8px 8px;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+        .announcement-content {
+            display: inline-block;
+            animation: scrollText 10s linear infinite;
+        }
+        @keyframes scrollText {
+            from { transform: translateX(100%); }
+            to { transform: translateX(-100%); }
+        }
+        .close-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: red;
+        }
         .image-container {
             width: 90%;
             max-width: 660px;
@@ -75,6 +109,12 @@
 </head>
 <body>
 
+    <!-- 滚动通知栏 -->
+    <div class="announcement-bar" id="announcementBar">
+        <span class="announcement-content">推荐使用中国联通或中国电信网络访问本站，使用中国移动网络可能导致无法正常访问本站。建议使用Chrome浏览器以获得最佳浏览体验。</span>
+        <button class="close-btn" onclick="closeAnnouncement()">×</button>
+    </div>
+
     <!-- Bing 每日壁纸 -->
     <div class="image-container">
         <img id="wallpaper" src="https://bing.img.run/uhd.php?t=<?php echo date('Ymd'); ?>" alt="Bing每日壁纸">
@@ -130,6 +170,11 @@
     </div>
 
     <script>
+        // 关闭公告栏
+        function closeAnnouncement() {
+            document.getElementById('announcementBar').style.display = 'none';
+        }
+
         // 自动处理图片加载状态
         const img = document.getElementById('wallpaper');
         const loading = document.getElementById('loading');
