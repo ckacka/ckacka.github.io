@@ -1,119 +1,261 @@
-﻿<!DOCTYPE html>
-<html lang="zh">
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>二维码生成器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ckacka二维码生成器</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #2196F3;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --input-border: #cccccc;
+            --toolbar-bg: #2196F3;
+            --secondary-text: #666666;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #BB86FC;
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --input-border: #555555;
+            --toolbar-bg: #1F1F1F;
+            --secondary-text: #aaaaaa;
+        }
+
         body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        /* 标题栏样式 */
+        .toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: var(--toolbar-bg);
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
-            background: linear-gradient(to right, #1e3c72, #2a5298);
-            font-family: Arial, sans-serif;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
         }
-        .container {
-            width: 350px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            text-align: center;
+
+        .material-icons {
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
         }
-        h2 {
-            margin-bottom: 15px;
-            color: #333;
+
+        .back-button {
+            margin-right: 24px;
         }
-        input, select {
-            width: 90%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+
+        .title {
+            color: white;
+            font-size: 18px;
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 主内容区 */
+        .main-container {
+            padding: 24px 16px;
+            margin-top: 72px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 输入组样式 */
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-label {
+            display: block;
             font-size: 14px;
+            color: var(--secondary-text);
+            margin-bottom: 8px;
+            font-weight: 500;
         }
-        button {
-            background: #007bff;
+
+        .input-field {
+            width: 100%;
+            height: 48px;
+            padding: 0 16px;
+            border: 2px solid var(--input-border);
+            border-radius: 6px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(33,150,243,0.1);
+        }
+
+        /* 按钮样式（圆角调整为6px） */
+        .action-btn {
+            width: 100%;
+            height: 48px;
+            background: var(--primary-color);
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 6px;
             font-size: 16px;
-            margin-top: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
         }
-        button:hover {
-            background: #0056b3;
+
+        .action-btn:active {
+            opacity: 0.9;
         }
-        .qr-code {
-            margin-top: 15px;
+
+        /* 二维码容器 */
+        .qr-container {
+            margin: 32px 0;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
         }
-        .error {
-            color: red;
+
+        /* 错误提示 */
+        .error-msg {
+            color: #B00020;
             font-size: 14px;
+            padding: 12px;
+            background: #FFEBEE;
+            border-radius: 6px;
+            margin: 16px 0;
+            display: none;
+        }
+
+        /* 保存按钮 */
+        .save-btn {
+            background: #4CAF50;
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h2>二维码生成器</h2>
-        <input type="text" id="urlInput" placeholder="输入文字或网址生成二维码">
-        <select id="frameSelect">
-            <option value="1">边框样式 1</option>
-            <option value="2">边框样式 2</option>
-            <option value="3">边框样式 3</option>
-        </select>
-        <select id="errorCorrection">
-            <option value="L">低纠错 (L)</option>
-            <option value="M">中纠错 (M)</option>
-            <option value="Q">高纠错 (Q)</option>
-            <option value="H">最高纠错 (H)</option>
-        </select>
-        <select id="sizeSelect">
-            <option value="150">150px</option>
-            <option value="200" selected>200px</option>
-            <option value="250">250px</option>
-            <option value="300">300px</option>
-        </select>
-        <button onclick="generateQRCode()">生成二维码</button>
-        <p class="error" id="errorMsg"></p>
-        <div class="qr-code" id="qrCode"></div>
-        <button id="saveBtn" style="display:none;" onclick="saveQRCode()">保存二维码</button>
+<body data-theme="light">
+    <!-- 标题栏 -->
+    <div class="toolbar">
+        <i class="material-icons back-button" onclick="window.close()">arrow_back</i>
+        <div class="title">ckacka二维码生成器</div>
+        <i class="material-icons" id="themeIcon" onclick="toggleTheme()">dark_mode</i>
+    </div>
+
+    <div class="main-container">
+        <!-- 输入内容 -->
+        <div class="input-group">
+            <label class="input-label">输入内容</label>
+            <input type="text" class="input-field" id="urlInput" placeholder="输入文字或网址">
+        </div>
+
+        <!-- 尺寸选择（添加标签） -->
+        <div class="input-group">
+            <label class="input-label">选择尺寸</label>
+            <select class="input-field" id="sizeSelect">
+                <option value="200">200 x 200</option>
+                <option value="300">300 x 300</option>
+                <option value="400">400 x 400</option>
+            </select>
+        </div>
+
+        <button class="action-btn" onclick="generateQR()">生成二维码</button>
+        <div class="error-msg" id="errorMsg">请输入有效内容</div>
+        
+        <div class="qr-container" id="qrContainer"></div>
+        <button class="action-btn save-btn" id="saveBtn" onclick="saveQR()">保存二维码</button>
     </div>
 
     <script>
-        function generateQRCode() {
+        // 主题切换功能
+        function toggleTheme() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            document.getElementById('themeIcon').textContent = isDark ? 'dark_mode' : 'wb_sunny';
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // 初始化主题
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeIcon').textContent = 
+                savedTheme === 'dark' ? 'wb_sunny' : 'dark_mode';
+        }
+
+        // 生成二维码功能
+        function generateQR() {
             const url = document.getElementById('urlInput').value.trim();
-            const frame = document.getElementById('frameSelect').value;
-            const errorCorrection = document.getElementById('errorCorrection').value;
             const size = document.getElementById('sizeSelect').value;
-            const qrCodeDiv = document.getElementById('qrCode');
             const errorMsg = document.getElementById('errorMsg');
+            const qrContainer = document.getElementById('qrContainer');
             const saveBtn = document.getElementById('saveBtn');
 
+            // 重置状态
+            errorMsg.style.display = 'none';
+            qrContainer.innerHTML = '';
+            saveBtn.style.display = 'none';
+
+            // 输入验证
             if (!url) {
-                errorMsg.textContent = "请输入有效的文字或网址！";
-                qrCodeDiv.innerHTML = "";
-                saveBtn.style.display = "none";
+                errorMsg.style.display = 'block';
                 return;
             }
 
-            errorMsg.textContent = "";
-            const qrCodeUrl = `https://api.kuleu.com/api/qrcode?frame=${frame}&e=${errorCorrection}&text=${encodeURIComponent(url)}&size=${size}`;
-            qrCodeDiv.innerHTML = `<img id="qrImage" src="${qrCodeUrl}" alt="二维码" width="${size}">`;
-            saveBtn.style.display = "inline-block";
+            // 生成二维码
+            try {
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`;
+                qrContainer.innerHTML = `<img src="${qrUrl}" alt="二维码" id="qrImage" style="width:${size}px;height:${size}px">`;
+                saveBtn.style.display = 'block';
+            } catch (error) {
+                errorMsg.textContent = '二维码生成失败，请重试';
+                errorMsg.style.display = 'block';
+                console.error('生成错误:', error);
+            }
         }
 
-        function saveQRCode() {
-            const qrImage = document.getElementById('qrImage');
-            if (!qrImage) return;
+        // 保存二维码功能
+        function saveQR() {
+            try {
+                const qrImage = document.getElementById('qrImage');
+                if (!qrImage) return;
 
-            const link = document.createElement('a');
-            link.href = qrImage.src;
-            link.download = '二维码.png';
-            link.click();
+                const link = document.createElement('a');
+                link.href = qrImage.src;
+                link.download = `qrcode_${Date.now()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                document.getElementById('errorMsg').textContent = '保存失败，请重试';
+                document.getElementById('errorMsg').style.display = 'block';
+                console.error('保存错误:', error);
+            }
         }
+
+        // 初始化
+        initTheme();
     </script>
 </body>
 </html>
