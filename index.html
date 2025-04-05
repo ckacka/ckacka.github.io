@@ -155,22 +155,26 @@
     <div class="settings-page">
         <div class="category-title">主题设置</div>
         <div class="settings-item">
-            <input type="checkbox" id="dark-mode-toggle" onclick="toggleThemeSwitch()">
+            <input type="checkbox" id="dark-mode-toggle">
             <label for="dark-mode-toggle">启用深色模式（测试版）</label>
         </div>
 
-        <div class="category-title">时间设置</div>
+        <div class="category-title">报时器设置</div>
         <div class="settings-item">
-            <input type="checkbox" id="time-format-toggle" onclick="toggleTimeFormat()">
-            <label for="time-format-toggle">12小时制</label>
+            <input type="checkbox" id="show-time-toggle">
+            <label for="show-time-toggle">打开报时器</label>
         </div>
         <div class="settings-item">
-            <input type="checkbox" id="show-date-toggle" onclick="toggleShowDate()">
+            <input type="checkbox" id="time-format-toggle">
+            <label for="time-format-toggle">时间为12小时制</label>
+        </div>
+        <div class="settings-item">
+            <input type="checkbox" id="show-date-toggle">
             <label for="show-date-toggle">显示日期和星期</label>
         </div>
 
         <div class="copyright">
-            <p>© ckacka v1.0</p>
+            <p>© ckacka v2.0</p>
         </div>
     </div>
 
@@ -188,6 +192,18 @@
     </div>
 
     <script>
+        // 初始化设置
+        document.addEventListener('DOMContentLoaded', () => {
+            // 从本地存储加载设置
+            loadSettings();
+            // 绑定事件
+            document.getElementById('dark-mode-toggle').addEventListener('change', toggleThemeSwitch);
+            document.getElementById('show-time-toggle').addEventListener('change', toggleShowTime);
+            document.getElementById('time-format-toggle').addEventListener('change', toggleTimeFormat);
+            document.getElementById('show-date-toggle').addEventListener('change', toggleShowDate);
+            updateTime();
+        });
+
         function switchTab(element, tabName) {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             element.classList.add('active');
@@ -201,42 +217,67 @@
         }
 
         function toggleThemeSwitch() {
-            let darkMode = document.getElementById('dark-mode-toggle').checked;
+            const darkMode = this.checked;
             document.body.classList.toggle('dark-mode', darkMode);
-            localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+            localStorage.setItem('darkMode', darkMode);
+        }
+
+        function toggleShowTime() {
+            localStorage.setItem('showTime', this.checked);
+            updateTime();
         }
 
         function toggleTimeFormat() {
+            localStorage.setItem('timeFormat12h', this.checked);
             updateTime();
         }
 
         function toggleShowDate() {
+            localStorage.setItem('showDate', this.checked);
             updateTime();
         }
 
+        function loadSettings() {
+            // 加载深色模式
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            document.getElementById('dark-mode-toggle').checked = darkMode;
+            document.body.classList.toggle('dark-mode', darkMode);
+
+            // 加载时间显示设置
+            document.getElementById('show-time-toggle').checked = localStorage.getItem('showTime') !== 'false';
+            document.getElementById('time-format-toggle').checked = localStorage.getItem('timeFormat12h') === 'true';
+            document.getElementById('show-date-toggle').checked = localStorage.getItem('showDate') === 'true';
+        }
+
         function updateTime() {
-            let now = new Date();
+            const now = new Date();
+            const showTime = localStorage.getItem('showTime') !== 'false';
+            const is12Hour = localStorage.getItem('timeFormat12h') === 'true';
+            const showDate = localStorage.getItem('showDate') === 'true';
+
+            // 控制时间显示
+            document.getElementById('current-time').style.display = showTime ? 'block' : 'none';
+
+            if (!showTime) return;
+
             let hours = now.getHours();
             let minutes = now.getMinutes().toString().padStart(2, '0');
             let seconds = now.getSeconds().toString().padStart(2, '0');
-            let is12Hour = document.getElementById('time-format-toggle').checked;
-            let showDate = document.getElementById('show-date-toggle').checked;
-
+            
             // 处理小时显示
-            let displayHours;
+            let timeString;
             if (is12Hour) {
-                displayHours = (hours % 12 || 12).toString().padStart(2, '0');
-                let period = hours >= 12 ? 'PM' : 'AM';
-                var timeString = `${displayHours}:${minutes}:${seconds} ${period}`;
+                const displayHours = (hours % 12 || 12).toString().padStart(2, '0');
+                const period = hours >= 12 ? 'PM' : 'AM';
+                timeString = `${displayHours}:${minutes}:${seconds} ${period}`;
             } else {
-                displayHours = hours.toString().padStart(2, '0');
-                timeString = `${displayHours}:${minutes}:${seconds}`;
+                timeString = `${hours.toString().padStart(2, '0')}:${minutes}:${seconds}`;
             }
 
-            // 显示日期和星期
+            // 处理日期显示
             let dateString = '';
             if (showDate) {
-                let dayOfWeek = ['日', '一', '二', '三', '四', '五', '六'][now.getDay()];
+                const dayOfWeek = ['日', '一', '二', '三', '四', '五', '六'][now.getDay()];
                 dateString = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${dayOfWeek} `;
             }
 
