@@ -53,6 +53,58 @@
             cursor: pointer;
             color: red;
         }
+        /* 搜索框样式 */
+        .search-container {
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+            position: relative;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 8px;
+            padding: 8px 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #searchInput {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            padding: 8px;
+            background: transparent;
+        }
+        #searchButton {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            margin-left: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        #searchButton:hover {
+            background: #1976D2;
+        }
+        .no-results {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+            animation: fadeIn 0.3s;
+            padding: 10px;
+            border: 1px solid #ffcccc;
+            border-radius: 4px;
+            background: #fff3f3;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         .image-container {
             width: 90%;
             max-width: 660px;
@@ -115,6 +167,15 @@
         <button class="close-btn" onclick="closeAnnouncement()">×</button>
     </div>
 
+    <!-- 搜索框 -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="输入工具名称或描述进行搜索...">
+            <button id="searchButton" onclick="searchTools()">搜索</button>
+        </div>
+        <div id="noResults" class="no-results"> Σ(ŎдŎ|||)ﾉﾉ 没有找到相关工具！</div>
+    </div>
+
     <!-- Bing 每日壁纸 -->
     <div class="image-container">
         <img id="wallpaper" src="https://bing.img.run/uhd.php?t=<?php echo date('Ymd'); ?>" alt="Bing每日壁纸">
@@ -126,57 +187,56 @@
     </div>
 
     <!-- 工具卡片 -->
-<div class="container">
-    <div class="tool-card">
-        <h3>数字电视</h3>
-        <p>在线看电视、听广播。</p>
-        <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/tvradio.html" target="_blank">
-            <i class="material-icons mdc-button__icon">tv</i>
-            使用工具
-        </a>
+    <div class="container">
+        <div class="tool-card">
+            <h3>数字电视</h3>
+            <p>在线看电视、听广播。</p>
+            <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/tvradio.html">
+                <i class="material-icons mdc-button__icon">tv</i>
+                使用工具
+            </a>
+        </div>
+        <div class="tool-card">
+            <h3>在线视频播放器</h3>
+            <p>输入播放地址播放视频。</p>
+            <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/videoplayer.html">
+                <i class="material-icons mdc-button__icon">play_circle_filled</i>
+                使用工具
+            </a>
+        </div>
+        <div class="tool-card">
+            <h3>二维码生成器</h3>
+            <p>在线二维码生成器。</p>
+            <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/qrcode.html">
+                <i class="material-icons mdc-button__icon">qr_code</i>
+                使用工具
+            </a>
+        </div>
+        <div class="tool-card">
+            <h3>怪物挑战赛</h3>
+            <p>一起消灭怪物！</p>
+            <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/guaiwu.html">
+                <i class="material-icons mdc-button__icon">sports_esports</i>
+                开始游戏
+            </a>
+        </div>
+        <div class="tool-card">
+            <h3>随机生词</h3>
+            <p>随机生成新词语，但是人类可能看不懂……</p>
+            <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/sjsc.html">
+                <i class="material-icons mdc-button__icon">school</i>
+                使用工具
+            </a>
+        </div>
+        <div class="tool-card">
+            <h3>敬请期待</h3>
+            <p>更多工具即将上线！</p>
+            <button class="mdc-button mdc-button--outlined" disabled>
+                <i class="material-icons mdc-button__icon">hourglass_empty</i>
+                Coming Soon
+            </button>
+        </div>
     </div>
-    <div class="tool-card">
-        <h3>在线视频播放器</h3>
-        <p>输入播放地址播放视频。</p>
-        <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/videoplayer.html" target="_blank">
-            <i class="material-icons mdc-button__icon">play_circle_filled</i>
-            使用工具
-        </a>
-    </div>
-    <div class="tool-card">
-        <h3>二维码生成器</h3>
-        <p>在线二维码生成器。</p>
-        <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/qrcode.html" target="_blank">
-            <i class="material-icons mdc-button__icon">qr_code</i>
-            使用工具
-        </a>
-    </div>
-    <div class="tool-card">
-        <h3>怪物挑战赛</h3>
-        <p>一起消灭怪物！</p>
-        <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/guaiwu.html" target="_blank">
-            <i class="material-icons mdc-button__icon">sports_esports</i>
-            开始游戏
-        </a>
-    </div>
-    <div class="tool-card">
-        <h3>随机生词</h3>
-        <p>随机生成新词语，但是人类可能看不懂……</p>
-        <a class="mdc-button mdc-button--outlined" href="https://ckacka.github.io/sjsc.html" target="_blank">
-            <i class="material-icons mdc-button__icon">school</i>
-            使用工具
-        </a>
-    </div>
-    <div class="tool-card">
-        <h3>敬请期待</h3>
-        <p>更多工具即将上线！</p>
-        <button class="mdc-button mdc-button--outlined" disabled>
-            <i class="material-icons mdc-button__icon">hourglass_empty</i>
-            Coming Soon
-        </button>
-    </div>
-</div>
-
 
     <script>
         // 关闭公告栏
@@ -184,7 +244,33 @@
             document.getElementById('announcementBar').style.display = 'none';
         }
 
-        // 自动处理图片加载状态
+        // 搜索功能
+        function searchTools() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase().trim();
+            const cards = document.getElementsByClassName('tool-card');
+            const noResults = document.getElementById('noResults');
+            let foundCount = 0;
+
+            Array.from(cards).forEach(card => {
+                const title = card.querySelector('h3').innerText.toLowerCase();
+                const desc = card.querySelector('p').innerText.toLowerCase();
+                
+                if (filter === '' || title.includes(filter) || desc.includes(filter)) {
+                    card.style.display = 'block';
+                    foundCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            noResults.style.display = foundCount > 0 || filter === '' ? 'none' : 'block';
+        }
+
+        // 实时搜索
+        document.getElementById('searchInput').addEventListener('input', searchTools);
+
+        // 图片处理
         const img = document.getElementById('wallpaper');
         const loading = document.getElementById('loading');
 
@@ -196,14 +282,11 @@
             loading.textContent = '图片加载失败，请稍后刷新重试';
         }
 
-        // 下载功能
         function downloadImage() {
             const imageUrl = img.src.split('?')[0];
-            const fileName = 'BingWallpaper_' + new Date().toISOString().slice(0,10) + '.jpg';
             window.open(imageUrl, '_blank');
         }
 
-        // 避免缓存问题
         img.src += (img.src.includes('?') ? '&' : '?') + 't=' + Date.now();
     </script>
 
