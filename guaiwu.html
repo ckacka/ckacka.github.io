@@ -4,6 +4,7 @@
     <title>是女人就扇他一百耳光</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* 优化后的CSS */
         /* 禁止长按菜单和文本选择 */
         body {
             -webkit-touch-callout: none;
@@ -11,14 +12,17 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            overflow: hidden; /* 防止滚动条闪烁 */
         }
 
-        /* 游戏原有样式 */
-        .blink { animation: blink 1s infinite; }
+        /* 性能优化动画 */
+        .blink { 
+            animation: blink 1s infinite;
+            will-change: opacity;
+        }
         @keyframes blink {
-            0% { opacity: 1; }
+            0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
-            100% { opacity: 1; }
         }
 
         body {
@@ -31,11 +35,13 @@
             min-height: 100vh;
             background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
             color: white;
+            touch-action: manipulation; /* 优化移动端触摸 */
         }
 
         .game-header {
             text-align: center;
             margin-bottom: 20px;
+            will-change: transform;
         }
 
         #healthBar {
@@ -47,6 +53,7 @@
             margin: 15px 0;
             overflow: hidden;
             position: relative;
+            backface-visibility: hidden;
         }
 
         #health {
@@ -54,6 +61,7 @@
             height: 100%;
             background: linear-gradient(90deg, #4CAF50, #45a049);
             transition: width 0.3s ease;
+            transform: translateZ(0); /* 启用GPU加速 */
         }
 
         #targetImage {
@@ -64,9 +72,9 @@
             cursor: pointer;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            transition: all 0.1s;
             background: #444;
-            position: relative;
+            transform: translateZ(0);
+            image-rendering: -webkit-optimize-contrast;
         }
 
         .hit-effect {
@@ -74,17 +82,14 @@
         }
 
         @keyframes hitShake {
-            0% { transform: translateX(0); }
+            0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             50% { transform: translateX(5px); }
             75% { transform: translateX(-3px); }
-            100% { transform: translateX(0); }
         }
 
         @keyframes redFlash {
-            0% { background-color: rgba(255,0,0,0); }
             50% { background-color: rgba(255,0,0,0.3); }
-            100% { background-color: rgba(255,0,0,0); }
         }
 
         #restartBtn {
@@ -99,12 +104,14 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             display: none;
             transition: 0.3s all;
+            touch-action: manipulation;
         }
 
         #status {
             font-size: 1.2em;
             margin: 10px 0;
             color: #ffd700;
+            will-change: contents;
         }
 
         .regenerate {
@@ -112,9 +119,7 @@
         }
 
         @keyframes regenerateGlow {
-            0% { box-shadow: 0 0 10px #00ff00; }
             50% { box-shadow: 0 0 20px #00ff00; }
-            100% { box-shadow: 0 0 10px #00ff00; }
         }
 
         .damage-number {
@@ -124,16 +129,16 @@
             animation: floatUp 1s ease-out;
             pointer-events: none;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            will-change: transform, opacity;
         }
 
         @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
             100% { transform: translateY(-50px); opacity: 0; }
         }
 
         @media (max-width: 600px) {
             #healthBar { height: 20px; }
-            #restartBtn { padding: 12px 25px; font-size: 1.1em; }
+            #restartBtn { padding: 12px 25px; }
         }
     </style>
 </head>
@@ -149,168 +154,230 @@
     <button id="restartBtn">再来一局</button>
 
     <audio id="bgMusic" loop>
-        <source src="https://ckacka.github.io/bgm.mp3" type="audio/mpeg">
+        <source src="https://ckacka.github.io/bgm.mp3" type="audio/mp3">
     </audio>
     <audio id="hitSound">
-        <source src="https://ckacka.github.io/shan.mp3" type="audio/mpeg">
+        <source src="https://ckacka.github.io/shan.mp3" type="audio/mp3">
     </audio>
     <audio id="healSound">
-        <source src="https://ckacka.github.io/heal.mp3" type="audio/mpeg">
+        <source src="https://ckacka.github.io/heal.mp3" type="audio/mp3">
     </audio>
 
     <script>
-        // 禁止右键菜单
-        document.addEventListener('contextmenu', e => e.preventDefault());
-
-        // 游戏逻辑
-        let gameTimer;
-        let regenerateTimer;
-        let currentHealth = 200;
-        let timeLeft = 15;
-        let score = 0;
-        let combo = 0;
-        let lastHitTime = 0;
-        let isPlaying = false;
-        let isRegenerating = false;
-
-        const elements = {
-            health: document.getElementById('health'),
-            targetImage: document.getElementById('targetImage'),
-            restartBtn: document.getElementById('restartBtn'),
-            status: document.getElementById('status'),
-            healthBar: document.getElementById('healthBar'),
-            bgMusic: document.getElementById('bgMusic'),
-            hitSound: document.getElementById('hitSound'),
-            healSound: document.getElementById('healSound')
-        };
-
-        function initGame() {
-            clearInterval(gameTimer);
-            clearInterval(regenerateTimer);
-            currentHealth = 200;
-            timeLeft = 15;
-            score = 0;
-            combo = 0;
-            isPlaying = false;
-            isRegenerating = false;
+        (function() {
+            // 性能优化变量
+            let lastFrameTime = performance.now();
+            const damageNumbers = new Set();
+            const hitSoundPool = Array(5).fill().map(() => new Audio('https://ckacka.github.io/shan.mp3'));
+            let currentHitSound = 0;
             
-            elements.health.style.width = '100%';
-            elements.health.style.background = 'linear-gradient(90deg, #4CAF50, #45a049)';
-            elements.targetImage.style.filter = 'none';
-            elements.targetImage.classList.remove('regenerate');
-            elements.targetImage.style.cursor = 'pointer';
-            elements.restartBtn.style.display = 'none';
-            elements.status.textContent = '点击怪物开始游戏！';
-            elements.status.classList.add('blink');
-            elements.healthBar.style.display = 'none';
-            
-            elements.bgMusic.pause();
-            elements.bgMusic.currentTime = 0;
-        }
+            // 游戏状态变量
+            let gameTimer;
+            let regenerateTimer;
+            let currentHealth = 200;
+            let timeLeft = 15;
+            let score = 0;
+            let combo = 0;
+            let lastHitTime = 0;
+            let isPlaying = false;
+            let isRegenerating = false;
+            let audioEnabled = false;
 
-        function startGame() {
-            if(isPlaying) return;
-            
-            isPlaying = true;
-            elements.healthBar.style.display = 'block';
-            elements.status.classList.remove('blink');
-            elements.status.textContent = `剩余时间: ${timeLeft}s | 得分: ${score}`;
-            
-            elements.bgMusic.play().catch(console.error);
+            // DOM缓存
+            const elements = {
+                health: document.getElementById('health'),
+                targetImage: document.getElementById('targetImage'),
+                restartBtn: document.getElementById('restartBtn'),
+                status: document.getElementById('status'),
+                healthBar: document.getElementById('healthBar'),
+                bgMusic: document.getElementById('bgMusic'),
+                healSound: document.getElementById('healSound')
+            };
 
-            gameTimer = setInterval(() => {
-                timeLeft = Math.max(0, timeLeft - 1);
+            // 音频初始化
+            function initAudio() {
+                if (!audioEnabled) {
+                    audioEnabled = true;
+                    elements.bgMusic.volume = 0.5;
+                    elements.healSound.volume = 0.7;
+                }
+            }
+
+            // 使用requestAnimationFrame优化动画
+            function updateGame(timestamp) {
+                const deltaTime = timestamp - lastFrameTime;
+                lastFrameTime = timestamp;
+
+                // 更新伤害数字
+                damageNumbers.forEach(num => {
+                    num.element.style.top = `${num.y -= deltaTime * 0.05}px`;
+                    num.element.style.opacity = num.opacity -= deltaTime * 0.002;
+                });
+
+                requestAnimationFrame(updateGame);
+            }
+
+            // 优化后的伤害数字创建
+            function createDamageNumber(x, y, damage) {
+                const num = document.createElement('div');
+                num.className = 'damage-number';
+                num.textContent = `-${damage}`;
+                Object.assign(num.style, {
+                    left: `${x}px`,
+                    top: `${y}px`,
+                    opacity: 1
+                });
+                document.body.appendChild(num);
+                
+                damageNumbers.add({
+                    element: num,
+                    y: y,
+                    opacity: 1
+                });
+
+                setTimeout(() => {
+                    num.remove();
+                    damageNumbers.delete(num);
+                }, 1000);
+            }
+
+            // 游戏初始化
+            function initGame() {
+                cancelAnimationFrame(updateGame);
+                clearInterval(gameTimer);
+                clearInterval(regenerateTimer);
+                
+                currentHealth = 200;
+                timeLeft = 15;
+                score = 0;
+                combo = 0;
+                isPlaying = false;
+                isRegenerating = false;
+                
+                elements.health.style.width = '100%';
+                elements.health.style.background = 'linear-gradient(90deg, #4CAF50, #45a049)';
+                elements.targetImage.classList.remove('regenerate', 'hit-effect');
+                elements.targetImage.style.cursor = 'pointer';
+                elements.restartBtn.style.display = 'none';
+                elements.status.textContent = '点击怪物开始游戏！';
+                elements.healthBar.style.display = 'none';
+                
+                elements.bgMusic.pause();
+                elements.bgMusic.currentTime = 0;
+            }
+
+            // 游戏启动
+            function startGame() {
+                if(isPlaying) return;
+                
+                isPlaying = true;
+                elements.healthBar.style.display = 'block';
                 elements.status.textContent = `剩余时间: ${timeLeft}s | 得分: ${score}`;
-                if(timeLeft <= 0) endGame(false);
-            }, 1000);
-        }
-
-        function createDamageNumber(x, y, damage) {
-            const num = document.createElement('div');
-            num.className = 'damage-number';
-            num.textContent = `-${damage}`;
-            num.style.left = `${x}px`;
-            num.style.top = `${y}px`;
-            document.body.appendChild(num);
-            setTimeout(() => num.remove(), 1000);
-        }
-
-        function startRegeneration() {
-            if(isRegenerating) return;
-            
-            isRegenerating = true;
-            elements.targetImage.classList.add('regenerate');
-            elements.healSound.play();
-
-            regenerateTimer = setInterval(() => {
-                if(currentHealth >= 200 || !isPlaying) return stopRegeneration();
                 
-                currentHealth = Math.min(200, currentHealth + 4);
-                elements.health.style.width = (currentHealth / 2) + '%';
+                // 处理音频自动播放
+                initAudio();
+                elements.bgMusic.play().catch(() => {});
+
+                // 精确的时间管理
+                let lastUpdate = Date.now();
+                gameTimer = setInterval(() => {
+                    const now = Date.now();
+                    timeLeft = Math.max(0, timeLeft - (now - lastUpdate)/1000);
+                    lastUpdate = now;
+                    elements.status.textContent = `剩余时间: ${Math.round(timeLeft)}s | 得分: ${score}`;
+                    if(timeLeft <= 0) endGame(false);
+                }, 100);
+
+                requestAnimationFrame(updateGame);
+            }
+
+            // 点击处理
+            function handleClick(e) {
+                if(!isPlaying) {
+                    initGame();
+                    startGame();
+                    return;
+                }
+
+                const now = Date.now();
+                if (now - lastHitTime < 50) return;
+
+                // 优化音频播放
+                hitSoundPool[currentHitSound].play();
+                currentHitSound = (currentHitSound + 1) % hitSoundPool.length;
+
+                // 优化动画
+                elements.targetImage.classList.add('hit-effect');
+                setTimeout(() => elements.targetImage.classList.remove('hit-effect'), 300);
+
+                // 游戏逻辑
+                currentHealth = Math.max(0, currentHealth - 5);
+                elements.health.style.width = `${currentHealth / 2}%`;
+
+                // 连击系统
+                combo = (now - lastHitTime < 1000) ? combo + 1 : 1;
+                lastHitTime = now;
+                score += combo * 10;
+
+                createDamageNumber(e.clientX, e.clientY, 5);
+
+                // 振动优化
+                navigator.vibrate?.(30);
+
+                // 血量管理
+                if (currentHealth <= 50 && !isRegenerating) {
+                    startRegeneration();
+                }
+
+                if(currentHealth === 0) endGame(true);
+            }
+
+            // 再生系统
+            function startRegeneration() {
+                isRegenerating = true;
+                elements.targetImage.classList.add('regenerate');
+                elements.healSound.play();
+
+                regenerateTimer = setInterval(() => {
+                    if(currentHealth >= 200 || !isPlaying) return stopRegeneration();
+                    
+                    currentHealth = Math.min(200, currentHealth + 4);
+                    elements.health.style.width = `${currentHealth / 2}%`;
+                }, 1000);
+            }
+
+            function stopRegeneration() {
+                clearInterval(regenerateTimer);
+                isRegenerating = false;
+                elements.targetImage.classList.remove('regenerate');
+            }
+
+            // 游戏结束
+            function endGame(isWin) {
+                clearInterval(gameTimer);
+                stopRegeneration();
+                isPlaying = false;
+                elements.targetImage.style.filter = 'grayscale(1) blur(2px)';
+                elements.restartBtn.style.display = 'block';
+                elements.bgMusic.pause();
                 
-                const healNum = document.createElement('div');
-                healNum.className = 'damage-number';
-                healNum.textContent = `+4`;
-                healNum.style.color = '#00ff00';
-                healNum.style.left = `${elements.targetImage.offsetLeft + 100}px`;
-                healNum.style.top = `${elements.targetImage.offsetTop + 50}px`;
-                document.body.appendChild(healNum);
-                setTimeout(() => healNum.remove(), 1000);
-            }, 1000);
-        }
+                requestAnimationFrame(() => {
+                    alert(`${isWin ? '🎉 恭喜获胜！' : '😭 游戏结束！'}\n剩余时间: ${Math.round(timeLeft)}s\n最终得分: ${score}`);
+                });
+            }
 
-        function stopRegeneration() {
-            clearInterval(regenerateTimer);
-            isRegenerating = false;
-            elements.targetImage.classList.remove('regenerate');
-        }
+            // 事件监听
+            elements.targetImage.addEventListener('click', handleClick, {passive: true});
+            elements.restartBtn.addEventListener('click', initGame);
 
-        function handleClick(e) {
-            if(!isPlaying) return initGame(), startGame();
-            if(currentHealth <= 0 || timeLeft <= 0) return;
+            // 预加载资源
+            window.addEventListener('load', () => {
+                elements.bgMusic.load();
+                elements.healSound.load();
+            });
 
-            // 攻击处理
-            elements.hitSound.cloneNode(true).play();
-            createDamageNumber(e.clientX, e.clientY, 5);
-            navigator.vibrate?.(50);
-            elements.targetImage.classList.add('hit-effect');
-            setTimeout(() => elements.targetImage.classList.remove('hit-effect'), 300);
-
-            currentHealth = Math.max(0, currentHealth - 5);
-            elements.health.style.width = (currentHealth / 2) + '%';
-
-            // 血量检测
-            currentHealth <= 50 
-                ? (elements.health.style.background = 'linear-gradient(90deg, #ff4444, #cc0000)',
-                   !isRegenerating && startRegeneration())
-                : stopRegeneration();
-
-            // 连击系统
-            const now = Date.now();
-            combo = (now - lastHitTime < 1000) ? combo + 1 : 1;
-            lastHitTime = now;
-            score += combo * 10;
-            elements.status.textContent = `剩余时间: ${timeLeft}s | 得分: ${score}`;
-
-            if(currentHealth === 0) endGame(true);
-        }
-
-        function endGame(isWin) {
-            clearInterval(gameTimer);
-            stopRegeneration();
-            isPlaying = false;
-            elements.targetImage.style.filter = 'grayscale(100%) blur(2px)';
-            elements.restartBtn.style.display = 'block';
-            elements.bgMusic.pause();
-            elements.bgMusic.currentTime = 0;
-            alert(`${isWin ? '恭喜获胜！' : '游戏结束！'}\n剩余时间: ${timeLeft}s\n最终得分: ${score}`);
-        }
-
-        // 事件监听
-        elements.targetImage.addEventListener('click', handleClick);
-        elements.restartBtn.addEventListener('click', initGame);
-
-        initGame();
+            initGame();
+        })();
     </script>
 </body>
 </html>
