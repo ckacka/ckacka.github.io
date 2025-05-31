@@ -6,85 +6,77 @@
     <title>ckacka</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>
-        /* 页面基础样式 */
+        /* 微信风格重置和基础样式 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
-            transition: background 0.3s, color 0.3s;
-        }
-        body {
-            background: #f5f5f5;
-            color: #333;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            -webkit-touch-callout: none;
+            font-family: -apple-system, BlinkMacSystemFont, 
+                        "Helvetica Neue", "PingFang SC", "Microsoft YaHei", 
+                        sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         
-        /* 顶部标题栏 */
-        .app-bar {
-            height: 56px;
-            background: #2196F3;
+        body {
+            background: #F5F5F5;
+            color: #333;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        /* 微信顶部导航栏 - 使用微信绿色 #07c160 */
+        .wechat-header {
+            height: 44px;
+            background: #07c160; /* 微信绿色 */
             color: white;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            font-size: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 0 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .time-display {
-            font-size: 18px;
-        }
-
-        /* 嵌入页面 */
-        .iframe-page {
+        
+        .header-content {
             width: 100%;
-            height: calc(100vh - 112px);
-            border: none;
-            display: none;
-        }
-        #home-page {
-            display: block;
-        }
-
-        /* 设置页面 */
-        .settings-page {
-            display: none;
-            padding: 20px;
-        }
-
-        /* 分类标题 */
-        .category-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            color: #2196F3;
-        }
-
-        /* 设置项 */
-        .settings-item {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            justify-content: space-between;
+            padding: 0 10px;
         }
-        .settings-item label {
-            margin-left: 10px;
-            font-size: 16px;
-        }
-
-        .settings-page .copyright {
-            margin-top: 30px;
-            font-size: 12px;
+        
+        .wechat-header .title {
+            font-size: 17px;
+            font-weight: 500;
             text-align: center;
-            color: #888;
+            position: absolute;
+            left: 0;
+            right: 0;
+            margin: auto;
         }
-
-        /* 底部菜单栏 */
+        
+        .time-display {
+            font-size: 14px;
+            color: white; /* 白色文字在绿色背景上更清晰 */
+            opacity: 0.9;
+            margin-left: auto;
+        }
+        
+        /* 标签页内容 */
+        .tab-content {
+            display: none;
+            height: calc(100vh - 44px - 56px); /* 减去顶部和底部高度 */
+            overflow-y: auto;
+            background: #F5F5F5;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 微信底部导航栏 */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -94,127 +86,351 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2);
-            transition: background 0.3s;
+            box-shadow: 0 -0.5px 1px rgba(0,0,0,0.1);
+            border-top: 1px solid #EDEDED;
         }
+        
         .nav-item {
             text-align: center;
             flex: 1;
             padding: 8px 0;
-            color: #666;
-            font-size: 14px;
-            transition: color 0.3s, transform 0.2s;
+            color: #9B9B9B;
+            font-size: 12px;
+            transition: color 0.2s;
         }
+        
         .nav-item i {
             display: block;
-            font-size: 24px;
-            margin-bottom: 2px;
-            transition: transform 0.2s;
+            font-size: 20px;
+            margin-bottom: 4px;
+            transition: color 0.2s;
         }
+        
         .nav-item.active {
-            color: #2196F3;
+            color: #07C160;
         }
-        .nav-item:active {
-            transform: scale(0.9);
+        
+        .nav-item.active i {
+            color: #07C160;
         }
-
+        
+        /* 设置页样式 */
+        .wechat-settings {
+            padding: 12px;
+        }
+        
+        .settings-section {
+            background: #FFFFFF;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 500;
+            padding: 12px 16px;
+            color: #333;
+            background: #FAFAFA;
+            border-bottom: 1px solid #EDEDED;
+        }
+        
+        .settings-item {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .settings-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 16px;
+            right: 0;
+            height: 1px;
+            background: #EDEDED;
+        }
+        
+        .item-content {
+            flex: 1;
+        }
+        
+        .item-content .title {
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .item-content .subtitle {
+            font-size: 14px;
+            color: #888;
+            margin-top: 4px;
+        }
+        
+        .settings-item .material-icons {
+            color: #AAA;
+            font-size: 20px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #07C160;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        
+        .copyright {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+        
         /* 深色模式 */
         body.dark-mode {
             background: #121212;
-            color: #fff;
+            color: #EEE;
         }
-        .dark-mode .app-bar {
+        
+        .dark-mode .wechat-header {
+            background: #05753a; /* 深色模式下深一点的绿色 */
+        }
+        
+        .dark-mode .time-display {
+            color: #EEE;
+        }
+        
+        .dark-mode .bottom-nav {
+            background: #1A1A1A;
+            border-top: 1px solid #333;
+        }
+        
+        .dark-mode .nav-item {
+            color: #666;
+        }
+        
+        .dark-mode .nav-item.active {
+            color: #07C160;
+        }
+        
+        .dark-mode .wechat-settings {
+            background: #121212;
+        }
+        
+        .dark-mode .settings-section {
+            background: #1F1F1F;
+        }
+        
+        .dark-mode .section-title {
+            color: #CCC;
+            background: #1A1A1A;
+            border-bottom: 1px solid #333;
+        }
+        
+        .dark-mode .item-content .title {
+            color: #EEE;
+        }
+        
+        .dark-mode .item-content .subtitle {
+            color: #AAA;
+        }
+        
+        .dark-mode .settings-item:not(:last-child)::after {
             background: #333;
         }
-        .dark-mode .bottom-nav {
-            background: #222;
+        
+        /* iframe样式 */
+        .iframe-page {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #FFFFFF;
         }
-        .dark-mode .nav-item {
-            color: #bbb;
-        }
-        .dark-mode .nav-item.active {
-            color: #4CAF50;
+        
+        .dark-mode .iframe-page {
+            background: #121212;
         }
     </style>
 </head>
 <body>
-
-    <!-- 顶部标题栏 -->
-    <div class="app-bar">
-        <span id="app-title">ckacka</span>
-        <span id="current-time" class="time-display"></span>
+    <!-- 微信风格顶部导航栏 - 使用微信绿 #07c160 -->
+    <div class="wechat-header">
+        <div class="header-content">
+            <div class="title" id="app-title">ckacka</div>
+            <div id="current-time" class="time-display"></div>
+        </div>
     </div>
 
-    <!-- ckacka（默认） -->
-    <iframe id="home-page" class="iframe-page" src="https://ckacka.github.io/homepage.html"></iframe>
+    <!-- 首页 -->
+    <div id="home-tab" class="tab-content active">
+        <iframe id="home-page" class="iframe-page" src="https://ckacka.github.io/homepage.html"></iframe>
+    </div>
 
     <!-- 发现页面 -->
-    <iframe id="discover-page" class="iframe-page" src="https://hot.browser.miui.com/v7/#status=open&cate=%E6%8E%A8%E8%8D%90/"></iframe>
+    <div id="discover-tab" class="tab-content">
+        <iframe id="discover-page" class="iframe-page" src="https://hot.browser.miui.com/v7/#status=open&cate=%E6%8E%A8%E8%8D%90/"></iframe>
+    </div>
 
     <!-- 设置页面 -->
-    <div class="settings-page">
-        <div class="category-title">主题设置</div>
-        <div class="settings-item">
-            <input type="checkbox" id="dark-mode-toggle">
-            <label for="dark-mode-toggle">启用深色模式（测试版）</label>
-        </div>
-
-        <div class="category-title">报时器设置</div>
-        <div class="settings-item">
-            <input type="checkbox" id="show-time-toggle">
-            <label for="show-time-toggle">打开报时器</label>
-        </div>
-        <div class="settings-item">
-            <input type="checkbox" id="time-format-toggle">
-            <label for="time-format-toggle">时间为12小时制</label>
-        </div>
-        <div class="settings-item">
-            <input type="checkbox" id="show-date-toggle">
-            <label for="show-date-toggle">显示日期和星期</label>
-        </div>
-
-        <div class="copyright">
-            <p>© ckacka v2.0</p>
+    <div id="settings-tab" class="tab-content">
+        <div class="wechat-settings">
+            <div class="settings-section">
+                <div class="section-title">主题设置</div>
+                <div class="settings-item">
+                    <div class="item-content">
+                        <div class="title">深色模式（测试版）</div>
+                        <div class="subtitle">夜间使用更舒适</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-mode-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <div class="section-title">报时器设置</div>
+                <div class="settings-item">
+                    <div class="item-content">
+                        <div class="title">显示时间</div>
+                        <div class="subtitle">在顶部显示当前时间</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="show-time-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <div class="item-content">
+                        <div class="title">12小时制</div>
+                        <div class="subtitle">使用AM/PM时间格式</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="time-format-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <div class="item-content">
+                        <div class="title">显示日期</div>
+                        <div class="subtitle">包含日期和星期信息</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="show-date-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>© ckacka v3.0</p>
+            </div>
         </div>
     </div>
 
-    <!-- 底部菜单栏 -->
+    <!-- 微信风格底部导航栏 -->
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab(this, 'home')">
-            <i class="material-icons">home</i> 首页
+        <div class="nav-item active" data-tab="home-tab">
+            <i class="material-icons">home</i>
+            首页
         </div>
-        <div class="nav-item" onclick="switchTab(this, 'discover')">
-            <i class="material-icons">explore</i> 发现
+        <div class="nav-item" data-tab="discover-tab">
+            <i class="material-icons">explore</i>
+            发现
         </div>
-        <div class="nav-item" onclick="switchTab(this, 'settings')">
-            <i class="material-icons">settings</i> 设置
+        <div class="nav-item" data-tab="settings-tab">
+            <i class="material-icons">settings</i>
+            设置
         </div>
     </div>
 
     <script>
+        // 设置项默认值
+        const defaultSettings = {
+            darkMode: false,
+            showTime: true,
+            timeFormat12h: false,
+            showDate: false
+        };
+        
         // 初始化设置
         document.addEventListener('DOMContentLoaded', () => {
-            // 从本地存储加载设置
+            // 初始化底部导航点击事件
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    // 更新导航状态
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // 更新页面显示
+                    const tabId = item.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // 更新标题
+                    document.getElementById('app-title').textContent = 
+                        tabId === 'home-tab' ? 'ckacka' :
+                        tabId === 'discover-tab' ? '发现' : '设置';
+                });
+            });
+            
+            // 初始化开关状态
             loadSettings();
-            // 绑定事件
+            
+            // 绑定开关事件
             document.getElementById('dark-mode-toggle').addEventListener('change', toggleThemeSwitch);
             document.getElementById('show-time-toggle').addEventListener('change', toggleShowTime);
             document.getElementById('time-format-toggle').addEventListener('change', toggleTimeFormat);
             document.getElementById('show-date-toggle').addEventListener('change', toggleShowDate);
+            
+            // 启动时间更新
             updateTime();
+            setInterval(updateTime, 1000);
+            
+            // 防误触设置
+            document.addEventListener('gesturestart', e => e.preventDefault());
+            document.addEventListener('contextmenu', e => e.preventDefault());
         });
-
-        function switchTab(element, tabName) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            element.classList.add('active');
-
-            document.getElementById('home-page').style.display = tabName === 'home' ? 'block' : 'none';
-            document.getElementById('discover-page').style.display = tabName === 'discover' ? 'block' : 'none';
-            document.querySelector('.settings-page').style.display = tabName === 'settings' ? 'block' : 'none';
-
-            document.getElementById('app-title').innerText = tabName === 'home' ? 'ckacka' :
-                                                              tabName === 'discover' ? '发现' : '设置';
-        }
 
         function toggleThemeSwitch() {
             const darkMode = this.checked;
@@ -223,8 +439,9 @@
         }
 
         function toggleShowTime() {
-            localStorage.setItem('showTime', this.checked);
-            updateTime();
+            const showTime = this.checked;
+            document.getElementById('current-time').style.display = showTime ? 'block' : 'none';
+            localStorage.setItem('showTime', showTime);
         }
 
         function toggleTimeFormat() {
@@ -239,27 +456,40 @@
 
         function loadSettings() {
             // 加载深色模式
-            const darkMode = localStorage.getItem('darkMode') === 'true';
+            const darkMode = getStoredBoolean('darkMode', defaultSettings.darkMode);
             document.getElementById('dark-mode-toggle').checked = darkMode;
             document.body.classList.toggle('dark-mode', darkMode);
-
+            
             // 加载时间显示设置
-            document.getElementById('show-time-toggle').checked = localStorage.getItem('showTime') !== 'false';
-            document.getElementById('time-format-toggle').checked = localStorage.getItem('timeFormat12h') === 'true';
-            document.getElementById('show-date-toggle').checked = localStorage.getItem('showDate') === 'true';
+            const showTime = getStoredBoolean('showTime', defaultSettings.showTime);
+            document.getElementById('show-time-toggle').checked = showTime;
+            document.getElementById('current-time').style.display = showTime ? 'block' : 'none';
+            
+            // 加载其他设置
+            document.getElementById('time-format-toggle').checked = getStoredBoolean('timeFormat12h', defaultSettings.timeFormat12h);
+            document.getElementById('show-date-toggle').checked = getStoredBoolean('showDate', defaultSettings.showDate);
+            
+            // 初始更新时间
+            updateTime();
+        }
+        
+        // 辅助函数：获取存储的布尔值设置
+        function getStoredBoolean(key, defaultValue) {
+            const storedValue = localStorage.getItem(key);
+            return storedValue === null ? defaultValue : storedValue === 'true';
         }
 
         function updateTime() {
-            const now = new Date();
-            const showTime = localStorage.getItem('showTime') !== 'false';
-            const is12Hour = localStorage.getItem('timeFormat12h') === 'true';
-            const showDate = localStorage.getItem('showDate') === 'true';
-
-            // 控制时间显示
+            const showTime = getStoredBoolean('showTime', defaultSettings.showTime);
+            const is12Hour = getStoredBoolean('timeFormat12h', defaultSettings.timeFormat12h);
+            const showDate = getStoredBoolean('showDate', defaultSettings.showDate);
+            
+            // 更新显示状态
             document.getElementById('current-time').style.display = showTime ? 'block' : 'none';
-
+            
             if (!showTime) return;
-
+            
+            const now = new Date();
             let hours = now.getHours();
             let minutes = now.getMinutes().toString().padStart(2, '0');
             let seconds = now.getSeconds().toString().padStart(2, '0');
@@ -273,20 +503,16 @@
             } else {
                 timeString = `${hours.toString().padStart(2, '0')}:${minutes}:${seconds}`;
             }
-
+            
             // 处理日期显示
             let dateString = '';
             if (showDate) {
                 const dayOfWeek = ['日', '一', '二', '三', '四', '五', '六'][now.getDay()];
-                dateString = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${dayOfWeek} `;
+                dateString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} 周${dayOfWeek} `;
             }
-
+            
             document.getElementById('current-time').textContent = dateString + timeString;
         }
-
-        setInterval(updateTime, 1000);
-        document.addEventListener('gesturestart', e => e.preventDefault());
-        document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>
 </html>
