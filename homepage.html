@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ckackahomepage</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-components-web/14.0.0/material-components-web.min.css">
+    <style>
+        :root {
+            --wechat-primary: #07C160;  /* 微信绿色 */
+            --wechat-bg: #F7F7F7;        /* 微信背景色 */
+            --wechat-section-bg: #FFFFFF; /* 卡片背景色 */
+            --wechat-text-primary: #323232; /* 主要文字颜色 */
+            --wechat-text-secondary: #888888; /* 次要文字颜色 */
+            --wechat-divider: #ECECEC;   /* 分隔线颜色 */
+        }
+        
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 
+                         'Segoe UI', Roboto, 'PingFang SC', 
+                         'Microsoft YaHei', sans-serif; /* 模仿微信字体 */
+        }
+        
+        body {
+            background-color: var(--wechat-bg);
+            margin: 0;
+            padding: 0;
+            color: var(--wechat-text-primary);
+            font-size: 16px;
+        }
+        
+        .wechat-layout {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 15px;
+            position: relative;
+            background-color: var(--wechat-section-bg);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+            min-height: 100vh;
+        }
+        
+        /* 微信顶部导航栏 */
+        .wechat-header {
+            height: 44px;
+            display: flex;
+            align-items: center;
+            background-color: var(--wechat-primary);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .wechat-header .title {
+            font-size: 17px;
+            font-weight: 500;
+            text-align: center;
+            flex: 1;
+            padding-right: 40px;
+        }
+        
+        /* 微信卡片样式 */
+        .wechat-section {
+            background-color: var(--wechat-section-bg);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            padding: 16px 15px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.03);
+        }
+        
+        .section-title {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--wechat-text-primary);
+        }
+        
+        /* 搜索框样式 */
+        .wechat-search-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .wechat-search-box {
+            display: flex;
+            align-items: center;
+            background-color: #f2f2f2;
+            border-radius: 8px;
+            padding: 8px 15px;
+            transition: all 0.3s;
+        }
+        
+        .wechat-search-box.focused {
+            background-color: #e1e1e1;
+        }
+        
+        #searchInput {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            padding: 8px;
+            background: transparent;
+            color: var(--wechat-text-primary);
+        }
+        
+        #searchInput::placeholder {
+            color: #b2b2b2;
+        }
+        
+        #searchButton {
+            color: white;
+            background-color: var(--wechat-primary);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            margin-left: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            min-width: 68px;
+            font-size: 14px;
+        }
+        
+        #searchButton:hover {
+            background-color: #069c4d;
+        }
+        
+        .search-icon {
+            color: #b2b2b2;
+            font-size: 20px;
+            margin-right: 8px;
+        }
+        
+        /* 工具卡片样式 */
+        .tool-card {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 1px;
+            background-color: var(--wechat-section-bg);
+            transition: background-color 0.2s;
+            border-radius: 4px;
+        }
+        
+        .tool-card:not(:last-child) {
+            border-bottom: 1px solid var(--wechat-divider);
+        }
+        
+        .tool-card:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .tool-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 20px;
+            background-color: var(--wechat-primary);
+            font-weight: 500;
+        }
+        
+        .tool-info {
+            flex: 1;
+        }
+        
+        .tool-info h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .tool-info p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--wechat-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .use-button {
+            color: var(--wechat-primary);
+            background: none;
+            border: none;
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .use-button .material-icons {
+            font-size: 16px;
+            margin-left: 4px;
+        }
+        
+        .use-button:hover {
+            text-decoration: underline;
+        }
+        
+        /* 公告栏样式 */
+        .announcement-bar {
+            background-color: rgba(7, 193, 96, 0.1);
+            color: var(--wechat-primary);
+            padding: 10px 15px;
+            font-size: 13px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        
+        .announcement-bar::before {
+            content: "!";
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background-color: var(--wechat-primary);
+            color: white;
+            border-radius: 50%;
+            margin-right: 8px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .close-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #b2b2b2;
+        }
+        
+        /* 壁纸部分 */
+        .image-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        #wallpaper {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+        
+        .download-btn {
+            background-color: var(--wechat-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 24px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        
+        .download-btn:hover {
+            background-color: #069c4d;
+        }
+        
+        .download-btn .material-icons {
+            font-size: 18px;
+            margin-right: 5px;
+        }
+        
+        /* 空状态样式 */
+        .empty-state {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--wechat-text-secondary);
+        }
+        
+        .empty-state .material-icons {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wechat-layout">      
+
+            <!-- 公告栏 -->
+            <div class="announcement-bar" id="announcementBar">
+                <span>推荐使用中国联通或中国电信网络访问本站，使用中国移动网络可能导致无法正常访问。</span>
+                <button class="close-btn" onclick="closeAnnouncement()">×</button>
+            </div>
+            
+        <!-- 主要内容区 -->
+        <div style="padding: 15px 0;">
+            <!-- 搜索区域 -->
+            <div class="wechat-section">
+                <div class="section-title">快速查找工具</div>
+                <div class="wechat-search-container">
+                    <div class="wechat-search-box" id="searchBox">
+                        <span class="search-icon material-icons">search</span>
+                        <input type="text" id="searchInput" placeholder="输入工具名称或描述进行搜索...">
+                        <button id="searchButton">搜索</button>
+                    </div>
+                </div>
+            </div>
+       
+            <!-- Bing壁纸 -->
+            <div class="wechat-section image-container">
+                <div class="section-title">今日壁纸</div>
+                <img id="wallpaper" src="https://bing.img.run/uhd.php?t=<?php echo date('Ymd'); ?>" alt="Bing每日壁纸">
+                <button class="download-btn" onclick="downloadImage()">
+                    <i class="material-icons">cloud_download</i>
+                    下载高清壁纸
+                </button>
+                <div id="loading" style="color: #888; font-size: 14px; margin-top: 10px;"></div>
+            </div>
+            
+            <!-- 工具集合区域 -->
+            <div class="wechat-section" style="padding:0">
+                <div class="section-title" style="padding: 0 15px 0;">实用工具</div>
+                
+                <div id="toolsContainer">
+                    <!-- 工具卡片将通过JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <!-- 没有找到结果时的显示 -->
+            <div id="noResults" class="empty-state" style="display: none;">
+                <i class="material-icons">search_off</i>
+                <p>没有找到相关工具</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 工具数据
+        const tools = [
+            {
+                name: "数字电视",
+                description: "在线看电视、听广播",
+                icon: "tv",
+                color: "#ff9f0a",
+                link: "https://ckacka.github.io/tvradio.html"
+            },
+            {
+                name: "在线视频播放器",
+                description: "输入播放地址播放视频",
+                icon: "play_circle_filled",
+                color: "#ff375f",
+                link: "https://ckacka.github.io/videoplayer.html"
+            },
+            {
+                name: "二维码生成器",
+                description: "在线二维码生成器",
+                icon: "qr_code",
+                color: "#30d158",
+                link: "https://ckacka.github.io/qrcode.html"
+            },
+            {
+                name: "怪物挑战赛",
+                description: "一起消灭怪物！",
+                icon: "sports_esports",
+                color: "#5e5ce6",
+                link: "https://ckacka.github.io/guaiwu.html"
+            },
+            {
+                name: "随机生词",
+                description: "随机生成新词语，但是人类可能看不懂……",
+                icon: "school",
+                color: "#64d2ff",
+                link: "https://ckacka.github.io/sjsc.html"
+            },
+            {
+                name: "树洞便签",
+                description: "随时随地想记就记",
+                icon: "notes",
+                color: "#bf5af2",
+                link: "https://ckacka.github.io/sdnote.html"
+            },
+            {
+                name: "敬请期待",
+                description: "更多工具即将上线！",
+                icon: "hourglass_empty",
+                color: "#8e8e93",
+                link: null
+            }
+        ];
+        
+        // 初始化工具卡片
+        function renderTools(toolsList = tools) {
+            const container = document.getElementById('toolsContainer');
+            container.innerHTML = '';
+            
+            toolsList.forEach(tool => {
+                const toolCard = document.createElement('div');
+                toolCard.className = 'tool-card';
+                
+                toolCard.innerHTML = `
+                    <div class="tool-icon" style="background-color: ${tool.color}">
+                        <span class="material-icons">${tool.icon}</span>
+                    </div>
+                    <div class="tool-info">
+                        <h3>${tool.name}</h3>
+                        <p>${tool.description}</p>
+                    </div>
+                    ${tool.link ? 
+                        `<button class="use-button" onclick="window.open('${tool.link}', '_blank')">
+                            使用
+                            <span class="material-icons">chevron_right</span>
+                        </button>` : 
+                        `<button class="use-button" style="color:#b2b2b2" disabled>
+                            即将推出
+                        </button>`
+                    }
+                `;
+                
+                container.appendChild(toolCard);
+            });
+        }
+        
+        // 搜索功能
+        function searchTools() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase().trim();
+            const noResults = document.getElementById('noResults');
+            
+            if (!filter) {
+                renderTools();
+                noResults.style.display = 'none';
+                return;
+            }
+            
+            const filteredTools = tools.filter(tool => {
+                return tool.name.toLowerCase().includes(filter) || 
+                       tool.description.toLowerCase().includes(filter);
+            });
+            
+            renderTools(filteredTools);
+            
+            if (filteredTools.length === 0) {
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
+        }
+        
+        // 实时搜索
+        document.getElementById('searchInput').addEventListener('input', searchTools);
+        
+        // 图片处理
+        const img = document.getElementById('wallpaper');
+        const loading = document.getElementById('loading');
+        
+        img.onload = function() {
+            loading.textContent = '';
+        }
+        
+        img.onerror = function() {
+            loading.textContent = '图片加载失败，请稍后刷新重试';
+        }
+        
+        function downloadImage() {
+            const imageUrl = img.src.split('?')[0];
+            window.open(imageUrl, '_blank');
+        }
+        
+        img.src += (img.src.includes('?') ? '&' : '?') + 't=' + Date.now();
+        
+        // 关闭公告
+        function closeAnnouncement() {
+            document.getElementById('announcementBar').style.display = 'none';
+        }
+        
+        // 搜索框聚焦效果
+        const searchBox = document.getElementById('searchBox');
+        document.getElementById('searchInput').addEventListener('focus', function() {
+            searchBox.classList.add('focused');
+        });
+        
+        document.getElementById('searchInput').addEventListener('blur', function() {
+            searchBox.classList.remove('focused');
+        });
+        
+        // 页面加载完成后渲染工具
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTools();
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/material-components-web/14.0.0/material-components-web.min.js"></script>
+</body>
+</html>
