@@ -1,188 +1,403 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ckacka</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ckacka工具箱</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* 微信风格重置和基础样式 */
+        :root {
+            --color-primary: #6750A4;
+            --color-primary-container: #EADDFF;
+            --color-on-primary: #FFFFFF;
+            --color-surface: #FEF7FF;
+            --color-surface-variant: #E7E0EC;
+            --color-on-surface: #1D1B20;
+            --color-on-surface-variant: #49454F;
+            --color-shadow: rgba(0, 0, 0, 0.15);
+            --color-backdrop: rgba(0, 0, 0, 0.25);
+            --card-radius: 24px;
+            --header-height: 56px;
+            --tool-card-height: 140px;
+            --transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
+        }
+
+        [data-theme="dark"] {
+            --color-primary: #D0BCFF;
+            --color-primary-container: #4F378B;
+            --color-on-primary: #381E72;
+            --color-surface: #1D1B20;
+            --color-surface-variant: #49454F;
+            --color-on-surface: #E6E1E5;
+            --color-on-surface-variant: #CAC4D0;
+            --color-shadow: rgba(0, 0, 0, 0.3);
+            --color-backdrop: rgba(0, 0, 0, 0.5);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 
-                        "Helvetica Neue", "PingFang SC", "Microsoft YaHei", 
-                        sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            font-family: 'Roboto', sans-serif;
         }
-        
+
         body {
-            background: #F5F5F5;
-            color: #333;
-            -webkit-user-select: none;
-            user-select: none;
+            background-color: var(--color-surface);
+            color: var(--color-on-surface);
+            min-height: 100vh;
+            transition: background-color var(--transition), color var(--transition);
+            overflow-x: hidden;
         }
-        
-        /* 微信顶部导航栏 - 使用微信绿色 #07c160 */
-        .wechat-header {
-            height: 44px;
-            background: #07c160; /* 微信绿色 */
-            color: white;
+
+        .app-header {
+            height: var(--header-height);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background-color: var(--color-surface);
+            box-shadow: 0 2px 4px var(--color-shadow);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-title h1 {
+            font-weight: 500;
+            font-size: 20px;
+            color: var(--color-primary);
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 8px;
+            position: relative;
+        }
+
+        .menu-icon {
             display: flex;
             align-items: center;
             justify-content: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 0 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .header-content {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 10px;
-        }
-        
-        .wechat-header .title {
-            font-size: 17px;
-            font-weight: 500;
-            text-align: center;
-            position: absolute;
-            left: 0;
-            right: 0;
-            margin: auto;
-        }
-        
-        .time-display {
-            font-size: 14px;
-            color: white; /* 白色文字在绿色背景上更清晰 */
-            opacity: 0.9;
-            margin-left: auto;
-        }
-        
-        /* 标签页内容 */
-        .tab-content {
-            display: none;
-            height: calc(100vh - 44px - 56px); /* 减去顶部和底部高度 */
-            overflow-y: auto;
-            background: #F5F5F5;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* 微信底部导航栏 */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 56px;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 -0.5px 1px rgba(0,0,0,0.1);
-            border-top: 1px solid #EDEDED;
-        }
-        
-        .nav-item {
-            text-align: center;
-            flex: 1;
-            padding: 8px 0;
-            color: #9B9B9B;
-            font-size: 12px;
-            transition: color 0.2s;
-        }
-        
-        .nav-item i {
-            display: block;
-            font-size: 20px;
-            margin-bottom: 4px;
-            transition: color 0.2s;
-        }
-        
-        .nav-item.active {
-            color: #07C160;
-        }
-        
-        .nav-item.active i {
-            color: #07C160;
-        }
-        
-        /* 设置页样式 */
-        .wechat-settings {
-            padding: 12px;
-        }
-        
-        .settings-section {
-            background: #FFFFFF;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            overflow: hidden;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-        }
-        
-        .section-title {
-            font-size: 16px;
-            font-weight: 500;
-            padding: 12px 16px;
-            color: #333;
-            background: #FAFAFA;
-            border-bottom: 1px solid #EDEDED;
-        }
-        
-        .settings-item {
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
             cursor: pointer;
         }
-        
-        .settings-item:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 16px;
-            right: 0;
-            height: 1px;
-            background: #EDEDED;
+
+        .material-icons {
+            user-select: none;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
-        
-        .item-content {
-            flex: 1;
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-on-surface);
+            transition: background-color var(--transition), transform 0.3s ease;
         }
-        
-        .item-content .title {
+
+        .icon-btn:hover {
+            background-color: rgba(var(--color-on-surface), 0.08);
+            transform: scale(1.1);
+        }
+
+        .search-container {
+            padding: 16px;
+            margin-top: 0;
+            background-color: var(--color-surface);
+            position: sticky;
+            top: var(--header-height);
+            z-index: 50;
+            box-shadow: 0 1px 3px var(--color-shadow);
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 48px 14px 16px;
+            border-radius: 28px;
+            background-color: var(--color-surface-variant);
+            color: var(--color-on-surface);
             font-size: 16px;
-            color: #333;
+            border: none;
+            transition: all var(--transition);
         }
-        
-        .item-content .subtitle {
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--color-primary);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-on-surface-variant);
+        }
+
+        .main-content {
+            padding: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .category-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 24px 0 16px;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-title .material-icons {
+            color: var(--color-primary);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+            transition: all var(--transition);
+        }
+
+        @media (min-width: 768px) {
+            .tools-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        .tool-card {
+            position: relative;
+            border-radius: var(--card-radius);
+            background: var(--color-surface);
+            box-shadow: 0 2px 6px var(--color-shadow);
+            border: 1px solid var(--color-surface-variant);
+            min-height: var(--tool-card-height);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            overflow: hidden;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px var(--color-shadow);
+        }
+
+        .tool-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 16px;
+            transition: all var(--transition);
+            position: relative;
+            z-index: 2;
+        }
+
+        .tool-card:hover .tool-icon {
+            transform: scale(1.1);
+        }
+
+        .tool-icon.purple {
+            background-color: #EADDFF;
+            color: #6750A4;
+        }
+
+        .tool-icon.blue {
+            background-color: #D0E3FF;
+            color: #1C6DE0;
+        }
+
+        .tool-icon.green {
+            background-color: #C8E6C9;
+            color: #388E3C;
+        }
+
+        .tool-icon.orange {
+            background-color: #FFECB3;
+            color: #FFA000;
+        }
+
+        .tool-icon.red {
+            background-color: #FFCDD2;
+            color: #D32F2F;
+        }
+
+        .tool-icon.teal {
+            background-color: #B2DFDB;
+            color: #00796B;
+        }
+
+        .tool-name {
+            font-size: 16px;
+            font-weight: 500;
+            transition: all var(--transition);
+            position: relative;
+            z-index: 2;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--color-surface-variant);
+            margin: 32px 0;
+            width: 100%;
+        }
+
+        .app-footer {
+            padding: 24px 16px;
+            text-align: center;
+            color: var(--color-on-surface-variant);
             font-size: 14px;
-            color: #888;
-            margin-top: 4px;
+            border-top: 1px solid var(--color-surface-variant);
+            margin-top: 20px;
+        }
+
+        .highlight-card {
+            background-color: var(--color-primary-container);
+            border: none;
+            position: relative;
+        }
+
+        .recent-section {
+            margin-bottom: 32px;
         }
         
-        .settings-item .material-icons {
-            color: #AAA;
+        .highlight-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tool-card {
+            animation: fadeIn 0.4s ease-out forwards;
+            opacity: 0;
+        }
+        
+        .tool-card:nth-child(1) { animation-delay: 0.1s; }
+        .tool-card:nth-child(2) { animation-delay: 0.2s; }
+        .tool-card:nth-child(3) { animation-delay: 0.3s; }
+        .tool-card:nth-child(4) { animation-delay: 0.4s; }
+        .tool-card:nth-child(5) { animation-delay: 0.5s; }
+        .tool-card:nth-child(6) { animation-delay: 0.6s; }
+        .tool-card:nth-child(7) { animation-delay: 0.7s; }
+        .tool-card:nth-child(8) { animation-delay: 0.8s; }
+        
+        /* 菜单样式 */
+        .menu-container {
+            position: relative;
+        }
+        
+        .menu-popup {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background-color: var(--color-surface);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--color-shadow);
+            min-width: 200px;
+            padding: 8px 0;
+            transform-origin: top right;
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 200;
+            display: none;
+            opacity: 0;
+            transform: scale(0.95) translateY(-10px);
+        }
+        
+        .menu-popup.show {
+            display: block;
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            font-size: 16px;
+            color: var(--color-on-surface);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--color-surface-variant);
+        }
+        
+        .menu-item .material-icons {
+            margin-right: 12px;
             font-size: 20px;
         }
         
-        .switch {
+        .menu-divider {
+            height: 1px;
+            background-color: var(--color-surface-variant);
+            margin: 6px 0;
+        }
+        
+        .menu-header {
+            padding: 8px 16px;
+            font-weight: 500;
+            color: var(--color-on-surface-variant);
+            font-size: 14px;
+        }
+        
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .toggle-switch {
             position: relative;
             display: inline-block;
-            width: 44px;
+            width: 42px;
             height: 24px;
         }
         
-        .switch input {
+        .toggle-switch input {
             opacity: 0;
             width: 0;
             height: 0;
@@ -190,329 +405,349 @@
         
         .slider {
             position: absolute;
+            cursor: pointer;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #ccc;
+            background-color: var(--color-on-surface-variant);
             transition: .4s;
-            border-radius: 24px;
+            border-radius: 34px;
         }
         
         .slider:before {
             position: absolute;
             content: "";
-            height: 20px;
-            width: 20px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--color-surface);
             transition: .4s;
             border-radius: 50%;
         }
         
         input:checked + .slider {
-            background-color: #07C160;
+            background-color: var(--color-primary);
         }
         
         input:checked + .slider:before {
-            transform: translateX(20px);
+            transform: translateX(18px);
         }
         
-        .copyright {
-            margin-top: 20px;
+        /* 改进开关可见性 */
+        [data-theme="dark"] .slider {
+            background-color: var(--color-on-surface-variant);
+        }
+        
+        [data-theme="dark"] input:checked + .slider {
+            background-color: var(--color-primary);
+        }
+        
+        [data-theme="dark"] .slider:before {
+            background-color: var(--color-surface);
+        }
+        
+        /* 无结果提示 */
+        .no-results {
+            grid-column: 1 / -1;
             text-align: center;
-            font-size: 12px;
-            color: #999;
+            padding: 40px 20px;
+            color: var(--color-on-surface-variant);
+            display: none;
         }
         
-        /* 深色模式 */
-        body.dark-mode {
-            background: #121212;
-            color: #EEE;
+        .no-results .material-icons {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--color-on-surface-variant);
         }
         
-        .dark-mode .wechat-header {
-            background: #05753a; /* 深色模式下深一点的绿色 */
-        }
-        
-        .dark-mode .time-display {
-            color: #EEE;
-        }
-        
-        .dark-mode .bottom-nav {
-            background: #1A1A1A;
-            border-top: 1px solid #333;
-        }
-        
-        .dark-mode .nav-item {
-            color: #666;
-        }
-        
-        .dark-mode .nav-item.active {
-            color: #07C160;
-        }
-        
-        .dark-mode .wechat-settings {
-            background: #121212;
-        }
-        
-        .dark-mode .settings-section {
-            background: #1F1F1F;
-        }
-        
-        .dark-mode .section-title {
-            color: #CCC;
-            background: #1A1A1A;
-            border-bottom: 1px solid #333;
-        }
-        
-        .dark-mode .item-content .title {
-            color: #EEE;
-        }
-        
-        .dark-mode .item-content .subtitle {
-            color: #AAA;
-        }
-        
-        .dark-mode .settings-item:not(:last-child)::after {
-            background: #333;
-        }
-        
-        /* iframe样式 */
-        .iframe-page {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #FFFFFF;
-        }
-        
-        .dark-mode .iframe-page {
-            background: #121212;
+        .no-results p {
+            margin: 0;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <!-- 微信风格顶部导航栏 - 使用微信绿 #07c160 -->
-    <div class="wechat-header">
-        <div class="header-content">
-            <div class="title" id="app-title">ckacka</div>
-            <div id="current-time" class="time-display"></div>
+    <!-- 应用头部 -->
+    <div class="app-header">
+        <div class="app-title">
+            <h1>ckacka工具箱</h1>
+        </div>
+        <div class="toolbar-actions">
+            <!-- 菜单容器 -->
+            <div class="menu-container">
+                <div class="icon-btn" id="menuButton">
+                    <span class="material-icons">more_vert</span>
+                </div>
+                
+                <!-- 菜单弹出层 -->
+                <div class="menu-popup" id="menuPopup">
+                    <div class="menu-header">主题设置</div>
+                    <div class="menu-item toggle-container">
+                        <div>
+                            <span class="material-icons">dark_mode</span>
+                            深色模式
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="themeToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- 首页 -->
-    <div id="home-tab" class="tab-content active">
-        <iframe id="home-page" class="iframe-page" src="https://ckacka.github.io/homepage.html"></iframe>
+    
+    <!-- 搜索区域 -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索工具...">
+            <span class="material-icons search-icon">search</span>
+        </div>
     </div>
-
-    <!-- 发现页面 -->
-    <div id="discover-tab" class="tab-content">
-        <iframe id="discover-page" class="iframe-page" src="https://hot.browser.miui.com/v7/#status=open&cate=%E6%8E%A8%E8%8D%90/"></iframe>
-    </div>
-
-    <!-- 设置页面 -->
-    <div id="settings-tab" class="tab-content">
-        <div class="wechat-settings">
-            <div class="settings-section">
-                <div class="section-title">主题设置</div>
-                <div class="settings-item">
-                    <div class="item-content">
-                        <div class="title">深色模式（测试版）</div>
-                        <div class="subtitle">夜间使用更舒适</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="dark-mode-toggle">
-                        <span class="slider"></span>
-                    </label>
+    
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 全部工具 -->
+        <h2 class="category-title">
+            <span class="material-icons">apps</span>
+            全部工具
+        </h2>
+        <div class="tools-grid">
+            <!-- 按顺序添加的8个工具卡片 -->
+            <div class="tool-card" data-url="https://ckacka.github.io/fby.html" data-name="分贝仪">
+                <div class="tool-icon teal">
+                    <span class="material-icons">settings_accessibility</span>
                 </div>
+                <div class="tool-name">分贝仪</div>
             </div>
             
-            <div class="settings-section">
-                <div class="section-title">报时器设置</div>
-                <div class="settings-item">
-                    <div class="item-content">
-                        <div class="title">显示时间</div>
-                        <div class="subtitle">在顶部显示当前时间</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="show-time-toggle" checked>
-                        <span class="slider"></span>
-                    </label>
+            <div class="tool-card" data-url="https://ckacka.github.io/znz.html" data-name="指南针">
+                <div class="tool-icon blue">
+                    <span class="material-icons">compass_calibration</span>
                 </div>
-                <div class="settings-item">
-                    <div class="item-content">
-                        <div class="title">12小时制</div>
-                        <div class="subtitle">使用AM/PM时间格式</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="time-format-toggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="settings-item">
-                    <div class="item-content">
-                        <div class="title">显示日期</div>
-                        <div class="subtitle">包含日期和星期信息</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="show-date-toggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+                <div class="tool-name">指南针</div>
             </div>
             
-            <div class="copyright">
-                <p>© ckacka v3.0</p>
+            <div class="tool-card" data-url="https://ckacka.github.io/sdnote.html" data-name="树洞便签">
+                <div class="tool-icon orange">
+                    <span class="material-icons">note_add</span>
+                </div>
+                <div class="tool-name">树洞便签</div>
+            </div>
+            
+            <div class="tool-card" data-url="https://ckacka.github.io/sjsc.html" data-name="随机生词">
+                <div class="tool-icon green">
+                    <span class="material-icons">history_edu</span>
+                </div>
+                <div class="tool-name">随机生词</div>
+            </div>
+            
+            <div class="tool-card" data-url="https://ckacka.github.io/guaiwu.html" data-name="是女人就删他一百耳光">
+                <div class="tool-icon red">
+                    <span class="material-icons">whatshot</span>
+                </div>
+                <div class="tool-name">是女人就删他一百耳光</div>
+            </div>
+            
+            <div class="tool-card" data-url="https://ckacka.github.io/qrcode.html" data-name="二维码生成器">
+                <div class="tool-icon purple">
+                    <span class="material-icons">qr_code_scanner</span>
+                </div>
+                <div class="tool-name">二维码生成器</div>
+            </div>
+            
+            <div class="tool-card" data-url="https://ckacka.github.io/videoplayer.html" data-name="在线视频播放器">
+                <div class="tool-icon blue">
+                    <span class="material-icons">play_circle</span>
+                </div>
+                <div class="tool-name">在线视频播放器</div>
+            </div>
+            
+            <div class="tool-card" data-url="https://ckacka.github.io/tvradio.html" data-name="数字电视">
+                <div class="tool-icon teal">
+                    <span class="material-icons">tv</span>
+                </div>
+                <div class="tool-name">数字电视</div>
+            </div>
+            
+            <!-- 无结果提示 -->
+            <div class="no-results" id="noResults">
+                <span class="material-icons">search_off</span>
+                <p>没有找到匹配的工具</p>
+                <p>请尝试其他关键词</p>
             </div>
         </div>
     </div>
-
-    <!-- 微信风格底部导航栏 -->
-    <div class="bottom-nav">
-        <div class="nav-item active" data-tab="home-tab">
-            <i class="material-icons">home</i>
-            首页
-        </div>
-        <div class="nav-item" data-tab="discover-tab">
-            <i class="material-icons">explore</i>
-            发现
-        </div>
-        <div class="nav-item" data-tab="settings-tab">
-            <i class="material-icons">settings</i>
-            设置
-        </div>
+    
+    <!-- 页脚 -->
+    <div class="app-footer">
+        <p>ckacka 工具箱 • v1.6.0</p>
+        <p class="copyright">© ckacka 工具箱应用 • 遵循 Material Design 规范</p>
     </div>
 
     <script>
-        // 设置项默认值
-        const defaultSettings = {
-            darkMode: false,
-            showTime: true,
-            timeFormat12h: false,
-            showDate: false
-        };
+        // 菜单功能
+        const menuButton = document.getElementById('menuButton');
+        const menuPopup = document.getElementById('menuPopup');
         
-        // 初始化设置
-        document.addEventListener('DOMContentLoaded', () => {
-            // 初始化底部导航点击事件
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    // 更新导航状态
-                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                    item.classList.add('active');
+        // 点击菜单按钮显示/隐藏菜单
+        menuButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            menuPopup.classList.toggle('show');
+        });
+        
+        // 点击页面其他地方关闭菜单
+        document.addEventListener('click', function(e) {
+            if (!menuButton.contains(e.target) && !menuPopup.contains(e.target)) {
+                menuPopup.classList.remove('show');
+            }
+        });
+        
+        // 深色模式切换
+        const themeToggle = document.getElementById('themeToggle');
+        
+        // 初始化主题
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.dataset.theme = savedTheme;
+            
+            // 设置开关状态
+            if (savedTheme === 'dark') {
+                themeToggle.checked = true;
+            } else {
+                themeToggle.checked = false;
+            }
+        }
+        
+        function toggleTheme() {
+            const isDark = document.body.dataset.theme === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            
+            document.body.dataset.theme = newTheme;
+            localStorage.setItem('theme', newTheme);
+            
+            // 关闭菜单
+            menuPopup.classList.remove('show');
+            
+            // 添加主题切换动画效果
+            document.body.style.transition = 'background-color 0.5s ease, color 0.5s ease';
+            setTimeout(() => {
+                document.body.style.transition = '';
+            }, 500);
+        }
+        
+        // 工具卡片点击效果和跳转
+        const toolCards = document.querySelectorAll('.tool-card');
+        toolCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const toolName = this.getAttribute('data-name');
+                const url = this.getAttribute('data-url');
+                
+                // 添加点击效果
+                this.style.transform = 'scale(0.98)';
+                const icon = this.querySelector('.tool-icon');
+                icon.style.transform = 'scale(1.2)';
+                
+                setTimeout(() => {
+                    this.style.transform = '';
+                    icon.style.transform = 'scale(1)';
                     
-                    // 更新页面显示
-                    const tabId = item.getAttribute('data-tab');
-                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-                    document.getElementById(tabId).classList.add('active');
+                    // 模拟应用打开效果
+                    const toolHeader = document.createElement('div');
+                    toolHeader.innerHTML = `<span class="material-icons">${icon.querySelector('.material-icons').textContent}</span> ${toolName}`;
+                    toolHeader.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        height: 56px;
+                        background-color: var(--color-primary);
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 18px;
+                        font-weight: 500;
+                        z-index: 1000;
+                        transform: translateY(-100%);
+                        transition: transform 0.3s ease-out;
+                    `;
+                    document.body.appendChild(toolHeader);
                     
-                    // 更新标题
-                    document.getElementById('app-title').textContent = 
-                        tabId === 'home-tab' ? 'ckacka' :
-                        tabId === 'discover-tab' ? '发现' : '设置';
-                });
+                    setTimeout(() => {
+                        toolHeader.style.transform = 'translateY(0)';
+                    }, 10);
+                    
+                    setTimeout(() => {
+                        toolHeader.style.transform = 'translateY(-100%)';
+                        setTimeout(() => {
+                            document.body.removeChild(toolHeader);
+                            // 跳转到指定URL
+                            window.location.href = url;
+                        }, 300);
+                    }, 500);
+                }, 200);
+            });
+        });
+        
+        // 搜索框交互
+        const searchInput = document.getElementById('searchInput');
+        const noResults = document.getElementById('noResults');
+        const allCards = document.querySelectorAll('.tool-card:not(#noResults)');
+        
+        searchInput.addEventListener('focus', function() {
+            this.parentElement.style.boxShadow = '0 0 0 2px var(--color-primary)';
+        });
+        
+        searchInput.addEventListener('blur', function() {
+            this.parentElement.style.boxShadow = 'none';
+        });
+        
+        // 搜索功能实现
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim().toLowerCase();
+            let found = false;
+            
+            // 隐藏无结果提示
+            noResults.style.display = 'none';
+            
+            // 遍历所有工具卡片
+            allCards.forEach(card => {
+                const cardName = card.getAttribute('data-name').toLowerCase();
+                
+                // 检查是否匹配
+                if (cardName.includes(searchTerm) || searchTerm === '') {
+                    card.style.display = 'flex';
+                    found = true;
+                } else {
+                    card.style.display = 'none';
+                }
             });
             
-            // 初始化开关状态
-            loadSettings();
-            
-            // 绑定开关事件
-            document.getElementById('dark-mode-toggle').addEventListener('change', toggleThemeSwitch);
-            document.getElementById('show-time-toggle').addEventListener('change', toggleShowTime);
-            document.getElementById('time-format-toggle').addEventListener('change', toggleTimeFormat);
-            document.getElementById('show-date-toggle').addEventListener('change', toggleShowDate);
-            
-            // 启动时间更新
-            updateTime();
-            setInterval(updateTime, 1000);
-            
-            // 防误触设置
-            document.addEventListener('gesturestart', e => e.preventDefault());
-            document.addEventListener('contextmenu', e => e.preventDefault());
+            // 如果没有匹配结果，显示无结果提示
+            if (!found && searchTerm !== '') {
+                noResults.style.display = 'block';
+            }
         });
-
-        function toggleThemeSwitch() {
-            const darkMode = this.checked;
-            document.body.classList.toggle('dark-mode', darkMode);
-            localStorage.setItem('darkMode', darkMode);
-        }
-
-        function toggleShowTime() {
-            const showTime = this.checked;
-            document.getElementById('current-time').style.display = showTime ? 'block' : 'none';
-            localStorage.setItem('showTime', showTime);
-        }
-
-        function toggleTimeFormat() {
-            localStorage.setItem('timeFormat12h', this.checked);
-            updateTime();
-        }
-
-        function toggleShowDate() {
-            localStorage.setItem('showDate', this.checked);
-            updateTime();
-        }
-
-        function loadSettings() {
-            // 加载深色模式
-            const darkMode = getStoredBoolean('darkMode', defaultSettings.darkMode);
-            document.getElementById('dark-mode-toggle').checked = darkMode;
-            document.body.classList.toggle('dark-mode', darkMode);
-            
-            // 加载时间显示设置
-            const showTime = getStoredBoolean('showTime', defaultSettings.showTime);
-            document.getElementById('show-time-toggle').checked = showTime;
-            document.getElementById('current-time').style.display = showTime ? 'block' : 'none';
-            
-            // 加载其他设置
-            document.getElementById('time-format-toggle').checked = getStoredBoolean('timeFormat12h', defaultSettings.timeFormat12h);
-            document.getElementById('show-date-toggle').checked = getStoredBoolean('showDate', defaultSettings.showDate);
-            
-            // 初始更新时间
-            updateTime();
-        }
         
-        // 辅助函数：获取存储的布尔值设置
-        function getStoredBoolean(key, defaultValue) {
-            const storedValue = localStorage.getItem(key);
-            return storedValue === null ? defaultValue : storedValue === 'true';
-        }
-
-        function updateTime() {
-            const showTime = getStoredBoolean('showTime', defaultSettings.showTime);
-            const is12Hour = getStoredBoolean('timeFormat12h', defaultSettings.timeFormat12h);
-            const showDate = getStoredBoolean('showDate', defaultSettings.showDate);
-            
-            // 更新显示状态
-            document.getElementById('current-time').style.display = showTime ? 'block' : 'none';
-            
-            if (!showTime) return;
-            
-            const now = new Date();
-            let hours = now.getHours();
-            let minutes = now.getMinutes().toString().padStart(2, '0');
-            let seconds = now.getSeconds().toString().padStart(2, '0');
-            
-            // 处理小时显示
-            let timeString;
-            if (is12Hour) {
-                const displayHours = (hours % 12 || 12).toString().padStart(2, '0');
-                const period = hours >= 12 ? 'PM' : 'AM';
-                timeString = `${displayHours}:${minutes}:${seconds} ${period}`;
-            } else {
-                timeString = `${hours.toString().padStart(2, '0')}:${minutes}:${seconds}`;
+        // 清空搜索时显示所有卡片
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                const event = new Event('input');
+                this.dispatchEvent(event);
             }
-            
-            // 处理日期显示
-            let dateString = '';
-            if (showDate) {
-                const dayOfWeek = ['日', '一', '二', '三', '四', '五', '六'][now.getDay()];
-                dateString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} 周${dayOfWeek} `;
-            }
-            
-            document.getElementById('current-time').textContent = dateString + timeString;
-        }
+        });
+        
+        // 页面加载
+        window.onload = () => {
+            loadTheme();
+            themeToggle.addEventListener('change', toggleTheme);
+        };
     </script>
 </body>
 </html>
