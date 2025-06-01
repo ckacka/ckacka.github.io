@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分贝仪</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #4A90E2;
+            --color-primary-light: #6BAAF0;
+            --color-primary-dark: #3A70B5;
+            --color-surface: #FFFFFF;
+            --color-on-surface: #333333;
+            --color-surface-variant: #F8FAFE;
+            --color-card: #FFFFFF;
+            --color-text: #22252A;
+            --color-text-secondary: #5B5E66;
+            --color-indicator: #4A90E2;
+            --color-border: #E0E6ED;
+            --color-success: #4CAF50;
+            --color-warning: #FFC107;
+            --color-danger: #F44336;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-active: 0 6px 20px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+            --border-radius: 20px;
+        }
+
+        [data-theme="dark"] {
+            --color-primary: #64B5F6;
+            --color-primary-light: #85C8FA;
+            --color-primary-dark: #4C8FD3;
+            --color-surface: #121212;
+            --color-on-surface: #E0E0E0;
+            --color-surface-variant: #1E1E1E;
+            --color-card: #1E1E1E;
+            --color-text: #E0E0E0;
+            --color-text-secondary: #9E9E9E;
+            --color-indicator: #64B5F6;
+            --color-border: #2A2A2A;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-active: 0 6px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Nunito', 'Segoe UI', 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--color-surface);
+            color: var(--color-text);
+            min-height: 100vh;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(74, 144, 226, 0.05), transparent 60%);
+            z-index: -1;
+            opacity: 0.5;
+            transition: var(--transition);
+        }
+
+        [data-theme="dark"] body::before {
+            background: radial-gradient(circle at top right, rgba(100, 181, 246, 0.05), transparent 60%);
+            opacity: 0.15;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--color-card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--color-border);
+            transition: var(--transition);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 24px;
+            border-bottom: 1px solid var(--color-border);
+            background: var(--color-surface-variant);
+        }
+
+        .title-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: background 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        .app-content {
+            padding: 0 24px;
+        }
+
+        .meter-section {
+            position: relative;
+            padding: 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .meter-container {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            margin: 0 auto 20px;
+            overflow: hidden;
+        }
+
+        .meter-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 150px 150px 0 0;
+            background: transparent;
+            overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 70%, 0 100%);
+            border: 1px solid var(--color-border);
+            box-sizing: border-box;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .meter-background {
+            border-color: rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .needle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            height: 90%;
+            background: linear-gradient(to top, var(--color-primary), var(--color-primary-light));
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(-90deg);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 10;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .needle::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            background: var(--color-primary);
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+        .center-circle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 24px;
+            height: 24px;
+            background: var(--color-surface);
+            border: 3px solid var(--color-primary);
+            border-radius: 50%;
+            transform: translate(-50%, 50%);
+            z-index: 20;
+        }
+
+        .db-display {
+            text-align: center;
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .db-value-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .db-value {
+            font-size: 70px;
+            font-weight: 800;
+            color: var(--color-primary);
+            line-height: 1;
+            letter-spacing: -2px;
+            text-shadow: 0 2px 4px rgba(74, 144, 226, 0.2);
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .db-unit {
+            position: absolute;
+            top: 0;
+            right: -48px;
+            font-size: 24px;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            letter-spacing: -0.5px;
+        }
+
+        .environment {
+            text-align: center;
+            margin: 15px 0 30px;
+            font-size: 18px;
+            color: var(--color-text);
+            font-weight: 600;
+            min-height: 28px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            background: var(--color-surface-variant);
+            display: inline-block;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+
+        .controls {
+            padding: 0 0 25px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-active);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.3), transparent);
+            opacity: 0.3;
+        }
+
+        .btn-secondary {
+            background: var(--color-surface-variant);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-surface-variant);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-active);
+        }
+
+        .info-card {
+            background: var(--color-surface-variant);
+            border-radius: 16px;
+            padding: 22px;
+            margin: 0 0 30px;
+            border: 1px solid var(--color-border);
+            transition: var(--transition);
+        }
+
+        .info-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-title .material-icons {
+            font-size: 20px;
+        }
+
+        .info-content {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        .info-list {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .info-list li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .info-list li::before {
+            content: "";
+            position: absolute;
+            left: -18px;
+            top: 10px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-primary);
+        }
+
+        .info-list li strong {
+            color: var(--color-text);
+        }
+
+        .status-circle {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .bounce {
+            animation: bounce 0.8s infinite alternate;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-8px); }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                border-radius: 18px;
+            }
+            
+            .meter-container {
+                width: 260px;
+                height: 174px;
+            }
+            
+            .db-value {
+                font-size: 60px;
+            }
+            
+            .db-unit {
+                font-size: 20px;
+                right: -42px;
+            }
+            
+            .environment {
+                font-size: 16px;
+                padding: 8px 16px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 28px;
+            }
+            
+            .header {
+                padding: 18px 20px;
+            }
+            
+            .app-content {
+                padding: 0 20px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .meter-container {
+                width: 240px;
+                height: 160px;
+            }
+            
+            .db-value {
+                font-size: 56px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title-container">
+                <i class="material-icons" style="color: var(--color-primary);">hearing</i>
+                <div class="title">分贝检测仪</div>
+            </div>
+            <button class="theme-toggle" id="themeToggle">
+                <span class="material-icons" id="themeIcon">dark_mode</span>
+            </button>
+        </div>
+        
+        <div class="app-content">
+            <div class="meter-section">
+                <div class="meter-container">
+                    <div class="meter-background"></div>
+                    <div class="needle" id="needle"></div>
+                    <div class="center-circle"></div>
+                </div>
+                
+                <div class="db-display">
+                    <div class="db-value-container">
+                        <span class="db-value" id="dbValue">--</span>
+                        <span class="db-unit">dB</span>
+                    </div>
+                </div>
+                
+                <div class="environment" id="environment">
+                    <span class="status-circle"></span>
+                    <span>点击开始检测环境噪音</span>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" id="startBtn">
+                        <i class="material-icons">mic</i>
+                        开始检测
+                    </button>
+                    <button class="btn btn-secondary" id="stopBtn" disabled>
+                        <i class="material-icons">stop</i>
+                        停止检测
+                    </button>
+                </div>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-title">
+                    <i class="material-icons">info</i>
+                    分贝等级说明
+                </div>
+                <div class="info-content">
+                    <ul class="info-list">
+                        <li><strong>30dB以下</strong>: <span class="status-circle" style="background-color: var(--color-success);"></span> 非常安静 (图书馆环境)</li>
+                        <li><strong>30-50dB</strong>: <span class="status-circle" style="background-color: #8BC34A;"></span> 安静环境 (正常交谈)</li>
+                        <li><strong>50-70dB</strong>: <span class="status-circle" style="background-color: var(--color-warning);"></span> 中等噪音 (办公室环境)</li>
+                        <li><strong>70-90dB</strong>: <span class="status-circle" style="background-color: #FF9800;"></span> 嘈杂环境 (城市交通)</li>
+                        <li><strong>90dB以上</strong>: <span class="status-circle" style="background-color: var(--color-danger);"></span> 有害噪音 (可能损伤听力)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化音频处理
+        let audioContext;
+        let analyser;
+        let microphone;
+        let isRecording = false;
+        let animationId;
+        let statusCircle;
+        
+        // 分贝计算函数
+        function calculateDecibels(dataArray) {
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                // 将8位无符号整数转换为有符号浮点数（-1到1范围）
+                const sample = (dataArray[i] - 128) / 128.0;
+                sum += sample * sample;
+            }
+            
+            const rms = Math.sqrt(sum / dataArray.length);
+            // 转换为分贝值（参考公式：20 * log10(rms)）
+            // 添加参考值避免log10(0)错误
+            return 20 * Math.log10(Math.max(rms, 0.0001));
+        }
+        
+        // 更新界面显示
+        function updateDisplay(decibels) {
+            // 更新数值显示（修正范围）
+            const dbValue = Math.max(30, Math.min(110, decibels + 60)); // 调整偏移量
+            
+            document.getElementById('dbValue').textContent = dbValue.toFixed(1);
+            
+            // 更新指针位置（0°到180°对应30-110dB）
+            const needle = document.getElementById('needle');
+            const angle = (dbValue - 30) * (180 / 80) - 90;
+            needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+            
+            // 更新环境状态
+            const environment = document.getElementById('environment');
+            statusCircle = environment.querySelector('.status-circle');
+            statusCircle.classList.remove('bounce');
+            
+            // 根据数值设置状态
+            if (dbValue < 30) {
+                environment.innerHTML = '<span class="status-circle" style="background-color: var(--color-success);"></span> 非常安静 (图书馆环境)';
+                environment.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+            } else if (dbValue < 50) {
+                environment.innerHTML = '<span class="status-circle" style="background-color: #8BC34A;"></span> 安静环境 (正常交谈)';
+                environment.style.backgroundColor = 'rgba(139, 195, 74, 0.1)';
+            } else if (dbValue < 70) {
+                environment.innerHTML = '<span class="status-circle" style="background-color: var(--color-warning);"></span> 中等噪音 (办公室环境)';
+                environment.style.backgroundColor = 'rgba(255, 193, 7, 0.1)';
+            } else if (dbValue < 90) {
+                environment.innerHTML = '<span class="status-circle" style="background-color: #FF9800;"></span> 嘈杂环境 (城市交通)';
+                environment.style.backgroundColor = 'rgba(255, 152, 0, 0.1)';
+            } else {
+                environment.innerHTML = '<span class="status-circle" style="background-color: var(--color-danger);"></span> 有害噪音 (请保护听力)';
+                environment.style.backgroundColor = 'rgba(244, 67, 54, 0.1)';
+                statusCircle.classList.add('pulse');
+            }
+        }
+        
+        // 开始检测
+        async function startDetection() {
+            if (isRecording) return;
+            
+            try {
+                // 请求麦克风权限
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    } 
+                });
+                
+                // 创建音频处理环境
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                
+                microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyser);
+                
+                isRecording = true;
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                
+                const environment = document.getElementById('environment');
+                environment.innerHTML = '<span class="status-circle"></span> 检测中...';
+                environment.style.color = "#4A90E2";
+                environment.querySelector('.status-circle').classList.add('bounce');
+                
+                // 处理音频数据
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                
+                function processAudio() {
+                    if (!isRecording) return;
+                    
+                    analyser.getByteTimeDomainData(dataArray);
+                    const decibels = calculateDecibels(dataArray);
+                    updateDisplay(decibels);
+                    
+                    animationId = requestAnimationFrame(processAudio);
+                }
+                
+                processAudio();
+            } catch (error) {
+                console.error("麦克风访问失败:", error);
+                
+                const environment = document.getElementById('environment');
+                environment.innerHTML = '<span class="status-circle" style="background-color: var(--color-danger);"></span> 麦克风访问失败';
+                environment.style.backgroundColor = 'rgba(244, 67, 54, 0.1)';
+                
+                // 重置按钮状态
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+        }
+        
+        // 停止检测
+        function stopDetection() {
+            if (!isRecording) return;
+            
+            isRecording = false;
+            cancelAnimationFrame(animationId);
+            
+            if (microphone) {
+                microphone.disconnect();
+                if (microphone.mediaStream) {
+                    microphone.mediaStream.getTracks().forEach(track => track.stop());
+                }
+            }
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            
+            const environment = document.getElementById('environment');
+            environment.innerHTML = '<span class="status-circle"></span> 检测已停止';
+            environment.style.backgroundColor = 'var(--color-surface-variant)';
+            environment.style.color = 'var(--color-text)';
+        }
+        
+        // 主题切换功能
+        function toggleTheme() {
+            const isDark = document.body.dataset.theme === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            const themeIcon = document.getElementById('themeIcon');
+            
+            document.body.dataset.theme = newTheme;
+            localStorage.setItem('theme', newTheme);
+            
+            // 更新图标
+            themeIcon.textContent = isDark ? 'dark_mode' : 'light_mode';
+            themeIcon.classList.add('bounce');
+            setTimeout(() => themeIcon.classList.remove('bounce'), 500);
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化主题
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.dataset.theme = savedTheme;
+            
+            // 设置正确的图标
+            const themeIcon = document.getElementById('themeIcon');
+            themeIcon.textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+            
+            // 事件监听
+            document.getElementById('startBtn').addEventListener('click', startDetection);
+            document.getElementById('stopBtn').addEventListener('click', stopDetection);
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            
+            // 给仪表盘添加加载动画
+            setTimeout(() => {
+                document.getElementById('needle').style.transition = 'transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            }, 300);
+        });
+    </script>
+</body>
+</html>
