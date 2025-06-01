@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ckacka工具箱</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #6750A4;
+            --color-primary-container: #EADDFF;
+            --color-on-primary: #FFFFFF;
+            --color-surface: #FEF7FF;
+            --color-surface-variant: #E7E0EC;
+            --color-on-surface: #1D1B20;
+            --color-on-surface-variant: #49454F;
+            --color-shadow: rgba(0, 0, 0, 0.15);
+            --color-backdrop: rgba(0, 0, 0, 0.25);
+            --card-radius: 24px;
+            --header-height: 56px;
+            --tool-card-height: 140px;
+            --transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
+        }
+
+        [data-theme="dark"] {
+            --color-primary: #D0BCFF;
+            --color-primary-container: #4F378B;
+            --color-on-primary: #381E72;
+            --color-surface: #1D1B20;
+            --color-surface-variant: #49454F;
+            --color-on-surface: #E6E1E5;
+            --color-on-surface-variant: #CAC4D0;
+            --color-shadow: rgba(0, 0, 0, 0.3);
+            --color-backdrop: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--color-surface);
+            color: var(--color-on-surface);
+            min-height: 100vh;
+            transition: background-color var(--transition), color var(--transition);
+            overflow-x: hidden;
+        }
+
+        .app-header {
+            height: var(--header-height);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background-color: var(--color-surface);
+            box-shadow: 0 2px 4px var(--color-shadow);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-title h1 {
+            font-weight: 500;
+            font-size: 20px;
+            color: var(--color-primary);
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 8px;
+            position: relative;
+        }
+
+        .menu-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .material-icons {
+            user-select: none;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-on-surface);
+            transition: background-color var(--transition), transform 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background-color: rgba(var(--color-on-surface), 0.08);
+            transform: scale(1.1);
+        }
+
+        .search-container {
+            padding: 16px;
+            margin-top: 0;
+            background-color: var(--color-surface);
+            position: sticky;
+            top: var(--header-height);
+            z-index: 50;
+            box-shadow: 0 1px 3px var(--color-shadow);
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 48px 14px 16px;
+            border-radius: 28px;
+            background-color: var(--color-surface-variant);
+            color: var(--color-on-surface);
+            font-size: 16px;
+            border: none;
+            transition: all var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--color-primary);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-on-surface-variant);
+        }
+
+        .main-content {
+            padding: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .category-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 24px 0 16px;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-title .material-icons {
+            color: var(--color-primary);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+            transition: all var(--transition);
+        }
+
+        @media (min-width: 768px) {
+            .tools-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        .tool-card {
+            position: relative;
+            border-radius: var(--card-radius);
+            background: var(--color-surface);
+            box-shadow: 0 2px 6px var(--color-shadow);
+            border: 1px solid var(--color-surface-variant);
+            min-height: var(--tool-card-height);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            overflow: hidden;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px var(--color-shadow);
+        }
+
+        .tool-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 16px;
+            transition: all var(--transition);
+            position: relative;
+            z-index: 2;
+        }
+
+        .tool-card:hover .tool-icon {
+            transform: scale(1.1);
+        }
+
+        .tool-icon.purple {
+            background-color: #EADDFF;
+            color: #6750A4;
+        }
+
+        .tool-icon.blue {
+            background-color: #D0E3FF;
+            color: #1C6DE0;
+        }
+
+        .tool-icon.green {
+            background-color: #C8E6C9;
+            color: #388E3C;
+        }
+
+        .tool-icon.orange {
+            background-color: #FFECB3;
+            color: #FFA000;
+        }
+
+        .tool-icon.red {
+            background-color: #FFCDD2;
+            color: #D32F2F;
+        }
+
+        .tool-icon.teal {
+            background-color: #B2DFDB;
+            color: #00796B;
+        }
+
+        .tool-name {
+            font-size: 16px;
+            font-weight: 500;
+            transition: all var(--transition);
+            position: relative;
+            z-index: 2;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--color-surface-variant);
+            margin: 32px 0;
+            width: 100%;
+        }
+
+        .app-footer {
+            padding: 24px 16px;
+            text-align: center;
+            color: var(--color-on-surface-variant);
+            font-size: 14px;
+            border-top: 1px solid var(--color-surface-variant);
+            margin-top: 20px;
+        }
+
+        .highlight-card {
+            background-color: var(--color-primary-container);
+            border: none;
+            position: relative;
+        }
+
+        .recent-section {
+            margin-bottom: 32px;
+        }
+        
+        .highlight-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tool-card {
+            animation: fadeIn 0.4s ease-out forwards;
+            opacity: 0;
+        }
+        
+        .tool-card:nth-child(1) { animation-delay: 0.1s; }
+        .tool-card:nth-child(2) { animation-delay: 0.2s; }
+        .tool-card:nth-child(3) { animation-delay: 0.3s; }
+        .tool-card:nth-child(4) { animation-delay: 0.4s; }
+        .tool-card:nth-child(5) { animation-delay: 0.5s; }
+        .tool-card:nth-child(6) { animation-delay: 0.6s; }
+        .tool-card:nth-child(7) { animation-delay: 0.7s; }
+        .tool-card:nth-child(8) { animation-delay: 0.8s; }
+        
+        /* 菜单样式 */
+        .menu-container {
+            position: relative;
+        }
+        
+        .menu-popup {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background-color: var(--color-surface);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--color-shadow);
+            min-width: 200px;
+            padding: 8px 0;
+            transform-origin: top right;
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 200;
+            display: none;
+            opacity: 0;
+            transform: scale(0.95) translateY(-10px);
+        }
+        
+        .menu-popup.show {
+            display: block;
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            font-size: 16px;
+            color: var(--color-on-surface);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--color-surface-variant);
+        }
+        
+        .menu-item .material-icons {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+        
+        .menu-divider {
+            height: 1px;
+            background-color: var(--color-surface-variant);
+            margin: 6px 0;
+        }
+        
+        .menu-header {
+            padding: 8px 16px;
+            font-weight: 500;
+            color: var(--color-on-surface-variant);
+            font-size: 14px;
+        }
+        
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 42px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--color-on-surface-variant);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--color-surface);
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--color-primary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(18px);
+        }
+        
+        /* 改进开关可见性 */
+        [data-theme="dark"] .slider {
+            background-color: var(--color-on-surface-variant);
+        }
+        
+        [data-theme="dark"] input:checked + .slider {
+            background-color: var(--color-primary);
+        }
+        
+        [data-theme="dark"] .slider:before {
+            background-color: var(--color-surface);
+        }
+        
+        /* 无结果提示 */
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--color-on-surface-variant);
+            display: none;
+        }
+        
+        .no-results .material-icons {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--color-on-surface-variant);
+        }
+        
+        .no-results p {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        /* 壁纸模块样式 */
+        .wallpaper-container {
+            border-radius: var(--card-radius);
+            background: var(--color-surface);
+            box-shadow: 0 2px 6px var(--color-shadow);
+            border: 1px solid var(--color-surface-variant);
+            padding: 24px;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .wallpaper-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--color-primary);
+            align-self: flex-start;
+        }
+        
+        .wallpaper-img-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .wallpaper-img {
+            width: 100%;
+            border-radius: 12px;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+        
+        .wallpaper-img:hover {
+            transform: scale(1.02);
+        }
+        
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .download-btn:hover {
+            background-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .download-btn i {
+            margin-right: 8px;
+        }
+        
+        .loading {
+            color: var(--color-on-surface-variant);
+            font-size: 14px;
+            margin-top: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- 应用头部 -->
+    <div class="app-header">
+        <div class="app-title">
+            <h1>ckacka工具箱</h1>
+        </div>
+        <div class="toolbar-actions">
+            <!-- 菜单容器 -->
+            <div class="menu-container">
+                <div class="icon-btn" id="menuButton">
+                    <span class="material-icons">more_vert</span>
+                </div>
+                
+                <!-- 菜单弹出层 -->
+                <div class="menu-popup" id="menuPopup">
+                    <div class="menu-header">主题设置</div>
+                    <div class="menu-item toggle-container">
+                        <div>
+                            <span class="material-icons">dark_mode</span>
+                            深色模式
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="themeToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- 搜索区域 -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索工具...">
+            <span class="material-icons search-icon">search</span>
+        </div>
+    </div>
+    
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 今日壁纸 -->
+        <div class="wallpaper-container">
+            <div class="wallpaper-title">今日壁纸</div>
+            <div class="wallpaper-img-container">
+                <img id="wallpaper" class="wallpaper-img" alt="Bing每日壁纸">
+            </div>
+            <button class="download-btn" id="downloadBtn">
+                <i class="material-icons">cloud_download</i>
+                下载高清壁纸
+            </button>
+            <div id="loading" class="loading">正在加载每日壁纸...</div>
+        </div>
+
+        <!-- 全部工具 -->
+        <h2 class="category-title">
+            <span class="material-icons">apps</span>
+            全部工具
+        </h2>
+        <div class="tools-grid">
+            <div class="tool-card" data-url="https://ckacka.github.io/sdnote.html" data-name="树洞便签">
+                <div class="tool-icon orange">
+                    <span class="material-icons">note_add</span>
+                </div>
+                <div class="tool-name">树洞便签</div>
+            </div>
+            
+            <div class="tool-card" data-url="https://ckacka.github.io/sjsc.html" data-name="随机生词">
+                <div class="tool-icon green">
+                    <span class="material-icons">history_edu</span>
+                </div>
+                <div class="tool-name">随机生词</div>
+            </div>
+            
+            <div class="tool-card" data-url="https://ckacka.github.io/guaiwu.html" data-name="是女人就删他一百耳光">
+                <div class="tool-icon red">
+                    <span class="material-icons">whatshot</span>
+                </div>
+                <div class="tool-name">是女人就删他一百耳光</div>
+            </div>
+            
+            <div class="tool-card" data-url="https://ckacka.github.io/qrcode.html" data-name="二维码生成器">
+                <div class="tool-icon purple">
+                    <span class="material-icons">qr_code_scanner</span>
+                </div>
+                <div class="tool-name">二维码生成器</div>
+            </div>
+            
+            <div class="tool-card" data-url="https://ckacka.github.io/videoplayer.html" data-name="在线视频播放器">
+                <div class="tool-icon blue">
+                    <span class="material-icons">play_circle</span>
+                </div>
+                <div class="tool-name">在线视频播放器</div>
+            </div>
+            
+            <div class="tool-card" data-url="https://ckacka.github.io/tvradio.html" data-name="数字电视">
+                <div class="tool-icon teal">
+                    <span class="material-icons">tv</span>
+                </div>
+                <div class="tool-name">数字电视</div>
+            </div>
+            
+            <!-- 无结果提示 -->
+            <div class="no-results" id="noResults">
+                <span class="material-icons">search_off</span>
+                <p>没有找到匹配的工具</p>
+                <p>请尝试其他关键词</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <div class="app-footer">
+        <p>ckacka 工具箱 • v1.6.0</p>
+        <p class="copyright">© ckacka 工具箱应用 • 遵循 Material Design 设计规范</p>
+    </div>
+
+    <script>
+        // 壁纸功能
+        function setWallpaper() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const dateStr = `${year}${month}${day}`;
+            const wallpaperImg = document.getElementById('wallpaper');
+            const loadingElement = document.getElementById('loading');
+            
+            // 更新loading文本
+            loadingElement.textContent = "正在加载最新壁纸...";
+            
+            // 设置图片URL
+            wallpaperImg.src = `https://bing.img.run/uhd.php?t=${dateStr}&t=${Date.now()}`;
+            
+            // 图片加载完成时
+            wallpaperImg.onload = function() {
+                loadingElement.textContent = "壁纸加载完成";
+                setTimeout(() => {
+                    loadingElement.textContent = "来源：Bing每日壁纸";
+                }, 2000);
+            };
+            
+            // 图片加载错误时
+            wallpaperImg.onerror = function() {
+                loadingElement.textContent = "壁纸加载失败，请稍后重试";
+                wallpaperImg.src = ''; // 清除错误的src
+            };
+        }
+        
+        // 下载壁纸
+        function downloadImage() {
+            const imgUrl = document.getElementById('wallpaper').src;
+            const loadingElement = document.getElementById('loading');
+            
+            if (!imgUrl || imgUrl.includes('data:image')) {
+                loadingElement.textContent = "无法下载，壁纸尚未加载完成";
+                return;
+            }
+            
+            loadingElement.textContent = "正在准备下载...";
+            
+            const a = document.createElement('a');
+            a.href = imgUrl;
+            a.download = 'bing_wallpaper_' + new Date().toISOString().slice(0,10) + '.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            loadingElement.textContent = "壁纸下载已完成";
+        }
+        
+        // 菜单功能
+        const menuButton = document.getElementById('menuButton');
+        const menuPopup = document.getElementById('menuPopup');
+        
+        // 点击菜单按钮显示/隐藏菜单
+        menuButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            menuPopup.classList.toggle('show');
+        });
+        
+        // 点击页面其他地方关闭菜单
+        document.addEventListener('click', function(e) {
+            if (!menuButton.contains(e.target) && !menuPopup.contains(e.target)) {
+                menuPopup.classList.remove('show');
+            }
+        });
+        
+        // 深色模式切换
+        const themeToggle = document.getElementById('themeToggle');
+        
+        // 初始化主题
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.dataset.theme = savedTheme;
+            
+            // 设置开关状态
+            if (savedTheme === 'dark') {
+                themeToggle.checked = true;
+            } else {
+                themeToggle.checked = false;
+            }
+        }
+        
+        function toggleTheme() {
+            const isDark = document.body.dataset.theme === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            
+            document.body.dataset.theme = newTheme;
+            localStorage.setItem('theme', newTheme);
+            
+            // 关闭菜单
+            menuPopup.classList.remove('show');
+            
+            // 添加主题切换动画效果
+            document.body.style.transition = 'background-color 0.5s ease, color 0.5s ease';
+            setTimeout(() => {
+                document.body.style.transition = '';
+            }, 500);
+        }
+        
+        // 工具卡片点击效果和跳转
+        const toolCards = document.querySelectorAll('.tool-card');
+        toolCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const toolName = this.getAttribute('data-name');
+                const url = this.getAttribute('data-url');
+                
+                // 添加点击效果
+                this.style.transform = 'scale(0.98)';
+                const icon = this.querySelector('.tool-icon');
+                icon.style.transform = 'scale(1.2)';
+                
+                setTimeout(() => {
+                    this.style.transform = '';
+                    icon.style.transform = 'scale(1)';
+                    
+                    // 模拟应用打开效果
+                    const toolHeader = document.createElement('div');
+                    toolHeader.innerHTML = `<span class="material-icons">${icon.querySelector('.material-icons').textContent}</span> ${toolName}`;
+                    toolHeader.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        height: 56px;
+                        background-color: var(--color-primary);
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 18px;
+                        font-weight: 500;
+                        z-index: 1000;
+                        transform: translateY(-100%);
+                        transition: transform 0.3s ease-out;
+                    `;
+                    document.body.appendChild(toolHeader);
+                    
+                    setTimeout(() => {
+                        toolHeader.style.transform = 'translateY(0)';
+                    }, 10);
+                    
+                    setTimeout(() => {
+                        toolHeader.style.transform = 'translateY(-100%)';
+                        setTimeout(() => {
+                            document.body.removeChild(toolHeader);
+                            // 跳转到指定URL
+                            window.location.href = url;
+                        }, 300);
+                    }, 500);
+                }, 200);
+            });
+        });
+        
+        // 搜索框交互
+        const searchInput = document.getElementById('searchInput');
+        const noResults = document.getElementById('noResults');
+        const allCards = document.querySelectorAll('.tool-card:not(#noResults)');
+        
+        searchInput.addEventListener('focus', function() {
+            this.parentElement.style.boxShadow = '0 0 0 2px var(--color-primary)';
+        });
+        
+        searchInput.addEventListener('blur', function() {
+            this.parentElement.style.boxShadow = 'none';
+        });
+        
+        // 搜索功能实现
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim().toLowerCase();
+            let found = false;
+            
+            // 隐藏无结果提示
+            noResults.style.display = 'none';
+            
+            // 遍历所有工具卡片
+            allCards.forEach(card => {
+                const cardName = card.getAttribute('data-name').toLowerCase();
+                
+                // 检查是否匹配
+                if (cardName.includes(searchTerm) || searchTerm === '') {
+                    card.style.display = 'flex';
+                    found = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // 如果没有匹配结果，显示无结果提示
+            if (!found && searchTerm !== '') {
+                noResults.style.display = 'block';
+            }
+        });
+        
+        // 清空搜索时显示所有卡片
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                const event = new Event('input');
+                this.dispatchEvent(event);
+            }
+        });
+        
+        // 页面加载
+        window.onload = () => {
+            loadTheme();
+            themeToggle.addEventListener('change', toggleTheme);
+            
+            // 设置壁纸
+            setWallpaper();
+            
+            // 添加下载按钮事件
+            document.getElementById('downloadBtn').addEventListener('click', downloadImage);
+        };
+    </script>
+</body>
+</html>
