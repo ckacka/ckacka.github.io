@@ -4,68 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>树洞便签</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #2196F3;
-            --primary-light: #e3f2fd;
-            --secondary-color: #FF9800;
-            --dark-color: #2d2d2d;
-            --text-color: #212121;
-            --bg-color: #f5f7fa;
-            --border-color: #e0e0e0;
-            --card-bg: #ffffff;
-            --secondary-text: #757575;
-            --green: #4CAF50;
-            --red: #F44336;
-            --yellow: #FFEB3B;
-            --purple: #9C27B0;
-            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --color-primary: #6750A4;
+            --color-primary-container: #EADDFF;
+            --color-on-primary: #FFFFFF;
+            --color-surface: #FEF7FF;
+            --color-surface-variant: #E7E0EC;
+            --color-on-surface: #1D1B20;
+            --color-on-surface-variant: #49454F;
+            --color-shadow: rgba(0, 0, 0, 0.15);
+            --color-backdrop: rgba(0, 0, 0, 0.25);
+            --card-radius: 16px;
+            --header-height: 56px;
+            --fab-size: 56px;
+            --transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
         }
 
         [data-theme="dark"] {
-            --primary-color: #90CAF9;
-            --primary-light: #1e3a5f;
-            --dark-color: #f5f7fa;
-            --text-color: #e0e0e0;
-            --bg-color: #121212;
-            --border-color: #444444;
-            --card-bg: #1e1e1e;
-            --secondary-text: #9e9e9e;
-            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --color-primary: #D0BCFF;
+            --color-primary-container: #4F378B;
+            --color-on-primary: #381E72;
+            --color-surface: #1D1B20;
+            --color-surface-variant: #49454F;
+            --color-on-surface: #E6E1E5;
+            --color-on-surface-variant: #CAC4D0;
+            --color-shadow: rgba(0, 0, 0, 0.3);
+            --color-backdrop: rgba(0, 0, 0, 0.5);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Noto Sans SC', system-ui, sans-serif;
+            font-family: 'Roboto', sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background 0.3s, color 0.3s;
+            background-color: var(--color-surface);
+            color: var(--color-on-surface);
             min-height: 100vh;
-            line-height: 1.6;
+            transition: background-color var(--transition), color var(--transition);
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px 16px;
-        }
-
-        /* 头部设计 */
         .app-header {
+            height: var(--header-height);
+            padding: 0 16px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 32px;
-            padding: 16px 0;
-            border-bottom: 2px solid var(--primary-color);
-            position: relative;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background-color: var(--color-surface);
+            box-shadow: 0 2px 4px var(--color-shadow);
         }
 
         .app-title {
@@ -75,543 +71,553 @@
         }
 
         .app-title h1 {
-            font-weight: 700;
-            font-size: 28px;
-            color: var(--text-color);
-            background: linear-gradient(45deg, var(--primary-color), var(--purple));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            font-weight: 500;
+            font-size: 18px;
         }
 
-        .app-title .material-icons {
-            font-size: 32px;
-            color: var(--primary-color);
-        }
-
-        /* 工具栏 */
-        .toolbar {
+        .toolbar-actions {
             display: flex;
             gap: 16px;
-            align-items: center;
         }
 
-        .theme-toggle {
-            width: 44px;
-            height: 44px;
+        .material-icons {
+            user-select: none;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--card-bg);
             cursor: pointer;
-            color: var(--text-color);
-            transition: all 0.3s;
-            box-shadow: var(--shadow);
-            border: none;
+            color: var(--color-on-surface);
+            transition: background-color var(--transition), transform 0.3s ease;
         }
 
-        .theme-toggle:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        .icon-btn:hover {
+            background-color: rgba(var(--color-on-surface), 0.08);
+            transform: scale(1.1);
+        }
+
+        .search-container {
+            padding: 16px;
+            margin-top: var(--header-height);
+            background-color: var(--color-surface);
+            position: sticky;
+            top: var(--header-height);
+            z-index: 50;
+            box-shadow: 0 1px 3px var(--color-shadow);
         }
 
         .search-box {
             position: relative;
-            width: 280px;
+            width: 100%;
         }
 
         .search-input {
             width: 100%;
-            padding: 12px 48px 12px 20px;
-            border: 2px solid var(--border-color);
-            border-radius: 50px;
-            background: var(--card-bg);
-            color: var(--text-color);
-            font-size: 15px;
-            transition: all 0.3s;
-            box-shadow: var(--shadow);
+            padding: 12px 48px 12px 16px;
+            border-radius: 28px;
+            background-color: var(--color-surface-variant);
+            color: var(--color-on-surface);
+            font-size: 16px;
+            border: none;
+            transition: all var(--transition);
         }
 
         .search-input:focus {
-            border-color: var(--primary-color);
             outline: none;
-            box-shadow: 0 4px 16px rgba(33,150,243,0.15);
+            box-shadow: 0 0 0 2px var(--color-primary);
         }
 
         .search-icon {
             position: absolute;
-            right: 20px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--secondary-text);
-            pointer-events: none;
+            color: var(--color-on-surface-variant);
         }
 
-        /* 标签过滤器 */
+        .main-content {
+            padding: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
         .tag-filter {
-            margin-bottom: 28px;
             display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 0 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .tag-filter::-webkit-scrollbar {
+            display: none;
         }
 
         .filter-tag {
             padding: 8px 16px;
-            border-radius: 24px;
-            background: var(--card-bg);
+            border-radius: 16px;
+            background-color: var(--color-surface-variant);
+            color: var(--color-on-surface);
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all var(--transition);
             display: flex;
             align-items: center;
             gap: 6px;
-            box-shadow: var(--shadow);
-            border: 2px solid transparent;
+            white-space: nowrap;
         }
 
         .filter-tag:hover {
-            background: var(--primary-light);
-            color: var(--primary-color);
+            background-color: rgba(var(--color-primary), 0.08);
         }
 
         .filter-tag.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
         }
 
-        /* 便签网格布局 */
-        .post-grid {
+        .memo-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
             margin-bottom: 80px;
         }
 
-        .post-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
+        @media (max-width: 480px) {
+            .memo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .memo-card {
+            background-color: var(--color-surface);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 6px var(--color-shadow);
             position: relative;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow);
-            border-top: 4px solid var(--primary-color);
+            transition: transform var(--transition), box-shadow var(--transition);
+            border: 1px solid var(--color-surface-variant);
             display: flex;
             flex-direction: column;
             height: 100%;
         }
 
-        .post-card.pinned {
-            border-top: 4px solid var(--secondary-color);
-            background: linear-gradient(to bottom, rgba(255,152,0,0.02), var(--card-bg));
+        .memo-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px var(--color-shadow);
         }
 
-        .post-card.pinned::before {
-            content: "已置顶";
+        .memo-card.pinned::before {
+            content: "置顶";
             position: absolute;
-            top: -10px;
-            right: 16px;
-            background: var(--secondary-color);
-            color: white;
-            padding: 4px 12px;
+            top: 12px;
+            right: 12px;
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+            padding: 4px 10px;
             border-radius: 12px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 500;
         }
 
-        .post-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-        }
-
-        .post-content {
+        .memo-content {
+            padding: 20px;
+            flex-grow: 1;
             font-size: 15px;
             line-height: 1.6;
-            margin-bottom: 16px;
-            color: var(--text-color);
-            flex-grow: 1;
         }
 
-        .post-content.done {
-            opacity: 0.7;
+        .memo-content.done {
             text-decoration: line-through;
+            color: var(--color-on-surface-variant);
         }
 
-        .post-card .tag-selector {
+        .memo-tags {
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
+            padding: 0 20px;
             margin-top: auto;
-            padding-top: 16px;
+            flex-wrap: wrap;
         }
 
-        .post-tag {
+        .tag {
             padding: 4px 12px;
             border-radius: 12px;
             font-size: 12px;
             font-weight: 500;
-            display: inline-block;
         }
 
-        .work {
-            background: rgba(33,150,243,0.15);
-            color: var(--primary-color);
+        .tag-work {
+            background-color: rgba(103, 80, 164, 0.1);
+            color: var(--color-primary);
         }
 
-        .study {
-            background: rgba(76,175,80,0.15);
-            color: var(--green);
+        .tag-study {
+            background-color: rgba(48, 136, 252, 0.1);
+            color: #3088FC;
         }
 
-        .life {
-            background: rgba(255,152,0,0.15);
-            color: var(--secondary-color);
+        .tag-life {
+            background-color: rgba(255, 160, 0, 0.1);
+            color: #FFA000;
         }
 
-        .inspire {
-            background: rgba(156,39,176,0.15);
-            color: var(--purple);
+        .tag-inspire {
+            background-color: rgba(236, 64, 122, 0.1);
+            color: #EC407A;
         }
 
-        .post-footer {
+        .memo-footer {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px dashed var(--border-color);
+            padding: 16px 20px;
+            border-top: 1px solid var(--color-surface-variant);
         }
 
-        .post-actions {
+        .memo-time {
+            font-size: 13px;
+            color: var(--color-on-surface-variant);
+        }
+
+        .memo-actions {
             display: flex;
             gap: 12px;
         }
 
         .action-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0,0,0,0.03);
             cursor: pointer;
-            transition: all 0.2s;
-            color: var(--secondary-text);
+            color: var(--color-on-surface-variant);
+            transition: all var(--transition);
+            background-color: transparent;
             border: none;
         }
 
         .action-btn:hover {
-            background: var(--primary-light);
-            color: var(--primary-color);
+            background-color: rgba(var(--color-on-surface), 0.08);
             transform: scale(1.1);
         }
 
         .delete-btn:hover {
-            background: rgba(244,67,54,0.1);
-            color: var(--red);
+            color: #F44336;
+            background-color: rgba(244, 67, 54, 0.1);
         }
 
-        .post-time {
-            font-size: 12px;
-            color: var(--secondary-text);
-        }
-
-        /* 浮层按钮 */
-        .float-btn {
+        .fab {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
+            bottom: 24px;
+            right: 24px;
+            width: var(--fab-size);
+            height: var(--fab-size);
+            border-radius: var(--fab-size);
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 6px 16px rgba(33,150,243,0.4);
+            box-shadow: 0 4px 8px var(--color-shadow);
             z-index: 100;
-            transition: all 0.3s;
+            transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition);
             border: none;
-            font-size: 0;
         }
 
-        .float-btn:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 8px 24px rgba(33,150,243,0.5);
+        .fab:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 6px 12px var(--color-shadow);
         }
 
-        .float-btn .material-icons {
-            font-size: 28px;
-        }
-
-        /* 模态框 */
-        .modal-overlay {
+        .modal-backdrop {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.7);
+            background-color: var(--color-backdrop);
             display: none;
-            z-index: 200;
-            backdrop-filter: blur(5px);
+            z-index: 300;
+            transition: opacity var(--transition);
         }
 
-        .post-modal {
+        .memo-modal {
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--card-bg);
-            padding: 28px;
-            border-radius: 24px;
-            width: 90%;
-            max-width: 500px;
+            transform: translate(-50%, -50%) scale(0.95);
+            width: calc(100% - 32px);
+            max-width: 560px;
+            max-height: 80vh;
+            background-color: var(--color-surface);
+            border-radius: var(--card-radius);
+            box-shadow: 0 24px 48px var(--color-shadow);
+            z-index: 400;
             display: none;
-            z-index: 300;
-            box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+            overflow: hidden;
+            opacity: 0;
+            transition: transform var(--transition), opacity var(--transition);
         }
 
-        .post-modal h3 {
-            font-size: 22px;
-            margin-bottom: 20px;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .modal-header {
+            padding: 24px 24px 8px;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--color-primary);
+        }
+
+        .modal-content {
+            padding: 0 24px;
+            overflow-y: auto;
+            max-height: 60vh;
         }
 
         #content {
             width: 100%;
-            min-height: 180px;
-            padding: 18px;
-            border: 2px solid var(--border-color);
+            min-height: 160px;
+            padding: 16px;
+            border: 1px solid var(--color-surface-variant);
             border-radius: 16px;
-            resize: vertical;
+            background-color: var(--color-surface);
+            color: var(--color-on-surface);
             font-size: 16px;
-            margin-bottom: 20px;
-            background: var(--card-bg);
-            color: var(--text-color);
-            transition: all 0.3s;
+            resize: none;
+            transition: border-color var(--transition);
         }
 
         #content:focus {
-            border-color: var(--primary-color);
             outline: none;
-            box-shadow: 0 0 0 4px rgba(33,150,243,0.2);
-        }
-
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .modal-btn {
-            padding: 12px 28px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 15px;
-            border: none;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .cancel-btn {
-            background: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        .cancel-btn:hover {
-            background: #f0f0f0;
-        }
-
-        .save-btn {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 12px rgba(33,150,243,0.3);
-        }
-
-        .save-btn:hover {
-            background: #1976D2;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(25,118,210,0.4);
-        }
-
-        .modal-btn .material-icons {
-            font-size: 20px;
+            border-color: var(--color-primary);
         }
 
         .tag-selector {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             flex-wrap: wrap;
-            margin: 16px 0;
+            margin: 20px 0 12px;
         }
 
         .tag-item {
             padding: 8px 16px;
-            border-radius: 50px;
-            background: var(--bg-color);
-            color: var(--secondary-text);
+            border-radius: 16px;
+            background-color: var(--color-surface-variant);
+            color: var(--color-on-surface);
             cursor: pointer;
-            transition: all 0.3s;
             font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 4px;
-            border: 1px solid var(--border-color);
+            gap: 6px;
+            transition: all var(--transition);
+        }
+
+        .tag-item:hover {
+            background-color: rgba(var(--color-primary), 0.1);
+            color: var(--color-primary);
+            transform: translateY(-2px);
         }
 
         .tag-item.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+            transform: translateY(-2px);
         }
 
-        /* 空状态 */
+        .modal-footer {
+            padding: 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--transition);
+            border: none;
+            min-width: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-outlined {
+            background-color: transparent;
+            color: var(--color-primary);
+            border: 1px solid var(--color-primary);
+        }
+
+        .btn-outlined:hover {
+            background-color: rgba(var(--color-primary), 0.08);
+            transform: translateY(-2px);
+        }
+
+        .btn-contained {
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+            box-shadow: 0 2px 4px var(--color-shadow);
+        }
+
+        .btn-contained:hover {
+            background-color: var(--color-primary);
+            opacity: 0.9;
+            box-shadow: 0 4px 8px var(--color-shadow);
+            transform: translateY(-2px);
+        }
+
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 60px 20px;
-            color: var(--secondary-text);
-            background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: var(--shadow);
+            padding: 60px 24px;
+            color: var(--color-on-surface-variant);
+            background-color: var(--color-surface);
+            border-radius: var(--card-radius);
+            box-shadow: 0 2px 6px var(--color-shadow);
             margin-top: 20px;
         }
 
-        .empty-state .material-icons {
-            font-size: 64px;
-            margin-bottom: 20px;
-            color: var(--primary-color);
+        .empty-icon {
+            font-size: 84px;
+            margin-bottom: 24px;
+            color: var(--color-primary);
+            transition: all 0.5s ease;
         }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .app-header {
-                flex-direction: column;
-                gap: 16px;
-                align-items: flex-start;
-            }
-            
-            .toolbar {
-                width: 100%;
-            }
-            
-            .search-box {
-                width: 100%;
-            }
-            
-            .app-title h1 {
-                font-size: 24px;
-            }
-            
-            .post-grid {
-                grid-template-columns: 1fr;
-            }
+        
+        .empty-icon.pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .rotating {
+            animation: spin 0.6s ease-out;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 头部区域 -->
-        <header class="app-header">
-            <div class="app-title">
-                <span class="material-icons">edit_note</span>
-                <h1>树洞便签</h1>
+    <!-- 应用头部 -->
+    <div class="app-header">
+        <div class="app-title">
+            <h1>树洞便签</h1>
+        </div>
+        <div class="toolbar-actions">
+            <div class="icon-btn" id="themeToggle">
+                <span class="material-icons" id="themeIcon">dark_mode</span>
             </div>
-            <div class="toolbar">
-                <div class="search-box">
-                    <input type="text" class="search-input" placeholder="搜索内容或标签..." id="searchInput">
-                    <span class="material-icons search-icon">search</span>
-                </div>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <span class="material-icons">dark_mode</span>
-                </button>
-            </div>
-        </header>
-
+        </div>
+    </div>
+    
+    <!-- 搜索区域 -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="搜索内容或标签..." id="searchInput">
+            <span class="material-icons search-icon">search</span>
+        </div>
+    </div>
+    
+    <!-- 主内容区 -->
+    <div class="main-content">
         <!-- 标签过滤器 -->
         <div class="tag-filter">
-            <div class="filter-tag active" onclick="filterByTag('all')">
-                <span class="material-icons">filter_list</span>
+            <div class="filter-tag active" data-tag="all" onclick="filterByTag('all')">
+                <span class="material-icons">list</span>
                 全部便签
             </div>
-            <div class="filter-tag" onclick="filterByTag('工作')">
+            <div class="filter-tag" data-tag="工作" onclick="filterByTag('工作')">
                 <span class="material-icons">work</span>
                 工作
             </div>
-            <div class="filter-tag" onclick="filterByTag('学习')">
+            <div class="filter-tag" data-tag="学习" onclick="filterByTag('学习')">
                 <span class="material-icons">school</span>
                 学习
             </div>
-            <div class="filter-tag" onclick="filterByTag('生活')">
+            <div class="filter-tag" data-tag="生活" onclick="filterByTag('生活')">
                 <span class="material-icons">home</span>
                 生活
             </div>
-            <div class="filter-tag" onclick="filterByTag('灵感')">
-                <span class="material-icons">emoji_objects</span>
+            <div class="filter-tag" data-tag="灵感" onclick="filterByTag('灵感')">
+                <span class="material-icons">lightbulb</span>
                 灵感
             </div>
         </div>
-
-        <!-- 便签网格布局 -->
-        <div class="post-grid" id="postList">
-            <!-- 内容会由JS动态生成 -->
-        </div>
-
-        <!-- 添加便签按钮 -->
-        <button class="float-btn" onclick="showModal()">
-            <span class="material-icons">add</span>
-        </button>
-
-        <!-- 模态框背景 -->
-        <div class="modal-overlay" id="modalOverlay" onclick="hideModal()"></div>
         
-        <!-- 新建便签模态框 -->
-        <div class="post-modal" id="postModal">
-            <h3><span class="material-icons">note_add</span> 新建便签</h3>
-            <textarea placeholder="分享您的想法或记录重要事项..." id="content" maxlength="500"></textarea>
+        <!-- 便签网格 -->
+        <div class="memo-grid" id="postList">
+            <!-- 内容由JavaScript动态生成 -->
+        </div>
+    </div>
+    
+    <!-- 浮动操作按钮 -->
+    <button class="fab" onclick="showModal()">
+        <span class="material-icons">add</span>
+    </button>
+    
+    <!-- 模态框背景 -->
+    <div class="modal-backdrop" id="modalBackdrop" onclick="hideModal()"></div>
+    
+    <!-- 新建便签模态框 -->
+    <div class="memo-modal" id="postModal">
+        <div class="modal-header">
+            <h3>新建便签</h3>
+        </div>
+        <div class="modal-content">
+            <textarea id="content" placeholder="记录您的想法、任务或灵感..."></textarea>
             
             <div class="tag-selector">
-                <div class="tag-item" onclick="toggleTag('工作')">
+                <div class="tag-item" onclick="toggleTag(this, '工作')">
                     <span class="material-icons">work</span>
                     工作
                 </div>
-                <div class="tag-item" onclick="toggleTag('学习')">
+                <div class="tag-item" onclick="toggleTag(this, '学习')">
                     <span class="material-icons">school</span>
                     学习
                 </div>
-                <div class="tag-item" onclick="toggleTag('生活')">
+                <div class="tag-item" onclick="toggleTag(this, '生活')">
                     <span class="material-icons">home</span>
                     生活
                 </div>
-                <div class="tag-item" onclick="toggleTag('灵感')">
-                    <span class="material-icons">emoji_objects</span>
+                <div class="tag-item" onclick="toggleTag(this, '灵感')">
+                    <span class="material-icons">lightbulb</span>
                     灵感
                 </div>
             </div>
-
-            <div class="modal-actions">
-                <button class="modal-btn cancel-btn" onclick="hideModal()">
-                    <span class="material-icons">close</span>
-                    取消
-                </button>
-                <button class="modal-btn save-btn" onclick="postMessage()">
-                    <span class="material-icons">save</span>
-                    保存
-                </button>
-            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outlined" onclick="hideModal()">
+                <span class="material-icons">close</span>
+                取消
+            </button>
+            <button class="btn btn-contained" onclick="postMessage()">
+                <span class="material-icons">save</span>
+                保存
+            </button>
         </div>
     </div>
 
@@ -620,69 +626,57 @@
         let selectedTags = new Set();
         let currentSearch = '';
         let activeTagFilter = 'all';
+        let lastThemeToggle = 0;
         
-        // 示例数据
-        if (posts.length === 0) {
-            posts = [
-                {
-                    id: 1,
-                    content: '完成项目进度报告，包括数据分析与总结部分',
-                    tags: ['工作'],
-                    timestamp: Date.now() - 86400000 * 2,
-                    done: false,
-                    pinned: true
-                },
-                {
-                    id: 2,
-                    content: '学习React状态管理库Recoil的基本用法',
-                    tags: ['学习'],
-                    timestamp: Date.now() - 86400000 * 1,
-                    done: true,
-                    pinned: false
-                },
-                {
-                    id: 3,
-                    content: '为新功能设计一个创新的用户交互方案',
-                    tags: ['工作', '灵感'],
-                    timestamp: Date.now() - 86400000 * 3,
-                    done: false,
-                    pinned: true
-                },
-                {
-                    id: 4,
-                    content: '周末带家人去郊外野餐，准备好野餐用品',
-                    tags: ['生活'],
-                    timestamp: Date.now() - 86400000 * 4,
-                    done: false,
-                    pinned: false
-                }
-            ];
-            savePosts();
-        }
-
         // 初始化
         window.onload = () => {
             loadTheme();
-            initSearch();
+            setupEventListeners();
             renderPosts();
         };
 
-        // 弹窗控制
+        function setupEventListeners() {
+            // 主题切换
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            
+            // 搜索功能
+            document.getElementById('searchInput').addEventListener('input', function() {
+                currentSearch = this.value;
+                renderPosts();
+            });
+        }
+
+        // 弹窗控制 - 添加动画效果
         function showModal() {
-            document.getElementById('modalOverlay').style.display = 'block';
+            document.getElementById('modalBackdrop').style.display = 'block';
             document.getElementById('postModal').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('postModal').style.opacity = '1';
+                document.getElementById('postModal').style.transform = 'translate(-50%, -50%) scale(1)';
+                document.getElementById('modalBackdrop').style.opacity = '1';
+            }, 10);
+            
             document.getElementById('content').focus();
         }
 
         function hideModal() {
-            document.getElementById('modalOverlay').style.display = 'none';
-            document.getElementById('postModal').style.display = 'none';
-            resetForm();
+            const modal = document.getElementById('postModal');
+            const backdrop = document.getElementById('modalBackdrop');
+            
+            modal.style.opacity = '0';
+            modal.style.transform = 'translate(-50%, -50%) scale(0.95)';
+            backdrop.style.opacity = '0';
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+                backdrop.style.display = 'none';
+                resetForm();
+            }, 300);
         }
 
         // 标签功能
-        function toggleTag(tag) {
-            const element = event.target;
+        function toggleTag(element, tag) {
             element.classList.toggle('active');
             if (selectedTags.has(tag)) {
                 selectedTags.delete(tag);
@@ -693,9 +687,13 @@
         
         function filterByTag(tag) {
             activeTagFilter = tag;
+            
+            // 修复标签按钮激活状态 - 使用data-tag属性
             document.querySelectorAll('.filter-tag').forEach(el => {
-                el.classList.toggle('active', el.textContent.includes(tag));
+                const elTag = el.getAttribute('data-tag');
+                el.classList.toggle('active', elTag === tag);
             });
+            
             renderPosts();
         }
 
@@ -720,15 +718,38 @@
             savePosts();
             renderPosts();
             hideModal();
+            
+            // 添加反馈动画
+            const fab = document.querySelector('.fab');
+            fab.style.background = 'var(--color-primary-container)';
+            fab.style.color = 'var(--color-primary)';
+            fab.innerHTML = '<span class="material-icons">check</span>';
+            setTimeout(() => {
+                fab.style.background = 'var(--color-primary)';
+                fab.style.color = 'var(--color-on-primary)';
+                fab.innerHTML = '<span class="material-icons">add</span>';
+            }, 1000);
         }
 
         // 渲染功能
         function renderPosts() {
             const filtered = filterPosts();
             const container = document.getElementById('postList');
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon material-icons pulse">note_add</div>
+                        <h3>暂无便签记录</h3>
+                        <p>点击右下角 + 按钮创建您的第一条便签</p>
+                    </div>
+                `;
+                return;
+            }
+
             let html = '';
             
-            // 如果有置顶的便签，先渲染
+            // 如果有置顶便签，优先渲染
             const pinnedPosts = filtered.filter(post => post.pinned);
             if (pinnedPosts.length > 0) {
                 pinnedPosts.forEach(post => {
@@ -736,45 +757,35 @@
                 });
             }
 
-            // 渲染普通内容
+            // 渲染普通便签
             const normalPosts = filtered.filter(post => !post.pinned);
             normalPosts.forEach(post => {
                 html += createPostHTML(post);
             });
 
-            if (html) {
-                container.innerHTML = html;
-            } else {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <span class="material-icons">note_add</span>
-                        <h3>暂无便签记录</h3>
-                        <p>点击右下角按钮创建新的便签</p>
-                    </div>
-                `;
-            }
+            container.innerHTML = html;
         }
 
         function createPostHTML(post) {
             return `
-                <div class="post-card ${post.pinned ? 'pinned' : ''}">
-                    <div class="post-content ${post.done ? 'done' : ''}">${post.content}</div>
-                    <div class="tag-selector">
+                <div class="memo-card ${post.pinned ? 'pinned' : ''}" data-id="${post.id}">
+                    <div class="memo-content ${post.done ? 'done' : ''}">${post.content}</div>
+                    <div class="memo-tags">
                         ${post.tags.map(tag => `
-                            <div class="post-tag ${tag === '工作' ? 'work' : 
-                                                tag === '学习' ? 'study' : 
-                                                tag === '生活' ? 'life' : 
-                                                'inspire'}">${tag}</div>
+                            <div class="tag ${tag === '工作' ? 'tag-work' : 
+                                          tag === '学习' ? 'tag-study' : 
+                                          tag === '生活' ? 'tag-life' : 
+                                          'tag-inspire'}">${tag}</div>
                         `).join('')}
                     </div>
-                    <div class="post-footer">
-                        <div class="post-time">${formatTime(post.timestamp)}</div>
-                        <div class="post-actions">
+                    <div class="memo-footer">
+                        <div class="memo-time">${formatTime(post.timestamp)}</div>
+                        <div class="memo-actions">
                             <button class="action-btn" onclick="togglePin(${post.id})" title="${post.pinned ? '取消置顶' : '置顶'}">
-                                <span class="material-icons">${post.pinned ? 'push_pin' : 'push_pin'}</span>
+                                <span class="material-icons">push_pin</span>
                             </button>
                             <button class="action-btn" onclick="toggleDone(${post.id})" title="${post.done ? '标记未完成' : '标记已完成'}">
-                                <span class="material-icons">${post.done ? 'undo' : 'done'}</span>
+                                <span class="material-icons">${post.done ? 'check_circle' : 'radio_button_unchecked'}</span>
                             </button>
                             <button class="action-btn delete-btn" onclick="confirmDelete(${post.id})" title="删除">
                                 <span class="material-icons">delete</span>
@@ -806,18 +817,20 @@
 
         function confirmDelete(id) {
             if (confirm('确定要删除这条便签吗？删除后不可恢复。')) {
-                posts = posts.filter(p => p.id !== id);
-                savePosts();
-                renderPosts();
+                // 修复删除问题 - 获取正确的卡片元素
+                const postElement = document.querySelector(`.memo-card[data-id="${id}"]`);
+                if (postElement) {
+                    // 添加删除动画效果
+                    postElement.style.transform = 'scale(0.9)';
+                    postElement.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        posts = posts.filter(p => p.id !== id);
+                        savePosts();
+                        renderPosts();
+                    }, 300);
+                }
             }
-        }
-
-        function initSearch() {
-            const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', () => {
-                currentSearch = searchInput.value;
-                renderPosts();
-            });
         }
 
         function filterPosts() {
@@ -832,6 +845,12 @@
                 const tagTextMatch = post.tags.some(tag => tag.toLowerCase().includes(currentSearch.toLowerCase()));
                 
                 return tagMatch && (contentMatch || tagTextMatch);
+            }).sort((a, b) => {
+                // 置顶的排在前面
+                if (a.pinned && !b.pinned) return -1;
+                if (!a.pinned && b.pinned) return 1;
+                // 然后按时间倒序
+                return b.timestamp - a.timestamp;
             });
         }
 
@@ -848,16 +867,35 @@
         }
 
         function toggleTheme() {
+            const now = Date.now();
+            // 防止快速连续点击
+            if (now - lastThemeToggle < 500) return;
+            lastThemeToggle = now;
+            
             const isDark = document.body.dataset.theme === 'dark';
+            const themeIcon = document.getElementById('themeIcon');
+            
+            // 添加旋转动画
+            themeIcon.classList.add('rotating');
+            setTimeout(() => {
+                themeIcon.classList.remove('rotating');
+            }, 600);
+            
+            // 更新图标
+            themeIcon.textContent = isDark ? 'dark_mode' : 'light_mode';
+            
+            // 应用新主题
             document.body.dataset.theme = isDark ? 'light' : 'dark';
-            document.querySelector('.theme-toggle .material-icons').textContent = isDark ? 'dark_mode' : 'light_mode';
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
 
         function loadTheme() {
             const theme = localStorage.getItem('theme') || 'light';
             document.body.dataset.theme = theme;
-            document.querySelector('.theme-toggle .material-icons').textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+            
+            // 确保图标正确显示
+            const themeIcon = document.getElementById('themeIcon');
+            themeIcon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
         }
 
         function formatTime(timestamp) {
@@ -865,8 +903,16 @@
             const now = new Date();
             const diff = now - date;
             
+            // 计算时间差
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            
             // 今天内的消息
             if (diff < 86400000 && date.getDate() === now.getDate()) {
+                if (minutes < 60) {
+                    return `${minutes} 分钟前`;
+                }
                 return `今天 ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
             }
             
@@ -875,7 +921,7 @@
                 return `昨天 ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
             }
             
-            // 一周内
+            // 本周内
             if (diff < 604800000) {
                 const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
                 return `${days[date.getDay()]} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
