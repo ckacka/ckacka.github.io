@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二维码生成器 | ckacka工具箱</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #6750A4;
+            --color-primary-container: #EADDFF;
+            --color-on-primary: #FFFFFF;
+            --color-surface: #FEF7FF;
+            --color-surface-variant: #E7E0EC;
+            --color-on-surface: #1D1B20;
+            --color-on-surface-variant: #49454F;
+            --color-shadow: rgba(0, 0, 0, 0.15);
+            --color-backdrop: rgba(0, 0, 0, 0.25);
+            --card-radius: 24px;
+            --header-height: 56px;
+            --transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
+            
+            /* 新增红色主题变量 */
+            --color-red-primary: #FF5252;
+            --color-red-surface: #FFF3F3;
+            --color-red-on-surface: #5C0000;
+            --color-red-surface-variant: #FFB4B4;
+        }
+
+        [data-theme="dark"] {
+            --color-primary: #D0BCFF;
+            --color-primary-container: #4F378B;
+            --color-on-primary: #381E72;
+            --color-surface: #1D1B20;
+            --color-surface-variant: #49454F;
+            --color-on-surface: #E6E1E5;
+            --color-on-surface-variant: #CAC4D0;
+            --color-shadow: rgba(0, 0, 0, 0.3);
+            --color-backdrop: rgba(0, 0, 0, 0.5);
+        }
+
+        /* 红色主题样式 */
+        [data-theme="red"] {
+            --color-primary: var(--color-red-primary);
+            --color-primary-container: rgba(255, 82, 82, 0.1);
+            --color-on-primary: #ffffff;
+            --color-surface: var(--color-red-surface);
+            --color-surface-variant: var(--color-red-surface-variant);
+            --color-on-surface: var(--color-red-on-surface);
+            --color-on-surface-variant: #B30000;
+            --color-shadow: rgba(92, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--color-surface);
+            color: var(--color-on-surface);
+            min-height: 100vh;
+            transition: background-color var(--transition), color var(--transition);
+            overflow-x: hidden;
+        }
+
+        .app-header {
+            height: var(--header-height);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background-color: var(--color-surface);
+            box-shadow: 0 2px 4px var(--color-shadow);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-title h1 {
+            font-weight: 500;
+            font-size: 20px;
+            color: var(--color-primary);
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-on-surface);
+            transition: background-color var(--transition), transform 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background-color: rgba(0,0,0,0.08);
+            transform: scale(1.1);
+        }
+
+        .main-content {
+            padding: 16px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .category-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 24px 0 16px;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-title .material-icons {
+            color: var(--color-primary);
+        }
+
+        .card-container {
+            border-radius: var(--card-radius);
+            background: var(--color-surface);
+            box-shadow: 0 2px 6px var(--color-shadow);
+            border: 1px solid var(--color-surface-variant);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            color: var(--color-on-surface-variant);
+            margin-bottom: 8px;
+            font-weight: 500;
+            padding-left: 4px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--color-surface-variant);
+            border-radius: 12px;
+            font-size: 16px;
+            background: var(--color-surface);
+            color: var(--color-on-surface);
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(var(--color-primary), 0.2);
+        }
+
+        .select-style {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--color-surface-variant);
+            border-radius: 12px;
+            font-size: 16px;
+            background: var(--color-surface);
+            color: var(--color-on-surface);
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2349454f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+        }
+
+        .select-style:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--color-primary);
+            color: var(--color-on-primary);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px var(--color-shadow);
+            margin-top: 8px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--color-shadow);
+        }
+
+        .qr-container {
+            margin: 32px 0;
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: var(--color-surface-variant);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-msg {
+            color: #B00020;
+            font-size: 14px;
+            padding: 16px;
+            background: #FFEBEE;
+            border-radius: 12px;
+            margin: 16px 0;
+            display: none;
+        }
+
+        .save-btn {
+            background: #4CAF50;
+            display: none;
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            background: var(--color-surface);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px var(--color-shadow);
+            z-index: 1000;
+            display: none;
+            width: 280px;
+            transform: translateY(-10px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            border: 1px solid var(--color-surface-variant);
+        }
+
+        .settings-panel.show {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .settings-item {
+            margin-bottom: 16px;
+        }
+
+        .settings-item label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--color-on-surface);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .theme-preview {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .light-preview { background: linear-gradient(135deg, #6750A4 50%, #FEF7FF 50%); }
+        .dark-preview { background: linear-gradient(135deg, #D0BCFF 50%, #1D1B20 50%); }
+        .red-preview { background: linear-gradient(135deg, #FF5252 50%, #FFF3F3 50%); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .qr-container img {
+            animation: fadeIn 0.4s ease-out forwards;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="app-header">
+        <div class="app-title">
+            <div class="icon-btn" onclick="goBackOrClose()">
+                <span class="material-icons">arrow_back</span>
+            </div>
+            <h1>二维码生成器</h1>
+        </div>
+        <div class="toolbar-actions">
+            <div class="icon-btn" onclick="toggleSettings()">
+                <span class="material-icons">settings</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-item">
+            <label>界面主题</label>
+            <select id="themeSelect" class="select-style">
+                <option value="light"><span class="theme-preview light-preview"></span>默认主题</option>
+                <option value="dark"><span class="theme-preview dark-preview"></span>深色模式</option>
+                <option value="red"><span class="theme-preview red-preview"></span>红色警示</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <h2 class="category-title">
+            <span class="material-icons">qr_code_2</span>
+            二维码生成器
+        </h2>
+        
+        <div class="card-container">
+            <!-- 输入内容 -->
+            <div class="input-group">
+                <label class="input-label">输入内容</label>
+                <input type="text" class="input-field" id="urlInput" placeholder="输入文字或网址">
+            </div>
+            
+            <!-- 尺寸选择 -->
+            <div class="input-group">
+                <label class="input-label">选择尺寸</label>
+                <select class="select-style" id="sizeSelect">
+                    <option value="200">200 x 200</option>
+                    <option value="300" selected>300 x 300</option>
+                    <option value="400">400 x 400</option>
+                </select>
+            </div>
+            
+            <button class="action-btn" onclick="generateQR()">
+                <span class="material-icons">qr_code_2</span>生成二维码
+            </button>
+            
+            <div class="error-msg" id="errorMsg">请输入有效内容</div>
+            
+            <div class="qr-container" id="qrContainer"></div>
+            
+            <button class="action-btn save-btn" id="saveBtn" onclick="saveQR()">
+                <span class="material-icons">download</span>保存二维码
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // 应用返回或关闭功能
+        function goBackOrClose() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.close();
+            }
+        }
+        
+        // 初始化主题
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.dataset.theme = savedTheme;
+            document.getElementById('themeSelect').value = savedTheme;
+        }
+        
+        function applyTheme(theme) {
+            document.body.dataset.theme = theme;
+            localStorage.setItem('theme', theme);
+            
+            // 更新应用标题颜色
+            document.querySelector('.app-title h1').style.color = 
+                `var(${theme === 'red' ? '--color-red-primary' : '--color-primary'})`;
+        }
+
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('show');
+        }
+
+        // 主题切换事件
+        document.getElementById('themeSelect').addEventListener('change', function(e) {
+            applyTheme(e.target.value);
+            document.getElementById('settingsPanel').classList.remove('show');
+        });
+        
+        // 生成二维码功能
+        function generateQR() {
+            const url = document.getElementById('urlInput').value.trim();
+            const size = document.getElementById('sizeSelect').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const qrContainer = document.getElementById('qrContainer');
+            const saveBtn = document.getElementById('saveBtn');
+            
+            // 重置状态
+            errorMsg.style.display = 'none';
+            qrContainer.innerHTML = '';
+            saveBtn.style.display = 'none';
+            
+            // 输入验证
+            if (!url) {
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
+            // 生成二维码
+            try {
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`;
+                qrContainer.innerHTML = `<img src="${qrUrl}" alt="二维码" id="qrImage" style="width:${size}px;height:${size}px">`;
+                saveBtn.style.display = 'block';
+            } catch (error) {
+                errorMsg.textContent = '二维码生成失败，请重试';
+                errorMsg.style.display = 'block';
+                console.error('生成错误:', error);
+            }
+        }
+        
+        // 保存二维码功能
+        function saveQR() {
+            try {
+                const qrImage = document.getElementById('qrImage');
+                if (!qrImage) return;
+                
+                const link = document.createElement('a');
+                link.href = qrImage.src;
+                link.download = `qrcode_${Date.now()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 显示保存成功反馈
+                const saveBtn = document.getElementById('saveBtn');
+                const originalHTML = saveBtn.innerHTML;
+                saveBtn.innerHTML = `<span class="material-icons">check</span> 已保存`;
+                
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalHTML;
+                }, 2000);
+            } catch (error) {
+                document.getElementById('errorMsg').textContent = '保存失败，请重试';
+                document.getElementById('errorMsg').style.display = 'block';
+                console.error('保存错误:', error);
+            }
+        }
+        
+        // 初始化
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.icon-btn') && 
+                !e.target.closest('.settings-panel') &&
+                !e.target.closest('.select-style')) {
+                document.getElementById('settingsPanel').classList.remove('show');
+            }
+        });
+        
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('settingsPanel').classList.contains('show')) {
+                document.getElementById('settingsPanel').classList.remove('show');
+            }
+        });
+        
+        // 页面加载
+        window.onload = function() {
+            loadTheme();
+
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频播放器 | ckacka工具箱</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #6750A4;
+            --color-primary-container: #EADDFF;
+            --color-on-primary: #FFFFFF;
+            --color-surface: #FEF7FF;
+            --color-surface-variant: #E7E0EC;
+            --color-on-surface: #1D1B20;
+            --color-on-surface-variant: #49454F;
+            --color-shadow: rgba(0, 0, 0, 0.15);
+            --color-backdrop: rgba(0, 0, 0, 0.25);
+            --card-radius: 24px;
+            --header-height: 56px;
+            --transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
+            --card-padding: 24px;
+        }
+
+        [data-theme="dark"] {
+            --color-primary: #D0BCFF;
+            --color-primary-container: #4F378B;
+            --color-on-primary: #381E72;
+            --color-surface: #1D1B20;
+            --color-surface-variant: #49454F;
+            --color-on-surface: #E6E1E5;
+            --color-on-surface-variant: #CAC4D0;
+            --color-shadow: rgba(0, 0, 0, 0.3);
+            --color-backdrop: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--color-surface);
+            color: var(--color-on-surface);
+            min-height: 100vh;
+            transition: background-color var(--transition), color var(--transition);
+            overflow-x: hidden;
+        }
+
+        .app-header {
+            height: var(--header-height);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background-color: var(--color-surface);
+            box-shadow: 0 2px 4px var(--color-shadow);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-title h1 {
+            font-weight: 500;
+            font-size: 20px;
+            color: var(--color-primary);
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-on-surface);
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background-color: rgba(0,0,0,0.08);
+            transform: scale(1.1);
+        }
+
+        .main-content {
+            padding: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            border-radius: var(--card-radius);
+            background: var(--color-surface);
+            box-shadow: 0 2px 6px var(--color-shadow);
+            border: 1px solid var(--color-surface-variant);
+            padding: var(--card-padding);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title .material-icons {
+            color: var(--color-primary);
+        }
+
+        /* 视频容器样式 */
+        .video-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-color: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px var(--color-shadow);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: #000;
+            cursor: pointer;
+        }
+
+        /* 播放提示 */
+        #playHint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 20px;
+            border-radius: 24px;
+            font-size: 14px;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+
+        video:hover ~ #playHint {
+            opacity: 0.3;
+        }
+
+        /* 控制区域样式 */
+        .control-panel {
+            background: var(--color-surface-variant);
+            padding: 20px;
+            border-radius: 16px;
+        }
+
+        /* URL输入框样式 */
+        .url-input-group {
+            display: flex;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .url-input-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .url-input-label {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            font-size: 14px;
+            color: var(--color-on-surface-variant);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        #videoUrlInput {
+            width: 100%;
+            padding: 34px 16px 14px;
+            border: 2px solid var(--color-surface-variant);
+            border-radius: 12px;
+            font-size: 16px;
+            background: var(--color-surface);
+            color: var(--color-on-surface);
+            transition: all 0.3s ease;
+        }
+
+        #videoUrlInput:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(var(--color-primary), 0.2);
+        }
+
+        #videoUrlInput:focus + .url-input-label,
+        #videoUrlInput:not(:placeholder-shown) + .url-input-label {
+            top: 8px;
+            font-size: 12px;
+        }
+
+        .play-icon {
+            color: var(--color-primary);
+            position: absolute;
+            top: 16px;
+            right: 16px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 16px 24px;
+            background: var(--color-primary);
+            color: var(--color-on-primary);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px var(--color-shadow);
+            height: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--color-shadow);
+        }
+
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+            padding: 12px 24px;
+            border-radius: 12px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px var(--color-shadow);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        /* 设置菜单样式 */
+        .settings-menu {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            background: var(--color-surface);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px var(--color-shadow);
+            z-index: 1000;
+            display: none;
+            width: 240px;
+            transform: translateY(-10px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            border: 1px solid var(--color-surface-variant);
+            overflow: hidden;
+        }
+
+        .settings-menu.show {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .menu-item:hover {
+            background-color: var(--color-surface-variant);
+        }
+
+        .menu-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 16px;
+            color: var(--color-on-surface);
+        }
+
+        /* 开关样式 */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--color-on-surface-variant);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--color-primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* 响应式布局 */
+        @media (max-width: 700px) {
+            .main-content {
+                padding: 8px;
+            }
+            
+            .card {
+                padding: 16px;
+            }
+            
+            .video-container {
+                aspect-ratio: 16/9;
+            }
+            
+            .url-input-group {
+                flex-direction: column;
+            }
+            
+            .url-input-container {
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 16px;
+            }
+            
+            .app-title h1 {
+                font-size: 18px;
+            }
+            
+            .settings-menu {
+                width: 200px;
+            }
+        }
+        
+        @media (max-width: 500px) {
+            :root {
+                --card-padding: 16px;
+            }
+            
+            .video-container {
+                border-radius: 12px;
+            }
+            
+            #videoUrlInput {
+                padding-top: 30px;
+                padding-bottom: 12px;
+            }
+            
+            .control-panel {
+                padding: 16px;
+            }
+            
+            .app-title h1 {
+                font-size: 16px;
+            }
+            
+            .settings-menu {
+                top: 56px;
+                right: 10px;
+                width: 180px;
+            }
+        }
+
+        @media (min-width: 1000px) {
+            .main-content {
+                max-width: 900px;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .settings-menu {
+            animation: slideIn 0.3s ease forwards;
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="app-header">
+        <div class="app-title">
+            <div class="icon-btn" onclick="goBackOrClose()">
+                <span class="material-icons">arrow_back</span>
+            </div>
+            <h1>视频播放器</h1>
+        </div>
+        <div class="icon-btn" id="menuButton">
+            <span class="material-icons">more_vert</span>
+        </div>
+    </div>
+    
+    <!-- 精简设置菜单 -->
+    <div class="settings-menu" id="settingsMenu">
+        <div class="menu-item" onclick="toggleTheme()">
+            <div class="menu-content">
+                <span class="material-icons">dark_mode</span>
+                <span>深色模式</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="menu-item" onclick="resetVideoPlayer()">
+            <div class="menu-content">
+                <span class="material-icons">refresh</span>
+                <span>重置播放器</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="card">
+            <div class="card-title">
+                <span class="material-icons">play_circle</span>
+                视频播放器
+            </div>
+            
+            <!-- 视频容器 -->
+            <div class="video-container">
+                <video id="myVideo" controls>
+                    <source src="https://ckacka.github.io/djs.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放
+                </video>
+                <div id="playHint">点击播放视频</div>
+            </div>
+            
+            <!-- 控制面板 -->
+            <div class="control-panel">
+                <!-- URL输入控制 -->
+                <div class="url-input-group">
+                    <div class="url-input-container">
+                        <input type="text" id="videoUrlInput" class="url-input" placeholder="https://example.com/video.mp4">
+                        <div class="url-input-label">视频播放地址</div>
+                        <i class="material-icons play-icon">link</i>
+                    </div>
+                    <button class="btn" onclick="changeVideoSource()">
+                        <span class="material-icons">play_arrow</span>
+                        <span>加载视频</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 应用返回或关闭功能
+        function goBackOrClose() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.close();
+            }
+        }
+        
+        // 菜单控制
+        const menuButton = document.getElementById('menuButton');
+        const settingsMenu = document.getElementById('settingsMenu');
+        
+        function toggleMenu() {
+            settingsMenu.classList.toggle('show');
+        }
+        
+        menuButton.addEventListener('click', (e) => {
+            toggleMenu();
+            e.stopPropagation(); // 阻止事件冒泡
+        });
+        
+        // 初始化主题
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.dataset.theme = savedTheme;
+            document.getElementById('themeToggle').checked = savedTheme === 'dark';
+        }
+        
+        function toggleTheme() {
+            const isDarkMode = document.getElementById('themeToggle').checked;
+            const theme = isDarkMode ? 'dark' : 'light';
+            
+            document.body.dataset.theme = theme;
+            localStorage.setItem('theme', theme);
+            
+            // 更新应用标题颜色
+            document.querySelector('.app-title h1').style.color = 
+                theme === 'dark' ? 'var(--color-primary)' : 'var(--color-primary)';
+                
+            showNotification(`已切换至${isDarkMode ? '深色' : '浅色'}模式`);
+        }
+        
+        // 主题切换事件
+        document.getElementById('themeToggle').addEventListener('change', toggleTheme);
+        
+        // 视频源切换功能
+        function changeVideoSource() {
+            const inputUrl = document.getElementById('videoUrlInput').value;
+            const videoElement = document.getElementById('myVideo');
+            
+            if (inputUrl) {
+                videoElement.src = inputUrl;
+                videoElement.load();
+                videoElement.play().catch(error => {
+                    console.error('视频播放失败:', error);
+                    showNotification('视频加载失败，请检查地址有效性');
+                });
+                showNotification('视频加载中...');
+            } else {
+                showNotification('请输入视频地址');
+            }
+        }
+        
+        // 显示通知信息
+        function showNotification(message) {
+            // 移除现有的通知
+            const existingNote = document.querySelector('.notification');
+            if (existingNote) document.body.removeChild(existingNote);
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // 显示通知并添加动画
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // 3秒后淡出并移除
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // 重置播放器
+        function resetVideoPlayer() {
+            const videoElement = document.getElementById('myVideo');
+            videoElement.src = "https://ckacka.github.io/djs.mp4";
+            videoElement.load();
+            document.getElementById('videoUrlInput').value = '';
+            showNotification('播放器已重置');
+            settingsMenu.classList.remove('show'); // 关闭菜单
+        }
+        
+        // 视频控制逻辑
+        const video = document.getElementById('myVideo');
+        const playHint = document.getElementById('playHint');
+
+        video.addEventListener('play', () => playHint.style.display = 'none');
+        video.addEventListener('pause', () => playHint.style.display = 'block');
+        video.addEventListener('click', () => video.paused && video.play());
+        
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', (event) => {
+            if (!menuButton.contains(event.target) && 
+                !settingsMenu.contains(event.target) &&
+                settingsMenu.classList.contains('show')) {
+                settingsMenu.classList.remove('show');
+            }
+        });
+        
+        // 初始化
+        window.onload = function() {
+            loadTheme();
+            // 初始时显示播放提示
+            playHint.style.display = 'block';
+        };
+    </script>
+</body>
+</html>

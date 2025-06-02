@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机生词 | ckacka工具箱</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #6750A4;
+            --color-primary-container: #EADDFF;
+            --color-on-primary: #FFFFFF;
+            --color-surface: #FEF7FF;
+            --color-surface-variant: #E7E0EC;
+            --color-on-surface: #1D1B20;
+            --color-on-surface-variant: #49454F;
+            --color-shadow: rgba(0, 0, 0, 0.15);
+            --color-backdrop: rgba(0, 0, 0, 0.25);
+            --card-radius: 24px;
+            --header-height: 56px;
+            --tool-card-height: 140px;
+            --transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
+            
+            /* 新增红色主题变量 */
+            --color-red-primary: #FF5252;
+            --color-red-surface: #FFF3F3;
+            --color-red-on-surface: #5C0000;
+            --color-red-surface-variant: #FFB4B4;
+        }
+
+        [data-theme="dark"] {
+            --color-primary: #D0BCFF;
+            --color-primary-container: #4F378B;
+            --color-on-primary: #381E72;
+            --color-surface: #1D1B20;
+            --color-surface-variant: #49454F;
+            --color-on-surface: #E6E1E5;
+            --color-on-surface-variant: #CAC4D0;
+            --color-shadow: rgba(0, 0, 0, 0.3);
+            --color-backdrop: rgba(0, 0, 0, 0.5);
+        }
+
+        /* 红色主题样式 */
+        [data-theme="red"] {
+            --color-primary: var(--color-red-primary);
+            --color-primary-container: rgba(255, 82, 82, 0.1);
+            --color-on-primary: #ffffff;
+            --color-surface: var(--color-red-surface);
+            --color-surface-variant: var(--color-red-surface-variant);
+            --color-on-surface: var(--color-red-on-surface);
+            --color-on-surface-variant: #B30000;
+            --color-shadow: rgba(92, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--color-surface);
+            color: var(--color-on-surface);
+            min-height: 100vh;
+            transition: background-color var(--transition), color var(--transition);
+            overflow-x: hidden;
+        }
+
+        .app-header {
+            height: var(--header-height);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background-color: var(--color-surface);
+            box-shadow: 0 2px 4px var(--color-shadow);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-title h1 {
+            font-weight: 500;
+            font-size: 20px;
+            color: var(--color-primary);
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-on-surface);
+            transition: background-color var(--transition), transform 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background-color: rgba(0,0,0,0.08);
+            transform: scale(1.1);
+        }
+
+        .main-content {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .category-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 24px 0 16px;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-title .material-icons {
+            color: var(--color-primary);
+        }
+
+        .card-container {
+            border-radius: var(--card-radius);
+            background: var(--color-surface);
+            box-shadow: 0 2px 6px var(--color-shadow);
+            border: 1px solid var(--color-surface-variant);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .progress-bar {
+            height: 5px;
+            background: var(--color-surface-variant);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--color-primary);
+            transition: width 0.3s linear;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .captcha-input {
+            flex: 1;
+            padding: 16px;
+            border: 2px solid var(--color-surface-variant);
+            border-radius: 12px;
+            font-size: 16px;
+            background: var(--color-surface);
+            color: var(--color-on-surface);
+            transition: all 0.3s ease;
+        }
+
+        .captcha-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(var(--color-primary), 0.2);
+        }
+
+        .copy-btn {
+            background: var(--color-primary);
+            color: var(--color-on-primary);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px var(--color-shadow);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--color-shadow);
+        }
+
+        .refresh-tip {
+            text-align: center;
+            font-size: 14px;
+            color: var(--color-on-surface-variant);
+            opacity: 0.8;
+            margin: 10px 0;
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: var(--color-primary);
+            color: var(--color-on-primary);
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+            transition: all 0.3s ease;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+
+        .material-icons.large {
+            font-size: 32px;
+        }
+
+        .captcha-image {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            border-radius: 12px;
+            aspect-ratio: 16/9;
+            object-fit: contain;
+            background: var(--color-surface-variant);
+            padding: 20px;
+            display: block;
+            box-shadow: 0 2px 4px var(--color-shadow);
+            transition: opacity 0.3s ease;
+        }
+        
+        /* 设置面板样式 */
+        .settings-panel {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            background: var(--color-surface);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px var(--color-shadow);
+            z-index: 1000;
+            display: none;
+            width: 280px;
+            transform: translateY(-10px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            border: 1px solid var(--color-surface-variant);
+        }
+
+        .settings-panel.show {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .settings-item {
+            margin-bottom: 16px;
+        }
+
+        .settings-item label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--color-on-surface);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .select-style {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: var(--color-surface);
+            color: var(--color-on-surface);
+            border: 2px solid var(--color-surface-variant);
+            font-size: 16px;
+            appearance: none;
+            position: relative;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2349454f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .select-style:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-container {
+            animation: fadeIn 0.4s ease-out forwards;
+            opacity: 0;
+        }
+        
+        /* 主题预览标记 */
+        .theme-preview {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .light-preview { background: linear-gradient(135deg, #6750A4 50%, #FEF7FF 50%); }
+        .dark-preview { background: linear-gradient(135deg, #D0BCFF 50%, #1D1B20 50%); }
+        .red-preview { background: linear-gradient(135deg, #FF5252 50%, #FFF3F3 50%); }
+        
+        .select-style option {
+            padding: 8px;
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="app-header">
+        <div class="app-title">
+            <div class="icon-btn" onclick="goBackOrClose()">
+                <span class="material-icons">arrow_back</span>
+            </div>
+            <h1>随机生词</h1>
+        </div>
+        <div class="toolbar-actions">
+            <div class="icon-btn" onclick="toggleSettings()">
+                <span class="material-icons">settings</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <h2 class="category-title">
+            <span class="material-icons">history_edu</span>
+            随机生词工具
+        </h2>
+        
+        <div class="card-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <img id="captchaImage" class="captcha-image" src="https://fankui.sogou.com/index.php/web/uc/vcode?tag=0.616400807192693" alt="随机生词">
+            
+            <div class="input-container">
+                <input type="text" id="captchaInput" class="captcha-input" placeholder="输入生成的词语...">
+                <button class="copy-btn" onclick="copyText()">
+                    <span class="material-icons">content_copy</span> 复制
+                </button>
+            </div>
+            
+            <div class="refresh-tip">每 <span id="intervalDisplay">10</span> 秒自动刷新</div>
+        </div>
+    </div>
+    
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-item">
+            <label>界面主题</label>
+            <select id="themeSelect" class="select-style">
+                <option value="light"><span class="theme-preview light-preview"></span>默认主题</option>
+                <option value="dark"><span class="theme-preview dark-preview"></span>深色模式</option>
+                <option value="red"><span class="theme-preview red-preview"></span>红色警示</option>
+            </select>
+        </div>
+        <div class="settings-item">
+            <label>刷新间隔（秒）</label>
+            <select id="intervalSelect" class="select-style">
+                <option value="10">10</option>
+                <option value="30">30</option>
+                <option value="60">60</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="floating-btn" onclick="refreshCaptcha()">
+        <span class="material-icons large">refresh</span>
+    </div>
+    
+    <script>
+        // 新增返回/关闭函数
+        function goBackOrClose() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.close();
+            }
+        }
+        
+        // 初始化主题
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.dataset.theme = savedTheme;
+            document.getElementById('themeSelect').value = savedTheme;
+        }
+        
+        function applyTheme(theme) {
+            document.body.dataset.theme = theme;
+            localStorage.setItem('theme', theme);
+            
+            // 更新应用标题颜色
+            document.querySelector('.app-title h1').style.color = 
+                `var(${theme === 'red' ? '--color-red-primary' : '--color-primary'})`;
+        }
+
+        const config = {
+            imageUrl: 'https://fankui.sogou.com/index.php/web/uc/vcode?tag=',
+            refreshInterval: localStorage.getItem('refreshInterval') || 10000
+        }
+
+        const elements = {
+            themeSelect: document.getElementById('themeSelect'),
+            intervalSelect: document.getElementById('intervalSelect'),
+            settingsPanel: document.getElementById('settingsPanel'),
+            progressFill: document.getElementById('progressFill'),
+            captchaImage: document.getElementById('captchaImage'),
+            intervalDisplay: document.getElementById('intervalDisplay'),
+            captchaInput: document.getElementById('captchaInput')
+        }
+
+        function initSettings() {
+            loadTheme();
+            elements.themeSelect.value = localStorage.getItem('theme') || 'light';
+            config.refreshInterval = localStorage.getItem('refreshInterval') || 10000;
+            elements.intervalSelect.value = String(config.refreshInterval / 1000);
+            elements.intervalDisplay.textContent = config.refreshInterval / 1000;
+        }
+
+        function toggleSettings() {
+            elements.settingsPanel.classList.toggle('show');
+        }
+
+        elements.themeSelect.addEventListener('change', (e) => {
+            const theme = e.target.value;
+            applyTheme(theme);
+            elements.settingsPanel.classList.remove('show');
+        })
+
+        elements.intervalSelect.addEventListener('change', (e) => {
+            const interval = Number(e.target.value) * 1000;
+            config.refreshInterval = interval;
+            elements.intervalDisplay.textContent = e.target.value;
+            localStorage.setItem('refreshInterval', interval);
+            resetTimer();
+        })
+
+        let timer = null;
+        function startAutoRefresh() {
+            let startTime = Date.now();
+            timer = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                elements.progressFill.style.width = `${(elapsed / config.refreshInterval) * 100}%`;
+                if (elapsed >= config.refreshInterval) {
+                    refreshCaptcha();
+                    startTime = Date.now();
+                }
+            }, 50);
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            elements.progressFill.style.width = '0%';
+            startAutoRefresh();
+        }
+
+        function refreshCaptcha() {
+            elements.captchaImage.style.opacity = '0.5';
+            elements.captchaImage.src = `${config.imageUrl}${Math.random()}`;
+            setTimeout(() => elements.captchaImage.style.opacity = '1', 300);
+            
+            // 重置进度条
+            elements.progressFill.style.width = '0%';
+            clearInterval(timer);
+            startAutoRefresh();
+        }
+
+        function copyText() {
+            elements.captchaInput.select();
+            navigator.clipboard.writeText(elements.captchaInput.value)
+                .then(() => {
+                    // 显示复制成功反馈
+                    const copyBtn = document.querySelector('.copy-btn');
+                    const originalHTML = copyBtn.innerHTML;
+                    copyBtn.innerHTML = `<span class="material-icons">check</span> 已复制`;
+                    copyBtn.style.background = 'var(--color-primary-container)';
+                    copyBtn.style.color = 'var(--color-on-surface)';
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHTML;
+                        copyBtn.style.background = 'var(--color-primary)';
+                        copyBtn.style.color = 'var(--color-on-primary)';
+                    }, 2000);
+                })
+                .catch(err => console.error('复制失败:', err));
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.icon-btn') && 
+                !e.target.closest('.settings-panel') &&
+                !e.target.closest('.select-style')) {
+                elements.settingsPanel.classList.remove('show');
+            }
+        })
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && elements.settingsPanel.classList.contains('show')) {
+                elements.settingsPanel.classList.remove('show');
+            }
+        })
+
+        // 页面加载
+        window.onload = () => {
+            initSettings();
+            startAutoRefresh();
+        };
+    </script>
+</body>
+</html>
