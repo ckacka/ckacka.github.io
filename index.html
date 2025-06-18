@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ckacka工具箱</title>
+    <!-- 添加备用字体图标源 -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/3.0.1/iconfont/material-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -621,6 +623,13 @@
                             <span class="slider"></span>
                         </label>
                     </div>
+                    <!-- 添加分隔线 -->
+                    <div class="menu-divider"></div>
+                    <!-- 添加更新日志菜单项 -->
+                    <div class="menu-item" id="changelogItem">
+                        <span class="material-icons">history</span>
+                        更新日志
+                    </div>
                 </div>
             </div>
         </div>
@@ -852,6 +861,13 @@
                     openingHeader.classList.add('show');
                 }, 10);
                 
+                // 设置定时器在3秒后移除提示条
+                setTimeout(() => {
+                    if (document.body.contains(openingHeader)) {
+                        document.body.removeChild(openingHeader);
+                    }
+                }, 3000);
+                
                 // 跳转到指定URL
                 setTimeout(() => {
                     window.location.href = url;
@@ -945,6 +961,32 @@
             
             // 添加下载按钮事件
             document.getElementById('downloadBtn').addEventListener('click', downloadImage);
+            
+            // 添加更新日志菜单项点击事件
+            document.getElementById('changelogItem').addEventListener('click', function() {
+                // 创建更新日志提示条
+                const openingHeader = document.createElement('div');
+                openingHeader.className = 'opening-header';
+                openingHeader.innerHTML = `<span class="material-icons">history</span> 正在打开更新日志`;
+                document.body.appendChild(openingHeader);
+                
+                // 显示提示
+                setTimeout(() => {
+                    openingHeader.classList.add('show');
+                }, 10);
+                
+                // 设置定时器在3秒后移除提示条
+                setTimeout(() => {
+                    if (document.body.contains(openingHeader)) {
+                        document.body.removeChild(openingHeader);
+                    }
+                }, 3000);
+                
+                // 跳转到更新日志页面
+                setTimeout(() => {
+                    window.open('https://ckacka.github.io/changelog', '_blank');
+                }, 1000);
+            });
         };
     </script>
 </body>
