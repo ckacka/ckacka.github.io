@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ckacka工具箱</title>
-    <!-- 添加备用字体图标源 -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/3.0.1/iconfont/material-icons.min.css">
+    <!-- 修复图标加载问题：使用更稳定的CDN -->
+    <link href="https://fonts.loli.net/css?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* 所有原有样式保持不变 */
         :root {
             --color-primary: #6750A4;
             --color-primary-container: #EADDFF;
@@ -612,6 +612,12 @@
                 
                 <!-- 菜单弹出层 -->
                 <div class="menu-popup" id="menuPopup">
+                    <!-- 新增更新日志菜单项 -->
+                    <div class="menu-item" id="changelogItem">
+                        <span class="material-icons">history</span>
+                        更新日志
+                    </div>
+                    <div class="menu-divider"></div>
                     <div class="menu-header">主题设置</div>
                     <div class="menu-item toggle-container">
                         <div>
@@ -622,13 +628,6 @@
                             <input type="checkbox" id="themeToggle">
                             <span class="slider"></span>
                         </label>
-                    </div>
-                    <!-- 添加分隔线 -->
-                    <div class="menu-divider"></div>
-                    <!-- 添加更新日志菜单项 -->
-                    <div class="menu-item" id="changelogItem">
-                        <span class="material-icons">history</span>
-                        更新日志
                     </div>
                 </div>
             </div>
@@ -725,7 +724,7 @@
     
     <!-- 页脚 -->
     <div class="app-footer">
-        <p>ckacka 工具箱 • v1.6.0</p>
+        <p>ckacka 工具箱 • v1.6.1</p>
         <p class="copyright">© ckacka 工具箱应用 • 遵循 Material Design 设计规范</p>
     </div>
 
@@ -861,12 +860,12 @@
                     openingHeader.classList.add('show');
                 }, 10);
                 
-                // 设置定时器在3秒后移除提示条
+                // 修复1: 设置定时器自动移除提示条
                 setTimeout(() => {
                     if (document.body.contains(openingHeader)) {
                         document.body.removeChild(openingHeader);
                     }
-                }, 3000);
+                }, 3000); // 3秒后自动消失
                 
                 // 跳转到指定URL
                 setTimeout(() => {
@@ -951,6 +950,11 @@
             }
         });
         
+        // 新增：更新日志功能
+        function openChangelog() {
+            window.open('https://ckacka.github.io/changelog.html', '_blank');
+        }
+        
         // 页面加载
         window.onload = () => {
             loadTheme();
@@ -962,30 +966,10 @@
             // 添加下载按钮事件
             document.getElementById('downloadBtn').addEventListener('click', downloadImage);
             
-            // 添加更新日志菜单项点击事件
+            // 新增：为更新日志菜单项添加事件
             document.getElementById('changelogItem').addEventListener('click', function() {
-                // 创建更新日志提示条
-                const openingHeader = document.createElement('div');
-                openingHeader.className = 'opening-header';
-                openingHeader.innerHTML = `<span class="material-icons">history</span> 正在打开更新日志`;
-                document.body.appendChild(openingHeader);
-                
-                // 显示提示
-                setTimeout(() => {
-                    openingHeader.classList.add('show');
-                }, 10);
-                
-                // 设置定时器在3秒后移除提示条
-                setTimeout(() => {
-                    if (document.body.contains(openingHeader)) {
-                        document.body.removeChild(openingHeader);
-                    }
-                }, 3000);
-                
-                // 跳转到更新日志页面
-                setTimeout(() => {
-                    window.open('https://ckacka.github.io/changelog', '_blank');
-                }, 1000);
+                openChangelog();
+                menuPopup.classList.remove('show');
             });
         };
     </script>
