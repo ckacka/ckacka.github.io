@@ -1,0 +1,699 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国之声 | 网页收音机</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #1E88E5;
+            --color-primary-light: #6AB7FF;
+            --color-primary-dark: #005CB2;
+            --color-primary-container: #E3F2FD;
+            --color-on-primary: #FFFFFF;
+            --color-surface: #FFFFFF;
+            --color-surface-variant: #F5F5F5;
+            --color-on-surface: #212121;
+            --color-on-surface-variant: #757575;
+            --color-shadow: rgba(0, 0, 0, 0.12);
+            --color-shadow-dark: rgba(0, 0, 0, 0.24);
+            --card-radius: 16px;
+            --header-height: 56px;
+            --transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
+            --card-padding: 20px;
+        }
+
+        [data-theme="dark"] {
+            --color-primary: #2196F3;
+            --color-primary-light: #64B5F6;
+            --color-primary-dark: #1976D2;
+            --color-primary-container: #1E1E1E;
+            --color-on-primary: #FFFFFF;
+            --color-surface: #121212;
+            --color-surface-variant: #1F1极速工具小站
+            F1F;
+            --color-on-surface: #E0E0E0;
+            --color-on-surface-variant: #BDBDBD;
+            --color-shadow: rgba(0, 0, 0, 0.24);
+            --color-shadow-dark: rgba(0, 0, 0, 0.36);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Noto Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--color-surface);
+            color: var(--color-on-surface);
+            min-height: 100vh;
+            transition: background-color var(--transition), color var(--transition);
+            overflow-x: hidden;
+        }
+
+        .app-header {
+            height: var(--header-height);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background-color: var(--color-surface);
+            box-shadow: 0 1px 3px var(--color-shadow);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-title h1 {
+            font-weight: 500;
+            font-size: 20px;
+            color: var(--color-on-surface);
+            letter-spacing: 0.15px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-on-surface);
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn:hover, .icon-btn:focus {
+            background-color: rgba(0, 0, 0, 0.06);
+        }
+
+        .main-content {
+            padding: 20px 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            border-radius: var(--card-radius);
+            background: var(--color-surface);
+            box-shadow: 0 1px 3px var(--color-shadow);
+            padding: var(--card-padding);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--color-primary);
+            letter-spacing: 0.15px;
+            text-transform: uppercase;
+        }
+
+        .card-title .material-icons {
+            color: var(--color-primary);
+            font-size: 20px;
+        }
+
+        /* 收音机容器样式 */
+        .radio-container {
+            position: relative;
+            width: 100%;
+            background-color: var(--color-surface-variant);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 1px 2px var(--color-shadow);
+            text-align: center;
+        }
+
+        .radio-visualizer {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px var(--color-shadow);
+            overflow: hidden;
+        }
+
+        .logo-container.active {
+            animation: rotateDisc 20s linear infinite;
+        }
+
+        .cnr-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+        }
+
+        .radio-info {
+            text-align: center;
+            width: 100%;
+        }
+
+        .radio-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--color-on-surface);
+            letter-spacing: 0.25px;
+        }
+
+        .radio-subtitle {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--color-on-surface-variant);
+            margin-bottom: 20px;
+            letter-spacing: 0.25px;
+        }
+
+        .radio-controls {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 20px;
+            align-items: center;
+        }
+
+        .volume-control {
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--color-on-surface-variant);
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .volume-slider {
+            width: 100%;
+            max-width: 300px;
+            -webkit-appearance: none;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--color-surface-variant);
+            outline: none;
+            margin: 0 8px;
+        }
+
+        .volume-slider::-webkit-slider-runnable-track {
+            height: 4px;
+            border-radius: 2px;
+            background: linear-gradient(to right, 
+                var(--color-primary) 0%, 
+                var(--color-primary) var(--volume-percent), 
+                var(--color-surface-variant) var(--volume-percent), 
+                var(--color-surface-variant) 100%);
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: -6px;
+            box-shadow: 0 2px 4px var(--color-shadow);
+            border: 1px solid var(--color-on-primary);
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* 控制按钮样式 */
+        .control-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+            box-shadow: 0 3px 5px var(--color-shadow);
+            border: none;
+            outline: none;
+        }
+
+        .control-btn:hover, .control-btn:focus {
+            background-color: var(--color-primary-dark);
+            transform: scale(1.05);
+            box-shadow: 0 5px 8px var(--color-shadow);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-lg {
+            width: 64px;
+            height: 64px;
+        }
+
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background-color: var(--color-surface);
+            color: var(--color-on-surface);
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px var(--color-shadow-dark);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            pointer-events: none;
+            font-size: 14px;
+            max-width: 300px;
+            text-align: center;
+            border: 1px solid var(--color-surface-variant);
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        /* 设置菜单样式 - 修复版本 */
+        .settings-menu {
+            position: fixed;
+            top: calc(var(--header-height) + 10px);
+            right: 16px;
+            background: var(--color-surface);
+            border-radius: 8px;
+            box-shadow: 0 8px 16px var(--color-shadow-dark);
+            z-index: 99;
+            display: none;
+            width: 200px;
+            transform: translateY(-10px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            border: 1px solid var(--color-surface-variant);
+            overflow: hidden;
+        }
+
+        .settings-menu.show {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            gap: 16px;
+            color: var(--color-on-surface);
+            font-size: 14px;
+        }
+
+        .menu-item:hover {
+            background-color: var(--color-surface-variant);
+        }
+
+        /* 开关样式 */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--color-on-surface-variant);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--color-primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* 动画效果 */
+        @keyframes rotateDisc {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* 响应式布局 */
+        @media (max-width: 500px) {
+            :root {
+                --card-padding: 16px;
+            }
+            
+            .radio-visualizer {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .logo-container {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .app-title h1 {
+                font-size: 18px;
+            }
+            
+            .settings-menu {
+                width: 180px;
+                right: 10px;
+            }
+            
+            .radio-title {
+                font-size: 18px;
+            }
+            
+            .control-btn {
+                width: 48px;
+                height: 48px;
+            }
+            
+            .btn-lg {
+                width: 56px;
+                height: 56px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="app-header">
+        <div class="app-title">
+            <div class="icon-btn" onclick="goBackOrClose()">
+                <span class="material-icons">arrow_back</span>
+            </div>
+            <h1>网页收音机</h1>
+        </div>
+        <div class="icon-btn" id="menuButton">
+            <span class="material-icons">more_vert</span>
+        </div>
+    </div>
+    
+    <!-- 设置菜单 - 修复版 -->
+    <div class="settings-menu" id="settingsMenu">
+        <div class="menu-item">
+            <div class="menu-content">
+                <span class="material-icons">dark_mode</span>
+                <span>深色模式</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+    
+    <!-- 主内容 -->
+    <div class="main-content">
+        <div class="card">
+            <div class="card-title">
+                <span class="material-icons">radio</span>
+                中国之声
+            </div>
+            
+            <!-- 收音机容器 -->
+            <div class="radio-container">
+                <div class="radio-visualizer">
+                    <div class="logo-container" id="logoContainer">
+                        <!-- 中国之声Logo - 使用图片URL -->
+                        <img src="https://imagev2.xmcdn.com/group78/M07/A6/A1/wKgO4F6EVv7gP1QhAABQuiUyuzo039.png!op_type=5&upload_type=cover&device_type=ios&name=small" 
+                             alt="中国之声" class="cnr-logo" id="cnrLogo">
+                    </div>
+                </div>
+                
+                <div class="radio-info">
+                    <div class="radio-title">中国之声</div>
+                    <div class="radio-subtitle" id="statusText">点击下方按钮开始播放</div>
+                    
+                    <div class="radio-controls">
+                        <button class="control-btn" onclick="adjustVolume(-0.1)">
+                            <span class="material-icons" style="font-size: 24px;">volume_down</span>
+                        </button>
+                        <button class="control-btn btn-lg" id="playBtn" onclick="togglePlay()">
+                            <span class="material-icons" style="font-size: 32px;">play_arrow</span>
+                        </button>
+                        <button class="control-btn" onclick="adjustVolume(0.1)">
+                            <span class="material-icons" style="font-size: 24px;">volume_up</span>
+                        </button>
+                    </div>
+                    
+                    <div class="volume-control">
+                        <div class="volume-label">
+                            <span class="material-icons" style="font-size: 18px;">volume_up</span>
+                            <div>音量调节</div>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.05" value="0.7" class="volume-slider" id="volumeSlider">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 14px; color: var(--color-on-surface-variant);">
+                <p>中国中央人民广播电台第一套节目</p>
+                <p>国家权威新闻广播频率</p>
+                <p>频率：AM 639kHz / AM 981kHz / FM 101.1MHz</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">操作提示</div>
+    
+    <script>
+        // 应用返回或关闭功能
+        function goBackOrClose() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.close();
+            }
+        }
+        
+        // 菜单控制
+        const menuButton = document.getElementById('menuButton');
+        const settingsMenu = document.getElementById('settingsMenu');
+        
+        function toggleMenu() {
+            // 切换菜单显示状态
+            if (settingsMenu.classList.contains('show')) {
+                settingsMenu.classList.remove('show');
+            } else {
+                settingsMenu.classList.add('show');
+            }
+        }
+        
+        menuButton.addEventListener('click', function(e) {
+            toggleMenu();
+            e.stopPropagation();
+        });
+        
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', function(event) {
+            if (!menuButton.contains(event.target) && 
+                !settingsMenu.contains(event.target)) {
+                settingsMenu.classList.remove('show');
+            }
+        });
+
+        // 初始化主题
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.dataset.theme = savedTheme;
+            document.getElementById('themeToggle').checked = savedTheme === 'dark';
+        }
+        
+        function toggleTheme() {
+            const isDarkMode = document.getElementById('themeToggle').checked;
+            const theme = isDarkMode ? 'dark' : 'light';
+            
+            document.body.dataset.theme = theme;
+            localStorage.setItem('theme', theme);
+            settingsMenu.classList.remove('show');
+            showNotification(`已切换至${isDarkMode ? '深色' : '浅色'}模式`);
+        }
+        
+        // 主题切换事件
+        document.getElementById('themeToggle').addEventListener('change', toggleTheme);
+        
+        // 显示通知信息
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+        
+        // 收音机控制逻辑
+        const audio = new Audio("https://ngcdn001.cnr.cn/live/zgzs/index.m3u8");
+        audio.volume = 0.7;
+        const playBtn = document.getElementById('playBtn');
+        const logoContainer = document.getElementById('logoContainer');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const statusText = document.getElementById('statusText');
+        
+        let isPlaying = false;
+        
+        // 初始化音量滑块
+        function updateVolumeSlider() {
+            const value = audio.volume * 100;
+            volumeSlider.style.setProperty('--volume-percent', `${value}%`);
+        }
+        
+        volumeSlider.addEventListener('input', function() {
+            audio.volume = parseFloat(this.value);
+            updateVolumeSlider();
+        });
+        
+        // 更新滑块视觉效果
+        updateVolumeSlider();
+        
+        // 调整音量
+        function adjustVolume(delta) {
+            let newVolume = audio.volume + delta;
+            if (newVolume < 0) newVolume = 0;
+            if (newVolume > 1) newVolume = 1;
+            audio.volume = newVolume;
+            volumeSlider.value = newVolume;
+            updateVolumeSlider();
+            showNotification(`音量: ${Math.round(newVolume * 100)}%`);
+        }
+        
+        // 播放/暂停切换
+        function togglePlay() {
+            if (isPlaying) {
+                pauseRadio();
+            } else {
+                playRadio();
+            }
+        }
+        
+        // 播放电台
+        function playRadio() {
+            audio.play()
+                .then(() => {
+                    isPlaying = true;
+                    playBtn.innerHTML = '<span class="material-icons" style="font-size: 32px;">pause</span>';
+                    logoContainer.classList.add('active');
+                    statusText.textContent = "正在播放: 中国之声";
+                    showNotification('正在播放中国之声');
+                })
+                .catch(error => {
+                    console.error('播放失败:', error);
+                    statusText.textContent = "播放失败，请重试";
+                    showNotification('播放失败，请检查网络连接');
+                });
+        }
+        
+        // 暂停电台
+        function pauseRadio() {
+            audio.pause();
+            isPlaying = false;
+            playBtn.innerHTML = '<span class="material-icons" style="font-size: 32px;">play_arrow</span>';
+            logoContainer.classList.remove('active');
+            statusText.textContent = "已暂停播放";
+            showNotification('已暂停播放');
+        }
+        
+        // 初始化
+        window.onload = function() {
+            loadTheme();
+            
+            // 处理播放错误
+            audio.addEventListener('error', () => {
+                statusText.textContent = "播放错误，请重试";
+                showNotification('播放错误，请尝试刷新页面');
+            });
+            
+            // 动态更新音量滑块背景
+            volumeSlider.addEventListener('input', updateVolumeSlider);
+        };
+    </script>
+</body>
+</html>
+
