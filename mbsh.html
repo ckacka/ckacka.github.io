@@ -1,0 +1,1726 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>妙笔生花</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4285F4;
+            --primary-light: #E8F0FE;
+            --text-primary: #202124;
+            --text-secondary: #5F6368;
+            --surface: #FFFFFF;
+            --surface-variant: #F8F9FA;
+            --error: #EA4335;
+            --success: #34A853;
+            --warning: #FBBC05;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #8AB4F8;
+            --primary-light: #3C4043;
+            --text-primary: #E8EAED;
+            --text-secondary: #9AA0A6;
+            --surface: #202124;
+            --surface-variant: #303134;
+            --error: #F28B82;
+            --success: #81C995;
+            --warning: #FDCF6F;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--surface);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--surface);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            overflow-x: auto;
+            padding: 0 16px;
+        }
+
+        .nav-item {
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .nav-item:hover:not(.active) {
+            background-color: var(--surface-variant);
+        }
+
+        .container {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .panel {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .panel.active {
+            display: flex;
+        }
+
+        .card {
+            background-color: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            transition: var(--transition);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius);
+            border: 1px solid var(--surface-variant);
+            background-color: var(--surface);
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: var(--surface-variant);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--surface);
+        }
+
+        .icon-btn {
+            padding: 10px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            background-color: var(--surface-variant);
+            color: var(--text-primary);
+        }
+
+        .icon-btn:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .icon-btn.success {
+            background-color: rgba(52, 168, 83, 0.2);
+            color: var(--success);
+        }
+
+        .output-area {
+            min-height: 300px;
+            padding: 16px;
+            border-radius: var(--radius);
+            background-color: var(--surface-variant);
+            color: var(--text-primary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .placeholder-text {
+            color: var(--text-secondary);
+            font-style: italic;
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 24px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--surface-variant);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .saved-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .saved-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--surface-variant);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .saved-item:hover {
+            background-color: var(--surface-variant);
+        }
+
+        .saved-content {
+            flex: 1;
+        }
+
+        .saved-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .saved-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .saved-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .small-btn {
+            padding: 6px;
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .delete-btn {
+            background-color: rgba(234, 67, 53, 0.1);
+            color: var(--error);
+        }
+
+        .download-item-btn {
+            background-color: rgba(52, 168, 83, 0.1);
+            color: var(--success);
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .template-card {
+            background-color: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .template-title {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .template-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .editor-container {
+            height: 500px;
+            background-color: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 24px;
+            margin-left: auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--surface-variant);
+            position: relative;
+        }
+
+        .app-title {
+            font-size: 24px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .editor-title-group {
+            margin-bottom: 16px;
+        }
+
+        .editor-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* 搜索框样式 */
+        .search-container {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .search-input {
+            padding-right: 40px;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .search-results-info {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* 设置面板样式 */
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 24px;
+            width: 400px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .settings-panel.active {
+            display: block;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .settings-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .settings-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 24px;
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 8px;
+            border-radius: var(--radius);
+        }
+
+        .api-status.connected {
+            background-color: rgba(52, 168, 83, 0.1);
+            color: var(--success);
+        }
+
+        .api-status.disconnected {
+            background-color: rgba(234, 67, 53, 0.1);
+            color: var(--error);
+        }
+
+        .api-status-icon {
+            font-size: 20px;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 24px;
+            margin-left: 16px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            margin-left: auto;
+        }
+
+        .api-warning {
+            background-color: #FFF8E1;
+            color: #5D4037;
+            padding: 16px;
+            border-radius: var(--radius);
+            margin: 16px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .api-warning .material-icons {
+            color: #FFA000;
+        }
+
+        .api-key-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            padding: 8px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+        }
+
+        #freeApiKey {
+            font-family: monospace;
+            font-size: 14px;
+            padding: 4px 8px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            flex-grow: 1;
+            word-break: break-all;
+        }
+
+        .copy-api-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px;
+            background-color: rgba(66, 133, 244, 0.1);
+            color: #4285F4;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            width: 36px;
+            height: 36px;
+            justify-content: center;
+        }
+
+        .copy-api-btn:hover {
+            background-color: rgba(66, 133, 244, 0.2);
+        }
+
+        .copy-api-btn.success {
+            background-color: rgba(52, 168, 83, 0.2);
+            color: #34A853;
+        }
+
+        .app-footer {
+            text-align: center;
+            padding: 16px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+            border-top: 1px solid var(--surface-variant);
+            background-color: var(--surface);
+            margin-top: auto;
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .settings-panel {
+                width: 95%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .nav-item {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+            
+            .actions {
+                flex-wrap: wrap;
+            }
+            
+            .btn {
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            .saved-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .saved-actions {
+                margin-top: 8px;
+                align-self: flex-end;
+            }
+            
+            .card {
+                padding: 16px;
+            }
+            
+            .template-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .settings-panel {
+                width: 95vw;
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .app-title {
+                font-size: 20px;
+            }
+            
+            .nav-item {
+                padding: 10px 12px;
+            }
+            
+            .output-area {
+                min-height: 200px;
+            }
+            
+            .editor-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="app-title">
+            <span class="material-icons">edit</span>
+            妙笔生花
+        </div>
+        
+        <div class="header-actions">
+            <button class="settings-btn tooltip" id="settingsBtn" title="设置">
+                <span class="material-icons">settings</span>
+            </button>
+            <button class="theme-toggle tooltip" id="themeToggle" title="切换主题">
+                <span class="material-icons">dark_mode</span>
+            </button>
+        </div>
+        
+        <!-- 设置面板 -->
+        <div class="settings-panel" id="settingsPanel">
+            <div class="settings-header">
+                <div class="settings-title">API设置</div>
+                <button class="settings-close" id="settingsClose">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            
+            <div class="form-group">
+                <label for="apiKey">DeepSeek API密钥</label>
+                <input type="password" id="apiKey" placeholder="输入您的API密钥">
+            </div>
+            
+            <div class="api-warning">
+                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                    <span class="material-icons">warning</span>
+                    <span>为您提供了一个免费API：</span>
+                </div>
+                <div class="api-key-container">
+                    <span id="freeApiKey">sk-bdd465c76bdf47b89b1497301bb7c13e</span>
+                    <button class="copy-api-btn tooltip" id="copyFreeApiBtn" title="复制API密钥">
+                        <span class="material-icons">content_copy</span>
+                    </button>
+                </div>
+                <span>该API在一定时间后将会失效。</span>
+            </div>
+            
+            <button class="btn btn-primary" id="testApiBtn">
+                <span class="material-icons">wifi</span>
+                测试连接
+            </button>
+            
+            <div class="api-status disconnected" id="apiStatus">
+                <span class="material-icons api-status-icon">signal_wifi_off</span>
+                <span>未连接API服务</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 遮罩层 -->
+    <div class="settings-overlay" id="settingsOverlay"></div>
+
+    <!-- 顶部导航栏 -->
+    <div class="top-nav">
+        <div class="nav-item active" data-panel="generate">作文生成</div>
+        <div class="nav-item" data-panel="templates">作文模板</div>
+        <div class="nav-item" data-panel="editor">文本编辑</div>
+        <div class="nav-item" data-panel="saved">保存的作文</div>
+    </div>
+
+    <div class="container">
+        <!-- 作文生成面板 -->
+        <div class="panel active" id="generatePanel">
+            <div class="layout-grid">
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-icons">create</span>
+                        作文设置
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="essayTopic">作文主题</label>
+                        <input type="text" id="essayTopic" placeholder="例如：我的梦想、环保的重要性、人工智能与未来">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="essayKeywords">关键词（可选，用逗号分隔）</label>
+                        <input type="text" id="essayKeywords" placeholder="例如：创新,科技,发展,未来">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="essayType">作文体裁</label>
+                        <select id="essayType">
+                            <option value="narrative">记叙文</option>
+                            <option value="argumentative">议论文</option>
+                            <option value="expository">说明文</option>
+                            <option value="descriptive">描写文</option>
+                            <option value="prose">散文</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="writingStyle">写作风格</label>
+                        <select id="writingStyle">
+                            <option value="formal">正式严谨</option>
+                            <option value="literary">文学优美</option>
+                            <option value="simple" selected>简洁明了</option>
+                            <option value="emotional">情感丰富</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="essayLength">作文字数</label>
+                        <select id="essayLength">
+                            <option value="300">300字（小作文）</option>
+                            <option value="500" selected>500字（标准作文）</option>
+                            <option value="800">800字（大作文）</option>
+                            <option value="1000">1000字（长文）</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-primary" id="generateBtn">
+                        <span class="material-icons">auto_awesome</span>
+                        生成作文
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-icons">article</span>
+                        生成的作文
+                    </div>
+                    
+                    <div class="loading" id="loadingIndicator">
+                        <div class="spinner"></div>
+                        <p>AI正在创作中，请稍候...</p>
+                    </div>
+                    
+                    <div class="output-area" id="essayOutput">
+                        <p class="placeholder-text">作文将在此处显示，请先设置参数并点击"生成作文"。</p>
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="icon-btn tooltip" id="copyBtn" title="复制作文">
+                            <span class="material-icons">content_copy</span>
+                        </button>
+                        <button class="icon-btn tooltip" id="saveBtn" title="保存作文">
+                            <span class="material-icons">save</span>
+                        </button>
+                        <button class="icon-btn tooltip" id="downloadBtn" title="下载作文">
+                            <span class="material-icons">download</span>
+                        </button>
+                        <button class="icon-btn tooltip" id="toEditorBtn" title="编辑作文">
+                            <span class="material-icons">edit</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 作文模板面板 -->
+        <div class="panel" id="templatesPanel">
+            <div class="card">
+                <div class="card-title">
+                    <span class="material-icons">description</span>
+                    作文模板库
+                </div>
+                
+                <div class="template-grid" id="templateGrid">
+                    <!-- 模板将通过JS动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 文本编辑面板 -->
+        <div class="panel" id="editorPanel">
+            <div class="card">
+                <div class="card-title">
+                    <span class="material-icons">edit_note</span>
+                    文本编辑器
+                </div>
+                
+                <div class="editor-title-group">
+                    <div class="editor-title">作文标题</div>
+                    <input type="text" id="editorTitle" placeholder="请输入作文标题" class="text-field-input">
+                </div>
+                
+                <div class="editor-container" id="editor"></div>
+                
+                <div class="actions">
+                    <button class="icon-btn tooltip" id="clearEditorBtn" title="清空编辑器">
+                        <span class="material-icons">clear</span>
+                    </button>
+                    <button class="icon-btn tooltip" id="saveEditorBtn" title="保存内容">
+                        <span class="material-icons">save</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 保存的作文面板 -->
+        <div class="panel" id="savedPanel">
+            <div class="card">
+                <div class="card-title">
+                    <span class="material-icons">history</span>
+                    保存的作文
+                </div>
+                
+                <!-- 搜索框 -->
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="搜索已保存的作文...">
+                    <span class="material-icons search-icon">search</span>
+                </div>
+                <div class="search-results-info" id="searchResultsInfo"></div>
+                
+                <div class="saved-list" id="savedList">
+                    <p class="placeholder-text">暂无保存的作文</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        妙笔生花 • v2.0<br>
+        © ckacka 工具箱 • 遵循 Material Design 设计规范
+    </footer>
+
+    <script>
+        // DOM元素
+        const themeToggle = document.getElementById('themeToggle');
+        const navItems = document.querySelectorAll('.nav-item');
+        const panels = document.querySelectorAll('.panel');
+        const generateBtn = document.getElementById('generateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const toEditorBtn = document.getElementById('toEditorBtn');
+        const clearEditorBtn = document.getElementById('clearEditorBtn');
+        const saveEditorBtn = document.getElementById('saveEditorBtn');
+        const essayOutput = document.getElementById('essayOutput');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const savedList = document.getElementById('savedList');
+        const templateGrid = document.getElementById('templateGrid');
+        const editorTitle = document.getElementById('editorTitle');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const settingsClose = document.getElementById('settingsClose');
+        const apiKeyInput = document.getElementById('apiKey');
+        const testApiBtn = document.getElementById('testApiBtn');
+        const apiStatus = document.getElementById('apiStatus');
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const copyFreeApiBtn = document.getElementById('copyFreeApiBtn');
+        const freeApiKey = document.getElementById('freeApiKey');
+        const searchInput = document.getElementById('searchInput');
+        const searchResultsInfo = document.getElementById('searchResultsInfo');
+        
+        // 初始化富文本编辑器
+        const quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'script': 'sub'}, { 'script': 'super' }],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    [{ 'direction': 'rtl' }],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'font': ['SimSun', 'SimHei', 'KaiTi', 'Microsoft YaHei', 'FangSong', 'YouYuan', 'LiSu'] }],
+                    [{ 'align': [] }],
+                    ['clean']
+                ]
+            },
+            placeholder: '在此处编辑您的作文...'
+        });
+        
+        // 主题切换
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const icon = themeToggle.querySelector('.material-icons');
+            
+            if (currentTheme === 'dark') {
+                document.body.removeAttribute('data-theme');
+                icon.textContent = 'dark_mode';
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                icon.textContent = 'light_mode';
+            }
+        });
+        
+        // 导航切换
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // 更新导航项状态
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                
+                // 显示对应面板
+                const panelId = item.getAttribute('data-panel');
+                panels.forEach(panel => {
+                    panel.classList.remove('active');
+                    if (panel.id === `${panelId}Panel`) {
+                        panel.classList.add('active');
+                    }
+                });
+                
+                // 如果是保存的作文面板，重新加载列表
+                if (panelId === 'saved') {
+                    loadSavedEssays();
+                }
+            });
+        });
+        
+        // 设置面板切换
+        settingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showSettingsPanel();
+        });
+        
+        settingsClose.addEventListener('click', () => {
+            hideSettingsPanel();
+        });
+        
+        settingsOverlay.addEventListener('click', () => {
+            hideSettingsPanel();
+        });
+        
+        // ESC键关闭设置面板
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && settingsPanel.classList.contains('active')) {
+                hideSettingsPanel();
+            }
+        });
+        
+        // 显示设置面板函数
+        function showSettingsPanel() {
+            settingsPanel.classList.add('active');
+            settingsOverlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 隐藏设置面板函数
+        function hideSettingsPanel() {
+            settingsPanel.classList.remove('active');
+            settingsOverlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        // 复制免费API密钥功能
+        copyFreeApiBtn.addEventListener('click', function() {
+            const apiKeyText = freeApiKey.textContent;
+            
+            // 使用现代Clipboard API 
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(apiKeyText).then(() => {
+                    showCopySuccess(this);
+                }).catch(err => {
+                    console.error('复制失败: ', err);
+                    fallbackCopy(apiKeyText, this);
+                });
+            } else {
+                // 回退到传统方法 
+                fallbackCopy(apiKeyText, this);
+            }
+        });
+        
+        // 显示复制成功提示
+        function showCopySuccess(button) {
+            const icon = button.querySelector('.material-icons');
+            const originalIcon = icon.textContent;
+            
+            icon.textContent = 'check';
+            button.classList.add('success');
+            button.title = '已复制';
+            
+            setTimeout(() => {
+                icon.textContent = originalIcon;
+                button.classList.remove('success');
+                button.title = '复制API密钥';
+            }, 2000);
+        }
+        
+        // 传统复制方法 
+        function fallbackCopy(text, button) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.top = '0';
+            textArea.style.left = '0';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess(button);
+                } else {
+                    alert('复制失败，请手动复制API密钥');
+                }
+            } catch (err) {
+                console.error('复制失败: ', err);
+                alert('复制失败，请手动复制API密钥');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        // 搜索功能
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
+            performSearch(query);
+        });
+        
+        // 执行搜索
+        function performSearch(query) {
+            const savedEssays = JSON.parse(localStorage.getItem('savedEssays') || '[]');
+            
+            if (query === '') {
+                // 如果搜索框为空，显示所有作文
+                displaySavedEssays(savedEssays);
+                searchResultsInfo.textContent = `显示全部 ${savedEssays.length} 篇作文`;
+                return;
+            }
+            
+            // 过滤匹配的作文
+            const results = savedEssays.filter(essay => {
+                return essay.title.toLowerCase().includes(query) || 
+                       essay.content.toLowerCase().includes(query);
+            });
+            
+            // 显示搜索结果
+            displaySavedEssays(results);
+            searchResultsInfo.textContent = `找到 ${results.length} 篇匹配的作文`;
+        }
+        
+        // 测试API连接
+        testApiBtn.addEventListener('click', testApiConnection);
+        
+        // 生成作文
+        generateBtn.addEventListener('click', generateEssay);
+        
+        // 复制作文
+        copyBtn.addEventListener('click', () => {
+            const essayText = essayOutput.innerText;
+            
+            if (!essayText || essayText.includes('作文将在此处显示')) {
+                alert('请先生成作文');
+                return;
+            }
+            
+            // 使用现代Clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(essayText).then(() => {
+                    showCopySuccess(copyBtn);
+                }).catch(err => {
+                    console.error('复制失败: ', err);
+                    alert('复制失败，请手动选择文本后复制');
+                });
+            } else {
+                // 回退到传统方法
+                fallbackCopy(essayText, copyBtn);
+            }
+        });
+        
+        // 保存作文
+        saveBtn.addEventListener('click', saveEssay);
+        
+        // 下载作文
+        downloadBtn.addEventListener('click', downloadEssay);
+        
+        // 跳转到编辑器
+        toEditorBtn.addEventListener('click', () => {
+            const essayText = essayOutput.innerText;
+            
+            if (!essayText || essayText.includes('作文将在此处显示')) {
+                alert('请先生成作文');
+                return;
+            }
+            
+            // 设置编辑器内容
+            const topic = document.getElementById('essayTopic').value || '未命名作文';
+            editorTitle.value = topic;
+            quill.setText(essayText);
+            
+            // 切换到编辑器面板
+            navItems.forEach(nav => nav.classList.remove('active'));
+            document.querySelector('.nav-item[data-panel="editor"]').classList.add('active');
+            
+            panels.forEach(panel => panel.classList.remove('active'));
+            document.getElementById('editorPanel').classList.add('active');
+        });
+        
+        // 清空编辑器
+        clearEditorBtn.addEventListener('click', () => {
+            if (confirm('确定要清空编辑器内容吗？')) {
+                editorTitle.value = '';
+                quill.setText('');
+            }
+        });
+        
+        // 保存编辑器内容
+        saveEditorBtn.addEventListener('click', () => {
+            const content = quill.getText();
+            if (!content.trim()) {
+                alert('编辑器内容为空');
+                return;
+            }
+            
+            const title = editorTitle.value || '编辑的作文';
+            saveContent(title, content);
+            alert('作文已保存');
+        });
+        
+        // 加载保存的作文
+        loadSavedEssays();
+        
+        // 加载作文模板
+        loadTemplates();
+        
+        // 加载API密钥
+        loadApiKey();
+        
+        // 测试API连接函数
+        function testApiConnection() {
+            const apiKey = apiKeyInput.value.trim();
+            
+            if (!apiKey) {
+                alert('请输入API密钥');
+                return;
+            }
+            
+            // 更新状态为测试中
+            apiStatus.className = 'api-status';
+            apiStatus.innerHTML = `
+                <span class="material-icons api-status-icon">hourglass_top</span>
+                <span>正在测试连接...</span>
+            `;
+            
+            // 测试API连接
+            fetch('https://api.deepseek.com/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "deepseek-chat",
+                    messages: [
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": "Hello!"}
+                    ],
+                    stream: false
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('API连接失败');
+            })
+            .then(data => {
+                // 保存API密钥
+                localStorage.setItem('deepseekApiKey', apiKey);
+                
+                // 更新状态为已连接
+                apiStatus.className = 'api-status connected';
+                apiStatus.innerHTML = `
+                    <span class="material-icons api-status-icon">wifi</span>
+                    <span>API连接成功！</span>
+                `;
+            })
+            .catch(error => {
+                console.error('API测试失败:', error);
+                
+                // 更新状态为未连接
+                apiStatus.className = 'api-status disconnected';
+                apiStatus.innerHTML = `
+                    <span class="material-icons api-status-icon">signal_wifi_off</span>
+                    <span>API连接失败: ${error.message}</span>
+                `;
+            });
+        }
+        
+        // 加载API密钥
+        function loadApiKey() {
+            const apiKey = localStorage.getItem('deepseekApiKey');
+            if (apiKey) {
+                apiKeyInput.value = apiKey;
+                apiStatus.className = 'api-status connected';
+                apiStatus.innerHTML = `
+                    <span class="material-icons api-status-icon">wifi</span>
+                    <span>API已配置</span>
+                `;
+            }
+        }
+        
+        // 生成作文函数
+        function generateEssay() {
+            const topic = document.getElementById('essayTopic').value;
+            const keywords = document.getElementById('essayKeywords').value;
+            const type = document.getElementById('essayType').value;
+            const length = document.getElementById('essayLength').value;
+            const style = document.getElementById('writingStyle').value;
+            const apiKey = localStorage.getItem('deepseekApiKey');
+            
+            if (!apiKey) {
+                alert('请先配置API密钥');
+                showSettingsPanel();
+                return;
+            }
+            
+            if (!topic) {
+                alert('请输入作文主题');
+                return;
+            }
+            
+            // 显示加载指示器
+            loadingIndicator.style.display = 'flex';
+            essayOutput.innerHTML = '';
+            
+            // 构建提示词
+            const prompt = buildPrompt(topic, keywords, type, length, style);
+            
+            // 调用DeepSeek API生成作文
+            fetch('https://api.deepseek.com/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "deepseek-chat",
+                    messages: [
+                        {"role": "system", "content": "你是一位专业的作文写作助手，擅长创作各种体裁的作文。"},
+                        {"role": "user", "content": prompt}
+                    ],
+                    stream: false
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('API请求失败');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 隐藏加载指示器
+                loadingIndicator.style.display = 'none';
+                
+                // 获取生成的作文内容
+                const essay = data.choices[0].message.content;
+                
+                // 显示作文
+                essayOutput.innerHTML = essay;
+            })
+            .catch(error => {
+                console.error('生成作文失败:', error);
+                
+                // 隐藏加载指示器
+                loadingIndicator.style.display = 'none';
+                
+                // 显示错误信息
+                essayOutput.innerHTML = `<p class="error-text">作文生成失败: ${error.message}</p>`;
+            });
+        }
+        
+        // 构建提示词
+        function buildPrompt(topic, keywords, type, length, style) {
+            const typeNames = {
+                narrative: '记叙文',
+                argumentative: '议论文',
+                expository: '说明文',
+                descriptive: '描写文',
+                prose: '散文'
+            };
+            
+            const styleDescriptions = {
+                formal: '正式严谨的语言风格',
+                literary: '富有文采的文学风格',
+                simple: '简洁明了的表达风格',
+                emotional: '情感丰富的表达风格'
+            };
+            
+            let prompt = `请创作一篇关于"${topic}"的作文，要求如下：
+- 体裁：${typeNames[type]}
+- 字数：约${length}字
+- 风格：${styleDescriptions[style]}`;
+            
+            if (keywords) {
+                prompt += `\n- 关键词：${keywords.split(',').join('、')}`;
+            }
+            
+            prompt += `\n\n请确保作文内容连贯、结构完整、语言优美，符合作文要求。`;
+            
+            return prompt;
+        }
+        
+        // 保存作文
+        function saveEssay() {
+            const essayText = essayOutput.innerText;
+            const topic = document.getElementById('essayTopic').value || '未命名作文';
+            
+            if (!essayText || essayText.includes('作文将在此处显示')) {
+                alert('请先生成作文');
+                return;
+            }
+            
+            saveContent(topic, essayText);
+            alert('作文已保存');
+        }
+        
+        // 保存内容通用函数（添加重复检查）
+        function saveContent(title, content) {
+            // 获取现有保存的作文
+            const savedEssays = JSON.parse(localStorage.getItem('savedEssays') || '[]');
+            
+            // 检查是否有重复标题
+            let finalTitle = title;
+            let counter = 1;
+            
+            // 检查标题是否已存在
+            while (savedEssays.some(essay => essay.title === finalTitle)) {
+                finalTitle = `${title} (${counter})`;
+                counter++;
+            }
+            
+            // 添加新作文
+            savedEssays.push({
+                id: Date.now(),
+                title: finalTitle,
+                content: content,
+                date: new Date().toLocaleString()
+            });
+            
+            // 保存到本地存储
+            localStorage.setItem('savedEssays', JSON.stringify(savedEssays));
+            
+            // 刷新列表
+            loadSavedEssays();
+        }
+        
+        // 加载保存的作文
+        function loadSavedEssays() {
+            const savedEssays = JSON.parse(localStorage.getItem('savedEssays') || '[]');
+            displaySavedEssays(savedEssays);
+        }
+        
+        // 显示保存的作文
+        function displaySavedEssays(essays) {
+            if (essays.length === 0) {
+                savedList.innerHTML = '<p class="placeholder-text">暂无保存的作文</p>';
+                return;
+            }
+            
+            let html = '';
+            essays.forEach(essay => {
+                html += `
+                <div class="saved-item" data-id="${essay.id}">
+                    <div class="saved-content">
+                        <div class="saved-title">${essay.title}</div>
+                        <div class="saved-meta">
+                            <span>${essay.date}</span>
+                        </div>
+                    </div>
+                    <div class="saved-actions">
+                        <button class="small-btn edit-btn tooltip" data-id="${essay.id}" title="编辑">
+                            <span class="material-icons">edit</span>
+                        </button>
+                        <button class="small-btn download-item-btn tooltip" data-id="${essay.id}" title="下载">
+                            <span class="material-icons">download</span>
+                        </button>
+                        <button class="small-btn delete-btn tooltip" data-id="${essay.id}" title="删除">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </div>
+                </div>
+                `;
+            });
+            
+            savedList.innerHTML = html;
+            
+            // 添加编辑事件
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.getAttribute('data-id');
+                    const savedEssays = JSON.parse(localStorage.getItem('savedEssays') || '[]');
+                    const essay = savedEssays.find(e => e.id == id);
+                    
+                    if (essay) {
+                        // 切换到编辑器面板
+                        navItems.forEach(nav => nav.classList.remove('active'));
+                        document.querySelector('.nav-item[data-panel="editor"]').classList.add('active');
+                        
+                        panels.forEach(panel => panel.classList.remove('active'));
+                        document.getElementById('editorPanel').classList.add('active');
+                        
+                        // 设置编辑器内容
+                        editorTitle.value = essay.title;
+                        quill.setText(essay.content);
+                    }
+                });
+            });
+            
+            // 添加下载事件
+            document.querySelectorAll('.download-item-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.getAttribute('data-id');
+                    const savedEssays = JSON.parse(localStorage.getItem('savedEssays') || '[]');
+                    const essay = savedEssays.find(e => e.id == id);
+                    
+                    if (essay) {
+                        downloadContent(essay.title, essay.content);
+                    }
+                });
+            });
+            
+            // 添加删除事件
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.getAttribute('data-id');
+                    
+                    if (confirm('确定要删除这篇作文吗？')) {
+                        deleteEssay(id);
+                    }
+                });
+            });
+            
+            // 添加点击事件（查看作文）
+            document.querySelectorAll('.saved-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = item.getAttribute('data-id');
+                    const savedEssays = JSON.parse(localStorage.getItem('savedEssays') || '[]');
+                    const essay = savedEssays.find(e => e.id == id);
+                    
+                    if (essay) {
+                        // 切换到生成面板
+                        navItems.forEach(nav => nav.classList.remove('active'));
+                        document.querySelector('.nav-item[data-panel="generate"]').classList.add('active');
+                        
+                        panels.forEach(panel => panel.classList.remove('active'));
+                        document.getElementById('generatePanel').classList.add('active');
+                        
+                        // 显示作文
+                        document.getElementById('essayTopic').value = essay.title;
+                        essayOutput.innerHTML = essay.content;
+                    }
+                });
+            });
+        }
+        
+        // 删除作文
+        function deleteEssay(id) {
+            const savedEssays = JSON.parse(localStorage.getItem('savedEssays') || '[]');
+            const newEssays = savedEssays.filter(essay => essay.id != id);
+            
+            localStorage.setItem('savedEssays', JSON.stringify(newEssays));
+            loadSavedEssays();
+        }
+        
+        // 下载作文
+        function downloadEssay() {
+            const essayText = essayOutput.innerText;
+            const topic = document.getElementById('essayTopic').value || 'AI生成的作文';
+            
+            if (!essayText || essayText.includes('作文将在此处显示')) {
+                alert('请先生成作文');
+                return;
+            }
+            
+            downloadContent(topic, essayText);
+        }
+        
+        // 下载内容通用函数（解决中文乱码问题）
+        function downloadContent(title, content) {
+            // 添加UTF-8 BOM字符解决中文乱码问题
+            const BOM = "\uFEFF";
+            const blob = new Blob([BOM + content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // 加载作文模板
+        function loadTemplates() {
+            const templates = [
+                {
+                    id: 1,
+                    title: "议论文模板",
+                    description: "标准议论文结构模板，包含论点、论据和结论",
+                    content: `作文题目：[在此输入题目]
+体裁：议论文
+
+开头段落：
+在当今社会，[主题]已成为一个备受关注的话题。随着[相关背景]，人们对[主题]的讨论日益增多。本文将从几个方面探讨[主题]的重要性及其影响。
+
+论点一：
+首先，[论点一]。例如，[具体事例或数据]。这表明[论点一的意义]。
+
+论点二：
+其次，[论点二]。以[具体事例]为例，我们可以看出[论点二的意义]。
+
+论点三：
+此外，[论点三]。从[某个角度]来看，[论点三的意义]。
+
+结论：
+综上所述，[主题]对[相关领域]具有重要意义。我们应该[建议或行动]。只有这样，才能[预期结果]。`
+                },
+                {
+                    id: 2,
+                    title: "记叙文模板",
+                    description: "记叙文写作模板，包含时间、地点、人物和事件",
+                    content: `作文题目：[在此输入题目]
+体裁：记叙文
+
+开头：
+那是一个[季节/天气]的[时间]，我[在哪里/做什么]。这件事虽然已经过去了[时间长度]，但至今仍让我记忆犹新。
+
+事件发展：
+起初，[描述事件的开端]。接着，[描述事件的发展]。然后，[描述关键转折点]。
+
+高潮：
+最让我难忘的是[高潮部分]。当时，[详细描述高潮场景]。
+
+结尾：
+这件事让我明白了[感悟或道理]。每当想起这件事，我都会[感受或行动]。这将成为我人生中一笔宝贵的财富。`
+                },
+                {
+                    id: 3,
+                    title: "说明文模板",
+                    description: "说明文写作模板，适合解释事物原理或过程",
+                    content: `作文题目：[在此输入题目]
+体裁：说明文
+
+引言：
+[主题]是我们日常生活中常见的事物/现象。了解[主题]的原理/过程对我们[意义]。本文将详细介绍[主题]的[方面]。
+
+定义与分类：
+首先，[主题]是指[定义]。它可以分为[分类一]、[分类二]和[分类三]等类型。
+
+原理/过程：
+[主题]的工作原理/过程主要包括以下几个步骤：第一步，[步骤一]。第二步，[步骤二]。第三步，[步骤三]。
+
+应用与意义：
+[主题]在[领域一]、[领域二]等方面有着广泛应用。它的重要性体现在[意义一]、[意义二]等方面。
+
+结论：
+总之，[主题]是[总结评价]。随着科技发展，[主题]将会[未来展望]。`
+                },
+                {
+                    id: 4,
+                    title: "散文模板",
+                    description: "散文写作模板，注重情感表达和意境营造",
+                    content: `作文题目：[在此输入题目]
+体裁：散文
+
+开篇：
+[季节/时间]的[地点]，总是别有一番韵味。漫步其中，[感官描写：看到的、听到的、闻到的]。
+
+景物描写：
+看那[具体景物一]，[详细描写]。还有那[具体景物二]，[详细描写]。更不用说[具体景物三]，[详细描写]。
+
+情感抒发：
+面对此情此景，我不禁[情感表达]。想起[相关回忆]，心中涌起[具体感受]。
+
+结尾：
+[地点]的[季节/时间]，就这样深深地印在我的记忆里。它让我懂得了[感悟]，体会到了[体会]。这或许就是[主题]的真谛吧。`
+                }
+            ];
+            
+            let html = '';
+            templates.forEach(template => {
+                html += `
+                <div class="template-card" data-id="${template.id}">
+                    <div class="template-title">${template.title}</div>
+                    <div class="template-desc">${template.description}</div>
+                </div>
+                `;
+            });
+            
+            templateGrid.innerHTML = html;
+            
+            // 添加模板点击事件
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const id = card.getAttribute('data-id');
+                    const template = templates.find(t => t.id == id);
+                    
+                    if (template) {
+                        // 切换到编辑器面板
+                        navItems.forEach(nav => nav.classList.remove('active'));
+                        document.querySelector('.nav-item[data-panel="editor"]').classList.add('active');
+                        
+                        panels.forEach(panel => panel.classList.remove('active'));
+                        document.getElementById('editorPanel').classList.add('active');
+                        
+                        // 设置编辑器内容
+                        editorTitle.value = template.title;
+                        quill.setText(template.content);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
+
