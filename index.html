@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ckacka工具箱</title>
-    <!-- 修复图标加载问题：使用更稳定的CDN -->
     <link href="https://fonts.loli.net/css?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -164,6 +163,59 @@
             border-radius: 0 0 var(--card-radius) var(--card-radius);
         }
 
+        /* 修复分类导航栏样式 */
+        .category-nav {
+            background-color: var(--color-surface);
+            padding: 16px;
+            border-bottom: 1px solid var(--color-surface-variant);
+            position: sticky;
+            top: calc(var(--header-height) + 82px);
+            z-index: 40;
+            transition: all var(--transition);
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .category-nav::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .category-list {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: inline-flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: nowrap;
+            min-width: max-content;
+            padding: 0 16px;
+        }
+        
+        .category-item {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: var(--color-surface-variant);
+            color: var(--color-on-surface-variant);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .category-item:hover {
+            background-color: var(--color-primary-container);
+            color: var(--color-primary);
+        }
+        
+        .category-item.active {
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+        }
+
         .main-content {
             padding: 16px;
             max-width: 1200px;
@@ -196,6 +248,11 @@
             .tools-grid {
                 grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
                 gap: 20px;
+            }
+            
+            .category-item {
+                padding: 10px 20px;
+                font-size: 16px;
             }
         }
 
@@ -268,6 +325,21 @@
         .tool-icon.teal {
             background-color: #B2DFDB;
             color: #00796B;
+        }
+
+        .tool-icon.pink {
+            background-color: #F8BBD0;
+            color: #C2185B;
+        }
+
+        .tool-icon.cyan {
+            background-color: #B2EBF2;
+            color: #0097A7;
+        }
+
+        .tool-icon.indigo {
+            background-color: #C5CAE9;
+            color: #303F9F;
         }
 
         .tool-name {
@@ -482,7 +554,7 @@
             font-size: 18px;
         }
 
-        /* 壁纸模块样式 */
+        /* 壁纸模块样式 - 修复折叠功能 */
         .wallpaper-container {
             border-radius: var(--card-radius);
             background: var(--color-surface);
@@ -497,12 +569,41 @@
             align-items: center;
         }
         
+        .wallpaper-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 16px;
+            cursor: pointer;
+        }
+        
         .wallpaper-title {
             font-size: 20px;
             font-weight: 500;
-            margin-bottom: 16px;
             color: var(--color-primary);
-            align-self: flex-start;
+        }
+        
+        .toggle-icon {
+            color: var(--color-on-surface-variant);
+            transition: transform 0.3s ease;
+        }
+        
+        .wallpaper-container.collapsed .toggle-icon {
+            transform: rotate(180deg);
+        }
+        
+        .wallpaper-content {
+            width: 100%;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .wallpaper-container.collapsed .wallpaper-content {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
         }
         
         .wallpaper-img-container {
@@ -525,6 +626,13 @@
             transform: scale(1.02);
         }
         
+        .download-btn-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
         .download-btn {
             display: inline-flex;
             align-items: center;
@@ -537,7 +645,6 @@
             font-size: 16px;
             font-weight: 500;
             cursor: pointer;
-            margin-top: 20px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
@@ -612,7 +719,6 @@
                 
                 <!-- 菜单弹出层 -->
                 <div class="menu-popup" id="menuPopup">
-                    <!-- 新增更新日志菜单项 -->
                     <div class="menu-item" id="changelogItem">
                         <span class="material-icons">history</span>
                         更新日志
@@ -643,6 +749,21 @@
         </div>
     </div>
     
+    <!-- 分类导航栏 -->
+    <div class="category-nav">
+        <nav>
+            <ul class="category-list">
+                <li class="category-item active" data-category="all">全部</li>
+                <li class="category-item" data-category="ai">AI</li>
+                <li class="category-item" data-category="railway">铁路</li>
+                <li class="category-item" data-category="text">文字</li>
+                <li class="category-item" data-category="video">视频</li>
+                <li class="category-item" data-category="audio">音频</li>
+                <li class="category-item" data-category="game">游戏</li>
+            </ul>
+        </nav>
+    </div>
+    
     <!-- 搜索结果区 -->
     <div class="search-results-container" id="searchResults">
         <div class="results-title">
@@ -659,17 +780,24 @@
     
     <!-- 主内容区 -->
     <div class="main-content" id="mainContent">
-        <!-- 今日壁纸 -->
-        <div class="wallpaper-container">
-            <div class="wallpaper-title">今日壁纸</div>
-            <div class="wallpaper-img-container">
-                <img id="wallpaper" class="wallpaper-img" alt="Bing每日壁纸">
+        <!-- 今日壁纸 - 修复折叠功能 -->
+        <div class="wallpaper-container" id="wallpaperContainer">
+            <div class="wallpaper-header" id="wallpaperHeader">
+                <div class="wallpaper-title">今日壁纸</div>
+                <span class="material-icons toggle-icon" id="toggleIcon">expand_less</span>
             </div>
-            <button class="download-btn" id="downloadBtn">
-                <i class="material-icons">cloud_download</i>
-                下载高清壁纸
-            </button>
-            <div id="loading" class="loading">正在加载每日壁纸...</div>
+            <div class="wallpaper-content" id="wallpaperContent">
+                <div class="wallpaper-img-container">
+                    <img id="wallpaper" class="wallpaper-img" alt="Bing每日壁纸">
+                </div>
+                <div class="download-btn-container">
+                    <button class="download-btn" id="downloadBtn">
+                        <i class="material-icons">cloud_download</i>
+                        下载高清壁纸
+                    </button>
+                </div>
+                <div id="loading" class="loading">正在加载每日壁纸...</div>
+            </div>
         </div>
 
         <!-- 全部工具 -->
@@ -678,42 +806,42 @@
             全部工具
         </h2>
         <div class="tools-grid" id="allToolsGrid">
-            <div class="tool-card" data-url="https://ckacka.github.io/sdnote.html" data-name="树洞便签">
+            <div class="tool-card" data-url="https://ckacka.github.io/sdnote.html" data-name="树洞便签" data-category="text">
                 <div class="tool-icon orange">
                     <span class="material-icons">note_add</span>
                 </div>
                 <div class="tool-name">树洞便签</div>
             </div>
             
-            <div class="tool-card" data-url="https://ckacka.github.io/sjsc.html" data-name="随机生词">
+            <div class="tool-card" data-url="https://ckacka.github.io/sjsc.html" data-name="随机生词" data-category="text">
                 <div class="tool-icon green">
                     <span class="material-icons">history_edu</span>
                 </div>
                 <div class="tool-name">随机生词</div>
             </div>
             
-            <div class="tool-card" data-url="https://ckacka.github.io/guaiwu.html" data-name="是女人就删他一百耳光">
+            <div class="tool-card" data-url="https://ckacka.github.io/guaiwu.html" data-name="是女人就删他一百耳光" data-category="game">
                 <div class="tool-icon red">
                     <span class="material-icons">whatshot</span>
                 </div>
                 <div class="tool-name">是女人就删他一百耳光</div>
             </div>
             
-            <div class="tool-card" data-url="https://ckacka.github.io/qrcode.html" data-name="二维码生成器">
+            <div class="tool-card" data-url="https://ckacka.github.io/qrcode.html" data-name="二维码生成器" data-category="text">
                 <div class="tool-icon purple">
                     <span class="material-icons">qr_code_scanner</span>
                 </div>
                 <div class="tool-name">二维码生成器</div>
             </div>
             
-            <div class="tool-card" data-url="https://ckacka.github.io/videoplayer.html" data-name="在线视频播放器">
+            <div class="tool-card" data-url="https://ckacka.github.io/videoplayer.html" data-name="在线视频播放器" data-category="video">
                 <div class="tool-icon blue">
                     <span class="material-icons">play_circle</span>
                 </div>
                 <div class="tool-name">在线视频播放器</div>
             </div>
             
-            <div class="tool-card" data-url="https://ckacka.github.io/tvradio.html" data-name="数字电视">
+            <div class="tool-card" data-url="https://ckacka.github.io/tvradio.html" data-name="数字电视" data-category="video">
                 <div class="tool-icon teal">
                     <span class="material-icons">tv</span>
                 </div>
@@ -724,7 +852,7 @@
     
     <!-- 页脚 -->
     <div class="app-footer">
-        <p>ckacka 工具箱 • v1.6.1</p>
+        <p>ckacka 工具箱 • v1.7.1</p>
         <p class="copyright">© ckacka 工具箱应用 • 遵循 Material Design 设计规范</p>
     </div>
 
@@ -908,6 +1036,8 @@
             // 隐藏/显示搜索区域
             if (searchTerm) {
                 searchResults.style.display = 'block';
+                // 搜索时隐藏主内容区
+                mainContent.style.display = 'none';
             } else {
                 searchResults.style.display = 'none';
                 // 显示全部工具区域
@@ -950,6 +1080,45 @@
             }
         });
         
+        // 新增：分类过滤功能
+        const categoryItems = document.querySelectorAll('.category-item');
+        
+        categoryItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // 移除所有分类项的active类
+                categoryItems.forEach(i => i.classList.remove('active'));
+                // 为当前点击项添加active类
+                this.classList.add('active');
+                
+                const category = this.getAttribute('data-category');
+                
+                // 过滤工具卡片
+                toolCards.forEach(card => {
+                    const cardCategory = card.getAttribute('data-category');
+                    if (category === 'all' || cardCategory === category) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // 更新分类标题
+                const categoryTitle = document.querySelector('.category-title');
+                if (category === 'all') {
+                    categoryTitle.innerHTML = `<span class="material-icons">apps</span> 全部工具`;
+                } else {
+                    categoryTitle.innerHTML = `<span class="material-icons">apps</span> ${this.textContent}工具`;
+                }
+                
+                // 如果正在搜索，清空搜索框并显示主内容区
+                if (searchInput.value.trim()) {
+                    searchInput.value = '';
+                    searchResults.style.display = 'none';
+                    mainContent.style.display = 'block';
+                }
+            });
+        });
+        
         // 新增：更新日志功能
         function openChangelog() {
             window.open('https://ckacka.github.io/changelog.html', '_blank');
@@ -966,11 +1135,29 @@
             // 添加下载按钮事件
             document.getElementById('downloadBtn').addEventListener('click', downloadImage);
             
-            // 新增：为更新日志菜单项添加事件
+            // 为更新日志菜单项添加事件
             document.getElementById('changelogItem').addEventListener('click', function() {
                 openChangelog();
                 menuPopup.classList.remove('show');
             });
+            
+            // 壁纸折叠功能
+            document.getElementById('wallpaperHeader').addEventListener('click', function() {
+                const container = document.getElementById('wallpaperContainer');
+                const icon = document.getElementById('toggleIcon');
+                
+                container.classList.toggle('collapsed');
+                icon.textContent = container.classList.contains('collapsed') ? 'expand_more' : 'expand_less';
+                
+                // 保存状态
+                localStorage.setItem('wallpaperCollapsed', container.classList.contains('collapsed'));
+            });
+            
+            // 恢复壁纸折叠状态
+            if (localStorage.getItem('wallpaperCollapsed') === 'true') {
+                document.getElementById('wallpaperContainer').classList.add('collapsed');
+                document.getElementById('toggleIcon').textContent = 'expand_more';
+            }
         };
     </script>
 </body>
