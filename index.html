@@ -7,7 +7,6 @@
     <link href="https://fonts.loli.net/css?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* 所有原有样式保持不变 */
         :root {
             --color-primary: #6750A4;
             --color-primary-container: #EADDFF;
@@ -84,16 +83,8 @@
             position: relative;
         }
 
-        .menu-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .material-icons {
-            user-select: none;
-            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        .menu-container {
+            position: relative;
         }
 
         .icon-btn {
@@ -111,6 +102,11 @@
         .icon-btn:hover {
             background-color: rgba(var(--color-on-surface), 0.08);
             transform: scale(1.1);
+        }
+
+        .material-icons {
+            user-select: none;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
 
         .search-container {
@@ -153,17 +149,6 @@
             color: var(--color-on-surface-variant);
         }
 
-        .search-results-container {
-            display: none;
-            padding: 16px;
-            max-width: 1200px;
-            margin: 0 auto;
-            background: var(--color-surface);
-            box-shadow: 0 1px 3px var(--color-shadow);
-            border-radius: 0 0 var(--card-radius) var(--card-radius);
-        }
-
-        /* 修复分类导航栏样式 */
         .category-nav {
             background-color: var(--color-surface);
             padding: 16px;
@@ -327,34 +312,12 @@
             color: #00796B;
         }
 
-        .tool-icon.pink {
-            background-color: #F8BBD0;
-            color: #C2185B;
-        }
-
-        .tool-icon.cyan {
-            background-color: #B2EBF2;
-            color: #0097A7;
-        }
-
-        .tool-icon.indigo {
-            background-color: #C5CAE9;
-            color: #303F9F;
-        }
-
         .tool-name {
             font-size: 16px;
             font-weight: 500;
             transition: all var(--transition);
             position: relative;
             z-index: 2;
-        }
-
-        .divider {
-            height: 1px;
-            background: var(--color-surface-variant);
-            margin: 32px 0;
-            width: 100%;
         }
 
         .app-footer {
@@ -366,52 +329,7 @@
             margin-top: 20px;
         }
 
-        .highlight-card {
-            background-color: var(--color-primary-container);
-            border: none;
-            position: relative;
-        }
-
-        .recent-section {
-            margin-bottom: 32px;
-        }
-        
-        .highlight-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background-color: var(--color-primary);
-            color: var(--color-on-primary);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .tool-card {
-            animation: fadeIn 0.4s ease-out forwards;
-            opacity: 0;
-        }
-        
-        .tool-card:nth-child(1) { animation-delay: 0.1s; }
-        .tool-card:nth-child(2) { animation-delay: 0.2s; }
-        .tool-card:nth-child(3) { animation-delay: 0.3s; }
-        .tool-card:nth-child(4) { animation-delay: 0.4s; }
-        .tool-card:nth-child(5) { animation-delay: 0.5s; }
-        .tool-card:nth-child(6) { animation-delay: 0.6s; }
-        .tool-card:nth-child(7) { animation-delay: 0.7s; }
-        .tool-card:nth-child(8) { animation-delay: 0.8s; }
-        
         /* 菜单样式 */
-        .menu-container {
-            position: relative;
-        }
-        
         .menu-popup {
             position: absolute;
             top: calc(100% + 8px);
@@ -519,42 +437,7 @@
             transform: translateX(18px);
         }
         
-        /* 改进开关可见性 */
-        [data-theme="dark"] .slider {
-            background-color: var(--color-on-surface-variant);
-        }
-        
-        [data-theme="dark"] input:checked + .slider {
-            background-color: var(--color-primary);
-        }
-        
-        [data-theme="dark"] .slider:before {
-            background-color: var(--color-surface);
-        }
-        
-        /* 无结果提示 */
-        .no-results {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--color-on-surface-variant);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .no-results .material-icons {
-            font-size: 48px;
-            margin-bottom: 16px;
-            color: var(--color-on-surface-variant);
-        }
-        
-        .no-results p {
-            margin: 0;
-            font-size: 18px;
-        }
-
-        /* 壁纸模块样式 - 修复折叠功能 */
+        /* 壁纸模块样式 */
         .wallpaper-container {
             border-radius: var(--card-radius);
             background: var(--color-surface);
@@ -666,6 +549,16 @@
             text-align: center;
         }
         
+        .search-results-container {
+            display: none;
+            padding: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--color-surface);
+            box-shadow: 0 1px 3px var(--color-shadow);
+            border-radius: 0 0 var(--card-radius) var(--card-radius);
+        }
+        
         .results-title {
             font-size: 18px;
             font-weight: 500;
@@ -679,6 +572,27 @@
         
         .results-title .material-icons {
             font-size: 24px;
+        }
+        
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--color-on-surface-variant);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .no-results .material-icons {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--color-on-surface-variant);
+        }
+        
+        .no-results p {
+            margin: 0;
+            font-size: 18px;
         }
         
         .opening-header {
@@ -701,6 +615,343 @@
         
         .opening-header.show {
             transform: translateY(0);
+        }
+
+        /* 负一屏样式 - 修改为浮动侧边栏 */
+        .minus-one-screen {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 380px;
+            height: 100vh;
+            background-color: var(--color-surface);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .minus-one-screen.open {
+            right: 0;
+        }
+        
+        .minus-one-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--color-surface-variant);
+            background-color: var(--color-surface);
+        }
+        
+        .minus-one-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .minus-one-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .minus-one-settings-btn, .minus-one-close {
+            background: none;
+            border: none;
+            color: var(--color-on-surface);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        
+        .minus-one-settings-btn:hover, .minus-one-close:hover {
+            background-color: var(--color-surface-variant);
+        }
+        
+        .minus-one-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .minus-one-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .minus-one-card {
+            border-radius: var(--card-radius);
+            background: var(--color-surface);
+            box-shadow: 0 2px 6px var(--color-shadow);
+            border: 1px solid var(--color-surface-variant);
+            overflow: hidden;
+        }
+        
+        .minus-one-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            background-color: var(--color-surface-variant);
+            transition: background-color 0.3s ease;
+        }
+        
+        .minus-one-card-header:hover {
+            background-color: var(--color-primary-container);
+        }
+        
+        .minus-one-card-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--color-primary);
+        }
+        
+        .minus-one-card-content {
+            width: 100%;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .minus-one-card.collapsed .minus-one-card-content {
+            max-height: 0;
+            opacity: 0;
+        }
+        
+        .minus-one-iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            background-color: var(--color-surface);
+        }
+        
+        /* 负一屏设置模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--color-backdrop);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background-color: var(--color-surface);
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--color-primary);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--color-on-surface-variant);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+        }
+        
+        .modal-close:hover {
+            background-color: var(--color-surface-variant);
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--color-on-surface);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background-color: var(--color-surface-variant);
+            color: var(--color-on-surface);
+            border: 1px solid var(--color-surface-variant);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(103, 80, 164, 0.2);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 24px;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
+        }
+        
+        .btn-secondary {
+            background-color: var(--color-surface-variant);
+            color: var(--color-on-surface);
+        }
+        
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        
+        .card-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: var(--color-surface-variant);
+            border-radius: 12px;
+        }
+        
+        .card-list-info {
+            flex: 1;
+        }
+        
+        .card-list-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .card-list-url {
+            font-size: 12px;
+            color: var(--color-on-surface-variant);
+            word-break: break-all;
+        }
+        
+        .card-list-controls {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .list-control-btn {
+            background: none;
+            border: none;
+            color: var(--color-on-surface-variant);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+        }
+        
+        .list-control-btn:hover {
+            background-color: var(--color-surface);
+        }
+        
+        /* 负一屏浮动按钮 */
+        .minus-one-button {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+        
+        .minus-one-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+        }
+        
+        .minus-one-button .material-icons {
+            font-size: 28px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .minus-one-screen {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .minus-one-button {
+                bottom: 16px;
+                right: 16px;
+                width: 56px;
+                height: 56px;
+            }
         }
     </style>
 </head>
@@ -780,7 +1031,7 @@
     
     <!-- 主内容区 -->
     <div class="main-content" id="mainContent">
-        <!-- 今日壁纸 - 修复折叠功能 -->
+        <!-- 今日壁纸 -->
         <div class="wallpaper-container" id="wallpaperContainer">
             <div class="wallpaper-header" id="wallpaperHeader">
                 <div class="wallpaper-title">今日壁纸</div>
@@ -850,13 +1101,113 @@
         </div>
     </div>
     
+    <!-- 负一屏浮动按钮 -->
+    <button class="minus-one-button" id="minusOneButton">
+        <span class="material-icons">dashboard</span>
+    </button>
+    
+    <!-- 负一屏侧边栏 -->
+    <div class="minus-one-screen" id="minusOneScreen">
+        <div class="minus-one-header">
+            <div class="minus-one-title">
+                <span class="material-icons">dashboard</span>
+                负一屏
+            </div>
+            <div class="minus-one-controls">
+                <!-- 设置按钮放在关闭按钮左边 -->
+                <button class="minus-one-settings-btn" id="minusOneSettingsBtn">
+                    <span class="material-icons">settings</span>
+                </button>
+                <button class="minus-one-close" id="minusOneClose">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="minus-one-content">
+            <div class="minus-one-cards" id="minusOneCards">
+                <!-- 负一屏卡片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 负一屏设置模态框 -->
+    <div class="modal-overlay" id="minusOneModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">负一屏设置</h3>
+                <button class="modal-close" id="closeModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">新增卡片</label>
+                <input type="text" class="form-input" id="newCardTitle" placeholder="卡片标题">
+                <input type="text" class="form-input" id="newCardUrl" placeholder="卡片链接" style="margin-top: 8px;">
+                <button class="btn btn-primary" id="addCardBtn" style="width: 100%; margin-top: 12px;">
+                    <span class="material-icons">add</span>
+                    添加卡片
+                </button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">卡片管理</label>
+                <div class="card-list" id="cardList">
+                    <!-- 卡片列表将通过JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">显示设置</label>
+                <div class="toggle-container" style="padding: 12px 0;">
+                    <div>
+                        <span class="material-icons">visibility</span>
+                        默认显示负一屏
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="showMinusOneToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelBtn">取消</button>
+                <button class="btn btn-primary" id="saveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- 页脚 -->
     <div class="app-footer">
-        <p>ckacka 工具箱 • v1.7.1</p>
+        <p>ckacka 工具箱 • v1.8.0</p>
         <p class="copyright">© ckacka 工具箱应用 • 遵循 Material Design 设计规范</p>
     </div>
 
     <script>
+        // 默认负一屏卡片数据
+        const defaultMinusOneCards = [
+            {
+                id: 1,
+                title: "在线计算器",
+                url: "https://tool.browser.qq.com/calculator?addressbar=hide&callfrom=gongjuxiang",
+                collapsed: false
+            },
+            {
+                id: 2,
+                title: "新闻资讯",
+                url: "https://hot.browser.miui.com/v7/#status=open&cate=%E6%8E%A8%E8%8D%90",
+                collapsed: false
+            },
+            {
+                id: 3,
+                title: "每天认识一种文物",
+                url: "https://ysxwyzl.4dage.com/4dwall/index.html",
+                collapsed: false
+            }
+        ];
+
         // 壁纸功能
         function setWallpaper() {
             const today = new Date();
@@ -1080,7 +1431,7 @@
             }
         });
         
-        // 新增：分类过滤功能
+        // 分类过滤功能
         const categoryItems = document.querySelectorAll('.category-item');
         
         categoryItems.forEach(item => {
@@ -1119,10 +1470,193 @@
             });
         });
         
-        // 新增：更新日志功能
+        // 更新日志功能
         function openChangelog() {
             window.open('https://ckacka.github.io/changelog.html', '_blank');
         }
+        
+        // 负一屏功能
+        let minusOneCards = [];
+        
+        // 加载负一屏数据
+        function loadMinusOneData() {
+            const savedData = localStorage.getItem('minusOneCards');
+            
+            if (savedData) {
+                minusOneCards = JSON.parse(savedData);
+            } else {
+                minusOneCards = JSON.parse(JSON.stringify(defaultMinusOneCards));
+            }
+            
+            renderMinusOneCards();
+        }
+        
+        // 保存负一屏数据
+        function saveMinusOneData() {
+            localStorage.setItem('minusOneCards', JSON.stringify(minusOneCards));
+        }
+        
+        // 渲染负一屏卡片
+        function renderMinusOneCards() {
+            const container = document.getElementById('minusOneCards');
+            container.innerHTML = '';
+            
+            minusOneCards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = `minus-one-card ${card.collapsed ? 'collapsed' : ''}`;
+                cardElement.innerHTML = `
+                    <div class="minus-one-card-header" data-card-id="${card.id}">
+                        <div class="minus-one-card-title">${card.title}</div>
+                        <span class="material-icons toggle-icon">${card.collapsed ? 'expand_more' : 'expand_less'}</span>
+                    </div>
+                    <div class="minus-one-card-content" style="${card.collapsed ? 'max-height: 0; opacity: 0;' : 'max-height: 650px; opacity: 1;'}">
+                        <iframe class="minus-one-iframe" src="${card.url}" frameborder="0"></iframe>
+                    </div>
+                `;
+                container.appendChild(cardElement);
+            });
+            
+            // 添加卡片点击事件
+            document.querySelectorAll('.minus-one-card-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const cardId = parseInt(this.getAttribute('data-card-id'));
+                    const card = minusOneCards.find(c => c.id === cardId);
+                    if (card) {
+                        card.collapsed = !card.collapsed;
+                        saveMinusOneData();
+                        renderMinusOneCards();
+                    }
+                });
+            });
+        }
+        
+        // 负一屏控制
+        const minusOneButton = document.getElementById('minusOneButton');
+        const minusOneScreen = document.getElementById('minusOneScreen');
+        const minusOneClose = document.getElementById('minusOneClose');
+        const minusOneSettingsBtn = document.getElementById('minusOneSettingsBtn');
+        const minusOneModal = document.getElementById('minusOneModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const addCardBtn = document.getElementById('addCardBtn');
+        const cardList = document.getElementById('cardList');
+        
+        // 打开负一屏
+        function openMinusOneScreen() {
+            minusOneScreen.classList.add('open');
+        }
+        
+        // 关闭负一屏
+        function closeMinusOneScreen() {
+            minusOneScreen.classList.remove('open');
+        }
+        
+        // 打开设置模态框
+        function openSettingsModal() {
+            minusOneModal.classList.add('show');
+            renderCardList();
+        }
+        
+        // 关闭设置模态框
+        function closeSettingsModal() {
+            minusOneModal.classList.remove('show');
+        }
+        
+        // 添加新卡片
+        addCardBtn.addEventListener('click', function() {
+            const title = document.getElementById('newCardTitle').value.trim();
+            const url = document.getElementById('newCardUrl').value.trim();
+            
+            if (!title || !url) {
+                alert('请输入卡片标题和链接');
+                return;
+            }
+            
+            // 验证URL格式
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert('请输入有效的URL链接（以http://或https://开头）');
+                return;
+            }
+            
+            const newCard = {
+                id: Date.now(), // 使用时间戳作为唯一ID
+                title: title,
+                url: url,
+                collapsed: false
+            };
+            
+            minusOneCards.push(newCard);
+            document.getElementById('newCardTitle').value = '';
+            document.getElementById('newCardUrl').value = '';
+            renderCardList();
+        });
+        
+        // 渲染卡片列表
+        function renderCardList() {
+            cardList.innerHTML = '';
+            
+            minusOneCards.forEach((card, index) => {
+                const listItem = document.createElement('div');
+                listItem.className = 'card-list-item';
+                listItem.innerHTML = `
+                    <div class="card-list-info">
+                        <div class="card-list-title">${card.title}</div>
+                        <div class="card-list-url">${card.url}</div>
+                    </div>
+                    <div class="card-list-controls">
+                        <button class="list-control-btn move-up-list-btn" data-index="${index}">
+                            <span class="material-icons">arrow_upward</span>
+                        </button>
+                        <button class="list-control-btn move-down-list-btn" data-index="${index}">
+                            <span class="material-icons">arrow_downward</span>
+                        </button>
+                        <button class="list-control-btn delete-list-btn" data-index="${index}">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </div>
+                `;
+                cardList.appendChild(listItem);
+            });
+            
+            // 添加列表控制事件
+            document.querySelectorAll('.move-up-list-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    if (index > 0) {
+                        [minusOneCards[index], minusOneCards[index - 1]] = [minusOneCards[index - 1], minusOneCards[index]];
+                        renderCardList();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.move-down-list-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    if (index < minusOneCards.length - 1) {
+                        [minusOneCards[index], minusOneCards[index + 1]] = [minusOneCards[index + 1], minusOneCards[index]];
+                        renderCardList();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.delete-list-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    if (confirm('确定要删除这个卡片吗？')) {
+                        minusOneCards.splice(index, 1);
+                        renderCardList();
+                    }
+                });
+            });
+        }
+        
+        // 保存设置
+        saveBtn.addEventListener('click', function() {
+            saveMinusOneData();
+            renderMinusOneCards();
+            closeSettingsModal();
+        });
         
         // 页面加载
         window.onload = () => {
@@ -1158,6 +1692,32 @@
                 document.getElementById('wallpaperContainer').classList.add('collapsed');
                 document.getElementById('toggleIcon').textContent = 'expand_more';
             }
+            
+            // 加载负一屏
+            loadMinusOneData();
+            
+            // 负一屏按钮事件
+            minusOneButton.addEventListener('click', openMinusOneScreen);
+            minusOneClose.addEventListener('click', closeMinusOneScreen);
+            minusOneSettingsBtn.addEventListener('click', openSettingsModal);
+            
+            // 点击负一屏外部关闭
+            minusOneScreen.addEventListener('click', function(e) {
+                if (e.target === minusOneScreen) {
+                    closeMinusOneScreen();
+                }
+            });
+            
+            // 设置模态框事件
+            closeModal.addEventListener('click', closeSettingsModal);
+            cancelBtn.addEventListener('click', closeSettingsModal);
+            
+            // 点击模态框外部关闭
+            minusOneModal.addEventListener('click', function(e) {
+                if (e.target === minusOneModal) {
+                    closeSettingsModal();
+                }
+            });
         };
     </script>
 </body>
