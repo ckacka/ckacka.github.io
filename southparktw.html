@@ -1,0 +1,941 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《南方公园》台配版</title>
+    <!-- 引入Roboto字体和Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* CSS变量定义 - 支持主题切换 */
+        :root {
+            /* 浅色主题变量 */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #eeeeee;
+            --text-primary: #000000;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --accent-color: #1976d2;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --header-bg: #ffffff;
+            --tab-bg: #f5f5f5;
+            --modal-bg: #ffffff;
+            --toast-bg: rgba(0, 0, 0, 0.8);
+            --bottom-menu-bg: rgba(255, 255, 255, 0.95);
+            --bottom-menu-border: rgba(0, 0, 0, 0.1);
+        }
+
+        /* 暗黑主题变量 */
+        [data-theme="dark"] {
+            --bg-primary: #000000;
+            --bg-secondary: #121212;
+            --bg-tertiary: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-tertiary: #666666;
+            --accent-color: #42a5f5;
+            --border-color: #333333;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --header-bg: #121212;
+            --tab-bg: #121212;
+            --modal-bg: #1e1e1e;
+            --toast-bg: rgba(0, 0, 0, 0.9);
+            --bottom-menu-bg: rgba(30, 30, 30, 0.95);
+            --bottom-menu-border: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 基础重置与全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* 顶部标题栏 */
+        .header {
+            width: 100%;
+            height: 56px;
+            background-color: var(--header-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            transition: all 0.3s ease;
+        }
+        .header-title {
+            font-size: 20px;
+            font-weight: 500;
+        }
+        
+        /* 头部控制区域 */
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 主题切换按钮 */
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border: none;
+            background: none;
+            color: var(--text-primary);
+        }
+        .theme-toggle:hover {
+            background-color: var(--border-color);
+        }
+        .theme-icon {
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+        .theme-toggle:hover .theme-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 更多按钮 */
+        .more-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            position: relative;
+        }
+        .more-btn:hover {
+            background-color: var(--border-color);
+        }
+        .more-icon {
+            color: var(--text-primary);
+            font-size: 24px;
+        }
+
+        /* 更多菜单 */
+        .more-menu {
+            position: absolute;
+            top: 56px;
+            right: 16px;
+            width: 160px;
+            background-color: var(--modal-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            overflow: hidden;
+            display: none;
+            z-index: 300;
+            border: 1px solid var(--border-color);
+        }
+        .more-menu.show {
+            display: block;
+        }
+        .menu-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .menu-item:hover {
+            background-color: var(--border-color);
+        }
+        .menu-icon {
+            font-size: 20px;
+            color: var(--text-primary);
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-item span {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        /* 顶栏标签容器 */
+        .tabs-container {
+            width: 100%;
+            background-color: var(--tab-bg);
+            box-shadow: 0 2px 4px var(--shadow-color);
+            position: sticky;
+            top: 56px;
+            z-index: 100;
+        }
+
+        /* 标签滚动容器 */
+        .tabs-scroll {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 0 16px;
+        }
+        .tabs-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* 标签样式 */
+        .tab {
+            padding: 16px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+            position: relative;
+            transition: color 0.2s ease;
+        }
+        .tab.active {
+            color: var(--accent-color);
+        }
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--accent-color);
+            border-radius: 1px;
+        }
+        .tab:hover {
+            color: var(--accent-color);
+        }
+
+        /* 内容区域 */
+        .content {
+            width: 100%;
+            padding: 16px;
+            min-height: calc(100vh - 120px);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* 播放器容器 */
+        .player-container {
+            width: 100%;
+            height: 360px;
+            min-height: 360px;
+            border-radius: 8px;
+            overflow: visible;
+            background-color: var(--bg-tertiary);
+            position: relative;
+            z-index: 10;
+        }
+        /* 其他季内容占位 */
+        .empty-content {
+            width: 100%;
+            height: 360px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: var(--text-tertiary);
+            background-color: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+        /* 视频库图标 */
+        .video-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+        }
+        .video-icon .material-icons {
+            font-size: 48px;
+        }
+
+        /* 功能提示弹窗 */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 16px;
+            background-color: var(--toast-bg);
+            color: #ffffff;
+            font-size: 14px;
+            border-radius: 4px;
+            display: none;
+            z-index: 400;
+        }
+        .toast.show {
+            display: block;
+            animation: fadeInOut 2s ease;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* 模态弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 1001;
+        }
+        .modal-content {
+            background-color: var(--modal-bg);
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            z-index: 1002;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .modal-close:hover {
+            background-color: var(--border-color);
+        }
+        .modal-body {
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+        
+        /* 赞赏二维码样式 */
+        .qrcode-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .qrcode-title {
+            font-size: 16px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .qrcode-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            object-fit: cover;
+        }
+        .reward-buttons {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+        .reward-button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .reward-button:hover {
+            background-color: #1e88e5;
+        }
+        .reward-button.wechat {
+            background-color: #07c160;
+        }
+        .reward-button.wechat:hover {
+            background-color: #06ae56;
+        }
+        .reward-note {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* 第三方浏览器底部菜单栏 - 修复主题适配 */
+        .bottom-menu-bar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--bottom-menu-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--bottom-menu-border);
+            z-index: 500;
+            padding: 10px 0;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .bottom-menu-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .bottom-menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            min-width: 80px;
+        }
+        .bottom-menu-item:hover {
+            background-color: var(--border-color);
+        }
+        .bottom-menu-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+        .bottom-menu-text {
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+        
+        /* 第三方浏览器检测样式 */
+        body.third-party-browser .more-btn {
+            display: none;
+        }
+        body.third-party-browser .bottom-menu-bar {
+            display: block;
+        }
+        body.third-party-browser .content {
+            padding-bottom: 80px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 12px;
+            }
+            .header-controls {
+                gap: 4px;
+            }
+            .tabs-scroll {
+                padding: 0 12px;
+            }
+            .content {
+                padding: 12px;
+            }
+            .tab {
+                padding: 12px 16px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <!-- 页面主要内容 -->
+    <div class="page-content">
+        <!-- 顶部标题栏 -->
+        <div class="header">
+            <div class="header-title">《南方公园》台配版</div>
+            <div class="header-controls">
+                <!-- 主题切换按钮放在左边 -->
+                <button class="theme-toggle" id="themeToggle" title="切换主题">
+                    <span class="material-icons theme-icon">dark_mode</span>
+                </button>
+                <!-- 更多按钮放在右边 -->
+                <div class="more-btn" id="moreBtn">
+                    <span class="material-icons more-icon">more_vert</span>
+                </div>
+            </div>
+            <!-- 更多菜单 -->
+            <div class="more-menu" id="moreMenu">
+                <div class="menu-item" data-action="refresh">
+                    <span class="material-icons menu-icon">refresh</span>
+                    <span>刷新播放器</span>
+                </div>
+                <div class="menu-item" data-action="reward">
+                    <span class="material-icons menu-icon">favorite</span>
+                    <span>赞赏</span>
+                </div>
+                <div class="menu-item" data-action="about">
+                    <span class="material-icons menu-icon">info</span>
+                    <span>关于</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第三方浏览器底部菜单栏 -->
+        <div class="bottom-menu-bar" id="bottomMenuBar">
+            <div class="bottom-menu-items">
+                <div class="bottom-menu-item" data-action="refresh">
+                    <span class="material-icons bottom-menu-icon">refresh</span>
+                    <div class="bottom-menu-text">刷新</div>
+                </div>
+                <div class="bottom-menu-item" data-action="reward">
+                    <span class="material-icons bottom-menu-icon">favorite</span>
+                    <div class="bottom-menu-text">赞赏</div>
+                </div>
+                <div class="bottom-menu-item" data-action="about">
+                    <span class="material-icons bottom-menu-icon">info</span>
+                    <div class="bottom-menu-text">关于</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 顶栏标签容器 -->
+        <div class="tabs-container">
+            <div class="tabs-scroll">
+                <div class="tab active" data-tab="tab1">第一季</div>
+                <div class="tab" data-tab="tab2">第二季</div>
+                <div class="tab" data-tab="tab3">第三季</div>
+                <div class="tab" data-tab="tab4">第四季</div>
+                <div class="tab" data-tab="tab5">第五季</div>
+                <div class="tab" data-tab="tab6">第六季</div>
+                <div class="tab" data-tab="tab7">第七季</div>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content">
+            <!-- 第一季内容（含播放器） -->
+            <div class="tab-content active" id="tab1">
+                <div class="player-container" id="player_2ef9dd48909dc300"></div>
+                <script type="text/javascript" src="https://player.dogecloud.com/js/loader"></script>
+                <script type="text/javascript">
+                    var player1 = new DogePlayer({
+                        container: document.getElementById('player_2ef9dd48909dc300'),
+                        userId: 14140,
+                        vcode: '2ef9dd48909dc300',
+                        autoPlay: false,
+                        plcode: '6b09b6b8d06b902c',
+                        plsort: 'name'
+                    });
+                </script>
+            </div>
+
+            <!-- 第二季内容（含播放器） -->
+            <div class="tab-content" id="tab2">
+                <div class="player-container" id="player_bde20bed5c4aa872"></div>
+                <script type="text/javascript" src="https://player.dogecloud.com/js/loader"></script>
+                <script type="text/javascript">
+                    var player2 = new DogePlayer({
+                        container: document.getElementById('player_bde20bed5c4aa872'),
+                        userId: 14140,
+                        vcode: 'bde20bed5c4aa872',
+                        autoPlay: false,
+                        plcode: '5ba17ace5a57ed42',
+                        plsort: 'name'
+                    });
+                </script>
+            </div>
+
+            <!-- 第三季内容（占位） -->
+            <div class="tab-content" id="tab3">
+                <div class="empty-content">
+                    <div class="video-icon">
+                        <span class="material-icons">video_library</span>
+                    </div>
+                    <p>第三季内容暂未更新</p>
+                </div>
+            </div>
+
+            <!-- 第四季内容（占位） -->
+            <div class="tab-content" id="tab4">
+                <div class="empty-content">
+                    <div class="video-icon">
+                        <span class="material-icons">video_library</span>
+                    </div>
+                    <p>第四季内容暂未更新</p>
+                </div>
+            </div>
+
+            <!-- 第五季内容（占位） -->
+            <div class="tab-content" id="tab5">
+                <div class="empty-content">
+                    <div class="video-icon">
+                        <span class="material-icons">video_library</span>
+                    </div>
+                    <p>第五季内容暂未更新</p>
+                </div>
+            </div>
+
+            <!-- 第六季内容（占位） -->
+            <div class="tab-content" id="tab6">
+                <div class="empty-content">
+                    <div class="video-icon">
+                        <span class="material-icons">video_library</span>
+                    </div>
+                    <p>第六季内容暂未更新</p>
+                </div>
+            </div>
+
+            <!-- 第七季内容（占位） -->
+            <div class="tab-content" id="tab7">
+                <div class="empty-content">
+                    <div class="video-icon">
+                        <span class="material-icons">video_library</span>
+                    </div>
+                    <p>第七季内容暂未更新</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 功能提示弹窗 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 赞赏模态弹窗 -->
+    <div class="modal" id="rewardModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">感谢支持</div>
+                <button class="modal-close" id="closeReward">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; margin-bottom: 20px;">如果您喜欢这个视频播放器，可以考虑支持我们的开发工作。</p>
+                
+                <!-- 支付宝二维码 -->
+                <div class="qrcode-container">
+                    <div class="qrcode-title">支付宝赞赏</div>
+                    <img src="https://preview.cloud.189.cn/image/imageAction?param=4A9642D17F6D5436EA1C5CCE96C3A5C04297C32046CE18EE47E7C4A89F243180377639D6981343CED866A3432131B211B3B6B7155931B084E40AF7CC97CF147CE160B661A7738969158DDE1F22FBA3F7CE85F08E14BF4C8E6AC48545133F5323D511A4C51179A9EEEEA1275E796058BEB591ABD0" alt="支付宝赞赏二维码" class="qrcode-image">
+                </div>
+                
+                <!-- 微信二维码 -->
+                <div class="qrcode-container">
+                    <div class="qrcode-title">微信赞赏</div>
+                    <img src="https://preview.cloud.189.cn/image/imageAction?param=FC58E9905ECE52C8ECCD2E9906EBE63814CA2426562544EADAACA7846BACDBB6867DBF02562C5FB28D23386D9EB2279BA0C819603195837887E191C7F63C4B8EBE086C32B360905C16675344566E22E96A5C7BF6BE6519259DB10870A0A1BE382532C5D8B2F35F9749E8761A903E12DF63223C72" alt="微信赞赏二维码" class="qrcode-image">
+                </div>
+                
+                <!-- 按钮区域 -->
+                <div class="reward-buttons">
+                    <a href="https://qr.alipay.com/tsx19575tdn3azsb7jedp8f" target="_blank" class="reward-button">打开支付宝</a>
+                    <button class="reward-button wechat" id="wechatBtn">打开微信</button>
+                </div>
+                
+                <p class="reward-note">长按二维码图片可保存到相册</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关于模态弹窗 -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">关于</div>
+                <button class="modal-close" id="closeAbout">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>这是一个视频季播页面示例，支持多季内容切换和播放。</p>
+                <p><strong>功能特点：</strong></p>
+                <ul style="padding-left: 20px; margin-top: 10px;">
+                    <li>多季内容标签切换</li>
+                    <li>响应式播放器</li>
+                    <li>明暗主题切换</li>
+                    <li>播放列表支持</li>
+                </ul>
+                <p style="margin-top: 15px; font-size: 12px; color: var(--text-secondary);">版本 1.1.1</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 交互逻辑 -->
+    <script>
+        // 等待DOM完全加载后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 主题管理功能
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = themeToggle.querySelector('.theme-icon');
+            const body = document.body;
+            const toast = document.getElementById('toast');
+            
+            // 初始化主题
+            function initTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                body.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            }
+            
+            // 更新主题图标
+            function updateThemeIcon(theme) {
+                if (theme === 'dark') {
+                    themeIcon.textContent = 'dark_mode';
+                    toast.textContent = '已切换到暗黑模式';
+                } else {
+                    themeIcon.textContent = 'light_mode';
+                    toast.textContent = '已切换到明亮模式';
+                }
+            }
+            
+            // 切换主题
+            function toggleTheme() {
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+                
+                // 显示切换提示
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            }
+            
+            // 初始化主题
+            initTheme();
+            
+            // 主题切换按钮点击事件
+            themeToggle.addEventListener('click', toggleTheme);
+
+            // 检测第三方浏览器
+            function detectThirdPartyBrowser() {
+                const userAgent = navigator.userAgent.toLowerCase();
+                const thirdPartyBrowsers = [
+                    'quark', 'qqbrowser', 'ucbrowser', 'miuibrowser', 
+                    'baidubrowser', 'sogoumobilebrowser', '360browser'
+                ];
+                
+                return thirdPartyBrowsers.some(browser => userAgent.includes(browser));
+            }
+            
+            // 如果是第三方浏览器，添加特殊类名
+            if (detectThirdPartyBrowser()) {
+                document.body.classList.add('third-party-browser');
+            }
+            
+            // 初始化播放器函数
+            function initPlayer(containerId, vcode, plcode) {
+                const playerContainer = document.getElementById(containerId);
+                playerContainer.innerHTML = '';
+                
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = 'https://player.dogecloud.com/js/loader?' + new Date().getTime();
+                document.head.appendChild(script);
+                
+                script.onload = function() {
+                    var player = new DogePlayer({
+                        container: document.getElementById(containerId),
+                        userId: 14140,
+                        vcode: vcode,
+                        autoPlay: false,
+                        plcode: plcode,
+                        plsort: 'name'
+                    });
+                };
+            }
+            
+            // 初始化第一季播放器
+            initPlayer('player_2ef9dd48909dc300', '2ef9dd48909dc300', '6b09b6b8d06b902c');
+            
+            // 初始化第二季播放器
+            initPlayer('player_bde20bed5c4aa872', 'bde20bed5c4aa872', '5ba17ace5a57ed42');
+
+            // 1. 标签切换逻辑
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 移除所有激活状态
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    // 激活当前标签和内容
+                    this.classList.add('active');
+                    const targetTab = this.getAttribute('data-tab');
+                    document.getElementById(targetTab).classList.add('active');
+                    // 滚动到当前标签
+                    this.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                });
+            });
+
+            // 2. 更多菜单功能
+            const moreBtn = document.getElementById('moreBtn');
+            const moreMenu = document.getElementById('moreMenu');
+            const rewardModal = document.getElementById('rewardModal');
+            const aboutModal = document.getElementById('aboutModal');
+            const wechatBtn = document.getElementById('wechatBtn');
+            const bottomMenuBar = document.getElementById('bottomMenuBar');
+            
+            // 点击更多按钮显示/隐藏菜单
+            moreBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                moreMenu.classList.toggle('show');
+            });
+            
+            // 通用菜单项点击处理函数
+            function handleMenuItemClick(action) {
+                switch(action) {
+                    case 'refresh':
+                        // 刷新当前激活的播放器
+                        const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                        toast.textContent = '正在刷新播放器...';
+                        toast.classList.add('show');
+                        
+                        if (activeTab === 'tab1') {
+                            initPlayer('player_2ef9dd48909dc300', '2ef9dd48909dc300', '6b09b6b8d06b902c');
+                        } else if (activeTab === 'tab2') {
+                            initPlayer('player_bde20bed5c4aa872', 'bde20bed5c4aa872', '5ba17ace5a57ed42');
+                        }
+                        
+                        setTimeout(() => {
+                            toast.textContent = '播放器已刷新';
+                        }, 500);
+                        setTimeout(() => {
+                            toast.classList.remove('show');
+                        }, 2000);
+                        break;
+                    case 'reward':
+                        // 显示赞赏模态框
+                        rewardModal.classList.add('active');
+                        break;
+                    case 'about':
+                        // 显示关于模态框
+                        aboutModal.classList.add('active');
+                        break;
+                }
+            }
+            
+            // 顶部菜单项点击事件（标准浏览器）
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const action = this.getAttribute('data-action');
+                    moreMenu.classList.remove('show');
+                    handleMenuItemClick(action);
+                });
+            });
+            
+            // 底部菜单项点击事件（第三方浏览器）
+            document.querySelectorAll('.bottom-menu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const action = this.getAttribute('data-action');
+                    handleMenuItemClick(action);
+                });
+            });
+            
+            // 微信按钮点击事件 - 唤起微信
+            wechatBtn.addEventListener('click', function() {
+                // 尝试唤起微信
+                window.location.href = 'weixin://';
+                
+                // 如果唤起失败，显示提示
+                setTimeout(function() {
+                    toast.textContent = '如果微信没有自动打开，请手动打开微信扫码';
+                    toast.classList.add('show');
+                    
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                    }, 3000);
+                }, 1000);
+            });
+            
+            // 关闭赞赏模态框
+            document.getElementById('closeReward').addEventListener('click', function() {
+                rewardModal.classList.remove('active');
+            });
+            
+            // 关闭关于模态框
+            document.getElementById('closeAbout').addEventListener('click', function() {
+                aboutModal.classList.remove('active');
+            });
+            
+            // 点击模态框外部关闭
+            rewardModal.addEventListener('click', function(e) {
+                if (e.target === rewardModal || e.target.classList.contains('modal-backdrop')) {
+                    rewardModal.classList.remove('active');
+                }
+            });
+            
+            aboutModal.addEventListener('click', function(e) {
+                if (e.target === aboutModal || e.target.classList.contains('modal-backdrop')) {
+                    aboutModal.classList.remove('active');
+                }
+            });
+            
+            // 点击页面其他地方关闭菜单
+            document.addEventListener('click', function() {
+                moreMenu.classList.remove('show');
+            });
+            
+            // 阻止菜单内部的点击事件冒泡
+            moreMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+    </script>
+</body>
+</html>
+
