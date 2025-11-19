@@ -167,8 +167,8 @@
         }
         .player-container {
             width: 100%;
-            height: 360px;
-            min-height: 360px;
+            height: 320px; /* 降低高度以适应电脑模式 */
+            min-height: 240px; /* 移动设备最小高度 */
             border-radius: 8px;
             overflow: hidden;
             background-color: var(--bg-tertiary);
@@ -177,7 +177,7 @@
         }
         .empty-content {
             width: 100%;
-            height: 360px;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -221,7 +221,7 @@
             font-size: 14px;
             border-radius: 4px;
             display: none;
-            z-index: 400;
+            z-index: 1003; /* 提高z-index确保在模态框之上 */
         }
         .toast.show {
             display: block;
@@ -386,6 +386,20 @@
         body.third-party-browser .more-btn { display: none; }
         body.third-party-browser .bottom-menu-bar { display: block; }
         body.third-party-browser .content { padding-bottom: 80px; }
+        
+        /* 响应式设计 */
+        @media (min-width: 768px) {
+            .player-container {
+                height: 400px; /* 在平板和电脑上稍微增加高度 */
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .player-container {
+                height: 500px; /* 在电脑上使用适中高度 */
+            }
+        }
+        
         @media (max-width: 768px) {
             .header { padding: 0 12px; }
             .header-controls { gap: 4px; }
@@ -530,7 +544,7 @@
                     <li>播放列表支持</li>
                     <li>播放进度保持</li>
                 </ul>
-                <p style="margin-top: 15px; font-size: 12px; color: var(--text-secondary);">版本 1.2.0</p>
+                <p style="margin-top: 15px; font-size: 12px; color: var(--text-secondary);">版本 1.2.1</p>
             </div>
         </div>
     </div>
@@ -557,9 +571,7 @@
                 body.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
                 themeIcon.textContent = newTheme === 'dark' ? 'dark_mode' : 'light_mode';
-                toast.textContent = `已切换到${newTheme === 'dark' ? '暗黑' : '明亮'}模式`;
-                toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 2000);
+                showToast(`已切换到${newTheme === 'dark' ? '暗黑' : '明亮'}模式`, 2000);
             });
             
             initTheme();
@@ -671,9 +683,7 @@
                                 if (retryCount < 3) {
                                     initPlayer(containerId, vcode, plcode, retryCount + 1);
                                 } else {
-                                    toast.textContent = '播放器加载失败，请刷新页面重试';
-                                    toast.classList.add('show');
-                                    setTimeout(() => toast.classList.remove('show'), 3000);
+                                    showToast('播放器加载失败，请刷新页面重试', 3000);
                                 }
                             });
                             
@@ -760,8 +770,7 @@
                 
                 switch(action) {
                     case 'refresh':
-                        toast.textContent = '正在刷新播放器...';
-                        toast.classList.add('show');
+                        showToast('正在刷新播放器...', 500);
                         
                         // 获取当前活动标签
                         const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
@@ -780,8 +789,7 @@
                         }
                         
                         setTimeout(() => {
-                            toast.textContent = '播放器已刷新';
-                            setTimeout(() => toast.classList.remove('show'), 1500);
+                            showToast('播放器已刷新', 1500);
                         }, 500);
                         break;
                         
@@ -841,16 +849,21 @@
                 });
             });
             
-            // 微信按钮功能
+            // 微信按钮功能 - 修复唤起微信的问题
             wechatBtn.addEventListener('click', function() {
                 if (isWeChatBrowser()) {
                     // 在微信中，尝试唤醒微信支付
                     window.location.href = 'weixin://';
                 } else {
-                    // 在非微信浏览器中，显示更友好的提示
-                    toast.textContent = '请使用微信扫描上方二维码进行赞赏';
-                    toast.classList.add('show');
-                    setTimeout(() => toast.classList.remove('show'), 3000);
+                    // 在非微信浏览器中，提示用户保存二维码图片
+                    showToast('请使用微信扫描上方二维码进行赞赏', 3000);
+                    
+                    // 尝试唤起微信，如果失败则显示提示
+                    window.location.href = 'weixin://';
+                    setTimeout(() => {
+                        // 如果页面没有被重定向，说明唤起失败
+                        showToast('无法唤起微信，请手动打开微信扫描二维码', 3000);
+                    }, 1000);
                 }
             });
             
@@ -861,6 +874,13 @@
                     closeModal(aboutModal);
                 }
             });
+            
+            // 显示Toast消息的辅助函数
+            function showToast(message, duration = 2000) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), duration);
+            }
             
             // 初始化第一季播放器
             const firstSeasonConfig = playerConfigs.find(config => config.id === 'player_2ef9dd48909dc300');
