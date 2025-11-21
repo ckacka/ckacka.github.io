@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>《南方公园》台配版</title>
+    <title>《南方公园》台配版 - 优化版</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -23,6 +23,8 @@
             --toast-bg: rgba(0, 0, 0, 0.8);
             --bottom-menu-bg: rgba(255, 255, 255, 0.95);
             --bottom-menu-border: rgba(0, 0, 0, 0.1);
+            --error-color: #f44336;
+            --success-color: #4caf50;
         }
         [data-theme="dark"] {
             --bg-primary: #000000;
@@ -40,6 +42,8 @@
             --toast-bg: rgba(0, 0, 0, 0.9);
             --bottom-menu-bg: rgba(30, 30, 30, 0.95);
             --bottom-menu-border: rgba(255, 255, 255, 0.1);
+            --error-color: #f44336;
+            --success-color: #4caf50;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -61,8 +65,13 @@
             position: sticky;
             top: 0;
             z-index: 200;
+            transition: all 0.3s ease;
         }
-        .header-title { font-size: 20px; font-weight: 500; }
+        .header-title { 
+            font-size: 20px; 
+            font-weight: 500; 
+            transition: color 0.3s ease;
+        }
         .header-controls { display: flex; align-items: center; gap: 8px; }
         .theme-toggle, .more-btn {
             width: 40px;
@@ -78,7 +87,7 @@
             color: var(--text-primary);
         }
         .theme-toggle:hover, .more-btn:hover { background-color: var(--border-color); }
-        .theme-icon { font-size: 24px; transition: transform 0.3s ease; }
+        .theme-icon { font-size: 24px; transition: transform 0.3s ease, opacity 0.3s ease; }
         .theme-toggle:hover .theme-icon { transform: rotate(180deg); }
         .more-icon { color: var(--text-primary); font-size: 24px; }
         .more-menu {
@@ -93,6 +102,7 @@
             display: none;
             z-index: 300;
             border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
         }
         .more-menu.show { display: block; }
         .menu-item {
@@ -123,6 +133,7 @@
             position: sticky;
             top: 56px;
             z-index: 100;
+            transition: all 0.3s ease;
         }
         .tabs-scroll {
             display: flex;
@@ -158,6 +169,7 @@
             width: 100%;
             padding: 16px;
             min-height: calc(100vh - 120px);
+            transition: padding 0.3s ease;
         }
         .tab-content { 
             display: none; 
@@ -167,13 +179,23 @@
         }
         .player-container {
             width: 100%;
-            height: 320px; /* 降低高度以适应电脑模式 */
-            min-height: 240px; /* 移动设备最小高度 */
+            height: 320px;
+            min-height: 240px;
             border-radius: 8px;
             overflow: hidden;
             background-color: var(--bg-tertiary);
             position: relative;
             z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .player-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10000;
+            background-color: #000;
         }
         .empty-content {
             width: 100%;
@@ -185,6 +207,8 @@
             color: var(--text-tertiary);
             background-color: var(--bg-tertiary);
             border-radius: 8px;
+            text-align: center;
+            padding: 20px;
         }
         .video-icon {
             width: 48px;
@@ -197,6 +221,19 @@
             color: var(--text-tertiary);
         }
         .video-icon .material-icons { font-size: 48px; }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-left: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         .retry-button {
             margin-top: 16px;
             padding: 8px 16px;
@@ -206,9 +243,31 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
+            transition: background-color 0.2s;
         }
         .retry-button:hover {
             background-color: #1565c0;
+        }
+        .error-message {
+            color: var(--error-color);
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        .network-status {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            width: 100%;
+            padding: 8px;
+            background-color: var(--error-color);
+            color: white;
+            text-align: center;
+            font-size: 14px;
+            z-index: 150;
+            display: none;
+        }
+        .network-status.online {
+            background-color: var(--success-color);
         }
         .toast {
             position: fixed;
@@ -221,7 +280,9 @@
             font-size: 14px;
             border-radius: 4px;
             display: none;
-            z-index: 1003; /* 提高z-index确保在模态框之上 */
+            z-index: 1003;
+            max-width: 80%;
+            text-align: center;
         }
         .toast.show {
             display: block;
@@ -266,6 +327,7 @@
             z-index: 1002;
             position: relative;
             border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
         }
         .modal-header {
             display: flex;
@@ -390,13 +452,13 @@
         /* 响应式设计 */
         @media (min-width: 768px) {
             .player-container {
-                height: 400px; /* 在平板和电脑上稍微增加高度 */
+                height: 400px;
             }
         }
         
         @media (min-width: 1024px) {
             .player-container {
-                height: 500px; /* 在电脑上使用适中高度 */
+                height: 500px;
             }
         }
         
@@ -411,9 +473,39 @@
                 min-height: 240px; 
             }
         }
+        
+        /* 修复全屏模式下的样式 */
+        .player-container:-webkit-full-screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        .player-container:-moz-full-screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        .player-container:-ms-fullscreen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        .player-container:fullscreen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        
+        /* 确保全屏时播放器内容正确显示 */
+        .player-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body data-theme="dark">
+    <div class="network-status" id="networkStatus">网络连接不可用，请检查网络设置</div>
     <div class="page-content">
         <div class="header">
             <div class="header-title">《南方公园》台配版</div>
@@ -543,8 +635,10 @@
                     <li>明暗主题切换</li>
                     <li>播放列表支持</li>
                     <li>播放进度保持</li>
+                    <li>网络状态检测</li>
+                    <li>改进的错误处理</li>
                 </ul>
-                <p style="margin-top: 15px; font-size: 12px; color: var(--text-secondary);">版本 1.2.1</p>
+                <p style="margin-top: 15px; font-size: 12px; color: var(--text-secondary);">版本 2.0.0</p>
             </div>
         </div>
     </div>
@@ -554,9 +648,30 @@
             const themeIcon = themeToggle.querySelector('.theme-icon');
             const body = document.body;
             const toast = document.getElementById('toast');
+            const networkStatus = document.getElementById('networkStatus');
             
             // 检查播放器脚本是否已加载
             let playerScriptLoaded = false;
+            
+            // 防抖函数
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+            
+            // HTML转义函数
+            function sanitizeHTML(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
             
             // 主题初始化
             function initTheme() {
@@ -587,15 +702,39 @@
                 return thirdPartyBrowsers.some(b => ua.includes(b));
             }
             
-            // 检查微信环境
+            // 增强微信环境检测
             function isWeChatBrowser() {
                 const ua = navigator.userAgent.toLowerCase();
-                return ua.includes('micromessenger');
+                return /micromessenger/i.test(ua) || 
+                       ua.includes('wechat') || 
+                       typeof window.__wxjs_environment !== 'undefined';
             }
             
             if (detectThirdPartyBrowser()) {
                 body.classList.add('third-party-browser');
             }
+            
+            // 网络状态检测
+            function checkNetworkStatus() {
+                if (!navigator.onLine) {
+                    networkStatus.textContent = '网络连接不可用，请检查网络设置';
+                    networkStatus.style.display = 'block';
+                    networkStatus.classList.remove('online');
+                    return false;
+                } else {
+                    networkStatus.textContent = '网络连接已恢复';
+                    networkStatus.classList.add('online');
+                    setTimeout(() => {
+                        networkStatus.style.display = 'none';
+                    }, 3000);
+                    return true;
+                }
+            }
+            
+            // 初始化网络状态检测
+            checkNetworkStatus();
+            window.addEventListener('online', checkNetworkStatus);
+            window.addEventListener('offline', checkNetworkStatus);
             
             // 播放器实例管理
             const playerInstances = {};
@@ -634,6 +773,63 @@
             
             // 初始化播放器
             function initPlayer(containerId, vcode, plcode, retryCount = 0) {
+                const maxRetries = 5;
+                const retryDelay = 2000; // 2秒后重试
+                
+                // 检查网络状态
+                if (!checkNetworkStatus()) {
+                    const container = document.getElementById(containerId);
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="empty-content">
+                                <div class="video-icon"><span class="material-icons">wifi_off</span></div>
+                                <p>网络连接不可用</p>
+                                <p class="error-message">请检查网络设置后重试</p>
+                                <button class="retry-button" data-container="${containerId}" data-vcode="${vcode}" data-plcode="${plcode}">重试</button>
+                            </div>
+                        `;
+                        
+                        // 添加重试按钮事件
+                        container.querySelector('.retry-button').addEventListener('click', function() {
+                            const containerId = this.getAttribute('data-container');
+                            const vcode = this.getAttribute('data-vcode');
+                            const plcode = this.getAttribute('data-plcode');
+                            
+                            if (retryCount < maxRetries) {
+                                initPlayer(containerId, vcode, plcode, retryCount + 1);
+                            } else {
+                                showToast('播放器加载失败，请刷新页面重试', 3000);
+                            }
+                        });
+                    }
+                    return Promise.reject(new Error('Network unavailable'));
+                }
+                
+                // 重试次数检查
+                if (retryCount >= maxRetries) {
+                    const container = document.getElementById(containerId);
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="empty-content">
+                                <div class="video-icon"><span class="material-icons">error_outline</span></div>
+                                <p>播放器加载失败</p>
+                                <p class="error-message">请检查网络连接或稍后重试</p>
+                                <button class="retry-button" onclick="location.reload()">刷新页面</button>
+                            </div>
+                        `;
+                    }
+                    return Promise.reject(new Error('Max retries exceeded'));
+                }
+                
+                // 延迟重试
+                if (retryCount > 0) {
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            initPlayer(containerId, vcode, plcode, retryCount).then(resolve);
+                        }, retryDelay);
+                    });
+                }
+                
                 const container = document.getElementById(containerId);
                 if (!container) {
                     console.error(`播放器容器不存在: ${containerId}`);
@@ -646,7 +842,12 @@
                 }
                 
                 // 清空容器并显示加载状态
-                container.innerHTML = '<div class="empty-content"><div class="video-icon"><span class="material-icons">play_circle_outline</span></div><p>正在加载播放器...</p></div>';
+                container.innerHTML = `
+                    <div class="empty-content">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载播放器...</p>
+                    </div>
+                `;
                 
                 return loadPlayerScript().then(() => {
                     return new Promise((resolve, reject) => {
@@ -660,6 +861,30 @@
                                 plsort: 'name'
                             });
                             
+                            // 监听播放器全屏事件
+                            player.on('fullscreenchange', function(isFullscreen) {
+                                if (isFullscreen) {
+                                    // 全屏时强制横向布局
+                                    container.classList.add('fullscreen');
+                                    // 尝试强制横向方向
+                                    try {
+                                        screen.orientation.lock('landscape').catch(e => {
+                                            console.log('无法锁定屏幕方向:', e);
+                                        });
+                                    } catch (e) {
+                                        console.log('不支持屏幕方向锁定:', e);
+                                    }
+                                } else {
+                                    container.classList.remove('fullscreen');
+                                    // 退出全屏时解锁方向
+                                    try {
+                                        screen.orientation.unlock();
+                                    } catch (e) {
+                                        console.log('不支持屏幕方向解锁:', e);
+                                    }
+                                }
+                            });
+                            
                             playerInstances[containerId] = player;
                             resolve(player);
                         } catch (error) {
@@ -670,6 +895,7 @@
                                 <div class="empty-content">
                                     <div class="video-icon"><span class="material-icons">error_outline</span></div>
                                     <p>播放器加载失败</p>
+                                    <p class="error-message">${sanitizeHTML(error.message)}</p>
                                     <button class="retry-button" data-container="${containerId}" data-vcode="${vcode}" data-plcode="${plcode}">重试</button>
                                 </div>
                             `;
@@ -680,7 +906,7 @@
                                 const vcode = this.getAttribute('data-vcode');
                                 const plcode = this.getAttribute('data-plcode');
                                 
-                                if (retryCount < 3) {
+                                if (retryCount < maxRetries) {
                                     initPlayer(containerId, vcode, plcode, retryCount + 1);
                                 } else {
                                     showToast('播放器加载失败，请刷新页面重试', 3000);
@@ -836,6 +1062,18 @@
             // 模态框关闭功能
             function closeModal(modal) {
                 modal.classList.remove('active');
+                
+                // 修复：关闭弹窗后检查播放器是否存在
+                const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                const activePlayerId = `player_${getPlayerIdByTab(activeTab)}`;
+                
+                // 如果播放器不存在，重新初始化
+                if (!playerInstances[activePlayerId]) {
+                    const playerConfig = playerConfigs.find(config => config.id === activePlayerId);
+                    if (playerConfig) {
+                        initPlayer(playerConfig.id, playerConfig.vcode, playerConfig.plcode);
+                    }
+                }
             }
             
             closeReward.addEventListener('click', () => closeModal(rewardModal));
@@ -881,6 +1119,22 @@
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), duration);
             }
+            
+            // 窗口调整大小时的防抖处理
+            window.addEventListener('resize', debounce(() => {
+                // 处理响应式布局调整
+                const activeTab = document.querySelector('.tab.active');
+                if (activeTab) {
+                    const tabRect = activeTab.getBoundingClientRect();
+                    const tabsContainer = document.querySelector('.tabs-scroll');
+                    const containerRect = tabsContainer.getBoundingClientRect();
+                    
+                    // 如果活动标签不在可视区域内，则滚动到可视区域
+                    if (tabRect.left < containerRect.left || tabRect.right > containerRect.right) {
+                        activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    }
+                }
+            }, 250));
             
             // 初始化第一季播放器
             const firstSeasonConfig = playerConfigs.find(config => config.id === 'player_2ef9dd48909dc300');
