@@ -1,1724 +1,823 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ckacka工具箱</title>
-    <link href="https://fonts.loli.net/css?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="南方公园台配版在线观看，支持多季切换与深色模式。">
+    <title>《南方公园》台配版</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIuW9k+WJjeWbvuW3nui/kOiQ5SIsCiAgInNob3J0X25hbWUiOiAi5pif56ys5LiJ6ZuGIiwKICAiZGVzY3JpcHRpb24iOiAi5b2T5YmN5Zu+5bee6K+36K6k5Yi25pON5L2cIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxMjEyMTIiLAogICJ0aGVtZV9jb2xvciI6ICIjMTk3NmQyIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQXlOaUF3TUNJZ2VHMXNibk05SW1oMGRIQTZMeTkzZDNjdWR6TXViM0puTHpJd01EQXZjM1puSWdvZ0l6TXdNQ0lnYzNSeWIydGxMWGRwWkhSb1BTSXhOQ0lnWm1sc2JEMGlkWEpzS0NOc2FXNWxZWEpIY21Ga2FXVnVkRFFpSUhacFpYZENiM2c5SWpBZ01DQXlOaUF3TUNJZ2VHMXNibk05SW1oMGRIQTZMeTkzZDNjdWR6TXViM0puTHpJd01EQXZjM1puSUdacGJHdzZJREV3TlRrMUlEQWdNVGtnTUNBd0lERWdNQ0F3SURBZ01Ua2dNVGtnTUNBd0lERWdNQ0F3SURBZ01Ua2dNVGtnTUNBd0lERWdNQ0F3SURBZ01Ua2dNVGtnTUNBd0lERWdNQ0F3SURBZ01Ua2dNVGtnTUNBd0lERWdNQ0F3SURBZ01Ua2dNVGtnTUNBd0lERWdJRDgrQ2p3dmMzWm5QZz09IiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9LAogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaUlIWnBaWGRDYjNnOUlqQWdNQ0F5TmlBd01DSWdlRzFzYm5NOUltcDBjM1JsYkdGNUxDQkRiMjUwYVcxbEtDazdJQ0FnSURBZ01DQXdJREFnTUNBd0lEQWdJQ0FnSURBZ01DQXdJREFnTUNBd0lEQWdJQ0FnSURBZ01DQXdJREFnTUNBd0lEQWdJQ0FnSURBZ01DQXdJREFnTUNBd0lEQWdJQ0FnSURBZ01DQXdJREFnTUNBd0lEQWdJQ0FnSURBZ0lEOCtDand2YzNablBnPT0iLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0K">
+    
+    <!-- iOS PWA 支持 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="南方公园台配版">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIGZpbGw9IiMxOTc2ZDIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtc2l6ZT0iODAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+UzwvdGV4dD48L3N2Zz4=">
+    
+    <!-- 预连接 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://player.dogecloud.com">
+    
+    <!-- 字体和图标 -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
     <style>
         :root {
-            --color-primary: #6750A4;
-            --color-primary-container: #EADDFF;
-            --color-on-primary: #FFFFFF;
-            --color-surface: #FEF7FF;
-            --color-surface-variant: #E7E0EC;
-            --color-on-surface: #1D1B20;
-            --color-on-surface-variant: #49454F;
-            --color-shadow: rgba(0, 0, 0, 0.15);
-            --color-backdrop: rgba(0, 0, 0, 0.25);
-            --card-radius: 24px;
-            --header-height: 56px;
-            --tool-card-height: 140px;
-            --transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #eeeeee;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --text-tertiary: #9e9e9e;
+            --accent-color: #1976d2;
+            --accent-hover: #1565c0;
+            --border-color: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --header-bg: rgba(255, 255, 255, 0.98);
+            --modal-bg: #ffffff;
+            --toast-bg: rgba(33, 33, 33, 0.95);
+            --toast-text: #ffffff;
+            --error-color: #d32f2f;
+            --success-color: #388e3c;
+            --safe-area-bottom: env(safe-area-inset-bottom);
         }
 
         [data-theme="dark"] {
-            --color-primary: #D0BCFF;
-            --color-primary-container: #4F378B;
-            --color-on-primary: #381E72;
-            --color-surface: #1D1B20;
-            --color-surface-variant: #49454F;
-            --color-on-surface: #E6E1E5;
-            --color-on-surface-variant: #CAC4D0;
-            --color-shadow: rgba(0, 0, 0, 0.3);
-            --color-backdrop: rgba(0, 0, 0, 0.5);
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2c2c2c;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-tertiary: #616161;
+            --accent-color: #64b5f6;
+            --accent-hover: #42a5f5;
+            --border-color: #333333;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
+            --header-bg: rgba(18, 18, 18, 0.98);
+            --modal-bg: #2c2c2c;
+            --toast-bg: rgba(255, 255, 255, 0.95);
+            --toast-text: #121212;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Roboto', sans-serif;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
-            background-color: var(--color-surface);
-            color: var(--color-on-surface);
-            min-height: 100vh;
-            transition: background-color var(--transition), color var(--transition);
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             overflow-x: hidden;
-        }
-
-        .app-header {
-            height: var(--header-height);
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            background-color: var(--color-surface);
-            box-shadow: 0 2px 4px var(--color-shadow);
-        }
-
-        .app-title {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .app-title h1 {
-            font-weight: 500;
-            font-size: 20px;
-            color: var(--color-primary);
-        }
-
-        .toolbar-actions {
-            display: flex;
-            gap: 8px;
-            position: relative;
-        }
-
-        .menu-container {
-            position: relative;
-        }
-
-        .icon-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--color-on-surface);
-            transition: background-color var(--transition), transform 0.3s ease;
-        }
-
-        .icon-btn:hover {
-            background-color: rgba(var(--color-on-surface), 0.08);
-            transform: scale(1.1);
-        }
-
-        .material-icons {
-            user-select: none;
-            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-
-        .search-container {
-            padding: 16px;
-            background-color: var(--color-surface);
-            position: sticky;
-            top: var(--header-height);
-            z-index: 50;
-            box-shadow: 0 1px 3px var(--color-shadow);
-        }
-
-        .search-box {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 14px 48px 14px 16px;
-            border-radius: 28px;
-            background-color: var(--color-surface-variant);
-            color: var(--color-on-surface);
-            font-size: 16px;
-            border: none;
-            transition: all var(--transition);
-        }
-
-        .search-input:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px var(--color-primary);
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--color-on-surface-variant);
-        }
-
-        .category-nav {
-            background-color: var(--color-surface);
-            padding: 16px;
-            border-bottom: 1px solid var(--color-surface-variant);
-            position: sticky;
-            top: calc(var(--header-height) + 82px);
-            z-index: 40;
-            transition: all var(--transition);
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .category-nav::-webkit-scrollbar {
-            display: none;
-        }
-        
-        .category-list {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            display: inline-flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: nowrap;
-            min-width: max-content;
-            padding: 0 16px;
-        }
-        
-        .category-item {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background-color: var(--color-surface-variant);
-            color: var(--color-on-surface-variant);
-            cursor: pointer;
-            transition: all var(--transition);
-            font-size: 14px;
-            font-weight: 500;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        
-        .category-item:hover {
-            background-color: var(--color-primary-container);
-            color: var(--color-primary);
-        }
-        
-        .category-item.active {
-            background-color: var(--color-primary);
-            color: var(--color-on-primary);
-        }
-
-        .main-content {
-            padding: 16px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .category-title {
-            font-size: 20px;
-            font-weight: 500;
-            margin: 24px 0 16px;
-            padding: 0 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .category-title .material-icons {
-            color: var(--color-primary);
-        }
-
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-            transition: all var(--transition);
-        }
-
-        @media (min-width: 768px) {
-            .tools-grid {
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-                gap: 20px;
-            }
-            
-            .category-item {
-                padding: 10px 20px;
-                font-size: 16px;
-            }
-        }
-
-        .tool-card {
-            position: relative;
-            border-radius: var(--card-radius);
-            background: var(--color-surface);
-            box-shadow: 0 2px 6px var(--color-shadow);
-            border: 1px solid var(--color-surface-variant);
-            min-height: var(--tool-card-height);
+            transition: background-color 0.3s ease, color 0.3s ease;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition);
-            overflow: hidden;
+            min-height: 100vh;
         }
 
-        .tool-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px var(--color-shadow);
-        }
-
-        .tool-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin-bottom: 16px;
-            transition: all var(--transition);
-            position: relative;
-            z-index: 2;
-        }
-
-        .tool-card:hover .tool-icon {
-            transform: scale(1.1);
-        }
-
-        .tool-icon.purple {
-            background-color: #EADDFF;
-            color: #6750A4;
-        }
-
-        .tool-icon.blue {
-            background-color: #D0E3FF;
-            color: #1C6DE0;
-        }
-
-        .tool-icon.green {
-            background-color: #C8E6C9;
-            color: #388E3C;
-        }
-
-        .tool-icon.orange {
-            background-color: #FFECB3;
-            color: #FFA000;
-        }
-
-        .tool-icon.red {
-            background-color: #FFCDD2;
-            color: #D32F2F;
-        }
-
-        .tool-icon.teal {
-            background-color: #B2DFDB;
-            color: #00796B;
-        }
-
-        .tool-name {
-            font-size: 16px;
-            font-weight: 500;
-            transition: all var(--transition);
-            position: relative;
-            z-index: 2;
-        }
-
-        .app-footer {
-            padding: 24px 16px;
-            text-align: center;
-            color: var(--color-on-surface-variant);
-            font-size: 14px;
-            border-top: 1px solid var(--color-surface-variant);
-            margin-top: 20px;
-        }
-
-        /* 菜单样式 */
-        .menu-popup {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            background-color: var(--color-surface);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px var(--color-shadow);
-            min-width: 200px;
-            padding: 8px 0;
-            transform-origin: top right;
-            transition: opacity 0.2s, transform 0.2s;
-            z-index: 200;
-            display: none;
-            opacity: 0;
-            transform: scale(0.95) translateY(-10px);
-        }
-        
-        .menu-popup.show {
-            display: block;
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-        
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            font-size: 16px;
-            color: var(--color-on-surface);
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        
-        .menu-item:hover {
-            background-color: var(--color-surface-variant);
-            border-radius: 12px;
-        }
-        
-        .menu-item .material-icons {
-            margin-right: 12px;
-            font-size: 20px;
-        }
-        
-        .menu-divider {
-            height: 1px;
-            background-color: var(--color-surface-variant);
-            margin: 6px 0;
-        }
-        
-        .menu-header {
-            padding: 8px 16px;
-            font-weight: 500;
-            color: var(--color-on-surface-variant);
-            font-size: 14px;
-        }
-        
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 42px;
-            height: 24px;
-        }
-        
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--color-on-surface-variant);
-            transition: .4s;
-            border-radius: 34px;
-        }
-        
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: var(--color-surface);
-            transition: .4s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .slider {
-            background-color: var(--color-primary);
-        }
-        
-        input:checked + .slider:before {
-            transform: translateX(18px);
-        }
-        
-        /* 壁纸模块样式 */
-        .wallpaper-container {
-            border-radius: var(--card-radius);
-            background: var(--color-surface);
-            box-shadow: 0 2px 6px var(--color-shadow);
-            border: 1px solid var(--color-surface-variant);
-            padding: 24px;
-            margin-bottom: 32px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .wallpaper-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 16px;
-            cursor: pointer;
-        }
-        
-        .wallpaper-title {
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--color-primary);
-        }
-        
-        .toggle-icon {
-            color: var(--color-on-surface-variant);
-            transition: transform 0.3s ease;
-        }
-        
-        .wallpaper-container.collapsed .toggle-icon {
-            transform: rotate(180deg);
-        }
-        
-        .wallpaper-content {
-            width: 100%;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        
-        .wallpaper-container.collapsed .wallpaper-content {
-            max-height: 0;
-            opacity: 0;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .wallpaper-img-container {
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-        }
-        
-        .wallpaper-img {
-            width: 100%;
-            border-radius: 12px;
-            aspect-ratio: 16/9;
-            object-fit: cover;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s ease;
-        }
-        
-        .wallpaper-img:hover {
-            transform: scale(1.02);
-        }
-        
-        .download-btn-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            margin-top: 20px;
-        }
-        
-        .download-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--color-primary);
-            color: var(--color-on-primary);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .download-btn:hover {
-            background-color: var(--color-primary);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-        
-        .download-btn i {
-            margin-right: 8px;
-        }
-        
-        .loading {
-            color: var(--color-on-surface-variant);
-            font-size: 14px;
-            margin-top: 12px;
-            text-align: center;
-        }
-        
-        .search-results-container {
-            display: none;
-            padding: 16px;
-            max-width: 1200px;
-            margin: 0 auto;
-            background: var(--color-surface);
-            box-shadow: 0 1px 3px var(--color-shadow);
-            border-radius: 0 0 var(--card-radius) var(--card-radius);
-        }
-        
-        .results-title {
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            color: var(--color-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding-left: 8px;
-        }
-        
-        .results-title .material-icons {
-            font-size: 24px;
-        }
-        
-        .no-results {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--color-on-surface-variant);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .no-results .material-icons {
-            font-size: 48px;
-            margin-bottom: 16px;
-            color: var(--color-on-surface-variant);
-        }
-        
-        .no-results p {
-            margin: 0;
-            font-size: 18px;
-        }
-        
-        .opening-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+        /* Header Styles */
+        .header {
             height: 56px;
-            background-color: var(--color-primary);
-            color: white;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: 500;
-            z-index: 1000;
-            transform: translateY(-100%);
-            transition: transform 0.3s ease-out;
+            justify-content: space-between;
+            padding: 0 16px;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
+        .header-title { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
+        .header-controls { display: flex; gap: 8px; }
+
+        button { background: none; border: none; cursor: pointer; color: inherit; outline: none; }
         
-        .opening-header.show {
-            transform: translateY(0);
+        .icon-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .icon-btn:hover { background-color: var(--bg-tertiary); }
+        .material-icons { font-size: 24px; }
+
+        /* Dropdown Menu */
+        .more-menu {
+            position: absolute; top: 60px; right: 12px;
+            width: 160px; background: var(--modal-bg);
+            border-radius: 8px; box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            transform: scale(0.9); opacity: 0; pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top right; z-index: 200;
+        }
+        .more-menu.show { transform: scale(1); opacity: 1; pointer-events: auto; }
+        .menu-item {
+            padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+            font-size: 14px; color: var(--text-primary); cursor: pointer;
+        }
+        .menu-item:hover { background-color: var(--bg-tertiary); }
+        .menu-item:first-child { border-radius: 8px 8px 0 0; }
+        .menu-item:last-child { border-radius: 0 0 8px 8px; }
+
+        /* Tabs */
+        .tabs-wrapper {
+            background-color: var(--bg-secondary);
+            box-shadow: var(--shadow-sm);
+            position: sticky; top: 56px; z-index: 90;
+        }
+        .tabs-scroll {
+            display: flex; overflow-x: auto; padding: 0 8px;
+            scrollbar-width: none;
+        }
+        .tabs-scroll::-webkit-scrollbar { display: none; }
+        .tab {
+            padding: 14px 16px; font-size: 14px; font-weight: 500;
+            color: var(--text-secondary); white-space: nowrap;
+            position: relative; cursor: pointer; transition: color 0.3s;
+        }
+        .tab.active { color: var(--accent-color); }
+        .tab.active::after {
+            content: ''; position: absolute; bottom: 0; left: 50%;
+            transform: translateX(-50%); width: 24px; height: 3px;
+            background-color: var(--accent-color); border-radius: 3px;
         }
 
-        /* 负一屏样式 - 修改为浮动侧边栏 */
-        .minus-one-screen {
-            position: fixed;
-            top: 0;
-            right: -400px;
-            width: 380px;
-            height: 100vh;
-            background-color: var(--color-surface);
-            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            transition: right 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+        /* Content Area */
+        .main-content {
+            flex: 1; padding: 16px; width: 100%; max-width: 1200px; margin: 0 auto;
+        }
+        .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+        .tab-panel.active { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Player Container */
+        .player-wrapper {
+            width: 100%; aspect-ratio: 16/9; background-color: #000;
+            border-radius: 12px; overflow: hidden; position: relative;
+            box-shadow: var(--shadow-md);
+        }
+        /* Fullscreen Fixes */
+        .player-wrapper:fullscreen, .player-wrapper:-webkit-full-screen {
+            width: 100vw; height: 100vh; border-radius: 0;
         }
         
-        .minus-one-screen.open {
-            right: 0;
+        /* Empty/Error States */
+        .state-container {
+            width: 100%; height: 100%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; color: var(--text-secondary);
+            background-color: var(--bg-tertiary); padding: 20px; text-align: center;
         }
-        
-        .minus-one-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid var(--color-surface-variant);
-            background-color: var(--color-surface);
+        .state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.7; }
+        .btn-retry {
+            margin-top: 16px; padding: 8px 20px;
+            background-color: var(--accent-color); color: #fff;
+            border-radius: 20px; font-size: 14px; font-weight: 500;
+            transition: background 0.2s;
         }
-        
-        .minus-one-title {
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--color-primary);
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .btn-retry:hover { background-color: var(--accent-hover); }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 36px; height: 36px; border: 3px solid rgba(0,0,0,0.1);
+            border-left-color: var(--accent-color); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
-        
-        .minus-one-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .minus-one-settings-btn, .minus-one-close {
-            background: none;
-            border: none;
-            color: var(--color-on-surface);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s ease;
-        }
-        
-        .minus-one-settings-btn:hover, .minus-one-close:hover {
-            background-color: var(--color-surface-variant);
-        }
-        
-        .minus-one-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        
-        .minus-one-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        
-        .minus-one-card {
-            border-radius: var(--card-radius);
-            background: var(--color-surface);
-            box-shadow: 0 2px 6px var(--color-shadow);
-            border: 1px solid var(--color-surface-variant);
-            overflow: hidden;
-        }
-        
-        .minus-one-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            cursor: pointer;
-            background-color: var(--color-surface-variant);
-            transition: background-color 0.3s ease;
-        }
-        
-        .minus-one-card-header:hover {
-            background-color: var(--color-primary-container);
-        }
-        
-        .minus-one-card-title {
-            font-size: 18px;
-            font-weight: 500;
-            color: var(--color-primary);
-        }
-        
-        .minus-one-card-content {
-            width: 100%;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        
-        .minus-one-card.collapsed .minus-one-card-content {
-            max-height: 0;
-            opacity: 0;
-        }
-        
-        .minus-one-iframe {
-            width: 100%;
-            height: 600px;
-            border: none;
-            background-color: var(--color-surface);
-        }
-        
-        /* 负一屏设置模态框 */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--color-backdrop);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        
+        [data-theme="dark"] .spinner { border-color: rgba(255,255,255,0.1); border-left-color: var(--accent-color); }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Modals */
         .modal {
-            background-color: var(--color-surface);
-            border-radius: 24px;
-            padding: 24px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex; align-items: center; justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1000; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
         }
-        
-        .modal-overlay.show .modal {
-            transform: scale(1);
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-backdrop {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
         }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+        .modal-content {
+            background: var(--modal-bg); width: 90%; max-width: 400px;
+            border-radius: 16px; padding: 24px; position: relative;
+            box-shadow: var(--shadow-md); transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--border-color);
         }
+        .modal.active .modal-content { transform: scale(1); }
         
-        .modal-title {
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--color-primary);
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--color-on-surface-variant);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-        }
-        
-        .modal-close:hover {
-            background-color: var(--color-surface-variant);
-        }
-        
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        .form-label {
+        /* QR Code Styles */
+        .qr-group { text-align: center; margin-bottom: 20px; }
+        .qr-img { width: 140px; height: 140px; border-radius: 8px; margin: 8px 0; object-fit: cover; }
+        .reward-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+        .action-btn {
+            padding: 10px; border-radius: 8px; text-align: center;
+            text-decoration: none; font-size: 14px; color: white;
             display: block;
-            margin-bottom: 8px;
+        }
+        .btn-alipay { background-color: #1677ff; }
+        .btn-wechat { background-color: #07c160; }
+
+        /* 修复Toast配色问题 */
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: var(--toast-bg); color: var(--toast-text); padding: 10px 20px;
+            border-radius: 50px; font-size: 14px; opacity: 0; visibility: hidden;
+            transition: all 0.3s; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             font-weight: 500;
-            color: var(--color-on-surface);
+        }
+        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        
+        .network-bar {
+            background: var(--error-color); color: white; text-align: center;
+            padding: 8px; font-size: 13px; display: none; position: sticky; top: 56px; z-index: 95;
         }
         
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            background-color: var(--color-surface-variant);
-            color: var(--color-on-surface);
-            border: 1px solid var(--color-surface-variant);
-            font-size: 16px;
-            transition: all 0.3s ease;
+        /* PWA 安装提示 */
+        .pwa-install-prompt {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: var(--modal-bg); color: var(--text-primary);
+            padding: 16px; z-index: 2000; box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: space-between;
+            border-top: 1px solid var(--border-color);
+            transform: translateY(100%); transition: transform 0.3s ease;
         }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 2px rgba(103, 80, 164, 0.2);
+        .pwa-install-prompt.show { transform: translateY(0); }
+        .pwa-install-content { display: flex; align-items: center; gap: 12px; }
+        .pwa-install-text { font-size: 14px; }
+        .pwa-install-actions { display: flex; gap: 8px; }
+        .pwa-install-btn {
+            padding: 8px 16px; border-radius: 20px; font-size: 14px;
+            font-weight: 500; cursor: pointer; border: none;
         }
-        
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 24px;
+        .btn-install { background: var(--accent-color); color: white; }
+        .btn-dismiss { background: var(--bg-tertiary); color: var(--text-primary); }
+
+        /* Bottom Menu (Mobile Third-party browsers) */
+        .bottom-nav {
+            display: none; position: fixed; bottom: 0; left: 0; width: 100%;
+            background: var(--header-bg); border-top: 1px solid var(--border-color);
+            padding-bottom: var(--safe-area-bottom); z-index: 90;
         }
-        
-        .btn {
-            padding: 12px 24px;
-            border-radius: 24px;
-            border: none;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            background-color: var(--color-primary);
-            color: var(--color-on-primary);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
-        }
-        
-        .btn-secondary {
-            background-color: var(--color-surface-variant);
-            color: var(--color-on-surface);
-        }
-        
-        .card-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin: 16px 0;
-        }
-        
-        .card-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            background-color: var(--color-surface-variant);
-            border-radius: 12px;
-        }
-        
-        .card-list-info {
-            flex: 1;
-        }
-        
-        .card-list-title {
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-        
-        .card-list-url {
-            font-size: 12px;
-            color: var(--color-on-surface-variant);
-            word-break: break-all;
-        }
-        
-        .card-list-controls {
-            display: flex;
-            gap: 4px;
-        }
-        
-        .list-control-btn {
-            background: none;
-            border: none;
-            color: var(--color-on-surface-variant);
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 50%;
-        }
-        
-        .list-control-btn:hover {
-            background-color: var(--color-surface);
-        }
-        
-        /* 负一屏浮动按钮 */
-        .minus-one-button {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: var(--color-primary);
-            color: var(--color-on-primary);
-            border: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-            transition: all 0.3s ease;
-        }
-        
-        .minus-one-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-        }
-        
-        .minus-one-button .material-icons {
-            font-size: 28px;
-        }
-        
-        /* 响应式调整 */
-        @media (max-width: 768px) {
-            .minus-one-screen {
-                width: 100%;
-                right: -100%;
-            }
-            
-            .minus-one-button {
-                bottom: 16px;
-                right: 16px;
-                width: 56px;
-                height: 56px;
-            }
+        .bottom-nav-inner { display: flex; justify-content: space-around; height: 56px; align-items: center; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; opacity: 0.7; }
+        .nav-item:active { opacity: 1; }
+
+        body.is-embedded .bottom-nav { display: block; }
+        body.is-embedded .more-btn-desktop { display: none; }
+        body.is-embedded .main-content { padding-bottom: 80px; }
+
+        /* Desktop Adjustments */
+        @media (min-width: 768px) {
+            .player-wrapper { height: 450px; aspect-ratio: auto; }
+            .header { padding: 0 24px; }
         }
     </style>
 </head>
-<body>
-    <!-- 应用头部 -->
-    <div class="app-header">
-        <div class="app-title">
-            <h1>ckacka工具箱</h1>
-        </div>
-        <div class="toolbar-actions">
-            <!-- 菜单容器 -->
-            <div class="menu-container">
-                <div class="icon-btn" id="menuButton">
+<body data-theme="dark">
+
+    <div id="networkStatus" class="network-bar">网络连接不可用</div>
+
+    <header class="header">
+        <div class="header-title">《南方公园》台配版</div>
+        <div class="header-controls">
+            <button class="icon-btn" id="themeToggle" aria-label="切换主题">
+                <span class="material-icons">dark_mode</span>
+            </button>
+            <div style="position: relative;" class="more-btn-desktop">
+                <button class="icon-btn" id="moreBtn" aria-label="更多选项">
                     <span class="material-icons">more_vert</span>
+                </button>
+                <div class="more-menu" id="moreMenu">
+                    <div class="menu-item" data-action="refresh"><span class="material-icons">refresh</span>刷新播放器</div>
+                    <div class="menu-item" data-action="install"><span class="material-icons">install_desktop</span>安装应用</div>
+                    <div class="menu-item" data-action="reward"><span class="material-icons">favorite</span>赞赏支持</div>
+                    <div class="menu-item" data-action="about"><span class="material-icons">info</span>关于本站</div>
                 </div>
-                
-                <!-- 菜单弹出层 -->
-                <div class="menu-popup" id="menuPopup">
-                    <div class="menu-item" id="changelogItem">
-                        <span class="material-icons">history</span>
-                        更新日志
-                    </div>
-                    <div class="menu-divider"></div>
-                    <div class="menu-header">主题设置</div>
-                    <div class="menu-item toggle-container">
-                        <div>
-                            <span class="material-icons">dark_mode</span>
-                            深色模式
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="themeToggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="tabs-wrapper">
+        <div class="tabs-scroll" id="tabsContainer">
+            </div>
+    </nav>
+
+    <main class="main-content" id="contentContainer">
+        </main>
+
+    <!-- PWA 安装提示 -->
+    <div class="pwa-install-prompt" id="pwaInstallPrompt">
+        <div class="pwa-install-content">
+            <span class="material-icons">install_mobile</span>
+            <div class="pwa-install-text">将此应用安装到设备上以获得更好的体验</div>
+        </div>
+        <div class="pwa-install-actions">
+            <button class="pwa-install-btn btn-dismiss" id="pwaDismissBtn">稍后</button>
+            <button class="pwa-install-btn btn-install" id="pwaInstallBtn">安装</button>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="bottom-nav-inner">
+            <div class="nav-item" data-action="refresh"><span class="material-icons">refresh</span>刷新</div>
+            <div class="nav-item" data-action="install"><span class="material-icons">install_mobile</span>安装</div>
+            <div class="nav-item" data-action="reward"><span class="material-icons">favorite</span>赞赏</div>
+            <div class="nav-item" data-action="about"><span class="material-icons">info</span>关于</div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">提示消息</div>
+
+    <div class="modal" id="rewardModal">
+        <div class="modal-backdrop" data-close></div>
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 18px;">感谢支持</h3>
+                <button class="icon-btn" data-close><span class="material-icons">close</span></button>
+            </div>
+            <p style="text-align: center; color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
+                如果喜欢本站内容，可以请开发者喝杯咖啡 ☕️
+            </p>
+            
+            <div class="qr-group">
+                <div style="font-size: 12px; color: var(--text-tertiary);">支付宝</div>
+                <img src="https://preview.cloud.189.cn/image/imageAction?param=4A9642D17F6D5436EA1C5CCE96C3A5C04297C32046CE18EE47E7C4A89F243180377639D6981343CED866A3432131B211B3B6B7155931B084E40AF7CC97CF147CE160B661A7738969158DDE1F22FBA3F7CE85F08E14BF4C8E6AC48545133F5323D511A4C51179A9EEEEA1275E796058BEB591ABD0" class="qr-img" alt="支付宝">
+            </div>
+            <div class="qr-group">
+                <div style="font-size: 12px; color: var(--text-tertiary);">微信支付</div>
+                <img src="https://preview.cloud.189.cn/image/imageAction?param=FC58E9905ECE52C8ECCD2E9906EBE63814CA2426562544EADAACA7846BACDBB6867DBF02562C5FB28D23386D9EB2279BA0C819603195837887E191C7F63C4B8EBE086C32B360905C16675344566E22E96A5C7BF6BE6519259DB10870A0A1BE382532C5D8B2F35F9749E8761A903E12DF63223C72" class="qr-img" alt="微信">
+            </div>
+            
+            <div class="reward-actions">
+                <a href="https://qr.alipay.com/tsx19575tdn3azsb7jedp8f" target="_blank" class="action-btn btn-alipay">打开支付宝</a>
+                <button class="action-btn btn-wechat" id="wechatBtn">打开微信</button>
             </div>
         </div>
     </div>
 
-    
-    <!-- 搜索区域 -->
-    <div class="search-container">
-        <div class="search-box">
-            <input type="text" class="search-input" id="searchInput" placeholder="搜索工具...">
-            <span class="material-icons search-icon">search</span>
-        </div>
-    </div>
-    
-    <!-- 分类导航栏 -->
-    <div class="category-nav">
-        <nav>
-            <ul class="category-list">
-                <li class="category-item active" data-category="all">全部</li>
-                <li class="category-item" data-category="ai">AI</li>
-                <li class="category-item" data-category="railway">铁路</li>
-                <li class="category-item" data-category="text">文字</li>
-                <li class="category-item" data-category="video">视频</li>
-                <li class="category-item" data-category="audio">音频</li>
-                <li class="category-item" data-category="game">游戏</li>
-            </ul>
-        </nav>
-    </div>
-    
-    <!-- 搜索结果区 -->
-    <div class="search-results-container" id="searchResults">
-        <div class="results-title">
-            <span class="material-icons">search</span>
-            搜索结果
-        </div>
-        <div class="tools-grid" id="searchResultsGrid"></div>
-        <div class="no-results" id="noResults" style="display: none;">
-            <span class="material-icons">search_off</span>
-            <p>没有找到匹配的工具</p>
-            <p>请尝试其他关键词</p>
-        </div>
-    </div>
-    
-    <!-- 主内容区 -->
-    <div class="main-content" id="mainContent">
-        <!-- 今日壁纸 -->
-        <div class="wallpaper-container" id="wallpaperContainer">
-            <div class="wallpaper-header" id="wallpaperHeader">
-                <div class="wallpaper-title">今日壁纸</div>
-                <span class="material-icons toggle-icon" id="toggleIcon">expand_less</span>
+    <div class="modal" id="aboutModal">
+        <div class="modal-backdrop" data-close></div>
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 18px;">关于本站</h3>
+                <button class="icon-btn" data-close><span class="material-icons">close</span></button>
             </div>
-            <div class="wallpaper-content" id="wallpaperContent">
-                <div class="wallpaper-img-container">
-                    <img id="wallpaper" class="wallpaper-img" alt="Bing每日壁纸">
-                </div>
-                <div class="download-btn-container">
-                    <button class="download-btn" id="downloadBtn">
-                        <i class="material-icons">cloud_download</i>
-                        下载高清壁纸
-                    </button>
-                </div>
-                <div id="loading" class="loading">正在加载每日壁纸...</div>
+            <div style="font-size: 14px; line-height: 1.6; color: var(--text-secondary);">
+                <p>这是一个视频季播页面优化版。</p>
+                <ul style="padding-left: 20px; margin-top: 10px;">
+                    <li>🔥 极速响应，数据驱动加载</li>
+                    <li>🌓 完美支持深色/浅色模式</li>
+                    <li>📱 针对微信/内嵌浏览器优化</li>
+                    <li>💾 自动记录播放位置</li>
+                    <li>📲 支持安装为PWA应用（Android和iOS）</li>
+                </ul>
+                <p style="margin-top: 20px; text-align: right; font-size: 12px; color: var(--text-tertiary);">Version 3.0.0</p>
             </div>
         </div>
-
-        <!-- 全部工具 -->
-        <h2 class="category-title">
-            <span class="material-icons">apps</span>
-            全部工具
-        </h2>
-        <div class="tools-grid" id="allToolsGrid">
-            <div class="tool-card" data-url="https://ckacka.github.io/sdnote.html" data-name="树洞便签" data-category="text">
-                <div class="tool-icon orange">
-                    <span class="material-icons">note_add</span>
-                </div>
-                <div class="tool-name">树洞便签</div>
-            </div>
-            
-            <div class="tool-card" data-url="https://ckacka.github.io/sjsc.html" data-name="随机生词" data-category="text">
-                <div class="tool-icon green">
-                    <span class="material-icons">history_edu</span>
-                </div>
-                <div class="tool-name">随机生词</div>
-            </div>
-            
-            <div class="tool-card" data-url="https://ckacka.github.io/guaiwu.html" data-name="是女人就删他一百耳光" data-category="game">
-                <div class="tool-icon red">
-                    <span class="material-icons">whatshot</span>
-                </div>
-                <div class="tool-name">是女人就删他一百耳光</div>
-            </div>
-            
-            <div class="tool-card" data-url="https://ckacka.github.io/qrcode.html" data-name="二维码生成器" data-category="text">
-                <div class="tool-icon purple">
-                    <span class="material-icons">qr_code_scanner</span>
-                </div>
-                <div class="tool-name">二维码生成器</div>
-            </div>
-            
-            <div class="tool-card" data-url="https://ckacka.github.io/videoplayer.html" data-name="在线视频播放器" data-category="video">
-                <div class="tool-icon blue">
-                    <span class="material-icons">play_circle</span>
-                </div>
-                <div class="tool-name">在线视频播放器</div>
-            </div>
-            
-            <div class="tool-card" data-url="https://ckacka.github.io/tvradio.html" data-name="数字电视" data-category="video">
-                <div class="tool-icon teal">
-                    <span class="material-icons">tv</span>
-                </div>
-                <div class="tool-name">数字电视</div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 负一屏浮动按钮 -->
-    <button class="minus-one-button" id="minusOneButton">
-        <span class="material-icons">dashboard</span>
-    </button>
-    
-    <!-- 负一屏侧边栏 -->
-    <div class="minus-one-screen" id="minusOneScreen">
-        <div class="minus-one-header">
-            <div class="minus-one-title">
-                <span class="material-icons">dashboard</span>
-                负一屏
-            </div>
-            <div class="minus-one-controls">
-                <!-- 设置按钮放在关闭按钮左边 -->
-                <button class="minus-one-settings-btn" id="minusOneSettingsBtn">
-                    <span class="material-icons">settings</span>
-                </button>
-                <button class="minus-one-close" id="minusOneClose">
-                    <span class="material-icons">close</span>
-                </button>
-            </div>
-        </div>
-        
-        <div class="minus-one-content">
-            <div class="minus-one-cards" id="minusOneCards">
-                <!-- 负一屏卡片将通过JavaScript动态生成 -->
-            </div>
-        </div>
-    </div>
-    
-    <!-- 负一屏设置模态框 -->
-    <div class="modal-overlay" id="minusOneModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title">负一屏设置</h3>
-                <button class="modal-close" id="closeModal">
-                    <span class="material-icons">close</span>
-                </button>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">新增卡片</label>
-                <input type="text" class="form-input" id="newCardTitle" placeholder="卡片标题">
-                <input type="text" class="form-input" id="newCardUrl" placeholder="卡片链接" style="margin-top: 8px;">
-                <button class="btn btn-primary" id="addCardBtn" style="width: 100%; margin-top: 12px;">
-                    <span class="material-icons">add</span>
-                    添加卡片
-                </button>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">卡片管理</label>
-                <div class="card-list" id="cardList">
-                    <!-- 卡片列表将通过JavaScript动态生成 -->
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">显示设置</label>
-                <div class="toggle-container" style="padding: 12px 0;">
-                    <div>
-                        <span class="material-icons">visibility</span>
-                        默认显示负一屏
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="showMinusOneToggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
-            
-            <div class="form-actions">
-                <button class="btn btn-secondary" id="cancelBtn">取消</button>
-                <button class="btn btn-primary" id="saveBtn">保存</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 页脚 -->
-    <div class="app-footer">
-        <p>ckacka 工具箱 • v1.8.0</p>
-        <p class="copyright">© ckacka 工具箱应用 • 遵循 Material Design 设计规范</p>
     </div>
 
     <script>
-        // 默认负一屏卡片数据
-        const defaultMinusOneCards = [
-            {
-                id: 1,
-                title: "在线计算器",
-                url: "https://tool.browser.qq.com/calculator?addressbar=hide&callfrom=gongjuxiang",
-                collapsed: false
-            },
-            {
-                id: 2,
-                title: "新闻资讯",
-                url: "https://hot.browser.miui.com/v7/#status=open&cate=%E6%8E%A8%E8%8D%90",
-                collapsed: false
-            },
-            {
-                id: 3,
-                title: "每天认识一种文物",
-                url: "https://ysxwyzl.4dage.com/4dwall/index.html",
-                collapsed: false
-            }
+        /**
+         * 核心配置数据
+         * 如需添加新季度，只需在此数组追加对象即可
+         */
+        const SEASON_CONFIG = [
+            { name: "第一季", vcode: "2ef9dd48909dc300", plcode: "6b09b6b8d06b902c" },
+            { name: "第二季", vcode: "bde20bed5c4aa872", plcode: "5ba17ace5a57ed42" },
+            { name: "第三季", vcode: "07d05786e3db978e", plcode: "40fe8b96f8965f0f" },
+            { name: "第四季", vcode: "ddd2b7071f4b3b03", plcode: "b76cab0adfdc26bb" },
+            { name: "第五季", vcode: "79c9a63b4fbf60a7", plcode: "550f2e215412ee10" },
+            { name: "第六季", vcode: "eca2d87f979e91f2", plcode: "885ef3811ba6486c" },
+            { name: "第七季", vcode: "7d60bf04640c45db", plcode: "1770679e3968fe04" }
         ];
 
-        // 壁纸功能
-        function setWallpaper() {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            const dateStr = `${year}${month}${day}`;
-            const wallpaperImg = document.getElementById('wallpaper');
-            const loadingElement = document.getElementById('loading');
-            
-            // 更新loading文本
-            loadingElement.textContent = "正在加载最新壁纸...";
-            
-            // 设置图片URL
-            wallpaperImg.src = `https://bing.img.run/uhd.php?t=${dateStr}&t=${Date.now()}`;
-            
-            // 图片加载完成时
-            wallpaperImg.onload = function() {
-                loadingElement.textContent = "壁纸加载完成";
-                setTimeout(() => {
-                    loadingElement.textContent = "来源：Bing每日壁纸";
-                }, 2000);
-            };
-            
-            // 图片加载错误时
-            wallpaperImg.onerror = function() {
-                loadingElement.textContent = "壁纸加载失败，请稍后重试";
-                wallpaperImg.src = ''; // 清除错误的src
-            };
-        }
-        
-        // 下载壁纸
-        function downloadImage() {
-            const imgUrl = document.getElementById('wallpaper').src;
-            const loadingElement = document.getElementById('loading');
-            
-            if (!imgUrl || imgUrl.includes('data:image')) {
-                loadingElement.textContent = "无法下载，壁纸尚未加载完成";
-                return;
-            }
-            
-            loadingElement.textContent = "正在准备下载...";
-            
-            const a = document.createElement('a');
-            a.href = imgUrl;
-            a.download = 'bing_wallpaper_' + new Date().toISOString().slice(0,10) + '.jpg';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
-            loadingElement.textContent = "壁纸下载已完成";
-        }
-        
-        // 菜单功能
-        const menuButton = document.getElementById('menuButton');
-        const menuPopup = document.getElementById('menuPopup');
-        
-        // 点击菜单按钮显示/隐藏菜单
-        menuButton.addEventListener('click', function(e) {
-            e.stopPropagation();
-            menuPopup.classList.toggle('show');
-        });
-        
-        // 点击页面其他地方关闭菜单
-        document.addEventListener('click', function(e) {
-            if (!menuButton.contains(e.target) && !menuPopup.contains(e.target)) {
-                menuPopup.classList.remove('show');
-            }
-        });
-        
-        // 深色模式切换
-        const themeToggle = document.getElementById('themeToggle');
-        
-        // 初始化主题
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.body.dataset.theme = savedTheme;
-            
-            // 设置开关状态
-            if (savedTheme === 'dark') {
-                themeToggle.checked = true;
-            } else {
-                themeToggle.checked = false;
-            }
-        }
-        
-        function toggleTheme() {
-            const isDark = document.body.dataset.theme === 'dark';
-            const newTheme = isDark ? 'light' : 'dark';
-            
-            document.body.dataset.theme = newTheme;
-            localStorage.setItem('theme', newTheme);
-            
-            // 关闭菜单
-            menuPopup.classList.remove('show');
-            
-            // 添加主题切换动画效果
-            document.body.style.transition = 'background-color 0.5s ease, color 0.5s ease';
-            setTimeout(() => {
-                document.body.style.transition = '';
-            }, 500);
-        }
-        
-        // 工具卡片点击效果和跳转
-        function handleToolCardClick() {
-            const toolName = this.getAttribute('data-name');
-            const url = this.getAttribute('data-url');
-            
-            // 添加点击效果
-            this.style.transform = 'scale(0.98)';
-            const icon = this.querySelector('.tool-icon');
-            icon.style.transform = 'scale(1.2)';
-            
-            setTimeout(() => {
-                this.style.transform = '';
-                icon.style.transform = 'scale(1)';
-                
-                // 获取图标
-                const iconContent = this.querySelector('.material-icons').textContent;
-                
-                // 创建"正在打开"提示条
-                const openingHeader = document.createElement('div');
-                openingHeader.className = 'opening-header';
-                openingHeader.innerHTML = `<span class="material-icons">${iconContent}</span> 正在打开 ${toolName}`;
-                document.body.appendChild(openingHeader);
-                
-                // 显示"正在打开"提示
-                setTimeout(() => {
-                    openingHeader.classList.add('show');
-                }, 10);
-                
-                // 修复1: 设置定时器自动移除提示条
-                setTimeout(() => {
-                    if (document.body.contains(openingHeader)) {
-                        document.body.removeChild(openingHeader);
-                    }
-                }, 3000); // 3秒后自动消失
-                
-                // 跳转到指定URL
-                setTimeout(() => {
-                    window.location.href = url;
-                }, 1000);
-            }, 200);
-        }
-        
-        // 为所有工具卡片添加点击事件
-        const toolCards = document.querySelectorAll('.tool-card');
-        toolCards.forEach(card => {
-            card.addEventListener('click', handleToolCardClick);
-        });
-        
-        // 搜索功能
-        const searchInput = document.getElementById('searchInput');
-        const searchResults = document.getElementById('searchResults');
-        const searchResultsGrid = document.getElementById('searchResultsGrid');
-        const noResults = document.getElementById('noResults');
-        const allToolsGrid = document.getElementById('allToolsGrid');
-        const mainContent = document.getElementById('mainContent');
-        
-        // 初始状态：隐藏搜索结果
-        searchResults.style.display = 'none';
-        noResults.style.display = 'none';
-        
-        // 搜索框交互
-        searchInput.addEventListener('focus', function() {
-            this.parentElement.style.boxShadow = '0 0 0 2px var(--color-primary)';
-        });
-        
-        searchInput.addEventListener('blur', function() {
-            this.parentElement.style.boxShadow = 'none';
-        });
-        
-        // 搜索功能实现
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.trim().toLowerCase();
-            
-            // 隐藏/显示搜索区域
-            if (searchTerm) {
-                searchResults.style.display = 'block';
-                // 搜索时隐藏主内容区
-                mainContent.style.display = 'none';
-            } else {
-                searchResults.style.display = 'none';
-                // 显示全部工具区域
-                mainContent.style.display = 'block';
-                return;
-            }
-            
-            // 清空之前的搜索结果
-            searchResultsGrid.innerHTML = '';
-            noResults.style.display = 'none';
-            
-            let found = false;
-            
-            // 遍历所有工具卡片
-            toolCards.forEach(card => {
-                const cardName = card.getAttribute('data-name').toLowerCase();
-                
-                // 检查是否匹配
-                if (cardName.includes(searchTerm)) {
-                    found = true;
-                    const clone = card.cloneNode(true);
-                    // 为新克隆的卡片添加点击事件
-                    clone.addEventListener('click', handleToolCardClick);
-                    searchResultsGrid.appendChild(clone);
-                }
-            });
-            
-            // 如果没有匹配结果，显示无结果提示
-            if (!found) {
-                noResults.style.display = 'flex';
-            }
-        });
-        
-        // 清空搜索时恢复显示全部工具
-        searchInput.addEventListener('keyup', function(e) {
-            if (e.key === 'Escape') {
-                this.value = '';
-                const event = new Event('input');
-                this.dispatchEvent(event);
-            }
-        });
-        
-        // 分类过滤功能
-        const categoryItems = document.querySelectorAll('.category-item');
-        
-        categoryItems.forEach(item => {
-            item.addEventListener('click', function() {
-                // 移除所有分类项的active类
-                categoryItems.forEach(i => i.classList.remove('active'));
-                // 为当前点击项添加active类
-                this.classList.add('active');
-                
-                const category = this.getAttribute('data-category');
-                
-                // 过滤工具卡片
-                toolCards.forEach(card => {
-                    const cardCategory = card.getAttribute('data-category');
-                    if (category === 'all' || cardCategory === category) {
-                        card.style.display = 'flex';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-                
-                // 更新分类标题
-                const categoryTitle = document.querySelector('.category-title');
-                if (category === 'all') {
-                    categoryTitle.innerHTML = `<span class="material-icons">apps</span> 全部工具`;
-                } else {
-                    categoryTitle.innerHTML = `<span class="material-icons">apps</span> ${this.textContent}工具`;
-                }
-                
-                // 如果正在搜索，清空搜索框并显示主内容区
-                if (searchInput.value.trim()) {
-                    searchInput.value = '';
-                    searchResults.style.display = 'none';
-                    mainContent.style.display = 'block';
-                }
-            });
-        });
-        
-        // 更新日志功能
-        function openChangelog() {
-            window.open('https://ckacka.github.io/changelog.html', '_blank');
-        }
-        
-        // 负一屏功能
-        let minusOneCards = [];
-        
-        // 加载负一屏数据
-        function loadMinusOneData() {
-            const savedData = localStorage.getItem('minusOneCards');
-            
-            if (savedData) {
-                minusOneCards = JSON.parse(savedData);
-            } else {
-                minusOneCards = JSON.parse(JSON.stringify(defaultMinusOneCards));
-            }
-            
-            renderMinusOneCards();
-        }
-        
-        // 保存负一屏数据
-        function saveMinusOneData() {
-            localStorage.setItem('minusOneCards', JSON.stringify(minusOneCards));
-        }
-        
-        // 渲染负一屏卡片
-        function renderMinusOneCards() {
-            const container = document.getElementById('minusOneCards');
-            container.innerHTML = '';
-            
-            minusOneCards.forEach((card, index) => {
-                const cardElement = document.createElement('div');
-                cardElement.className = `minus-one-card ${card.collapsed ? 'collapsed' : ''}`;
-                cardElement.innerHTML = `
-                    <div class="minus-one-card-header" data-card-id="${card.id}">
-                        <div class="minus-one-card-title">${card.title}</div>
-                        <span class="material-icons toggle-icon">${card.collapsed ? 'expand_more' : 'expand_less'}</span>
-                    </div>
-                    <div class="minus-one-card-content" style="${card.collapsed ? 'max-height: 0; opacity: 0;' : 'max-height: 650px; opacity: 1;'}">
-                        <iframe class="minus-one-iframe" src="${card.url}" frameborder="0"></iframe>
-                    </div>
-                `;
-                container.appendChild(cardElement);
-            });
-            
-            // 添加卡片点击事件
-            document.querySelectorAll('.minus-one-card-header').forEach(header => {
-                header.addEventListener('click', function() {
-                    const cardId = parseInt(this.getAttribute('data-card-id'));
-                    const card = minusOneCards.find(c => c.id === cardId);
-                    if (card) {
-                        card.collapsed = !card.collapsed;
-                        saveMinusOneData();
-                        renderMinusOneCards();
-                    }
-                });
-            });
-        }
-        
-        // 负一屏控制
-        const minusOneButton = document.getElementById('minusOneButton');
-        const minusOneScreen = document.getElementById('minusOneScreen');
-        const minusOneClose = document.getElementById('minusOneClose');
-        const minusOneSettingsBtn = document.getElementById('minusOneSettingsBtn');
-        const minusOneModal = document.getElementById('minusOneModal');
-        const closeModal = document.getElementById('closeModal');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const addCardBtn = document.getElementById('addCardBtn');
-        const cardList = document.getElementById('cardList');
-        
-        // 打开负一屏
-        function openMinusOneScreen() {
-            minusOneScreen.classList.add('open');
-        }
-        
-        // 关闭负一屏
-        function closeMinusOneScreen() {
-            minusOneScreen.classList.remove('open');
-        }
-        
-        // 打开设置模态框
-        function openSettingsModal() {
-            minusOneModal.classList.add('show');
-            renderCardList();
-        }
-        
-        // 关闭设置模态框
-        function closeSettingsModal() {
-            minusOneModal.classList.remove('show');
-        }
-        
-        // 添加新卡片
-        addCardBtn.addEventListener('click', function() {
-            const title = document.getElementById('newCardTitle').value.trim();
-            const url = document.getElementById('newCardUrl').value.trim();
-            
-            if (!title || !url) {
-                alert('请输入卡片标题和链接');
-                return;
-            }
-            
-            // 验证URL格式
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                alert('请输入有效的URL链接（以http://或https://开头）');
-                return;
-            }
-            
-            const newCard = {
-                id: Date.now(), // 使用时间戳作为唯一ID
-                title: title,
-                url: url,
-                collapsed: false
-            };
-            
-            minusOneCards.push(newCard);
-            document.getElementById('newCardTitle').value = '';
-            document.getElementById('newCardUrl').value = '';
-            renderCardList();
-        });
-        
-        // 渲染卡片列表
-        function renderCardList() {
-            cardList.innerHTML = '';
-            
-            minusOneCards.forEach((card, index) => {
-                const listItem = document.createElement('div');
-                listItem.className = 'card-list-item';
-                listItem.innerHTML = `
-                    <div class="card-list-info">
-                        <div class="card-list-title">${card.title}</div>
-                        <div class="card-list-url">${card.url}</div>
-                    </div>
-                    <div class="card-list-controls">
-                        <button class="list-control-btn move-up-list-btn" data-index="${index}">
-                            <span class="material-icons">arrow_upward</span>
-                        </button>
-                        <button class="list-control-btn move-down-list-btn" data-index="${index}">
-                            <span class="material-icons">arrow_downward</span>
-                        </button>
-                        <button class="list-control-btn delete-list-btn" data-index="${index}">
-                            <span class="material-icons">delete</span>
-                        </button>
-                    </div>
-                `;
-                cardList.appendChild(listItem);
-            });
-            
-            // 添加列表控制事件
-            document.querySelectorAll('.move-up-list-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    if (index > 0) {
-                        [minusOneCards[index], minusOneCards[index - 1]] = [minusOneCards[index - 1], minusOneCards[index]];
-                        renderCardList();
-                    }
-                });
-            });
-            
-            document.querySelectorAll('.move-down-list-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    if (index < minusOneCards.length - 1) {
-                        [minusOneCards[index], minusOneCards[index + 1]] = [minusOneCards[index + 1], minusOneCards[index]];
-                        renderCardList();
-                    }
-                });
-            });
-            
-            document.querySelectorAll('.delete-list-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    if (confirm('确定要删除这个卡片吗？')) {
-                        minusOneCards.splice(index, 1);
-                        renderCardList();
-                    }
-                });
-            });
-        }
-        
-        // 保存设置
-        saveBtn.addEventListener('click', function() {
-            saveMinusOneData();
-            renderMinusOneCards();
-            closeSettingsModal();
-        });
-        
-        // 页面加载
-        window.onload = () => {
-            loadTheme();
-            themeToggle.addEventListener('change', toggleTheme);
-            
-            // 设置壁纸
-            setWallpaper();
-            
-            // 添加下载按钮事件
-            document.getElementById('downloadBtn').addEventListener('click', downloadImage);
-            
-            // 为更新日志菜单项添加事件
-            document.getElementById('changelogItem').addEventListener('click', function() {
-                openChangelog();
-                menuPopup.classList.remove('show');
-            });
-            
-            // 壁纸折叠功能
-            document.getElementById('wallpaperHeader').addEventListener('click', function() {
-                const container = document.getElementById('wallpaperContainer');
-                const icon = document.getElementById('toggleIcon');
-                
-                container.classList.toggle('collapsed');
-                icon.textContent = container.classList.contains('collapsed') ? 'expand_more' : 'expand_less';
-                
-                // 保存状态
-                localStorage.setItem('wallpaperCollapsed', container.classList.contains('collapsed'));
-            });
-            
-            // 恢复壁纸折叠状态
-            if (localStorage.getItem('wallpaperCollapsed') === 'true') {
-                document.getElementById('wallpaperContainer').classList.add('collapsed');
-                document.getElementById('toggleIcon').textContent = 'expand_more';
-            }
-            
-            // 加载负一屏
-            loadMinusOneData();
-            
-            // 负一屏按钮事件
-            minusOneButton.addEventListener('click', openMinusOneScreen);
-            minusOneClose.addEventListener('click', closeMinusOneScreen);
-            minusOneSettingsBtn.addEventListener('click', openSettingsModal);
-            
-            // 点击负一屏外部关闭
-            minusOneScreen.addEventListener('click', function(e) {
-                if (e.target === minusOneScreen) {
-                    closeMinusOneScreen();
-                }
-            });
-            
-            // 设置模态框事件
-            closeModal.addEventListener('click', closeSettingsModal);
-            cancelBtn.addEventListener('click', closeSettingsModal);
-            
-            // 点击模态框外部关闭
-            minusOneModal.addEventListener('click', function(e) {
-                if (e.target === minusOneModal) {
-                    closeSettingsModal();
-                }
-            });
+        // 状态管理
+        const state = {
+            activeTab: 0,
+            players: {},
+            scriptLoaded: false,
+            isOnline: navigator.onLine,
+            deferredPrompt: null,
+            pwaDismissed: localStorage.getItem('pwaDismissed') === 'true',
+            isPWAInstalled: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
         };
+
+        // DOM 元素引用
+        const dom = {
+            body: document.body,
+            tabs: document.getElementById('tabsContainer'),
+            content: document.getElementById('contentContainer'),
+            toast: document.getElementById('toast'),
+            networkBar: document.getElementById('networkStatus'),
+            themeIcon: document.querySelector('#themeToggle span'),
+            moreMenu: document.getElementById('moreMenu'),
+            pwaInstallPrompt: document.getElementById('pwaInstallPrompt'),
+            pwaInstallBtn: document.getElementById('pwaInstallBtn'),
+            pwaDismissBtn: document.getElementById('pwaDismissBtn')
+        };
+
+        // --- 初始化渲染 ---
+
+        function init() {
+            renderTabsAndContainers();
+            initTheme();
+            checkBrowserEnv();
+            initNetworkListeners();
+            setupEventListeners();
+            initPWA();
+            
+            // 激活第一个标签页并加载
+            switchTab(0);
+        }
+
+        // 动态生成HTML结构
+        function renderTabsAndContainers() {
+            const fragmentTabs = document.createDocumentFragment();
+            const fragmentContent = document.createDocumentFragment();
+
+            SEASON_CONFIG.forEach((season, index) => {
+                // 创建 Tab
+                const tab = document.createElement('div');
+                tab.className = 'tab';
+                tab.textContent = season.name;
+                tab.dataset.index = index;
+                fragmentTabs.appendChild(tab);
+
+                // 创建 Content Panel
+                const panel = document.createElement('div');
+                panel.className = 'tab-panel';
+                panel.id = `panel-${index}`;
+                
+                // 创建 Player Container (初始为空)
+                const playerBox = document.createElement('div');
+                playerBox.className = 'player-wrapper';
+                playerBox.id = `player_${season.vcode}`; // 保持原有ID格式以防兼容性问题
+                
+                panel.appendChild(playerBox);
+                fragmentContent.appendChild(panel);
+            });
+
+            dom.tabs.appendChild(fragmentTabs);
+            dom.content.appendChild(fragmentContent);
+        }
+
+        // --- 播放器逻辑 ---
+
+        async function loadPlayerScript() {
+            if (state.scriptLoaded || document.querySelector('script[src*="player.dogecloud.com"]')) {
+                state.scriptLoaded = true;
+                return;
+            }
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = `https://player.dogecloud.com/js/loader?${Date.now()}`;
+                script.onload = () => {
+                    state.scriptLoaded = true;
+                    resolve();
+                };
+                script.onerror = () => reject(new Error('Script load failed'));
+                document.head.appendChild(script);
+            });
+        }
+
+        async function initPlayer(index, retryCount = 0) {
+            const config = SEASON_CONFIG[index];
+            const containerId = `player_${config.vcode}`;
+            const container = document.getElementById(containerId);
+
+            if (!container) return;
+            if (state.players[containerId]) return; // 已存在实例
+
+            if (!navigator.onLine) {
+                renderState(container, 'wifi_off', '网络连接不可用', true, index);
+                return;
+            }
+
+            // 显示加载中
+            container.innerHTML = `<div class="state-container"><div class="spinner"></div><p style="margin-top:10px">正在加载播放器...</p></div>`;
+
+            try {
+                await loadPlayerScript();
+                
+                // 确保DogePlayer可用
+                if (typeof DogePlayer === 'undefined') throw new Error('Player SDK not ready');
+
+                const player = new DogePlayer({
+                    container: container,
+                    userId: 14140,
+                    vcode: config.vcode,
+                    autoPlay: false,
+                    plcode: config.plcode,
+                    plsort: 'name'
+                });
+
+                // 全屏监听
+                player.on('fullscreenchange', (isFull) => {
+                   if (isFull) {
+                       try { screen.orientation.lock('landscape').catch(() => {}); } catch(e){}
+                   } else {
+                       try { screen.orientation.unlock(); } catch(e){}
+                   }
+                });
+
+                state.players[containerId] = player;
+
+            } catch (err) {
+                console.error('Player Init Error:', err);
+                if (retryCount < 3) {
+                    setTimeout(() => initPlayer(index, retryCount + 1), 2000);
+                } else {
+                    renderState(container, 'error_outline', '加载失败，请重试', true, index);
+                }
+            }
+        }
+
+        function destroyPlayer(index) {
+            const config = SEASON_CONFIG[index];
+            const containerId = `player_${config.vcode}`;
+            if (state.players[containerId]) {
+                try {
+                    // 如果SDK有destroy方法则调用，否则移除DOM引用
+                    if (state.players[containerId].destroy) state.players[containerId].destroy();
+                } catch(e) {}
+                delete state.players[containerId];
+                // 重置容器HTML
+                const container = document.getElementById(containerId);
+                if (container) container.innerHTML = '';
+            }
+        }
+
+        function renderState(container, icon, text, showRetry, index) {
+            let html = `<div class="state-container">
+                <span class="material-icons state-icon">${icon}</span>
+                <p>${text}</p>`;
+            if (showRetry) {
+                html += `<button class="btn-retry" onclick="initPlayer(${index})">重试</button>`;
+            }
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        // --- PWA 功能 ---
+
+        function initPWA() {
+            // 如果应用已安装，则不显示安装提示
+            if (state.isPWAInstalled) {
+                console.log('应用已安装');
+                return;
+            }
+
+            // 监听 beforeinstallprompt 事件
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // 阻止默认的安装提示
+                e.preventDefault();
+                // 保存事件以便稍后触发
+                state.deferredPrompt = e;
+                
+                // 如果用户之前没有忽略提示，则显示自定义安装提示
+                if (!state.pwaDismissed) {
+                    setTimeout(() => {
+                        dom.pwaInstallPrompt.classList.add('show');
+                    }, 3000);
+                }
+            });
+
+            // 安装按钮点击事件
+            dom.pwaInstallBtn.addEventListener('click', async () => {
+                if (!state.deferredPrompt) {
+                    showToast('您的浏览器不支持安装应用');
+                    return;
+                }
+                
+                // 显示安装提示
+                state.deferredPrompt.prompt();
+                
+                // 等待用户响应
+                const { outcome } = await state.deferredPrompt.userChoice;
+                
+                if (outcome === 'accepted') {
+                    showToast('应用安装中...');
+                    // 安装成功后隐藏提示
+                    dom.pwaInstallPrompt.classList.remove('show');
+                } else {
+                    showToast('已取消安装');
+                }
+                
+                // 清除保存的提示
+                state.deferredPrompt = null;
+            });
+
+            // 忽略按钮点击事件
+            dom.pwaDismissBtn.addEventListener('click', () => {
+                dom.pwaInstallPrompt.classList.remove('show');
+                state.pwaDismissed = true;
+                localStorage.setItem('pwaDismissed', 'true');
+            });
+
+            // 监听应用安装完成事件
+            window.addEventListener('appinstalled', () => {
+                showToast('应用已成功安装');
+                state.deferredPrompt = null;
+                state.isPWAInstalled = true;
+            });
+
+            // 注册Service Worker（用于离线功能和推送通知）
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    // 创建一个简单的Service Worker
+                    const swContent = `
+                        self.addEventListener('install', (event) => {
+                            console.log('Service Worker 安装中...');
+                            self.skipWaiting();
+                        });
+                        
+                        self.addEventListener('activate', (event) => {
+                            console.log('Service Worker 激活');
+                        });
+                        
+                        self.addEventListener('fetch', (event) => {
+                            // 简单的缓存策略：优先网络，失败则使用缓存
+                            event.respondWith(
+                                fetch(event.request).catch(() => {
+                                    return caches.match(event.request);
+                                })
+                            );
+                        });
+                    `;
+                    
+                    const blob = new Blob([swContent], { type: 'application/javascript' });
+                    const swUrl = URL.createObjectURL(blob);
+                    
+                    navigator.serviceWorker.register(swUrl)
+                        .then(registration => {
+                            console.log('SW 注册成功: ', registration);
+                        })
+                        .catch(error => {
+                            console.log('SW 注册失败: ', error);
+                        });
+                });
+            }
+        }
+
+        // --- 交互逻辑 ---
+
+        function switchTab(index) {
+            index = parseInt(index);
+            if (isNaN(index)) return;
+
+            // 1. UI更新
+            const tabs = dom.tabs.querySelectorAll('.tab');
+            const panels = dom.content.querySelectorAll('.tab-panel');
+            
+            tabs.forEach(t => t.classList.toggle('active', parseInt(t.dataset.index) === index));
+            panels.forEach(p => p.classList.toggle('active', parseInt(p.id.split('-')[1]) === index));
+            
+            // 2. 滚动Tab到可视区
+            tabs[index]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+            // 3. 逻辑处理
+            state.activeTab = index;
+            initPlayer(index);
+        }
+
+        function setupEventListeners() {
+            // Tab点击委托
+            dom.tabs.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tab')) {
+                    switchTab(e.target.dataset.index);
+                }
+            });
+
+            // 菜单点击
+            document.getElementById('moreBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                dom.moreMenu.classList.toggle('show');
+            });
+
+            document.addEventListener('click', () => dom.moreMenu.classList.remove('show'));
+
+            // 菜单项动作委托 (PC & Mobile)
+            const handleAction = (action) => {
+                if (!action) return;
+                if (action === 'refresh') {
+                    showToast('正在刷新当前播放器...');
+                    destroyPlayer(state.activeTab);
+                    setTimeout(() => initPlayer(state.activeTab), 200);
+                } else if (action === 'install') {
+                    // 触发PWA安装
+                    if (state.deferredPrompt) {
+                        state.deferredPrompt.prompt();
+                    } else if (state.isPWAInstalled) {
+                        showToast('应用已安装');
+                    } else {
+                        showToast('您的浏览器不支持安装应用');
+                    }
+                } else if (action === 'reward') {
+                    openModal('rewardModal');
+                } else if (action === 'about') {
+                    openModal('aboutModal');
+                }
+            };
+
+            dom.moreMenu.addEventListener('click', e => handleAction(e.target.closest('.menu-item')?.dataset.action));
+            document.querySelector('.bottom-nav-inner').addEventListener('click', e => handleAction(e.target.closest('.nav-item')?.dataset.action));
+
+            // Modal 关闭逻辑
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target.hasAttribute('data-close') || e.target.classList.contains('modal-backdrop')) {
+                        modal.classList.remove('active');
+                    }
+                });
+            });
+
+            // 微信按钮
+            document.getElementById('wechatBtn').addEventListener('click', () => {
+                if (/MicroMessenger/i.test(navigator.userAgent)) {
+                    window.location.href = 'weixin://';
+                } else {
+                    showToast('请使用微信扫描二维码');
+                    setTimeout(() => window.location.href = 'weixin://', 500);
+                }
+            });
+
+            // 主题切换
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        }
+
+        // --- 工具函数 ---
+
+        function toggleTheme() {
+            const current = dom.body.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            dom.body.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            dom.themeIcon.textContent = next === 'dark' ? 'dark_mode' : 'light_mode';
+            showToast(`已切换至${next === 'dark' ? '深色' : '浅色'}模式`);
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            dom.body.setAttribute('data-theme', saved);
+            dom.themeIcon.textContent = saved === 'dark' ? 'dark_mode' : 'light_mode';
+        }
+
+        function checkBrowserEnv() {
+            const ua = navigator.userAgent.toLowerCase();
+            const isEmbedded = /micromessenger|qqbrowser|weibo/.test(ua);
+            if (isEmbedded) dom.body.classList.add('is-embedded');
+        }
+
+        function initNetworkListeners() {
+            const updateNetwork = () => {
+                const online = navigator.onLine;
+                dom.networkBar.style.display = online ? 'none' : 'block';
+                if (!online) {
+                    dom.networkBar.textContent = '网络连接已断开';
+                    // 显示所有播放器的网络错误状态
+                    SEASON_CONFIG.forEach((_, index) => {
+                        const container = document.getElementById(`player_${SEASON_CONFIG[index].vcode}`);
+                        if (container && !container.querySelector('.state-container')) {
+                            renderState(container, 'wifi_off', '网络连接不可用', true, index);
+                        }
+                    });
+                } else if (!state.isOnline) { // 从离线变在线
+                    dom.networkBar.style.display = 'block';
+                    dom.networkBar.style.background = 'var(--success-color)';
+                    dom.networkBar.textContent = '网络已恢复';
+                    setTimeout(() => dom.networkBar.style.display = 'none', 2000);
+                    // 尝试重新加载当前播放器
+                    initPlayer(state.activeTab);
+                }
+                state.isOnline = online;
+            };
+            window.addEventListener('online', updateNetwork);
+            window.addEventListener('offline', updateNetwork);
+        }
+
+        function showToast(msg, duration = 2000) {
+            dom.toast.textContent = msg;
+            dom.toast.classList.add('show');
+            setTimeout(() => dom.toast.classList.remove('show'), duration);
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        // 导出全局函数供HTML中的onclick使用 (如重试按钮)
+        window.initPlayer = initPlayer;
+
+        // 启动
+        document.addEventListener('DOMContentLoaded', init);
+
     </script>
 </body>
 </html>
