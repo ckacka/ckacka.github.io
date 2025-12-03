@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>铁路商务座候车区查询 | ckacka工具箱</title>
+    <title>铁路商务座候车区查询</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         * {
@@ -79,20 +79,6 @@
             height: 100%;
             border: none;
         }
-        
-        .info-badge {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            color: #666;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            z-index: 200;
-            backdrop-filter: blur(4px);
-        }
     </style>
 </head>
 <body>
@@ -114,10 +100,6 @@
         <iframe id="loungeFrame" src="https://mobile.12306.cn/weixin/resources/weixin/lounge.html"></iframe>
     </div>
     
-    <div class="info-badge">
-        已加载最新商务座候车区信息
-    </div>
-    
     <script>
         // 刷新嵌入页面
         function refreshPage() {
@@ -129,12 +111,6 @@
             refreshBtn.innerHTML = '<span class="material-icons">hourglass_top</span>';
             refreshBtn.style.pointerEvents = 'none';
             
-            // 设置信息提示
-            const infoBadge = document.querySelector('.info-badge');
-            infoBadge.textContent = '正在刷新数据...';
-            infoBadge.style.background = 'rgba(30, 75, 135, 0.9)';
-            infoBadge.style.color = 'white';
-            
             // 重置iframe
             frame.src = originalSrc;
             
@@ -142,12 +118,6 @@
             setTimeout(() => {
                 refreshBtn.innerHTML = '<span class="material-icons">refresh</span>';
                 refreshBtn.style.pointerEvents = 'auto';
-                
-                infoBadge.textContent = '已刷新最新数据';
-                setTimeout(() => {
-                    infoBadge.style.background = 'rgba(255, 255, 255, 0.9)';
-                    infoBadge.style.color = '#666';
-                }, 1000);
             }, 1500);
         }
         
@@ -162,4 +132,3 @@
     </script>
 </body>
 </html>
-
