@@ -3,9 +3,9 @@ const urlsToCache = [
     '/',
     '/index.html',
     '/manifest.json',
+    // 确保把所有重要的资源都列在这里，包括您的CSS和JS文件
     'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200',
     'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap',
-    // 假设已创建了这些图标文件
     '/images/icon-192.png', 
     '/images/icon-512.png' 
 ];
@@ -17,8 +17,11 @@ self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('Opened cache');
                 return cache.addAll(urlsToCache);
+            })
+            .catch(error => {
+                // 如果任何文件缓存失败，则 SW 无法安装
+                console.error('Failed to cache resources:', error);
             })
     );
 });
@@ -30,7 +33,6 @@ self.addEventListener('activate', event => {
             return Promise.all(
                 cacheNames.map(cacheName => {
                     if (cacheName !== CACHE_NAME) {
-                        console.log('Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
@@ -42,33 +44,29 @@ self.addEventListener('activate', event => {
 // 抓取请求：缓存优先策略
 self.addEventListener('fetch', event => {
     // 排除对外部iframe内容的缓存
-    if (event.request.url.startsWith('http') && event.request.url.includes('ckacka.github.io')) {
+    if (event.request.url.startsWith('http')) {
          event.respondWith(
             caches.match(event.request)
                 .then(response => {
-                    // 缓存命中，返回缓存资源
                     if (response) {
                         return response;
                     }
-
-                    // 未命中，发起网络请求
                     return fetch(event.request).then(
                         networkResponse => {
-                            // 检查是否收到有效的响应
-                            if(!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-                                return networkResponse;
-                            }
-
-                            // 将有效的网络响应克隆一份存入缓存
-                            const responseToCache = networkResponse.clone();
-                            caches.open(CACHE_NAME)
-                                .then(cache => {
+                            // 仅缓存自己的应用资源，不缓存外部链接
+                            if (networkResponse && networkResponse.status === 200 && event.request.url.includes(location.origin)) {
+                                const responseToCache = networkResponse.clone();
+                                caches.open(CACHE_NAME).then(cache => {
                                     cache.put(event.request, responseToCache);
                                 });
-
+                            }
                             return networkResponse;
                         }
-                    );
+                    ).catch(error => {
+                        // 网络失败，且缓存中没有资源时的处理
+                        console.log('Fetch failed, no cached resource:', error);
+                        // 您可以在这里返回一个自定义的离线页面
+                    });
                 })
         );
     }
