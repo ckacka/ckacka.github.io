@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ckacka工具箱</title>
+    <meta name="theme-color" content="#6750A4">
+    <link rel="manifest" href="manifest.json">
+    <title>树洞工具箱</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -469,6 +471,65 @@
         .card-item-url { font-size: 11px; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .order-actions { display: flex; flex-direction: column; }
         .mini-btn { background: none; border: none; color: var(--md-sys-color-on-surface-variant); padding: 2px; }
+
+        /* --- PWA 安装提示样式 --- */
+        .pwa-install-prompt {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1100;
+            max-width: 90%;
+            width: 400px;
+            display: none;
+        }
+        
+        .pwa-install-prompt.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        
+        .pwa-install-prompt .prompt-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .pwa-install-prompt .prompt-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .pwa-install-prompt .prompt-icon {
+            color: var(--md-sys-color-primary);
+            background-color: var(--md-sys-color-primary-container);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pwa-install-prompt .prompt-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .pwa-install-prompt .btn {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -538,6 +599,14 @@
                         <span class="slider"></span>
                     </label>
                 </li>
+                <li class="profile-menu-item" id="pwaInstallOption">
+                    <span class="material-symbols-rounded" style="color: var(--md-sys-color-primary); margin-right: 16px;">install_desktop</span>
+                    <div style="flex: 1;">
+                        <h3>安装应用</h3>
+                        <p style="font-size: 12px; opacity: 0.7;" id="pwaStatusText">将应用安装到设备</p>
+                    </div>
+                    <button class="btn btn-outline" id="installPwaBtn" style="padding: 6px 12px; font-size: 12px;">安装</button>
+                </li>
                 <li class="profile-menu-item" id="aboutOption">
                     <span class="material-symbols-rounded" style="color: var(--md-sys-color-primary); margin-right: 16px;">info</span>
                     <div style="flex: 1;">
@@ -564,6 +633,24 @@
             <span class="nav-label">我的</span>
         </a>
     </nav>
+
+    <div class="pwa-install-prompt" id="pwaInstallPrompt">
+        <div class="prompt-content">
+            <div class="prompt-header">
+                <div class="prompt-icon">
+                    <span class="material-symbols-rounded">install_desktop</span>
+                </div>
+                <div>
+                    <h3 style="margin: 0;">安装应用</h3>
+                    <p style="margin: 4px 0 0; font-size: 14px; opacity: 0.7;">将树洞工具箱安装到您的设备</p>
+                </div>
+            </div>
+            <div class="prompt-actions">
+                <button class="btn btn-text" id="pwaPromptCancel">取消</button>
+                <button class="btn btn-primary" id="pwaPromptInstall">安装</button>
+            </div>
+        </div>
+    </div>
 
     <div class="modal" id="settingsModal">
         <div class="modal-content">
@@ -605,7 +692,7 @@
                 <h3 class="modal-title">关于</h3>
             </div>
             <div class="modal-body">
-                <p>ckacka工具箱 v3.0</p>
+                <p>树洞工具箱 v3.0</p>
                 <p style="margin-top: 10px; opacity: 0.7; font-size: 14px;">基于 Material Design 3 设计规范构建。</p>
             </div>
             <div style="padding: 16px 24px; text-align: right;">
@@ -643,7 +730,10 @@
             favorites: JSON.parse(localStorage.getItem('favs') || '[]'),
             discoverCards: JSON.parse(localStorage.getItem('cards') || JSON.stringify(defaultCards)),
             filterCategory: '全部',
-            searchText: ''
+            searchText: '',
+            pwaInstallPromptShown: false,
+            deferredPrompt: null,
+            isPwaInstalled: false
         };
 
         const dom = {
@@ -654,6 +744,11 @@
             discoverCards: document.getElementById('discoverCards'),
             cardsManagerList: document.getElementById('cardsManagerList'),
             favoritesGrid: document.getElementById('favoritesGrid'),
+            pwaInstallPrompt: document.getElementById('pwaInstallPrompt'),
+            pwaStatusText: document.getElementById('pwaStatusText'),
+            installPwaBtn: document.getElementById('installPwaBtn'),
+            pwaPromptInstall: document.getElementById('pwaPromptInstall'),
+            pwaPromptCancel: document.getElementById('pwaPromptCancel'),
             inputs: {
                 title: document.getElementById('cardTitle'),
                 url: document.getElementById('cardUrl'),
@@ -661,6 +756,89 @@
                 id: document.getElementById('editCardId')
             }
         };
+
+        // --- PWA 功能 ---
+        function initPwa() {
+            // 检测是否已安装
+            if (window.matchMedia('(display-mode: standalone)').matches || 
+                window.navigator.standalone === true) {
+                state.isPwaInstalled = true;
+                updatePwaStatus();
+                return;
+            }
+            
+            // 监听 beforeinstallprompt 事件
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                state.deferredPrompt = e;
+                updatePwaStatus();
+            });
+            
+            // 检测是否已安装（其他方法）
+            window.addEventListener('appinstalled', () => {
+                state.isPwaInstalled = true;
+                state.deferredPrompt = null;
+                updatePwaStatus();
+            });
+            
+            // 初始化安装按钮
+            dom.installPwaBtn.addEventListener('click', handlePwaInstall);
+            dom.pwaPromptInstall.addEventListener('click', handlePwaInstall);
+            dom.pwaPromptCancel.addEventListener('click', () => {
+                dom.pwaInstallPrompt.classList.remove('show');
+            });
+            
+            // 更新PWA状态显示
+            updatePwaStatus();
+        }
+        
+        function updatePwaStatus() {
+            if (state.isPwaInstalled) {
+                dom.pwaStatusText.textContent = '应用已安装';
+                dom.installPwaBtn.textContent = '已安装';
+                dom.installPwaBtn.disabled = true;
+                dom.installPwaBtn.style.opacity = '0.5';
+                dom.installPwaBtn.onclick = null;
+                dom.pwaInstallPrompt.classList.remove('show');
+            } else if (state.deferredPrompt) {
+                dom.pwaStatusText.textContent = '可安装到设备';
+                dom.installPwaBtn.textContent = '安装';
+                dom.installPwaBtn.disabled = false;
+                dom.installPwaBtn.style.opacity = '1';
+                
+                // 自动显示安装提示（仅在首次）
+                if (!state.pwaInstallPromptShown) {
+                    setTimeout(() => {
+                        dom.pwaInstallPrompt.classList.add('show');
+                        state.pwaInstallPromptShown = true;
+                    }, 3000);
+                }
+            } else {
+                dom.pwaStatusText.textContent = '浏览器不支持安装';
+                dom.installPwaBtn.textContent = '不支持';
+                dom.installPwaBtn.disabled = true;
+                dom.installPwaBtn.style.opacity = '0.5';
+            }
+        }
+        
+        function handlePwaInstall() {
+            if (state.deferredPrompt) {
+                // 隐藏任何可见的安装提示，以免重复点击
+                dom.pwaInstallPrompt.classList.remove('show');
+
+                state.deferredPrompt.prompt();
+                
+                state.deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        state.isPwaInstalled = true;
+                    }
+                    state.deferredPrompt = null;
+                    updatePwaStatus();
+                });
+            } else {
+                alert('您的浏览器不支持PWA安装功能，或应用已安装。');
+            }
+        }
 
         // --- 核心逻辑 ---
 
@@ -671,7 +849,7 @@
 
         // 首页渲染
         function renderHome() {
-            // 1. 更新标题文字：实现“切换分类时改变文字”的需求
+            // 1. 更新标题文字：实现"切换分类时改变文字"的需求
             dom.homeTitle.textContent = state.filterCategory === '全部' 
                 ? '所有工具' 
                 : `${state.filterCategory} 工具`;
@@ -864,6 +1042,22 @@
         // --- 初始化与事件监听 ---
 
         function init() {
+            // 初始化PWA功能
+            initPwa();
+
+            // PWA Service Worker 注册 (新增)
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js')
+                        .then(registration => {
+                            console.log('SW registered: ', registration);
+                        })
+                        .catch(registrationError => {
+                            console.log('SW registration failed: ', registrationError);
+                        });
+                });
+            }
+            
             // 主题处理
             const themeToggle = () => {
                 const isDark = document.body.getAttribute('data-theme') === 'dark';
@@ -970,7 +1164,7 @@
 
         function resetForm() {
             dom.inputs.title.value = ''; dom.inputs.url.value = ''; dom.inputs.icon.value = ''; dom.inputs.id.value = '';
-            document.getElementById('saveCardBtn').innerText = "添加卡片";
+            document.getElementById('saveCardBtn').innerText = "保存卡片";
             document.getElementById('cancelEditBtn').style.display = 'none';
         }
 
