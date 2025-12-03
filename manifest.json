@@ -1,8 +1,9 @@
 {
   "name": "树洞工具箱",
-  "short_name": "工具箱",
+  "short_name": "树洞工具箱",
   "description": "一个集合了常用小工具和网页应用的工具箱。",
-  "start_url": "./",
+  "start_url": "/",
+  "scope": "/", 
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#FDF8FD",
