@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#6750A4">
     <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <title>树洞工具箱</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -99,8 +103,9 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            background-color: rgba(var(--md-sys-color-surface), 0.8); /* 若不支持rgba变量，JS会处理背景色 */
-            background-color: var(--md-sys-color-surface); /* Fallback */
+            background-color: rgba(var(--md-sys-color-surface), 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             height: 64px;
             display: flex;
             align-items: center;
@@ -131,7 +136,6 @@
             transition: background-color 0.2s;
         }
 
-        /* 仅在支持悬停的设备上应用 Hover 效果，优化移动端体验 */
         @media (hover: hover) {
             .icon-btn:hover { background-color: rgba(128, 128, 128, 0.1); color: var(--md-sys-color-on-surface); }
             .chip:hover { background-color: rgba(128,128,128, 0.08); }
@@ -298,7 +302,7 @@
         .collapse-card.expanded .collapse-card-content {
             display: block;
             animation: slideDown 0.3s ease;
-            height: 500px; /* 固定高度确保体验一致 */
+            height: 500px;
         }
 
         @keyframes slideDown {
@@ -472,7 +476,7 @@
         .order-actions { display: flex; flex-direction: column; }
         .mini-btn { background: none; border: none; color: var(--md-sys-color-on-surface-variant); padding: 2px; }
 
-        /* --- PWA 安装提示样式 --- */
+        /* --- PWA 安装提示样式 (优化版) --- */
         .pwa-install-prompt {
             position: fixed;
             bottom: 100px;
@@ -638,11 +642,11 @@
         <div class="prompt-content">
             <div class="prompt-header">
                 <div class="prompt-icon">
-                    <span class="material-symbols-rounded">install_desktop</span>
+                    <span class="material-symbols-rounded" id="pwaPromptIcon">install_desktop</span>
                 </div>
                 <div>
-                    <h3 style="margin: 0;">安装应用</h3>
-                    <p style="margin: 4px 0 0; font-size: 14px; opacity: 0.7;">将树洞工具箱安装到您的设备</p>
+                    <h3 style="margin: 0;" id="pwaPromptTitle">安装应用</h3>
+                    <p style="margin: 4px 0 0; font-size: 14px; opacity: 0.7;" id="pwaPromptDesc">将树洞工具箱安装到您的设备</p>
                 </div>
             </div>
             <div class="prompt-actions">
@@ -703,7 +707,6 @@
 
     <script>
         // --- 数据源 ---
-        // 首页工具列表 (已根据用户需求修改)
         const toolsData = [
             { id: 1, name: "妙笔生花", desc: "AI 辅助的文本创作工具", icon: "edit_note", category: "AI", url: "https://ckacka.github.io/tools/mbsh.html" },
             { id: 2, name: "菜谱助手", desc: "智能菜谱生成与查询", icon: "restaurant_menu", category: "AI", url: "https://ckacka.github.io/tools/aifood.html" },
@@ -717,10 +720,8 @@
             { id: 10, name: "数字电视", desc: "在线数字电视与广播", icon: "tv", category: "音视频", url: "https://ckacka.github.io/tools/tvradio.html" },
             { id: 11, name: "视频播放器", desc: "在线视频播放", icon: "movie", category: "音视频", url: "https://ckacka.github.io/tools/videoplayer.html" },
             { id: 12, name: "域名检测", desc: "检测网站域名", icon: "assessment", category: "网站", url: "https://ckacka.github.io/tools/ymtest.html" }
-
         ];
 
-        // 发现页默认卡片列表
         const defaultCards = [
             { id: 101, title: "计算器", url: "https://tool.browser.qq.com/calculator?addressbar=hide&callfrom=gongjuxiang", icon: "calculate", expanded: false },
             { id: 102, title: "新闻资讯", url: "https://hot.browser.miui.com/v7/#status=open&cate=%E6%8E%A8%E8%8D%90", icon: "newspaper", expanded: false },
@@ -735,7 +736,8 @@
             searchText: '',
             pwaInstallPromptShown: false,
             deferredPrompt: null,
-            isPwaInstalled: false
+            isPwaInstalled: false,
+            isIos: false // 新增 iOS 状态检测
         };
 
         const dom = {
@@ -751,6 +753,9 @@
             installPwaBtn: document.getElementById('installPwaBtn'),
             pwaPromptInstall: document.getElementById('pwaPromptInstall'),
             pwaPromptCancel: document.getElementById('pwaPromptCancel'),
+            pwaPromptTitle: document.getElementById('pwaPromptTitle'),
+            pwaPromptDesc: document.getElementById('pwaPromptDesc'),
+            pwaPromptIcon: document.getElementById('pwaPromptIcon'),
             inputs: {
                 title: document.getElementById('cardTitle'),
                 url: document.getElementById('cardUrl'),
@@ -759,9 +764,12 @@
             }
         };
 
-        // --- PWA 功能 ---
+        // --- PWA 功能 (针对 iOS 优化) ---
         function initPwa() {
-            // 检测是否已安装
+            // 检测是否为 iOS 设备
+            state.isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+            // 1. 检测是否已安装 (Standalone 模式)
             if (window.matchMedia('(display-mode: standalone)').matches || 
                 window.navigator.standalone === true) {
                 state.isPwaInstalled = true;
@@ -769,29 +777,58 @@
                 return;
             }
             
-            // 监听 beforeinstallprompt 事件
+            // 2. iOS 特殊处理逻辑
+            if (state.isIos) {
+                updatePwaStatus();
+                // 绑定按钮点击事件，显示 iOS 引导
+                dom.installPwaBtn.addEventListener('click', showIosInstallPrompt);
+                return; 
+            }
+            
+            // 3. Android/Chrome 原生逻辑
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 state.deferredPrompt = e;
                 updatePwaStatus();
             });
             
-            // 检测是否已安装（其他方法）
             window.addEventListener('appinstalled', () => {
                 state.isPwaInstalled = true;
                 state.deferredPrompt = null;
                 updatePwaStatus();
             });
             
-            // 初始化安装按钮
+            // 初始化安卓/PC的安装按钮
             dom.installPwaBtn.addEventListener('click', handlePwaInstall);
             dom.pwaPromptInstall.addEventListener('click', handlePwaInstall);
             dom.pwaPromptCancel.addEventListener('click', () => {
                 dom.pwaInstallPrompt.classList.remove('show');
             });
             
-            // 更新PWA状态显示
             updatePwaStatus();
+        }
+
+        // 显示 iOS 专用安装指引
+        function showIosInstallPrompt() {
+            dom.pwaPromptTitle.textContent = "安装到主屏幕";
+            dom.pwaPromptIcon.innerHTML = "ios_share"; // 更改图标为分享图标
+            // iOS 指引内容
+            dom.pwaPromptDesc.innerHTML = `
+                <div style="margin-top:8px; line-height:1.6;">
+                    1. 点击浏览器底部或顶部的 <span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom; color:var(--md-sys-color-primary)">ios_share</span> 分享按钮<br>
+                    2. 在弹出菜单中选择 <strong>"添加到主屏幕"</strong>
+                </div>
+            `;
+            
+            // 隐藏原本的“安装”按钮，因为 JS 无法触发 iOS 安装
+            dom.pwaPromptInstall.style.display = 'none';
+            
+            // 将“取消”按钮改为“知道了”
+            dom.pwaPromptCancel.textContent = '知道了';
+            dom.pwaPromptCancel.style.width = '100%';
+            dom.pwaPromptCancel.onclick = () => dom.pwaInstallPrompt.classList.remove('show');
+
+            dom.pwaInstallPrompt.classList.add('show');
         }
         
         function updatePwaStatus() {
@@ -800,15 +837,21 @@
                 dom.installPwaBtn.textContent = '已安装';
                 dom.installPwaBtn.disabled = true;
                 dom.installPwaBtn.style.opacity = '0.5';
-                dom.installPwaBtn.onclick = null;
                 dom.pwaInstallPrompt.classList.remove('show');
+            } else if (state.isIos) {
+                // iOS 状态：始终显示可点击，触发指引
+                dom.pwaStatusText.textContent = '添加到主屏幕使用';
+                dom.installPwaBtn.textContent = '安装指引';
+                dom.installPwaBtn.disabled = false;
+                dom.installPwaBtn.style.opacity = '1';
             } else if (state.deferredPrompt) {
+                // Android 可安装状态
                 dom.pwaStatusText.textContent = '可安装到设备';
                 dom.installPwaBtn.textContent = '安装';
                 dom.installPwaBtn.disabled = false;
                 dom.installPwaBtn.style.opacity = '1';
                 
-                // 自动显示安装提示（仅在首次）
+                // 首次自动提示 (Android)
                 if (!state.pwaInstallPromptShown) {
                     setTimeout(() => {
                         dom.pwaInstallPrompt.classList.add('show');
@@ -825,11 +868,8 @@
         
         function handlePwaInstall() {
             if (state.deferredPrompt) {
-                // 隐藏任何可见的安装提示，以免重复点击
                 dom.pwaInstallPrompt.classList.remove('show');
-
                 state.deferredPrompt.prompt();
-                
                 state.deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
                         state.isPwaInstalled = true;
@@ -837,8 +877,8 @@
                     state.deferredPrompt = null;
                     updatePwaStatus();
                 });
-            } else {
-                alert('您的浏览器不支持PWA安装功能，或应用已安装。');
+            } else if (!state.isIos) {
+                alert('您的浏览器不支持快速安装，或应用已安装。');
             }
         }
 
@@ -851,18 +891,15 @@
 
         // 首页渲染
         function renderHome() {
-            // 1. 更新标题文字：实现"切换分类时改变文字"的需求
             dom.homeTitle.textContent = state.filterCategory === '全部' 
                 ? '所有工具' 
                 : `${state.filterCategory} 工具`;
 
-            // 2. 渲染 Chips
             const cats = ['全部', ...new Set(toolsData.map(t => t.category))];
             dom.catFilters.innerHTML = cats.map(c => 
                 `<button class="chip ${state.filterCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`
             ).join('');
 
-            // 3. 渲染工具网格
             renderTools(dom.toolsGrid, toolsData);
         }
 
@@ -892,7 +929,6 @@
                     <div class="tool-name">${tool.name}</div>
                     <div class="tool-desc">${tool.desc}</div>
                 `;
-                // 点击工具卡片在新窗口打开链接
                 el.onclick = (e) => { 
                     if(!e.target.closest('.favorite-btn')) {
                         if (tool.url) {
@@ -909,9 +945,7 @@
         // 发现页渲染
         function renderDiscover() {
             dom.discoverCards.innerHTML = '';
-            // 如果用户清空了发现卡片，使用默认卡片列表重新初始化
             if(state.discoverCards.length === 0) {
-                // 仅在本地存储为空时使用 defaultCards，否则显示无卡片提示
                 if (localStorage.getItem('cards') === null) {
                     state.discoverCards = defaultCards;
                     saveState();
@@ -925,7 +959,6 @@
                 const el = document.createElement('div');
                 el.className = `collapse-card ${card.expanded ? 'expanded' : ''}`;
                 
-                // 解决Iframe无法加载问题：在Header添加一个外部跳转按钮
                 el.innerHTML = `
                     <div class="collapse-card-header">
                         <div class="collapse-card-title">
@@ -948,7 +981,7 @@
                 `;
                 
                 el.querySelector('.collapse-card-header').onclick = (e) => {
-                    if(e.target.closest('.icon-btn')) return; // 防止点击按钮触发折叠
+                    if(e.target.closest('.icon-btn')) return;
                     card.expanded = !card.expanded;
                     saveState();
                     renderDiscover();
@@ -956,8 +989,6 @@
                 dom.discoverCards.appendChild(el);
             });
         }
-
-        // --- 全局交互函数 ---
 
         window.setCategory = (cat) => {
             state.filterCategory = cat;
@@ -984,8 +1015,6 @@
         function renderFavorites() {
             renderTools(dom.favoritesGrid, toolsData.filter(t => state.favorites.includes(t.id)), true);
         }
-
-        // --- 管理列表与设置逻辑 ---
 
         function renderManagerList() {
             dom.cardsManagerList.innerHTML = '';
@@ -1041,26 +1070,15 @@
             }
         };
 
-        // --- 初始化与事件监听 ---
-
         function init() {
-            // 初始化PWA功能
             initPwa();
 
-            // PWA Service Worker 注册 (新增)
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/service-worker.js')
-                        .then(registration => {
-                            console.log('SW registered: ', registration);
-                        })
-                        .catch(registrationError => {
-                            console.log('SW registration failed: ', registrationError);
-                        });
+                    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
                 });
             }
             
-            // 主题处理
             const themeToggle = () => {
                 const isDark = document.body.getAttribute('data-theme') === 'dark';
                 document.body.setAttribute('data-theme', isDark ? '' : 'dark');
@@ -1078,13 +1096,11 @@
             document.getElementById('themeToggle').onclick = themeToggle;
             document.getElementById('themeSwitch').onchange = themeToggle;
 
-            // 搜索
             document.getElementById('searchInput').oninput = (e) => {
                 state.searchText = e.target.value.toLowerCase().trim();
                 renderHome();
             };
 
-            // 导航切换
             document.querySelectorAll('.nav-item').forEach(nav => {
                 nav.onclick = (e) => {
                     e.preventDefault();
@@ -1097,12 +1113,10 @@
                 };
             });
 
-            // 滚动监听
             window.addEventListener('scroll', () => {
                 dom.appBar.classList.toggle('scrolled', window.scrollY > 10);
             });
 
-            // 模态框逻辑
             const toggleModal = (id, show) => document.getElementById(id).classList.toggle('show', show);
             
             document.getElementById('discoverSettingsBtn').onclick = () => {
@@ -1113,20 +1127,16 @@
             document.getElementById('aboutOption').onclick = () => toggleModal('aboutModal', true);
             document.getElementById('closeAbout').onclick = () => toggleModal('aboutModal', false);
             
-            // 点击遮罩关闭
             window.onclick = (e) => {
                 if(e.target.classList.contains('modal')) e.target.classList.remove('show');
             };
 
-            // Tab 切换
             document.getElementById('tabAdd').onclick = () => switchTab('add');
             document.getElementById('tabManage').onclick = () => switchTab('manage');
             
-            // 保存卡片逻辑（包含非必填图标处理）
             document.getElementById('saveCardBtn').onclick = () => {
                 const title = dom.inputs.title.value.trim();
                 const url = dom.inputs.url.value.trim();
-                // 需求实现：图标不是必填项，默认使用 public
                 const icon = dom.inputs.icon.value.trim() || 'public';
                 const id = dom.inputs.id.value;
 
@@ -1145,7 +1155,6 @@
             
             document.getElementById('cancelEditBtn').onclick = resetForm;
 
-            // 初始渲染
             renderHome();
             renderDiscover();
         }
@@ -1170,7 +1179,6 @@
             document.getElementById('cancelEditBtn').style.display = 'none';
         }
 
-        // 旋转动画css
         const styleSheet = document.createElement("style");
         styleSheet.innerText = "@keyframes spin { 100% { transform:rotate(360deg); } }";
         document.head.appendChild(styleSheet);
