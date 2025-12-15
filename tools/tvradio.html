@@ -1,253 +1,426 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ckacka数字电视</title>
     <style>
+        /* --- 全局变量配置 --- */
+        :root {
+            --primary-color: #006cff;
+            --primary-dark: #0050c2;
+            --bg-color: #f5f5f5;
+            --surface-color: #ffffff;
+            --text-main: #333333;
+            --text-light: #ffffff;
+            --spacing: 16px;
+            --radius: 12px;
+        }
+
+        /* --- 基础重置 --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f8ff;
-            margin: 0;
-            padding: 10px;
-        }
-        .scroll-notice {
-            width: 100%;
-            white-space: nowrap;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
             overflow: hidden;
-            background: #f0f0f0;
-            color: #ff0000;
-            padding: 8px 0;
-            font-size: 14px;
-            font-weight: bold;
-            position: relative;
-            border-radius: 20px;
-            margin-bottom: 10px;
-        }
-        .scroll-notice div {
-            display: inline-block;
-            padding-right: 100%;
-            animation: scrollText 20s linear infinite;
-        }
-        @keyframes scrollText {
-            from { transform: translateX(100%); }
-            to { transform: translateX(-100%); }
-        }
-        .header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 5px;
-            padding: 10px 15px;
-            background: #cce6ff;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-            color: #2a5a8d;
+            justify-content: center;
         }
-        .time-display {
-            font-size: 14px;
-            color: #1a3d66;
-            text-align: right;
-            white-space: pre-line;
+
+        /* --- APP 主容器 --- */
+        .app-container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        /* --- 顶栏 --- */
+        .top-bar {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--spacing);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .app-title { 
+            font-size: 18px; 
+            font-weight: bold; 
+            letter-spacing: 0.5px; 
+        }
+        
+        /* 优化时间显示 */
+        .time-display { 
+            text-align: right; 
+            line-height: 1.3;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .time-date { 
+            font-size: 12px; 
+            font-weight: 500;
+            opacity: 0.9;
+        }
+        .time-clock { 
+            font-size: 14px; 
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- 滚动公告 --- */
+        .notice-bar {
+            background-color: #fff3cd;
+            color: #856404;
+            font-size: 12px;
+            padding: 8px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            border-bottom: 1px solid #ffeeba;
+            flex-shrink: 0;
+        }
+        .notice-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll 25s linear infinite;
+        }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        
+        /* 公告中的超链接样式 */
+        .notice-link {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        .notice-link:hover {
+            color: #004d99;
+        }
+
+        /* --- 标签页切换 (Tabs) --- */
+        .tabs-container {
+            background: var(--surface-color);
+            padding: 10px var(--spacing);
+            flex-shrink: 0;
         }
         .tabs {
             display: flex;
-            cursor: pointer;
-            justify-content: flex-start;
-            margin-bottom: 10px;
+            background: #eef2f6;
+            border-radius: 8px;
+            padding: 4px;
         }
         .tab {
-            padding: 12px 20px;
-            background-color: #cce6ff;
-            border: 1px solid #99ccff;
-            border-radius: 20px;
-            margin-right: 5px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        .tab:hover { background-color: #b3d9ff; transform: translateY(-2px); }
-        .active-tab { background-color: #e6f3ff !important; color: #1a3d66; }
-        .tab-content {
-            display: none;
-            padding: 20px;
-            border: 1px solid #99ccff;
-            border-radius: 8px;
-            background-color: #e6f3ff;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            margin-top: 10px;
-        }
-        .active-content { display: block; }
-        .player-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .player {
-            width: 100%;
-            max-width: 800px;
-            height: 45vh;
-            min-height: 300px;
-            background-color: #000;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .current-channel {
-            font-size: 20px;
-            margin: 15px 0;
-            color: #1a3d66;
-        }
-        .playlist {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            justify-content: flex-start;
-            gap: 10px;
-            padding: 10px;
-            margin-top: 15px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            border: 1px solid #99ccff;
-            max-width: 100%;
-        }
-        .playlist button {
-            padding: 12px 20px;
-            background: #f0f8ff;
-            border: 1px solid #99ccff;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #2a5a8d;
+            flex: 1;
+            text-align: center;
+            padding: 8px 0;
             font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            background-color: var(--surface-color);
+            color: var(--primary-color);
+            font-weight: bold;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* --- 内容区域 --- */
+        .content-area {
+            flex: 1;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            padding: var(--spacing);
+        }
+        .content-area.active { display: flex; }
+
+        /* --- 电视：播放器 --- */
+        .video-box {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            margin-bottom: 12px;
+        }
+        .video-box video { width: 100%; height: 100%; object-fit: contain; }
+
+        /* --- 电视：节目信息 --- */
+        .program-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            padding-left: 4px;
             flex-shrink: 0;
         }
-        .playlist button:hover, .playlist button.active {
-            background: #4da3ff;
-            color: white;
+
+        /* --- 电视：播放列表 --- */
+        .playlist {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--surface-color);
+            border-radius: var(--radius);
+            padding: 8px 0;
         }
-        .iframe-container {
+        .channel-item {
+            display: block;
             width: 100%;
-            height: 340px;
-            background: #e6f3ff;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-        }
-        #radioIframe {
-            width: 100%;
-            height: 100%;
+            padding: 14px 20px;
+            text-align: left;
+            background: transparent;
             border: none;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: background 0.2s;
         }
+        .channel-item:last-child { border-bottom: none; }
+        .channel-item:hover { background-color: #f8f9fa; }
+        
+        /* 选中状态 */
+        .channel-item.active {
+            color: var(--primary-color);
+            background-color: #e6f0ff;
+            font-weight: bold;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 16px;
+        }
+
+        /* --- 广播：容器及高度优化 --- */
+        .radio-container {
+            width: 100%;
+            height: 350px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: #fff;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+        }
+        #radioIframe { 
+            width: 100%; 
+            height: 100%;
+            border: none; 
+        }
+
+        /* --- 广播：实心刷新按钮 --- */
         .refresh-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            font-size: 12px;
-            background: #4da3ff;
+            bottom: 16px;
+            right: 16px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-color);
             color: white;
             border: none;
+            box-shadow: 0 4px 12px rgba(0,108,255,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            border-radius: 5px;
+            z-index: 20;
+            transition: transform 0.2s;
         }
-        .footer {
+        .refresh-btn:active { transform: scale(0.9); background: var(--primary-dark); }
+        .refresh-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* --- 底部版权 --- */
+        footer {
             text-align: center;
-            font-size: 12px;
-            color: gray;
-            margin-top: 10px;
-        }
-        /* 新增滑动提示样式 */
-        .scroll-hint {
-            text-align: center;
-            color: #666;
-            font-size: 12px;
-            margin-top: 8px;
-            padding: 4px;
-            animation: hintPulse 2s infinite;
-        }
-        @keyframes hintPulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
+            font-size: 11px;
+            color: #999;
+            padding: 8px;
+            background: var(--bg-color);
+            flex-shrink: 0;
         }
     </style>
 </head>
 <body>
 
-<div class="scroll-notice">
-    <div><span>请勿相信本网页任何广告，注意保护个人隐私信息，谨防诈骗。访问本站推荐使用最新版Chrome浏览器<a href="https://www.google.cn/chrome/">点我下载</a></span></div>
-</div>
-
-<div class="header">
-    <div class="tabs">
-        <div class="tab active-tab" onclick="showTab('tab1')">看电视</div>
-        <div class="tab" onclick="showTab('tab2')">听广播</div>
+<div class="app-container">
+    
+    <div class="top-bar">
+        <div class="app-title">ckacka数字电视</div>
+        <div class="time-display">
+            <div class="time-date" id="currentDate">--年--月--日</div>
+            <div class="time-clock" id="currentTime">--:--:--</div>
+        </div>
     </div>
-    <div class="time-display" id="currentTime"></div>
-</div>
 
-<div id="tab1" class="tab-content active-content">
-    <div class="player-container">
-        <div class="current-channel" id="currentChannelName">当前频道：频道 1</div>
-        <div class="player" id="tvPlayer"></div>
-        <div class="playlist" id="playlist"></div>
-        <!-- 新增滑动提示 -->
-        <div class="scroll-hint">← 左右滑动查看更多节目 →</div>
+    <div class="notice-bar">
+        <div class="notice-content">
+            请勿相信本网页任何广告，注意保护个人隐私信息，谨防诈骗。推荐使用 Chrome 浏览器访问。
+            <a href="https://www.google.cn/chrome/index.html" target="_blank" class="notice-link">点我下载</a>
+        </div>
     </div>
-</div>
 
-<div id="tab2" class="tab-content">
-    <div class="iframe-container">
-        <button class="refresh-btn" onclick="refreshIframe()">刷新</button>
-        <iframe id="radioIframe" src="https://m.cnr.cn/#/pages/broadcast/broadcast"></iframe>
+    <div class="tabs-container">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('tv')">看电视</div>
+            <div class="tab" onclick="switchTab('radio')">听广播</div>
+        </div>
     </div>
-</div>
 
-<div class="footer">本网页仅供个人学习，信息来源于互联网。</div>
+    <div id="tab-tv" class="content-area active">
+        <div class="video-box" id="videoContainer">
+        </div>
+        
+        <div class="program-title" id="currentProgramText">正在播放：加载中...</div>
+
+        <div class="playlist" id="playlist">
+        </div>
+    </div>
+
+    <div id="tab-radio" class="content-area">
+        <div class="radio-container">
+            <iframe id="radioIframe" src="https://m.cnr.cn/#/pages/broadcast/broadcast"></iframe>
+            <button class="refresh-btn" onclick="refreshRadio()" title="刷新">
+                <svg viewBox="0 0 24 24">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="radio-info">
+            <!-- 可以在这里添加广播相关信息 -->
+        </div>
+    </div>
+
+    <footer>
+        本网页仅供个人学习，信息来源于互联网
+    </footer>
+</div>
 
 <script>
-    function showTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active-content'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active-tab'));
-        document.getElementById(tabId).classList.add('active-content');
-        document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active-tab');
-    }
-
-    function playChannel(index) {
-        currentChannelIndex = index;
-        document.getElementById("currentChannelName").innerText = "当前频道：" + channels[index].name;
-        document.getElementById("tvPlayer").innerHTML = `<video width="100%" height="100%" controls autoplay><source src="${channels[index].url}" type="video/mp4"></video>`;
-        document.querySelectorAll('.playlist button').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.playlist button')[index].classList.add('active');
-    }
-
-    function refreshIframe() {
-        document.getElementById("radioIframe").src = document.getElementById("radioIframe").src;
-    }
-
-    function updateTime() {
-        const now = new Date();
-        document.getElementById("currentTime").innerText = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日\n${now.getHours()}时${now.getMinutes()}分${now.getSeconds()}秒`;
-    }
-    setInterval(updateTime, 1000);
-    updateTime();
-
+    // --- 频道数据 ---
     const channels = [
-        { name: "央视春晚2025", url: "https://res.cctvnews.cctv.com/video/3005/record/cctv/merge1/133396667284143308839013005/8fbd6180bdef4da19f6155cf6b4652e1-4.m3u8" },
-        { name: "央视春晚2024", url: "https://p2.bdstatic.com/rtmp.liveshow.lss-user.baidubce.com/live/stream_bduid_6488563992_8982723413/merged_1707497046297_88536_25144_41936.m3u8" },
-        { name: "央视春晚2023", url: "https://txmov2.a.kwimgs.com/bs3/video-hls/5251197255879398624_hlshd15.m3u8" },
-        { name: "央视春晚2022", url: "https://alimov2.a.kwimgs.com/upic/2022/02/01/11/BMjAyMjAyMDExMTEwMjNfNDAzMDAxOTlfNjYzNzA4MTk4NzNfMF8z_b_B898cc7ddd0025bf54ddb18ec1f723c84.mp4" },
-        { name: "央视春晚2021", url: "https://alimov2.a.kwimgs.com/upic/2022/01/30/17/BMjAyMjAxMzAxNzE4NTJfNDAzMDAxOTlfNjYxNzUzOTg3NjlfMF8z_b_Be41d9503181d7b0608a839ed401e02c2.mp4" },
-        { name: "央视春晚2020", url: "https://alimov2.a.kwimgs.com/upic/2022/01/30/17/BMjAyMjAxMzAxNzA5NDdfNDAzMDAxOTlfNjYxNzQ2MDAyMTFfMF8z_b_B5d51d9564c5670dc66faeba20aa7af3f.mp4" },
-        { name: "央视春晚2019", url: "https://alimov2.a.kwimgs.com/upic/2023/01/06/16/BMjAyMzAxMDYxNjMxMTRfNDAzMDAxOTlfOTI4OTY2ODE2MTBfMF8z_b_B11a778e34390a21de42d407e94f45b91.mp4" }
-
+        { name: "央视春晚 2025", url: "https://res.cctvnews.cctv.com/video/3005/record/cctv/merge1/133396667284143308839013005/8fbd6180bdef4da19f6155cf6b4652e1-4.m3u8" },
+        { name: "央视春晚 2024", url: "https://p2.bdstatic.com/rtmp.liveshow.lss-user.baidubce.com/live/stream_bduid_6488563992_8982723413/merged_1707497046297_88536_25144_41936.m3u8" },
+        { name: "央视春晚 2023", url: "https://txmov2.a.kwimgs.com/bs3/video-hls/5251197255879398624_hlshd15.m3u8" },
+        { name: "央视春晚 2022", url: "https://alimov2.a.kwimgs.com/upic/2022/02/01/11/BMjAyMjAyMDExMTEwMjNfNDAzMDAxOTlfNjYzNzA4MTk4NzNfMF8z_b_B898cc7ddd0025bf54ddb18ec1f723c84.mp4" },
+        { name: "央视春晚 2021", url: "https://alimov2.a.kwimgs.com/upic/2022/01/30/17/BMjAyMjAxMzAxNzE4NTJfNDAzMDAxOTlfNjYxNzUzOTg3NjlfMF8z_b_Be41d9503181d7b0608a839ed401e02c2.mp4" },
+        { name: "央视春晚 2020", url: "https://alimov2.a.kwimgs.com/upic/2022/01/30/17/BMjAyMjAxMzAxNzA5NDdfNDAzMDAxOTlfNjYxNzQ2MDAyMTFfMF8z_b_B5d51d9564c5670dc66faeba20aa7af3f.mp4" },
+        { name: "央视春晚 2019", url: "https://alimov2.a.kwimgs.com/upic/2023/01/06/16/BMjAyMzAxMDYxNjMxMTRfNDAzMDAxOTlfOTI4OTY2ODE2MTBfMF8z_b_B11a778e34390a21de42d407e94f45b91.mp4" }
     ];
-    
-    document.getElementById("playlist").innerHTML = channels.map((ch, i) => 
-        `<button onclick="playChannel(${i})">${ch.name}</button>`
-    ).join('');
-    playChannel(0);
-</script>
 
+    // 初始化
+    function init() {
+        renderPlaylist();
+        playChannel(0);
+        startTime();
+    }
+
+    // 渲染列表
+    function renderPlaylist() {
+        const listContainer = document.getElementById("playlist");
+        listContainer.innerHTML = channels.map((ch, index) => `
+            <button class="channel-item" onclick="playChannel(${index})" id="btn-${index}">
+                ${ch.name}
+            </button>
+        `).join('');
+    }
+
+    // 播放逻辑
+    function playChannel(index) {
+        // 确保电视正在播放
+        switchTab('tv'); 
+
+        const channel = channels[index];
+        const playerContainer = document.getElementById("videoContainer");
+        
+        // 更新播放器
+        playerContainer.innerHTML = `
+            <video id="tvVideoPlayer" width="100%" height="100%" controls autoplay playsinline poster="">
+                <source src="${channel.url}" type="application/x-mpegURL">
+                <source src="${channel.url}" type="video/mp4">
+            </video>
+        `;
+
+        // 更新文案
+        document.getElementById("currentProgramText").innerText = "正在播放：" + channel.name;
+
+        // 更新列表选中样式
+        document.querySelectorAll('.channel-item').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.getElementById(`btn-${index}`);
+        if(activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    // 切换 Tab
+    function switchTab(type) {
+        const tvTab = document.getElementById('tab-tv');
+        const radioTab = document.getElementById('tab-radio');
+        const tabs = document.querySelectorAll('.tab');
+        const tvVideo = document.getElementById('tvVideoPlayer');
+        const radioIframe = document.getElementById('radioIframe');
+
+        if (type === 'tv') {
+            tvTab.classList.add('active');
+            radioTab.classList.remove('active');
+            tabs[0].classList.add('active');
+            tabs[1].classList.remove('active');
+            
+            // 尝试暂停广播
+            if (tvVideo) tvVideo.play();
+
+        } else { // type === 'radio'
+            tvTab.classList.remove('active');
+            radioTab.classList.add('active');
+            tabs[0].classList.remove('active');
+            tabs[1].classList.add('active');
+
+            // 暂停电视
+            if (tvVideo) tvVideo.pause();
+        }
+    }
+
+    // 刷新广播
+    function refreshRadio() {
+        const iframe = document.getElementById("radioIframe");
+        iframe.src = iframe.src;
+    }
+
+    // 顶栏时间 - 改为年月日加精准到秒
+    function startTime() {
+        const update = () => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            // 更新日期
+            document.getElementById("currentDate").innerText = `${year}年${month}月${day}日`;
+            // 更新时间
+            document.getElementById("currentTime").innerText = `${hours}:${minutes}:${seconds}`;
+        };
+        update();
+        setInterval(update, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
 </body>
 </html>
