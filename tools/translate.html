@@ -115,7 +115,7 @@
             height: calc(100vh - 64px); /* 减去header高度 */
         }
 
-        /* 语言选择栏 - 修复后的样式 */
+        /* 语言选择栏 */
         .language-bar {
             background-color: var(--md-sys-color-surface);
             border-radius: var(--border-radius-lg);
@@ -125,6 +125,7 @@
             align-items: center;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
             margin-top: 16px;
+            position: relative;
         }
 
         .lang-selector {
@@ -173,11 +174,11 @@
             border-radius: var(--border-radius-md);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             padding: 8px 0;
-            min-width: 160px;
+            min-width: 200px;
+            max-height: 400px;
+            overflow-y: auto;
             z-index: 10;
             display: none;
-            max-height: 300px;
-            overflow-y: auto;
         }
 
         .lang-dropdown.show {
@@ -185,14 +186,24 @@
         }
 
         .lang-option {
-            padding: 12px 16px;
+            padding: 10px 16px;
             cursor: pointer;
             color: var(--md-sys-color-on-surface);
             transition: background-color 0.2s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .lang-option:hover {
             background-color: var(--md-sys-color-surface-variant);
+        }
+
+        .lang-flag {
+            font-size: 16px;
+            width: 24px;
+            text-align: center;
         }
 
         .swap-btn {
@@ -213,10 +224,63 @@
         /* 翻译区域容器 */
         .translate-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 0;
             flex: 1;
             height: 100%;
+            position: relative;
+            align-items: center;
+        }
+
+        /* 中间翻译按钮容器 */
+        .center-translate-btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+            height: 100%;
+            opacity: 1;
+            transition: opacity 0.3s;
+            visibility: visible;
+        }
+
+        .center-translate-btn-container.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .center-translate-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border: none;
+            border-radius: var(--border-radius-lg);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 90, 193, 0.25);
+            white-space: nowrap;
+        }
+
+        .center-translate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 90, 193, 0.35);
+        }
+
+        .center-translate-btn:active {
+            transform: translateY(0);
+        }
+
+        .center-translate-btn:disabled {
+            background-color: var(--md-sys-color-outline);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         /* 输入和输出卡片 */
@@ -706,6 +770,11 @@
                 padding: 10px 12px;
             }
 
+            /* 移动端隐藏中间的翻译按钮 */
+            .center-translate-btn-container {
+                display: none;
+            }
+
             /* 移动端需要一个明确的翻译按钮 */
             .translate-fab {
                 display: flex;
@@ -773,15 +842,7 @@
             <div class="lang-selector">
                 <button class="lang-btn active" id="sourceLangBtn">检测语言</button>
                 <div class="lang-dropdown" id="sourceLangDropdown">
-                    <div class="lang-option" data-lang="auto">检测语言</div>
-                    <div class="lang-option" data-lang="zh">中文</div>
-                    <div class="lang-option" data-lang="en">英语</div>
-                    <div class="lang-option" data-lang="ja">日语</div>
-                    <div class="lang-option" data-lang="ko">韩语</div>
-                    <div class="lang-option" data-lang="fr">法语</div>
-                    <div class="lang-option" data-lang="de">德语</div>
-                    <div class="lang-option" data-lang="es">西班牙语</div>
-                    <div class="lang-option" data-lang="ru">俄语</div>
+                    <!-- 语言选项将通过JavaScript动态添加 -->
                 </div>
             </div>
             
@@ -792,24 +853,26 @@
             <div class="lang-selector">
                 <button class="lang-btn active" id="targetLangBtn">英语</button>
                 <div class="lang-dropdown" id="targetLangDropdown">
-                    <div class="lang-option" data-lang="en">英语</div>
-                    <div class="lang-option" data-lang="zh">中文</div>
-                    <div class="lang-option" data-lang="ja">日语</div>
-                    <div class="lang-option" data-lang="ko">韩语</div>
-                    <div class="lang-option" data-lang="fr">法语</div>
-                    <div class="lang-option" data-lang="de">德语</div>
-                    <div class="lang-option" data-lang="es">西班牙语</div>
-                    <div class="lang-option" data-lang="ru">俄语</div>
+                    <!-- 语言选项将通过JavaScript动态添加 -->
                 </div>
             </div>
         </div>
 
+        <!-- 翻译区域容器 -->
         <div class="translate-container">
             <div class="card input-card">
-                <textarea id="inputText" placeholder="输入内容..." maxlength="5000"></textarea>
+                <textarea id="inputText" placeholder="请输入要翻译的文本..." maxlength="5000"></textarea>
                 <div class="card-footer">
                     <span class="char-count" id="charCount">0 / 5000</span>
                 </div>
+            </div>
+
+            <!-- 中间翻译按钮（只在桌面端且自动翻译关闭时显示） -->
+            <div class="center-translate-btn-container" id="centerTranslateContainer">
+                <button class="center-translate-btn" id="centerTranslateBtn">
+                    <span class="material-symbols-rounded">translate</span>
+                    翻译
+                </button>
             </div>
 
             <div class="card output-card">
@@ -915,6 +978,10 @@
         const sourceLangDropdown = document.getElementById('sourceLangDropdown');
         const targetLangDropdown = document.getElementById('targetLangDropdown');
         
+        // 新的中间翻译按钮相关元素
+        const centerTranslateContainer = document.getElementById('centerTranslateContainer');
+        const centerTranslateBtn = document.getElementById('centerTranslateBtn');
+        
         // 弹窗相关元素
         const historyModal = document.getElementById('historyModal');
         const settingsModal = document.getElementById('settingsModal');
@@ -930,7 +997,7 @@
         const autoTranslateSwitch = document.getElementById('autoTranslateSwitch');
         const typingEffectSwitch = document.getElementById('typingEffectSwitch');
 
-        // 语言数据
+        // 扩展的语言数据 - 包含40多种语言
         const languages = {
             'auto': '检测语言',
             'zh': '中文',
@@ -940,7 +1007,104 @@
             'fr': '法语',
             'de': '德语',
             'es': '西班牙语',
-            'ru': '俄语'
+            'ru': '俄语',
+            'ar': '阿拉伯语',
+            'pt': '葡萄牙语',
+            'it': '意大利语',
+            'nl': '荷兰语',
+            'tr': '土耳其语',
+            'pl': '波兰语',
+            'sv': '瑞典语',
+            'da': '丹麦语',
+            'no': '挪威语',
+            'fi': '芬兰语',
+            'hi': '印地语',
+            'th': '泰语',
+            'vi': '越南语',
+            'id': '印尼语',
+            'ms': '马来语',
+            'tl': '菲律宾语',
+            'uk': '乌克兰语',
+            'cs': '捷克语',
+            'el': '希腊语',
+            'hu': '匈牙利语',
+            'ro': '罗马尼亚语',
+            'bg': '保加利亚语',
+            'hr': '克罗地亚语',
+            'sk': '斯洛伐克语',
+            'sl': '斯洛文尼亚语',
+            'et': '爱沙尼亚语',
+            'lv': '拉脱维亚语',
+            'lt': '立陶宛语',
+            'ca': '加泰罗尼亚语',
+            'sr': '塞尔维亚语',
+            'he': '希伯来语',
+            'fa': '波斯语',
+            'bn': '孟加拉语',
+            'te': '泰卢固语',
+            'ta': '泰米尔语',
+            'ur': '乌尔都语',
+            'pa': '旁遮普语',
+            'my': '缅甸语',
+            'km': '高棉语',
+            'lo': '老挝语',
+            'si': '僧伽罗语',
+            'hmn': '苗语'
+        };
+
+        // 语言国旗/符号映射
+        const languageFlags = {
+            'auto': '🌐',
+            'zh': '🇨🇳',
+            'en': '🇬🇧',
+            'ja': '🇯🇵',
+            'ko': '🇰🇷',
+            'fr': '🇫🇷',
+            'de': '🇩🇪',
+            'es': '🇪🇸',
+            'ru': '🇷🇺',
+            'ar': '🇸🇦',
+            'pt': '🇵🇹',
+            'it': '🇮🇹',
+            'nl': '🇳🇱',
+            'tr': '🇹🇷',
+            'pl': '🇵🇱',
+            'sv': '🇸🇪',
+            'da': '🇩🇰',
+            'no': '🇳🇴',
+            'fi': '🇫🇮',
+            'hi': '🇮🇳',
+            'th': '🇹🇭',
+            'vi': '🇻🇳',
+            'id': '🇮🇩',
+            'ms': '🇲🇾',
+            'tl': '🇵🇭',
+            'uk': '🇺🇦',
+            'cs': '🇨🇿',
+            'el': '🇬🇷',
+            'hu': '🇭🇺',
+            'ro': '🇷🇴',
+            'bg': '🇧🇬',
+            'hr': '🇭🇷',
+            'sk': '🇸🇰',
+            'sl': '🇸🇮',
+            'et': '🇪🇪',
+            'lv': '🇱🇻',
+            'lt': '🇱🇹',
+            'ca': '🇪🇸',
+            'sr': '🇷🇸',
+            'he': '🇮🇱',
+            'fa': '🇮🇷',
+            'bn': '🇧🇩',
+            'te': '🇮🇳',
+            'ta': '🇮🇳',
+            'ur': '🇵🇰',
+            'pa': '🇮🇳',
+            'my': '🇲🇲',
+            'km': '🇰🇭',
+            'lo': '🇱🇦',
+            'si': '🇱🇰',
+            'hmn': '🌏'
         };
 
         // DeepSeek API 语言代码映射
@@ -952,7 +1116,49 @@
             'fr': 'French',
             'de': 'German',
             'es': 'Spanish',
-            'ru': 'Russian'
+            'ru': 'Russian',
+            'ar': 'Arabic',
+            'pt': 'Portuguese',
+            'it': 'Italian',
+            'nl': 'Dutch',
+            'tr': 'Turkish',
+            'pl': 'Polish',
+            'sv': 'Swedish',
+            'da': 'Danish',
+            'no': 'Norwegian',
+            'fi': 'Finnish',
+            'hi': 'Hindi',
+            'th': 'Thai',
+            'vi': 'Vietnamese',
+            'id': 'Indonesian',
+            'ms': 'Malay',
+            'tl': 'Filipino',
+            'uk': 'Ukrainian',
+            'cs': 'Czech',
+            'el': 'Greek',
+            'hu': 'Hungarian',
+            'ro': 'Romanian',
+            'bg': 'Bulgarian',
+            'hr': 'Croatian',
+            'sk': 'Slovak',
+            'sl': 'Slovenian',
+            'et': 'Estonian',
+            'lv': 'Latvian',
+            'lt': 'Lithuanian',
+            'ca': 'Catalan',
+            'sr': 'Serbian',
+            'he': 'Hebrew',
+            'fa': 'Persian',
+            'bn': 'Bengali',
+            'te': 'Telugu',
+            'ta': 'Tamil',
+            'ur': 'Urdu',
+            'pa': 'Punjabi',
+            'my': 'Burmese',
+            'km': 'Khmer',
+            'lo': 'Lao',
+            'si': 'Sinhala',
+            'hmn': 'Hmong'
         };
 
         let typingTimer; // 用于防抖
@@ -965,6 +1171,100 @@
             autoTranslate: true,
             typingEffect: true
         };
+
+        // 初始化语言下拉菜单
+        function initLanguageDropdowns() {
+            // 清空现有的下拉菜单
+            sourceLangDropdown.innerHTML = '';
+            targetLangDropdown.innerHTML = '';
+            
+            // 为源语言下拉菜单添加选项（包括"检测语言"）
+            for (const [code, name] of Object.entries(languages)) {
+                const option = document.createElement('div');
+                option.className = 'lang-option';
+                option.setAttribute('data-lang', code);
+                
+                const flag = languageFlags[code] || '🌐';
+                option.innerHTML = `
+                    <span class="lang-flag">${flag}</span>
+                    <span>${name}</span>
+                `;
+                
+                // 源语言菜单包含"检测语言"
+                if (code === 'auto' || code !== 'auto') {
+                    sourceLangDropdown.appendChild(option.cloneNode(true));
+                }
+                
+                // 目标语言菜单不包含"检测语言"
+                if (code !== 'auto') {
+                    targetLangDropdown.appendChild(option);
+                }
+            }
+            
+            // 为源语言选项添加点击事件
+            document.querySelectorAll('#sourceLangDropdown .lang-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const langCode = option.getAttribute('data-lang');
+                    currentSourceLang = langCode;
+                    sourceLangBtn.textContent = languages[langCode];
+                    sourceLangDropdown.classList.remove('show');
+                    
+                    // 如果目标语言和源语言相同，自动切换目标语言
+                    if (langCode !== 'auto' && langCode === currentTargetLang) {
+                        // 找到另一个不同的语言
+                        for (const code in languages) {
+                            if (code !== langCode && code !== 'auto') {
+                                currentTargetLang = code;
+                                targetLangBtn.textContent = languages[code];
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // 更新翻译按钮状态
+                    updateCenterTranslateButton();
+                    
+                    // 如果当前有文本，重新翻译
+                    if (inputText.value.trim()) {
+                        if (settings.autoTranslate) {
+                            performTranslation(inputText.value);
+                        }
+                    }
+                });
+            });
+            
+            // 为目标语言选项添加点击事件
+            document.querySelectorAll('#targetLangDropdown .lang-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const langCode = option.getAttribute('data-lang');
+                    currentTargetLang = langCode;
+                    targetLangBtn.textContent = languages[langCode];
+                    targetLangDropdown.classList.remove('show');
+                    
+                    // 如果源语言不是auto且和目标语言相同，自动切换源语言
+                    if (currentSourceLang !== 'auto' && currentSourceLang === langCode) {
+                        // 找到另一个不同的语言
+                        for (const code in languages) {
+                            if (code !== langCode && code !== 'auto') {
+                                currentSourceLang = code;
+                                sourceLangBtn.textContent = languages[code];
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // 更新翻译按钮状态
+                    updateCenterTranslateButton();
+                    
+                    // 如果当前有文本，重新翻译
+                    if (inputText.value.trim()) {
+                        if (settings.autoTranslate) {
+                            performTranslation(inputText.value);
+                        }
+                    }
+                });
+            });
+        }
 
         // 页面加载时从localStorage加载数据
         function loadData() {
@@ -989,6 +1289,38 @@
                 darkModeBtn.innerHTML = '<span class="material-symbols-rounded">light_mode</span>';
                 darkModeBtn.title = '浅色模式';
             }
+            
+            // 更新中间翻译按钮的显示状态
+            updateCenterTranslateButton();
+            
+            // 初始化语言下拉菜单
+            initLanguageDropdowns();
+        }
+
+        // 更新中间翻译按钮的显示状态
+        function updateCenterTranslateButton() {
+            const isDesktop = window.innerWidth > 768;
+            const hasText = inputText.value.trim().length > 0;
+            const hasApiKey = settings.apiKey.trim().length > 0;
+            
+            // 更新中间翻译按钮的状态
+            if (centerTranslateBtn) {
+                centerTranslateBtn.disabled = !(hasText && hasApiKey);
+            }
+            
+            // 只有在桌面端且自动翻译关闭时才显示中间翻译按钮
+            if (isDesktop && !settings.autoTranslate) {
+                centerTranslateContainer.classList.remove('hidden');
+            } else {
+                centerTranslateContainer.classList.add('hidden');
+            }
+            
+            // 更新移动端按钮状态
+            if (mobileTranslateBtn) {
+                mobileTranslateBtn.disabled = !(hasText && hasApiKey);
+                mobileTranslateBtn.style.opacity = (hasText && hasApiKey) ? '1' : '0.5';
+                mobileTranslateBtn.style.cursor = (hasText && hasApiKey) ? 'pointer' : 'not-allowed';
+            }
         }
 
         // 保存设置到localStorage
@@ -999,6 +1331,9 @@
             
             localStorage.setItem('translationSettings', JSON.stringify(settings));
             showToast('设置已保存');
+            
+            // 更新中间翻译按钮的显示状态
+            updateCenterTranslateButton();
         }
 
         // 保存历史记录到localStorage
@@ -1063,6 +1398,9 @@
                     currentTargetLang = item.targetLang;
                     sourceLangBtn.textContent = languages[currentSourceLang];
                     targetLangBtn.textContent = languages[currentTargetLang];
+                    
+                    // 更新翻译按钮状态
+                    updateCenterTranslateButton();
                     
                     // 关闭弹窗
                     historyModal.classList.remove('active');
@@ -1220,59 +1558,6 @@
             sourceLangDropdown.classList.remove('show');
         });
 
-        // 语言选项点击事件
-        document.querySelectorAll('#sourceLangDropdown .lang-option').forEach(option => {
-            option.addEventListener('click', () => {
-                const langCode = option.getAttribute('data-lang');
-                currentSourceLang = langCode;
-                sourceLangBtn.textContent = languages[langCode];
-                sourceLangDropdown.classList.remove('show');
-                
-                // 如果目标语言和源语言相同，自动切换目标语言
-                if (langCode !== 'auto' && langCode === currentTargetLang) {
-                    // 找到另一个不同的语言
-                    for (const code in languages) {
-                        if (code !== langCode && code !== 'auto') {
-                            currentTargetLang = code;
-                            targetLangBtn.textContent = languages[code];
-                            break;
-                        }
-                    }
-                }
-                
-                // 如果当前有文本，重新翻译
-                if (inputText.value.trim()) {
-                    performTranslation(inputText.value);
-                }
-            });
-        });
-
-        document.querySelectorAll('#targetLangDropdown .lang-option').forEach(option => {
-            option.addEventListener('click', () => {
-                const langCode = option.getAttribute('data-lang');
-                currentTargetLang = langCode;
-                targetLangBtn.textContent = languages[langCode];
-                targetLangDropdown.classList.remove('show');
-                
-                // 如果源语言不是auto且和目标语言相同，自动切换源语言
-                if (currentSourceLang !== 'auto' && currentSourceLang === langCode) {
-                    // 找到另一个不同的语言
-                    for (const code in languages) {
-                        if (code !== langCode && code !== 'auto') {
-                            currentSourceLang = code;
-                            sourceLangBtn.textContent = languages[code];
-                            break;
-                        }
-                    }
-                }
-                
-                // 如果当前有文本，重新翻译
-                if (inputText.value.trim()) {
-                    performTranslation(inputText.value);
-                }
-            });
-        });
-
         // 点击页面其他位置关闭下拉菜单
         document.addEventListener('click', () => {
             sourceLangDropdown.classList.remove('show');
@@ -1284,6 +1569,9 @@
             const text = inputText.value;
             charCount.textContent = `${text.length} / 5000`;
 
+            // 更新翻译按钮状态
+            updateCenterTranslateButton();
+
             // 清除之前的定时器 (防抖：用户停止输入 800ms 后再翻译)
             clearTimeout(typingTimer);
             
@@ -1292,7 +1580,7 @@
                 return;
             }
 
-            // 桌面端自动翻译，移动端手动点击
+            // 桌面端且自动翻译开启时，启用自动翻译
             if (window.innerWidth > 768 && settings.autoTranslate) {
                 typingTimer = setTimeout(() => {
                     performTranslation(text);
@@ -1300,11 +1588,21 @@
             }
         });
 
-        // 5. 移动端按钮点击翻译
+        // 5. 中间翻译按钮点击事件（桌面端）
+        centerTranslateBtn.addEventListener('click', () => {
+            const text = inputText.value;
+            if (text.trim() && settings.apiKey) {
+                performTranslation(text);
+            }
+        });
+
+        // 移动端按钮点击翻译
         mobileTranslateBtn.addEventListener('click', () => {
             const text = inputText.value;
-            if (text.trim()) {
+            if (text.trim() && settings.apiKey) {
                 performTranslation(text);
+            } else if (!settings.apiKey) {
+                showToast('请先在设置中配置API密钥');
             }
         });
 
@@ -1330,6 +1628,12 @@
             
             inputText.value = currentOutput;
             outputText.innerText = currentInput;
+            
+            // 更新字符计数
+            charCount.textContent = `${inputText.value.length} / 5000`;
+            
+            // 更新翻译按钮状态
+            updateCenterTranslateButton();
             
             // 触发旋转动画
             swapBtn.style.transform = 'rotate(180deg)';
@@ -1429,8 +1733,7 @@
         window.addEventListener('load', () => {
             loadData();
             
-            // 显示示例翻译
-            inputText.value = "Hello, this is an example text for translation.";
+            // 更新字符计数
             charCount.textContent = `${inputText.value.length} / 5000`;
             
             // 初始渲染历史记录
@@ -1438,11 +1741,26 @@
             
             // 调整主容器高度
             adjustMainHeight();
+            
+            // 初始更新翻译按钮状态
+            updateCenterTranslateButton();
         });
 
-        // 窗口大小变化时调整布局
+        // 窗口大小变化时调整布局和按钮状态
         window.addEventListener('resize', () => {
             adjustMainHeight();
+            updateCenterTranslateButton();
+        });
+
+        // 自动翻译设置变化时更新按钮显示
+        autoTranslateSwitch.addEventListener('change', () => {
+            updateCenterTranslateButton();
+        });
+
+        // API密钥输入变化时更新按钮状态
+        apiKeyInput.addEventListener('input', () => {
+            settings.apiKey = apiKeyInput.value;
+            updateCenterTranslateButton();
         });
 
         // 调整主容器高度
