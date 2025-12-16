@@ -236,8 +236,24 @@
             background: var(--header-bg); border-top: 1px solid var(--border-color);
             padding-bottom: var(--safe-area-bottom); z-index: 90;
         }
-        .bottom-nav-inner { display: flex; justify-content: space-around; height: 56px; align-items: center; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; opacity: 0.7; }
+        .bottom-nav-inner { 
+            display: flex; 
+            justify-content: space-around; 
+            height: 56px; 
+            align-items: center; 
+            padding: 0 8px;
+        }
+        .nav-item { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 4px; 
+            font-size: 10px; 
+            opacity: 0.7;
+            padding: 4px 0;
+        }
         .nav-item:active { opacity: 1; }
 
         body.is-embedded .bottom-nav { display: block; }
@@ -568,7 +584,7 @@
             dom.moreMenu.addEventListener('click', e => handleAction(e.target.closest('.menu-item')?.dataset.action));
             document.querySelector('.bottom-nav-inner').addEventListener('click', e => handleAction(e.target.closest('.nav-item')?.dataset.action));
 
-            // Modal 关闭逻辑 - 修复这里
+            // Modal 关闭逻辑
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.addEventListener('click', (e) => {
                     // 检查是否点击了关闭按钮或背景
@@ -613,8 +629,38 @@
 
         function checkBrowserEnv() {
             const ua = navigator.userAgent.toLowerCase();
-            const isEmbedded = /micromessenger|qqbrowser|weibo/.test(ua);
-            if (isEmbedded) dom.body.classList.add('is-embedded');
+            
+            // 检测所有主流第三方浏览器
+            const isEmbedded = (
+                // 社交应用内嵌
+                /micromessenger/.test(ua) || // 微信
+                /weibo/.test(ua) || // 微博
+                /qzone/.test(ua) || // QQ空间
+                
+                // 移动浏览器
+                /mqqbrowser/.test(ua) || // QQ浏览器
+                /quark/.test(ua) || // 夸克浏览器
+                /ucbrowser/.test(ua) || // UC浏览器
+                /ucweb/.test(ua) || // UC浏览器（旧版）
+                /sogoumobilebrowser/.test(ua) || // 搜狗浏览器
+                /baidubrowser/.test(ua) || // 百度浏览器
+                /360browser/.test(ua) || // 360浏览器
+                /2345browser/.test(ua) || // 2345浏览器
+                /maxthon/.test(ua) || // 傲游浏览器
+                /samsungbrowser/.test(ua) || // 三星浏览器
+                
+                // 其他常见内嵌环境
+                /aliapp/.test(ua) || // 阿里系应用
+                /dingtalk/.test(ua) || // 钉钉
+                /ywapp/.test(ua) || // 小红书
+                /douyin/.test(ua) || // 抖音
+                /tiktok/.test(ua) // 抖音国际版
+            );
+            
+            if (isEmbedded) {
+                dom.body.classList.add('is-embedded');
+                console.log('检测到第三方浏览器环境，启用底栏菜单');
+            }
         }
 
         function initNetworkListeners() {
