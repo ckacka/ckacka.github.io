@@ -2,189 +2,244 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 解决混合内容问题 -->
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>树洞短视频</title>
     <!-- 使用国内可稳定访问的图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/3.0.1/iconfont/material-icons.min.css">
     <style>
-        /* 保持原有的CSS样式不变 */
+        /* 全局样式重置和响应式基础 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
         }
         
         body {
             background-color: #000;
             color: #fff;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            line-height: 1.5;
         }
         
+        /* 响应式视频播放器容器 */
         .video-player-container {
             position: relative;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh; /* 移动端兼容 */
+            max-width: 100%;
+            max-height: 100%;
             background-color: #000;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
         
+        /* 视频元素响应式适配 */
         .video-element {
             width: 100%;
             height: 100%;
             object-fit: contain;
             display: block;
+            background-color: #000;
         }
         
+        /* 视频标题 - 响应式调整 */
         .video-title {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 18px;
+            top: 0;
+            left: 0;
+            right: 0;
+            font-size: clamp(16px, 4vw, 20px);
             font-weight: 500;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            padding: clamp(12px, 3vw, 20px) clamp(16px, 4vw, 24px);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
             z-index: 20;
-            opacity: 0.9;
-            max-width: 60%;
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
         
+        /* 类型选择器 - 响应式调整 */
         .type-selector-container {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 0;
+            right: 0;
+            padding: clamp(12px, 3vw, 20px) clamp(16px, 4vw, 24px);
             z-index: 20;
         }
         
         .type-select-button {
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            padding: 10px 20px;
-            font-size: 14px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: clamp(8px, 2vw, 12px) clamp(16px, 3vw, 20px);
+            font-size: clamp(12px, 3vw, 14px);
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
         
         .type-select-button:hover {
-            background-color: rgba(0, 0, 0, 0.8);
-            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
         }
         
         .type-select-button:active {
-            transform: scale(0.98);
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
         
+        /* 类型下拉菜单 - 响应式优化 */
         .type-dropdown {
             position: absolute;
             top: 100%;
             right: 0;
             margin-top: 8px;
-            background-color: rgba(0, 0, 0, 0.9);
-            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 16px;
             min-width: 180px;
-            max-height: 300px;
+            max-width: 90vw;
+            max-height: 60vh;
             overflow-y: auto;
             display: none;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             z-index: 100;
         }
         
         .type-dropdown.show {
             display: block;
-            animation: fadeIn 0.2s ease;
+            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(-10px) scale(0.95);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            }
         }
         
         .type-option {
-            padding: 14px 20px;
+            padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 20px);
             cursor: pointer;
-            transition: background-color 0.1s;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 14px;
+            font-size: clamp(12px, 3vw, 14px);
+            color: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .type-option:last-child {
+            border-bottom: none;
         }
         
         .type-option:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
         }
         
         .type-option.active {
-            background-color: rgba(103, 80, 164, 0.3);
+            background: rgba(103, 80, 164, 0.2);
+            color: #A78BFA;
+        }
+        
+        .type-option.active .material-icons {
+            color: #A78BFA;
         }
         
         .type-option .material-icons {
             font-size: 18px;
-            color: #6750A4;
+            color: rgba(103, 80, 164, 0.7);
         }
         
+        /* 刷新按钮 - 改进的毛玻璃效果 */
         .refresh-button-container {
             position: absolute;
-            bottom: 40px;
+            bottom: clamp(20px, 8vh, 60px);
             left: 0;
             right: 0;
             display: flex;
             justify-content: center;
             z-index: 20;
             pointer-events: none;
+            padding: 0 clamp(16px, 4vw, 24px);
         }
         
         .refresh-button {
-            background-color: rgba(103, 80, 164, 0.9);
-            color: white;
-            border: none;
-            border-radius: 24px;
-            padding: 14px 28px;
-            font-size: 16px;
+            background: rgba(103, 80, 164, 0.25);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            padding: clamp(12px, 3vw, 16px) clamp(24px, 4vw, 32px);
+            font-size: clamp(14px, 3.5vw, 16px);
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: rgba(255, 255, 255, 0.95);
             pointer-events: auto;
-            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
         }
         
         .refresh-button:hover {
-            background-color: rgba(103, 80, 164, 1);
+            background: rgba(103, 80, 164, 0.35);
+            border-color: rgba(255, 255, 255, 0.25);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+            box-shadow: 
+                0 8px 30px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
         }
         
         .refresh-button:active {
             transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
         }
         
         .refresh-button .refresh-icon {
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .refresh-button.loading .refresh-icon {
-            animation: rotate 1s linear infinite;
+            animation: rotate 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
         
         @keyframes rotate {
@@ -192,33 +247,33 @@
             to { transform: rotate(360deg); }
         }
         
+        /* 视频控制栏 - 响应式优化 */
         .video-controls {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-            padding: 20px 16px 16px;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8) 30%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: clamp(12px, 3vw, 20px) clamp(12px, 3vw, 20px) clamp(12px, 4vw, 16px);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: clamp(8px, 2vw, 12px);
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 15;
         }
         
-        .video-player-container:hover .video-controls {
-            opacity: 1;
-        }
-        
+        .video-player-container:hover .video-controls,
         .video-controls.show {
             opacity: 1;
         }
         
         .progress-container {
             width: 100%;
-            height: 4px;
-            background-color: rgba(255, 255, 255, 0.2);
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 2px;
             cursor: pointer;
             position: relative;
@@ -227,10 +282,11 @@
         
         .progress-bar {
             height: 100%;
-            background-color: #ff375f;
+            background: linear-gradient(90deg, #FF375F, #FF6B9D);
             border-radius: 2px;
             width: 0%;
             position: relative;
+            transition: width 0.1s linear;
         }
         
         .progress-handle {
@@ -240,20 +296,22 @@
             transform: translateY(-50%);
             width: 12px;
             height: 12px;
-            background-color: #ff375f;
+            background: #FF375F;
             border-radius: 50%;
             opacity: 0;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 2px 8px rgba(255, 55, 95, 0.4);
         }
         
         .progress-container:hover .progress-handle {
             opacity: 1;
+            transform: translateY(-50%) scale(1.2);
         }
         
         .time-display {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
+            font-size: clamp(11px, 2.5vw, 12px);
             color: rgba(255, 255, 255, 0.8);
             padding: 0 4px;
         }
@@ -267,42 +325,45 @@
         .left-controls, .right-controls {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: clamp(12px, 3vw, 16px);
         }
         
         .control-btn {
-            background: none;
+            background: rgba(255, 255, 255, 0.1);
             border: none;
             color: white;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 8px;
+            padding: clamp(6px, 2vw, 8px);
             border-radius: 50%;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
         
         .control-btn:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
         }
         
         .control-btn:active {
-            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(0.95);
         }
         
         .control-btn .material-icons {
-            font-size: 24px;
+            font-size: clamp(20px, 5vw, 24px);
         }
         
         .play-pause-btn {
-            background-color: rgba(255, 255, 255, 0.1);
-            width: 48px;
-            height: 48px;
+            background: rgba(255, 255, 255, 0.15);
+            width: clamp(40px, 10vw, 48px);
+            height: clamp(40px, 10vw, 48px);
         }
         
         .play-pause-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.25);
         }
         
         .volume-container {
@@ -316,12 +377,15 @@
             bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 12px 8px;
             border-radius: 20px;
             margin-bottom: 8px;
             display: none;
             z-index: 20;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .volume-container:hover .volume-slider-container {
@@ -346,6 +410,7 @@
             border-radius: 50%;
             background: #fff;
             cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         
         .volume-slider::-moz-range-thumb {
@@ -355,51 +420,59 @@
             background: #fff;
             cursor: pointer;
             border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         
+        /* 大播放按钮 */
         .big-play-btn {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            border: none;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            width: 80px;
-            height: 80px;
+            width: clamp(60px, 20vw, 80px);
+            height: clamp(60px, 20vw, 80px);
             color: white;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             opacity: 0.9;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
         
         .big-play-btn:hover {
-            background-color: rgba(0, 0, 0, 0.7);
-            transform: translate(-50%, -50%) scale(1.05);
+            background: rgba(0, 0, 0, 0.7);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%) scale(1.1);
         }
         
         .big-play-btn .material-icons {
-            font-size: 48px;
+            font-size: clamp(36px, 12vw, 48px);
         }
         
         .big-play-btn.hidden {
             opacity: 0;
             pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.8);
         }
         
+        /* 加载动画 */
         .loading-spinner {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid #ff375f;
+            width: clamp(50px, 15vw, 60px);
+            height: clamp(50px, 15vw, 60px);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #FF375F;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             z-index: 10;
@@ -411,13 +484,70 @@
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
         
+        /* 全屏按钮 */
         .fullscreen-btn {
             margin-left: 8px;
         }
         
-        @media (max-width: 768px) {
+        /* 触摸设备优化 */
+        @media (hover: none) and (pointer: coarse) {
             .video-controls {
-                padding: 16px 12px 12px;
+                opacity: 1;
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+            
+            .control-btn {
+                min-width: 44px;
+                min-height: 44px;
+            }
+            
+            .play-pause-btn {
+                min-width: 50px;
+                min-height: 50px;
+            }
+            
+            .big-play-btn {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .type-select-button,
+            .refresh-button {
+                padding: 12px 20px;
+            }
+            
+            /* 隐藏悬停效果 */
+            .control-btn:hover,
+            .big-play-btn:hover,
+            .type-select-button:hover,
+            .refresh-button:hover {
+                transform: none;
+            }
+        }
+        
+        /* 横屏优化 */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .video-title {
+                font-size: 16px;
+                padding: 12px 16px;
+            }
+            
+            .type-select-button {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+            
+            .refresh-button-container {
+                bottom: 20px;
+            }
+            
+            .refresh-button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            
+            .video-controls {
+                padding: 10px 12px 10px;
             }
             
             .control-btn .material-icons {
@@ -428,50 +558,76 @@
                 width: 40px;
                 height: 40px;
             }
-            
-            .big-play-btn {
-                width: 64px;
-                height: 64px;
+        }
+        
+        /* 小屏幕设备 */
+        @media (max-width: 480px) {
+            .type-dropdown {
+                min-width: 160px;
+                max-width: calc(100vw - 32px);
             }
             
-            .big-play-btn .material-icons {
-                font-size: 40px;
-            }
-            
-            .video-title {
-                font-size: 16px;
-                top: 16px;
-                left: 16px;
-            }
-            
-            .type-select-button {
-                padding: 8px 16px;
+            .type-option {
+                padding: 10px 16px;
                 font-size: 13px;
             }
             
             .refresh-button {
                 padding: 12px 24px;
-                font-size: 15px;
+                border-radius: 24px;
             }
             
-            .type-dropdown {
-                min-width: 160px;
+            .big-play-btn {
+                width: 60px;
+                height: 60px;
             }
             
-            .type-option {
-                padding: 12px 16px;
-                font-size: 13px;
+            .big-play-btn .material-icons {
+                font-size: 36px;
             }
         }
         
+        /* 超小屏幕设备 */
+        @media (max-width: 360px) {
+            .video-title {
+                font-size: 14px;
+                padding: 10px 12px;
+            }
+            
+            .type-select-button {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+            
+            .refresh-button {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+            
+            .control-btn {
+                padding: 4px;
+            }
+            
+            .play-pause-btn {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .control-btn .material-icons {
+                font-size: 18px;
+            }
+        }
+        
+        /* 隐藏浏览器默认控件 */
         video::-webkit-media-controls {
-            display:none !important;
+            display: none !important;
         }
         
         video::-webkit-media-controls-enclosure {
-            display:none !important;
+            display: none !important;
         }
         
+        /* 遮罩层 */
         .overlay {
             position: fixed;
             top: 0;
@@ -487,63 +643,129 @@
             display: block;
         }
         
+        /* 提示消息 */
         .hint {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             color: white;
             padding: 12px 20px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: clamp(12px, 3vw, 14px);
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.3s ease;
             pointer-events: none;
             z-index: 10;
-            white-space: nowrap;
             text-align: center;
             max-width: 80%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .hint.show {
             opacity: 1;
         }
         
+        /* 错误消息 */
         .error-message {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             color: white;
-            padding: 20px;
-            border-radius: 12px;
+            padding: clamp(20px, 5vw, 24px);
+            border-radius: 16px;
             text-align: center;
             max-width: 80%;
             z-index: 10;
             display: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .error-message.show {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
         
+        .error-message button {
+            margin-top: 12px;
+            padding: 10px 20px;
+            background: rgba(103, 80, 164, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .error-message button:hover {
+            background: rgba(103, 80, 164, 0.4);
+        }
+        
+        /* 视频占位符 */
         .video-placeholder {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: clamp(14px, 4vw, 16px);
             text-align: center;
+            padding: 0 20px;
             z-index: 5;
+        }
+        
+        /* 响应式动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        /* 防止长按选择文本 */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* 防止图片拖动 */
+        img {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+        }
+        
+        /* 移动端滚动优化 */
+        .type-dropdown {
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* 安全区域适配（iPhone X等有刘海屏的设备） */
+        @supports (padding: max(0px)) {
+            .video-player-container {
+                padding-top: max(0px, env(safe-area-inset-top));
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+                padding-left: max(0px, env(safe-area-inset-left));
+                padding-right: max(0px, env(safe-area-inset-right));
+            }
         }
     </style>
 </head>
 <body>
     <div class="video-player-container" id="playerContainer">
-        <video class="video-element" id="videoElement" preload="metadata" playsinline>
+        <video class="video-element" id="videoElement" preload="metadata" playsinline webkit-playsinline>
             您的浏览器不支持视频播放
         </video>
         
@@ -555,7 +777,7 @@
         
         <div class="error-message" id="errorMessage">
             <p id="errorText">无法加载视频，请检查网络连接或稍后重试</p>
-            <button id="retryButton" style="margin-top: 10px; padding: 8px 16px; background: #6750A4; color: white; border: none; border-radius: 8px; cursor: pointer;">重试</button>
+            <button id="retryButton">重试</button>
         </div>
         
         <div class="video-placeholder" id="videoPlaceholder">
@@ -717,6 +939,7 @@
         let isRefreshing = false;
         let currentVideoUrl = '';
         let requestCounter = 0; // 请求计数器，用于生成唯一标识
+        let isTouchDevice = 'ontouchstart' in window;
         
         // 初始化播放器
         function initPlayer() {
@@ -799,15 +1022,27 @@
             
             // 进度条点击/拖动事件
             progressContainer.addEventListener('mousedown', startSeek);
-            progressContainer.addEventListener('touchstart', startSeek);
+            progressContainer.addEventListener('touchstart', handleTouchSeek);
             
             // 全屏按钮点击事件
             fullscreenBtn.addEventListener('click', toggleFullscreen);
             
             // 控制栏显示/隐藏
-            playerContainer.addEventListener('mousemove', showControls);
-            playerContainer.addEventListener('touchstart', showControls);
-            playerContainer.addEventListener('mouseleave', startControlsHideTimer);
+            if (isTouchDevice) {
+                // 触摸设备：点击显示/隐藏控制栏
+                playerContainer.addEventListener('touchstart', function(e) {
+                    if (e.target === videoElement || e.target === playerContainer) {
+                        videoControls.classList.toggle('show');
+                    }
+                });
+                
+                // 触摸设备自动隐藏控制栏
+                playerContainer.addEventListener('touchstart', startControlsHideTimer);
+            } else {
+                // 桌面设备：鼠标移动显示控制栏
+                playerContainer.addEventListener('mousemove', showControls);
+                playerContainer.addEventListener('mouseleave', startControlsHideTimer);
+            }
             
             // 键盘快捷键
             document.addEventListener('keydown', handleKeyPress);
@@ -838,6 +1073,38 @@
                 errorMessage.classList.remove('show');
                 refreshVideo();
             });
+            
+            // 窗口大小变化时重新计算布局
+            window.addEventListener('resize', handleResize);
+        }
+        
+        // 窗口大小变化处理
+        function handleResize() {
+            // 强制重新计算视频尺寸
+            videoElement.style.width = '100%';
+            videoElement.style.height = '100%';
+        }
+        
+        // 触摸设备进度条处理
+        function handleTouchSeek(e) {
+            e.preventDefault();
+            startSeek(e.touches[0]);
+            
+            const moveHandler = (moveEvent) => {
+                if (isDraggingProgress) {
+                    moveEvent.preventDefault();
+                    seekTo(moveEvent.touches[0]);
+                }
+            };
+            
+            const endHandler = () => {
+                isDraggingProgress = false;
+                document.removeEventListener('touchmove', moveHandler);
+                document.removeEventListener('touchend', endHandler);
+            };
+            
+            document.addEventListener('touchmove', moveHandler, { passive: false });
+            document.addEventListener('touchend', endHandler);
         }
         
         // 切换播放/暂停
@@ -932,7 +1199,9 @@
             const rect = progressContainer.getBoundingClientRect();
             let clientX;
             
-            if (event.type.includes('mouse')) {
+            if (event.type && event.type.includes('mouse')) {
+                clientX = event.clientX;
+            } else if (event.clientX !== undefined) {
                 clientX = event.clientX;
             } else if (event.touches && event.touches[0]) {
                 clientX = event.touches[0].clientX;
