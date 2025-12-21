@@ -280,15 +280,20 @@
             border-radius: 0 2px 2px 0;
         }
         
+        /* 移除勾图标样式 */
         .type-option .material-icons,
         .settings-option .material-icons {
             font-size: 18px;
             color: rgba(103, 80, 164, 0.7);
+            opacity: 0; /* 隐藏勾图标 */
+            width: 0;   /* 不占用空间 */
+            height: 0;
         }
         
         .type-option.active .material-icons,
         .settings-option.active .material-icons {
             color: #A78BFA;
+            opacity: 0; /* 保持隐藏 */
         }
         
         /* 刷新按钮容器 - 跟随控制栏位置 */
@@ -979,6 +984,7 @@
                     <div class="type-dropdown" id="typeDropdown">
                         <div class="type-option active" data-type="jk" data-name="jk类型视频">
                             <span>jk类型视频</span>
+                            <!-- 删除了勾图标 -->
                         </div>
                         <div class="type-option" data-type="YuMeng" data-name="欲梦视频">
                             <span>欲梦视频</span>
@@ -1038,6 +1044,7 @@
                             <div class="settings-section-title">刷新按钮位置</div>
                             <div class="settings-option active" data-position="right" data-name="右下角">
                                 <span>右下角</span>
+                                <!-- 删除了勾图标 -->
                             </div>
                             <div class="settings-option" data-position="center" data-name="中间">
                                 <span>中间</span>
