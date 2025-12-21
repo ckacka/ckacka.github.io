@@ -716,6 +716,7 @@
         let currentVideoName = 'jk类型视频';
         let isRefreshing = false;
         let currentVideoUrl = '';
+        let requestCounter = 0; // 请求计数器，用于生成唯一标识
         
         // 初始化播放器
         function initPlayer() {
@@ -1113,6 +1114,9 @@
                 }
             });
             
+            // 重置请求计数器
+            requestCounter = 0;
+            
             // 加载新类型的视频
             refreshVideo();
             
@@ -1126,6 +1130,9 @@
             
             isRefreshing = true;
             refreshButton.classList.add('loading');
+            
+            // 增加请求计数器
+            requestCounter++;
             
             // 显示加载提示
             showHint("正在加载视频...");
@@ -1158,12 +1165,17 @@
             try {
                 loadingSpinner.style.display = 'block';
                 
-                // 构建API请求URL - 使用mp4格式
-                const apiUrl = `${API_BASE_URL}?type=mp4&id=${type}`;
+                // 构建API请求URL - 使用mp4格式，添加时间戳防止缓存
+                // 使用请求计数器确保每次请求都是唯一的
+                const timestamp = Date.now();
+                const random = Math.random().toString(36).substring(7);
+                const apiUrl = `${API_BASE_URL}?type=mp4&id=${type}&_t=${timestamp}_${requestCounter}_${random}`;
                 
                 console.log("请求视频API:", apiUrl);
                 
                 // 由于API直接返回视频直链，我们直接使用这个URL
+                // 为了确保每次获取到新视频，我们可以先尝试HEAD请求验证URL有效性
+                // 但由于API可能不支持HEAD或CORS，我们直接返回URL
                 return apiUrl;
                 
             } catch (error) {
@@ -1171,8 +1183,10 @@
                 
                 // 如果直接请求失败，尝试获取JSON格式数据
                 try {
-                    // 尝试获取JSON格式数据
-                    const jsonApiUrl = `${API_BASE_URL}?type=json&id=${type}`;
+                    // 尝试获取JSON格式数据，同样添加防缓存参数
+                    const timestamp = Date.now();
+                    const random = Math.random().toString(36).substring(7);
+                    const jsonApiUrl = `${API_BASE_URL}?type=json&id=${type}&_t=${timestamp}_${requestCounter}_${random}`;
                     console.log("尝试JSON API:", jsonApiUrl);
                     
                     const response = await fetch(jsonApiUrl, {
@@ -1192,12 +1206,21 @@
                     console.log("JSON响应:", data);
                     
                     // 尝试从JSON响应中提取视频URL
+                    let videoUrl = null;
+                    
                     if (data && data.url) {
-                        return data.url;
+                        videoUrl = data.url;
                     } else if (data && data.data && data.data.url) {
-                        return data.data.url;
+                        videoUrl = data.data.url;
                     } else if (data && data.video_url) {
-                        return data.video_url;
+                        videoUrl = data.video_url;
+                    }
+                    
+                    // 如果找到视频URL，添加防缓存参数
+                    if (videoUrl) {
+                        const timestamp = Date.now();
+                        const random = Math.random().toString(36).substring(7);
+                        return `${videoUrl}${videoUrl.includes('?') ? '&' : '?'}_t=${timestamp}_${requestCounter}_${random}`;
                     } else {
                         throw new Error('无法解析视频URL');
                     }
@@ -1220,8 +1243,16 @@
                 URL.revokeObjectURL(videoElement.src);
             }
             
-            // 更新视频源
-            videoElement.src = videoUrl;
+            // 停止当前视频
+            videoElement.pause();
+            videoElement.currentTime = 0;
+            
+            // 更新视频源 - 添加随机参数防止浏览器缓存
+            const timestamp = Date.now();
+            const random = Math.random().toString(36).substring(7);
+            const uniqueVideoUrl = `${videoUrl}${videoUrl.includes('?') ? '&' : '?'}_nocache=${timestamp}_${random}`;
+            
+            videoElement.src = uniqueVideoUrl;
             videoElement.load();
             
             // 显示播放按钮
