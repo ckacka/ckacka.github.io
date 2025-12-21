@@ -339,6 +339,12 @@
             color: var(--md-sys-color-on-primary-container);
             display: flex; align-items: center; justify-content: center;
             margin-bottom: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .profile-avatar:active {
+            transform: scale(0.95);
         }
 
         .profile-menu { list-style: none; }
@@ -606,6 +612,79 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
+        /* --- 彩蛋模态框样式 --- */
+        .easter-egg-modal .modal-content {
+            max-width: 520px;
+            max-height: 320px;
+            background-color: transparent;
+            box-shadow: none;
+        }
+        
+        .easter-egg-modal .modal-body {
+            padding: 0;
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background-color: var(--md-sys-color-surface);
+        }
+        
+        .easter-egg-iframe {
+            width: 100%;
+            height: 250px;
+            border: none;
+            background-color: #fff;
+            display: block;
+        }
+        
+        .easter-egg-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            border: none;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        
+        .easter-egg-close-btn:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .easter-egg-close-btn:active {
+            transform: scale(0.9);
+        }
+        
+        .click-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            font-size: 12px;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 5;
+        }
+        
+        .profile-avatar:hover .click-counter {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -649,8 +728,9 @@
 
     <div class="page-content" id="profilePage">
         <div class="profile-header">
-            <div class="profile-avatar">
+            <div class="profile-avatar" id="profileAvatar">
                 <span class="material-symbols-rounded" style="font-size: 48px;">person</span>
+                <div class="click-counter" id="clickCounter">0</div>
             </div>
             <div class="profile-info">
                 <h2>欢迎使用</h2>
@@ -775,6 +855,18 @@
         </div>
     </div>
 
+    <!-- 彩蛋模态框 -->
+    <div class="modal easter-egg-modal" id="easterEggModal">
+        <div class="modal-content">
+            <div class="modal-body">
+                <iframe class="easter-egg-iframe" id="dinosaurGame" src="https://dinosaur.game/zh/dinosaur-game" allow="fullscreen"></iframe>
+                <button class="easter-egg-close-btn" id="closeEasterEgg" aria-label="关闭">
+                    <span class="material-symbols-rounded" style="font-size: 20px;">close</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -857,7 +949,11 @@
             pwaInstallPromptShown: false,
             deferredPrompt: null,
             isPwaInstalled: false,
-            isIos: false
+            isIos: false,
+            // 彩蛋相关状态
+            easterEggClickCount: 0,
+            easterEggLastClickTime: 0,
+            easterEggTimer: null
         };
 
         const dom = {
@@ -878,6 +974,11 @@
             pwaPromptTitle: document.getElementById('pwaPromptTitle'),
             pwaPromptDesc: document.getElementById('pwaPromptDesc'),
             pwaPromptIcon: document.getElementById('pwaPromptIcon'),
+            // 彩蛋相关DOM
+            profileAvatar: document.getElementById('profileAvatar'),
+            clickCounter: document.getElementById('clickCounter'),
+            easterEggModal: document.getElementById('easterEggModal'),
+            closeEasterEgg: document.getElementById('closeEasterEgg'),
             inputs: {
                 title: document.getElementById('cardTitle'),
                 url: document.getElementById('cardUrl'),
@@ -885,6 +986,94 @@
                 id: document.getElementById('editCardId')
             }
         };
+
+        // --- 彩蛋功能 ---
+        function initEasterEgg() {
+            // 加载保存的点击次数
+            const savedCount = localStorage.getItem('easterEggClickCount');
+            if (savedCount) {
+                state.easterEggClickCount = parseInt(savedCount);
+                updateClickCounter();
+            }
+            
+            // 添加头像点击事件监听
+            dom.profileAvatar.addEventListener('click', handleAvatarClick);
+            
+            // 关闭彩蛋模态框事件
+            dom.closeEasterEgg.addEventListener('click', () => {
+                dom.easterEggModal.classList.remove('show');
+            });
+            
+            // 点击模态框外部关闭
+            dom.easterEggModal.addEventListener('click', (e) => {
+                if (e.target === dom.easterEggModal) {
+                    dom.easterEggModal.classList.remove('show');
+                }
+            });
+        }
+        
+        function handleAvatarClick() {
+            const currentTime = Date.now();
+            
+            // 如果距离上次点击超过3秒，重置计数
+            if (currentTime - state.easterEggLastClickTime > 3000) {
+                state.easterEggClickCount = 0;
+            }
+            
+            // 更新点击次数和时间
+            state.easterEggClickCount++;
+            state.easterEggLastClickTime = currentTime;
+            
+            // 更新点击计数器显示
+            updateClickCounter();
+            
+            // 保存到本地存储
+            localStorage.setItem('easterEggClickCount', state.easterEggClickCount);
+            
+            // 清除之前的计时器
+            if (state.easterEggTimer) {
+                clearTimeout(state.easterEggTimer);
+            }
+            
+            // 设置3秒后重置计数
+            state.easterEggTimer = setTimeout(() => {
+                state.easterEggClickCount = 0;
+                updateClickCounter();
+                localStorage.setItem('easterEggClickCount', 0);
+            }, 3000);
+            
+            // 如果点击次数达到10次，触发彩蛋
+            if (state.easterEggClickCount === 10) {
+                triggerEasterEgg();
+                state.easterEggClickCount = 0;
+                updateClickCounter();
+                localStorage.setItem('easterEggClickCount', 0);
+            }
+        }
+        
+        function updateClickCounter() {
+            if (state.easterEggClickCount > 0) {
+                dom.clickCounter.textContent = state.easterEggClickCount;
+                dom.clickCounter.style.opacity = '1';
+            } else {
+                dom.clickCounter.style.opacity = '0';
+            }
+        }
+        
+        function triggerEasterEgg() {
+            // 显示彩蛋模态框
+            dom.easterEggModal.classList.add('show');
+            
+            // 添加庆祝动画
+            dom.profileAvatar.style.animation = 'none';
+            setTimeout(() => {
+                dom.profileAvatar.style.animation = 'spin 0.5s linear 3';
+            }, 10);
+            
+            // 确保iframe正确加载
+            const iframe = document.getElementById('dinosaurGame');
+            iframe.src = iframe.src; // 重新加载iframe
+        }
 
         // --- PWA 功能 (针对 iOS 优化) ---
         function initPwa() {
@@ -1363,6 +1552,7 @@
         function init() {
             initPwa();
             initClearCache();
+            initEasterEgg(); // 初始化彩蛋功能
 
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
