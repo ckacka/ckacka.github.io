@@ -1221,7 +1221,8 @@
                 el.onclick = (e) => { 
                     if(!e.target.closest('.favorite-btn')) {
                         if (tool.url) {
-                            window.open(tool.url, '_blank');
+                            // 修改这里：从 _blank 改为 _self，在当前页面打开链接
+                            window.open(tool.url, '_self');
                         } else {
                             alert(`工具 ${tool.name} 缺少链接信息。`);
                         }
