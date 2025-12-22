@@ -487,7 +487,7 @@
         /* --- 广播：容器及高度优化 --- */
         .radio-container {
             width: 100%;
-            height: 400px;
+            height: 350px;
             border-radius: var(--radius);
             overflow: hidden;
             background: var(--surface-color);
@@ -574,3 +574,234 @@
             </button>
         </div>
         <div class="drawer-content">
+            <div class="setting-item">
+                <span class="setting-label">暗色模式</span>
+                <label class="switch">
+                    <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="notice-bar">
+        <div class="notice-content">
+            请勿相信本网页任何广告，注意保护个人隐私信息，谨防诈骗。推荐使用 Chrome 浏览器访问。
+            <a href="https://www.google.cn/chrome/index.html" target="_blank" class="notice-link">点我下载</a>
+        </div>
+    </div>
+
+    <div class="tabs-container">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('program')">看节目</div>
+            <div class="tab" onclick="switchTab('live')">看直播</div>
+            <div class="tab" onclick="switchTab('radio')">听广播</div>
+        </div>
+    </div>
+
+    <div id="tab-program" class="content-area active">
+        <div class="video-box" id="videoContainer">
+        </div>
+        
+        <div class="program-title" id="currentProgramText">正在播放：加载中...</div>
+
+        <div class="playlist" id="playlist">
+        </div>
+    </div>
+
+    <div id="tab-live" class="content-area">
+        <div class="live-container">
+            <iframe src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=8178490&quality=0" frameborder="no" framespacing="0" scrolling="no" allow="autoplay; encrypted-media" allowfullscreen="true"></iframe>
+        </div>
+        
+        <div class="live-info">
+            <p style="font-size: 13px; color: var(--text-secondary); text-align: center; margin-top: 8px;">
+                直播内容来自Bilibili，请确保网络畅通
+            </p>
+        </div>
+    </div>
+
+    <div id="tab-radio" class="content-area">
+        <div class="radio-container">
+            <iframe id="radioIframe" src="https://m.cnr.cn/#/pages/broadcast/broadcast"></iframe>
+            <button class="refresh-btn" onclick="refreshRadio()" title="刷新">
+                <svg viewBox="0 0 24 24">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="radio-info">
+            <!-- 可以在这里添加广播相关信息 -->
+        </div>
+    </div>
+
+    <footer>
+        本网页仅供个人学习，信息来源于互联网
+    </footer>
+</div>
+
+<script>
+    // --- 频道数据 ---
+    const channels = [
+        { name: "央视春晚 2025", url: "https://res.cctvnews.cctv.com/video/3005/record/cctv/merge1/133396667284143308839013005/8fbd6180bdef4da19f6155cf6b4652e1-4.m3u8" },
+        { name: "央视春晚 2024", url: "https://p2.bdstatic.com/rtmp.liveshow.lss-user.baidubce.com/live/stream_bduid_6488563992_8982723413/merged_1707497046297_88536_25144_41936.m3u8" },
+        { name: "央视春晚 2023", url: "https://txmov2.a.kwimgs.com/bs3/video-hls/5251197255879398624_hlshd15.m3u8" },
+        { name: "央视春晚 2022", url: "https://alimov2.a.kwimgs.com/upic/2022/02/01/11/BMjAyMjAyMDExMTEwMjNfNDAzMDAxOTlfNjYzNzA4MTk4NzNfMF8z_b_B898cc7ddd0025bf54ddb18ec1f723c84.mp4" },
+        { name: "央视春晚 2021", url: "https://alimov2.a.kwimgs.com/upic/2022/01/30/17/BMjAyMjAxMzAxNzE4NTJfNDAzMDAxOTlfNjYxNzUzOTg3NjlfMF8z_b_Be41d9503181d7b0608a839ed401e02c2.mp4" },
+        { name: "央视春晚 2020", url: "https://alimov2.a.kwimgs.com/upic/2022/01/30/17/BMjAyMjAxMzAxNzA5NDdfNDAzMDAxOTlfNjYxNzQ2MDAyMTFfMF8z_b_B5d51d9564c5670dc66faeba20aa7af3f.mp4" },
+        { name: "央视春晚 2019", url: "https://alimov2.a.kwimgs.com/upic/2023/01/06/16/BMjAyMzAxMDYxNjMxMTRfNDAzMDAxOTlfOTI4OTY2ODE2MTBfMF8z_b_B11a778e34390a21de42d407e94f45b91.mp4" }
+    ];
+
+    // --- 侧拉栏控制 ---
+    function openDrawer() {
+        document.getElementById('drawerOverlay').classList.add('active');
+        document.getElementById('drawer').classList.add('active');
+    }
+
+    function closeDrawer() {
+        document.getElementById('drawerOverlay').classList.remove('active');
+        document.getElementById('drawer').classList.remove('active');
+    }
+
+    // 点击侧拉栏外部关闭
+    document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+
+    // --- 暗色模式切换 ---
+    function toggleDarkMode() {
+        const toggle = document.getElementById('darkModeToggle');
+        const isDarkMode = toggle.checked;
+        
+        if (isDarkMode) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+        }
+    }
+
+    // 初始化时检查已保存的主题
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const toggle = document.getElementById('darkModeToggle');
+        
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            toggle.checked = true;
+        } else {
+            toggle.checked = false;
+        }
+    }
+
+    // --- 初始化 ---
+    function init() {
+        renderPlaylist();
+        playChannel(0);
+        startTime();
+        initTheme(); // 初始化主题
+    }
+
+    // 渲染列表
+    function renderPlaylist() {
+        const listContainer = document.getElementById("playlist");
+        listContainer.innerHTML = channels.map((ch, index) => `
+            <button class="channel-item" onclick="playChannel(${index})" id="btn-${index}">
+                ${ch.name}
+            </button>
+        `).join('');
+    }
+
+    // 播放逻辑
+    function playChannel(index) {
+        // 确保节目正在播放
+        switchTab('program'); 
+
+        const channel = channels[index];
+        const playerContainer = document.getElementById("videoContainer");
+        
+        // 更新播放器
+        playerContainer.innerHTML = `
+            <video id="tvVideoPlayer" width="100%" height="100%" controls autoplay playsinline poster="">
+                <source src="${channel.url}" type="application/x-mpegURL">
+                <source src="${channel.url}" type="video/mp4">
+            </video>
+        `;
+
+        // 更新文案
+        document.getElementById("currentProgramText").innerText = "正在播放：" + channel.name;
+
+        // 更新列表选中样式
+        document.querySelectorAll('.channel-item').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.getElementById(`btn-${index}`);
+        if(activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    // 切换 Tab
+    function switchTab(type) {
+        const programTab = document.getElementById('tab-program');
+        const liveTab = document.getElementById('tab-live');
+        const radioTab = document.getElementById('tab-radio');
+        const tabs = document.querySelectorAll('.tab');
+        const programVideo = document.getElementById('tvVideoPlayer');
+        
+        // 移除所有活动状态
+        programTab.classList.remove('active');
+        liveTab.classList.remove('active');
+        radioTab.classList.remove('active');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        
+        // 根据类型设置活动状态
+        if (type === 'program') {
+            programTab.classList.add('active');
+            tabs[0].classList.add('active');
+            // 尝试播放节目视频
+            if (programVideo) programVideo.play();
+            
+        } else if (type === 'live') {
+            liveTab.classList.add('active');
+            tabs[1].classList.add('active');
+            // 暂停节目视频
+            if (programVideo) programVideo.pause();
+            
+        } else if (type === 'radio') {
+            radioTab.classList.add('active');
+            tabs[2].classList.add('active');
+            // 暂停节目视频
+            if (programVideo) programVideo.pause();
+        }
+    }
+
+    // 刷新广播
+    function refreshRadio() {
+        const iframe = document.getElementById("radioIframe");
+        iframe.src = iframe.src;
+    }
+
+    // 顶栏时间
+    function startTime() {
+        const update = () => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            // 更新日期
+            document.getElementById("currentDate").innerText = `${year}年${month}月${day}日`;
+            // 更新时间
+            document.getElementById("currentTime").innerText = `${hours}:${minutes}:${seconds}`;
+        };
+        update();
+        setInterval(update, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
