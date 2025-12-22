@@ -466,6 +466,24 @@
             padding-left: 16px;
         }
 
+        /* --- 直播：容器及高度优化 --- */
+        .live-container {
+            width: 100%;
+            height: 350px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--surface-color);
+            position: relative;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            margin-bottom: 16px;
+        }
+        
+        #liveIframe { 
+            width: 100%; 
+            height: 100%;
+            border: none; 
+        }
+
         /* --- 广播：容器及高度优化 --- */
         .radio-container {
             width: 100%;
@@ -576,6 +594,7 @@
     <div class="tabs-container">
         <div class="tabs">
             <div class="tab active" onclick="switchTab('tv')">看电视</div>
+            <div class="tab" onclick="switchTab('live')">看直播</div>
             <div class="tab" onclick="switchTab('radio')">听广播</div>
         </div>
     </div>
@@ -587,6 +606,18 @@
         <div class="program-title" id="currentProgramText">正在播放：加载中...</div>
 
         <div class="playlist" id="playlist">
+        </div>
+    </div>
+
+    <div id="tab-live" class="content-area">
+        <div class="live-container">
+            <iframe id="liveIframe" src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=8178490&quality=0"></iframe>
+        </div>
+        
+        <div class="live-info">
+            <p style="font-size: 13px; color: var(--text-secondary); text-align: center; margin-top: 8px;">
+                直播内容来自Bilibili，请确保网络畅通
+            </p>
         </div>
     </div>
 
@@ -712,27 +743,34 @@
     // 切换 Tab
     function switchTab(type) {
         const tvTab = document.getElementById('tab-tv');
+        const liveTab = document.getElementById('tab-live');
         const radioTab = document.getElementById('tab-radio');
         const tabs = document.querySelectorAll('.tab');
         const tvVideo = document.getElementById('tvVideoPlayer');
-        const radioIframe = document.getElementById('radioIframe');
-
+        
+        // 移除所有活动状态
+        tvTab.classList.remove('active');
+        liveTab.classList.remove('active');
+        radioTab.classList.remove('active');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        
+        // 根据类型设置活动状态
         if (type === 'tv') {
             tvTab.classList.add('active');
-            radioTab.classList.remove('active');
             tabs[0].classList.add('active');
-            tabs[1].classList.remove('active');
-            
-            // 尝试暂停广播
+            // 尝试播放电视视频
             if (tvVideo) tvVideo.play();
-
-        } else { // type === 'radio'
-            tvTab.classList.remove('active');
-            radioTab.classList.add('active');
-            tabs[0].classList.remove('active');
+            
+        } else if (type === 'live') {
+            liveTab.classList.add('active');
             tabs[1].classList.add('active');
-
-            // 暂停电视
+            // 暂停电视视频
+            if (tvVideo) tvVideo.pause();
+            
+        } else if (type === 'radio') {
+            radioTab.classList.add('active');
+            tabs[2].classList.add('active');
+            // 暂停电视视频
             if (tvVideo) tvVideo.pause();
         }
     }
