@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天气查询</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Material Design 3 标准色 - Android 13+ 原生主题 */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #31111D;
+            
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #F9DEDC;
+            --md-sys-color-on-error-container: #410002;
+            
+            --md-sys-color-surface: #FEF7FF;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #CAC4D0;
+            
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            
+            /* 表面容器颜色 - Material Design 3 新增 */
+            --md-sys-color-surface-container-lowest: #FFFFFF;
+            --md-sys-color-surface-container-low: #F7F2FA;
+            --md-sys-color-surface-container: #F3EDF7;
+            --md-sys-color-surface-container-high: #ECE6F0;
+            --md-sys-color-surface-container-highest: #E6E0E9;
+            
+            /* 阴影系统 */
+            --md-sys-elevation-0: none;
+            --md-sys-elevation-1: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+            --md-sys-elevation-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.15), 0px 1px 2px rgba(0, 0, 0, 0.3);
+            --md-sys-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
+            
+            /* 圆角系统 */
+            --md-sys-shape-corner-extra-small: 4px;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-shape-corner-full: 9999px;
+            
+            /* 字体系统 */
+            --md-sys-typescale-display-large-font: 'Roboto', 'Noto Sans SC', sans-serif;
+            --md-sys-typescale-display-large-weight: 400;
+            --md-sys-typescale-display-large-size: 57px;
+            --md-sys-typescale-display-large-line-height: 64px;
+            
+            --md-sys-typescale-title-large-weight: 400;
+            --md-sys-typescale-title-large-size: 22px;
+            --md-sys-typescale-title-large-line-height: 28px;
+            
+            --md-sys-typescale-body-large-weight: 400;
+            --md-sys-typescale-body-large-size: 16px;
+            --md-sys-typescale-body-large-line-height: 24px;
+            
+            /* 状态层透明度 */
+            --md-sys-state-hover-state-layer-opacity: 0.08;
+            --md-sys-state-focus-state-layer-opacity: 0.12;
+            --md-sys-state-pressed-state-layer-opacity: 0.12;
+            --md-sys-state-dragged-state-layer-opacity: 0.16;
+        }
+
+        /* 暗色主题 */
+        body.dark-theme {
+            --md-sys-color-primary: #D0BCFF;
+            --md-sys-color-on-primary: #371E73;
+            --md-sys-color-primary-container: #4F378B;
+            --md-sys-color-on-primary-container: #EADDFF;
+            
+            --md-sys-color-secondary: #CCC2DC;
+            --md-sys-color-on-secondary: #332D41;
+            --md-sys-color-secondary-container: #4A4458;
+            --md-sys-color-on-secondary-container: #E8DEF8;
+            
+            --md-sys-color-tertiary: #EFB8C8;
+            --md-sys-color-on-tertiary: #492532;
+            --md-sys-color-tertiary-container: #633B48;
+            --md-sys-color-on-tertiary-container: #FFD8E4;
+            
+            --md-sys-color-error: #F2B8B5;
+            --md-sys-color-on-error: #601410;
+            --md-sys-color-error-container: #8C1D18;
+            --md-sys-color-on-error-container: #F9DEDC;
+            
+            --md-sys-color-surface: #1C1B1F;
+            --md-sys-color-on-surface: #E6E1E5;
+            --md-sys-color-surface-variant: #49454F;
+            --md-sys-color-on-surface-variant: #CAC4D0;
+            
+            --md-sys-color-outline: #938F99;
+            --md-sys-color-outline-variant: #49454F;
+            
+            --md-sys-color-surface-container-lowest: #0F0D13;
+            --md-sys-color-surface-container-low: #1D1B20;
+            --md-sys-color-surface-container: #211F26;
+            --md-sys-color-surface-container-high: #2B2930;
+            --md-sys-color-surface-container-highest: #36343B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--md-sys-typescale-display-large-font);
+        }
+
+        body {
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            min-height: 100vh;
+            font-size: var(--md-sys-typescale-body-large-size);
+            line-height: var(--md-sys-typescale-body-large-line-height);
+            font-weight: var(--md-sys-typescale-body-large-weight);
+            transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Android原生顶部应用栏 */
+        .app-bar {
+            background-color: var(--md-sys-color-surface);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--md-sys-elevation-1);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .app-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .app-bar-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .app-bar-title {
+            font-size: var(--md-sys-typescale-title-large-size);
+            line-height: var(--md-sys-typescale-title-large-line-height);
+            font-weight: var(--md-sys-typescale-title-large-weight);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .app-bar-subtitle {
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-top: 2px;
+        }
+
+        .app-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Material Design图标按钮 */
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--md-sys-shape-corner-full);
+            background: transparent;
+            border: none;
+            color: var(--md-sys-color-on-surface-variant);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .icon-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            background-color: currentColor;
+            opacity: 0;
+            transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .icon-button:hover::after,
+        .icon-button:focus::after {
+            opacity: var(--md-sys-state-hover-state-layer-opacity);
+        }
+
+        .icon-button:active::after {
+            opacity: var(--md-sys-state-pressed-state-layer-opacity);
+        }
+
+        .icon-button i {
+            font-size: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 主要内容区域 */
+        .content {
+            padding: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 搜索卡片 */
+        .search-card {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--md-sys-elevation-1);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .search-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .search-section {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+
+        /* 文本输入字段 */
+        .text-field {
+            flex: 1;
+            position: relative;
+        }
+
+        .text-field input {
+            width: 100%;
+            height: 56px;
+            padding: 16px;
+            background-color: var(--md-sys-color-surface-container-high);
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-extra-small);
+            font-size: 16px;
+            color: var(--md-sys-color-on-surface);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .text-field input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
+            background-color: var(--md-sys-color-surface-container-high);
+        }
+
+        .text-field .leading-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        /* 按钮组 */
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Material Design按钮 */
+        .m3-button {
+            height: 40px;
+            padding: 0 24px;
+            border-radius: var(--md-sys-shape-corner-full);
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.1px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .m3-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: currentColor;
+            opacity: 0;
+            transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .m3-button:hover::after,
+        .m3-button:focus::after {
+            opacity: var(--md-sys-state-hover-state-layer-opacity);
+        }
+
+        .m3-button:active::after {
+            opacity: var(--md-sys-state-pressed-state-layer-opacity);
+        }
+
+        .m3-filled-button {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .m3-outlined-button {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .m3-outlined-button:hover,
+        .m3-outlined-button:focus {
+            border-color: var(--md-sys-color-primary);
+        }
+
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 48px 16px;
+            display: none;
+        }
+
+        .m3-circular-progress {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--md-sys-color-surface-variant);
+            border-top: 4px solid var(--md-sys-color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 错误消息 */
+        .error-message {
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+            padding: 16px;
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--md-sys-elevation-1);
+        }
+
+        /* 天气显示区域 */
+        .weather-display {
+            display: none;
+        }
+
+        /* 当前天气卡片 */
+        .current-weather-card {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--md-sys-elevation-1);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .location-info h2 {
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 4px;
+        }
+
+        .location-info p {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 14px;
+        }
+
+        .weather-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .temperature-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .temperature {
+            font-size: 72px;
+            font-weight: 300;
+            color: var(--md-sys-color-on-surface);
+            line-height: 1;
+        }
+
+        .weather-icon-large {
+            width: 88px;
+            height: 88px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary));
+            border-radius: var(--md-sys-shape-corner-full);
+            color: var(--md-sys-color-on-primary);
+            font-size: 36px;
+            box-shadow: var(--md-sys-elevation-1);
+        }
+
+        .weather-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .weather-condition {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .weather-feels-like {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 14px;
+        }
+
+        /* 天气指标网格 */
+        .weather-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .metric-card {
+            background-color: var(--md-sys-color-surface-container-high);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .metric-card:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+        }
+
+        .metric-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--md-sys-color-primary-container);
+            border-radius: var(--md-sys-shape-corner-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--md-sys-color-on-primary-container);
+        }
+
+        .metric-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 2px;
+        }
+
+        .metric-value {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        /* 天气预报部分 */
+        .forecast-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 16px;
+            padding-left: 8px;
+            border-left: 4px solid var(--md-sys-color-primary);
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .forecast-card {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .forecast-card:hover {
+            box-shadow: var(--md-sys-elevation-1);
+            border-color: var(--md-sys-color-primary);
+        }
+
+        .forecast-date {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 4px;
+        }
+
+        .forecast-day {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 12px;
+        }
+
+        .forecast-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-secondary));
+            border-radius: var(--md-sys-shape-corner-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--md-sys-color-on-primary);
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+
+        .forecast-temp {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 4px;
+        }
+
+        .forecast-condition {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        /* 昨天天气卡片 */
+        .yesterday-card {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 20px;
+            box-shadow: var(--md-sys-elevation-1);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .yesterday-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .yesterday-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--md-sys-color-secondary), var(--md-sys-color-tertiary));
+            border-radius: var(--md-sys-shape-corner-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--md-sys-color-on-secondary);
+            font-size: 24px;
+        }
+
+        .yesterday-info h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 8px;
+        }
+
+        .yesterday-info p {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 4px;
+        }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 24px 16px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 14px;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            margin-top: 32px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .app-bar {
+                height: 56px;
+                padding: 0 12px;
+            }
+            
+            .content {
+                padding: 12px;
+            }
+            
+            .temperature {
+                font-size: 56px;
+            }
+            
+            .weather-icon-large {
+                width: 72px;
+                height: 72px;
+                font-size: 32px;
+            }
+            
+            .weather-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .forecast-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .m3-button {
+                padding: 0 16px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .weather-metrics {
+                grid-template-columns: 1fr;
+            }
+            
+            .forecast-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .m3-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Android原生顶部应用栏 -->
+    <div class="app-bar">
+        <div class="app-bar-left">
+            <button class="icon-button" id="backButton" aria-label="返回">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="app-bar-content">
+                <h1 class="app-bar-title">天气预报</h1>
+            </div>
+        </div>
+        <div class="app-bar-right">
+            <button class="icon-button" id="themeToggle" aria-label="切换主题">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- 搜索卡片 -->
+        <div class="search-card">
+            <div class="search-section">
+                <div class="text-field">
+                    <input type="text" id="cityInput" placeholder="输入城市名称">
+                    <div class="leading-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="m3-button m3-filled-button" id="searchBtn">
+                        <i class="fas fa-search"></i> 查询
+                    </button>
+                    <button class="m3-button m3-outlined-button" id="autoBtn">
+                        <i class="fas fa-location-arrow"></i> 定位
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载状态 -->
+        <div class="loading" id="loading">
+            <div class="m3-circular-progress"></div>
+            <p>正在获取天气信息...</p>
+        </div>
+
+        <!-- 错误消息 -->
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText"></span>
+        </div>
+
+        <!-- 天气显示区域 -->
+        <div class="weather-display" id="weatherDisplay">
+            <!-- 当前天气卡片 -->
+            <div class="current-weather-card">
+                <div class="location-header">
+                    <div class="location-info">
+                        <h2 id="cityName">--</h2>
+                        <p id="currentTime">--</p>
+                    </div>
+                    <div class="update-time">
+                        <p class="app-bar-subtitle">更新: <span id="updateTime">--:--</span></p>
+                    </div>
+                </div>
+
+                <div class="weather-main">
+                    <div class="temperature-section">
+                        <div class="temperature" id="temperature">--°C</div>
+                        <div class="weather-icon-large" id="weatherIcon">
+                            <i class="fas fa-question"></i>
+                        </div>
+                    </div>
+                    <div class="weather-details">
+                        <div class="weather-condition" id="weatherCondition">--</div>
+                        <div class="weather-feels-like" id="weatherNotice">--</div>
+                    </div>
+                </div>
+
+                <div class="weather-metrics" id="currentDetails">
+                    <!-- 天气指标将通过JavaScript动态填充 -->
+                </div>
+            </div>
+
+            <!-- 天气预报 -->
+            <div class="forecast-section">
+                <h3 class="section-title">7天预报</h3>
+                <div class="forecast-grid" id="forecastContainer">
+                    <!-- 天气预报将通过JavaScript动态填充 -->
+                </div>
+            </div>
+
+            <!-- 昨天天气 -->
+            <div class="yesterday-card">
+                <h3 class="section-title">昨天天气</h3>
+                <div class="yesterday-content" id="yesterdayCard">
+                    <!-- 昨天天气将通过JavaScript动态填充 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        <p>天气数据由和风天气提供·定位信息来自你的网络IP</p>
+        <p>&copy; <span id="currentYear"></span></p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置当前年份
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            
+            // 获取DOM元素
+            const cityInput = document.getElementById('cityInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const autoBtn = document.getElementById('autoBtn');
+            const loading = document.getElementById('loading');
+            const weatherDisplay = document.getElementById('weatherDisplay');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const backButton = document.getElementById('backButton');
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            
+            // 天气显示元素
+            const cityName = document.getElementById('cityName');
+            const currentTime = document.getElementById('currentTime');
+            const updateTime = document.getElementById('updateTime');
+            const weatherCondition = document.getElementById('weatherCondition');
+            const weatherNotice = document.getElementById('weatherNotice');
+            const temperature = document.getElementById('temperature');
+            const weatherIcon = document.getElementById('weatherIcon');
+            const currentDetails = document.getElementById('currentDetails');
+            const forecastContainer = document.getElementById('forecastContainer');
+            const yesterdayCard = document.getElementById('yesterdayCard');
+            
+            // API配置
+            const weatherAPI = 'https://api.hewoyi.com/api/weather/v1?key=Nub0tYQ9brRDfSOfUXvA6xgoxb&city=';
+            const ipAPI = 'https://api.hewoyi.com/api/ipjwd/get?key=Nub0tYQ9brRDfSOfUXvA6xgoxb&ip=&domain=';
+            
+            // 主题切换功能
+            function initTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                if (savedTheme === 'system') {
+                    if (prefersDark) {
+                        document.body.classList.add('dark-theme');
+                        themeIcon.className = 'fas fa-sun';
+                    } else {
+                        document.body.classList.remove('dark-theme');
+                        themeIcon.className = 'fas fa-moon';
+                    }
+                } else if (savedTheme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                    themeIcon.className = 'fas fa-sun';
+                } else {
+                    document.body.classList.remove('dark-theme');
+                    themeIcon.className = 'fas fa-moon';
+                }
+            }
+            
+            // 切换主题
+            function toggleTheme() {
+                if (document.body.classList.contains('dark-theme')) {
+                    document.body.classList.remove('dark-theme');
+                    themeIcon.className = 'fas fa-moon';
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.body.classList.add('dark-theme');
+                    themeIcon.className = 'fas fa-sun';
+                    localStorage.setItem('theme', 'dark');
+                }
+            }
+            
+            // 初始化主题
+            initTheme();
+            
+            // 页面加载时自动获取IP位置天气
+            getWeatherByIP();
+            
+            // 绑定事件监听器
+            searchBtn.addEventListener('click', () => {
+                const city = cityInput.value.trim();
+                if (city) {
+                    getWeatherByCity(city);
+                } else {
+                    showError('请输入城市名称');
+                }
+            });
+            
+            autoBtn.addEventListener('click', getWeatherByIP);
+            
+            // 返回按钮 - 直接关闭或返回
+            backButton.addEventListener('click', () => {
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.close();
+                }
+            });
+            
+            // 主题切换按钮
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            // 按回车键查询
+            cityInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchBtn.click();
+                }
+            });
+            
+            // 根据IP获取天气
+            async function getWeatherByIP() {
+                showLoading();
+                hideError();
+                
+                try {
+                    const ipResponse = await fetch(ipAPI);
+                    if (!ipResponse.ok) {
+                        throw new Error(`IP查询失败: ${ipResponse.status}`);
+                    }
+                    
+                    const ipData = await ipResponse.json();
+                    
+                    if (ipData.code === 200 && ipData.data && ipData.data.info) {
+                        const city = ipData.data.info.city;
+                        const cleanCity = city.replace(/市$/, '');
+                        cityInput.value = cleanCity;
+                        getWeatherByCity(cleanCity);
+                    } else {
+                        throw new Error('无法获取您所在的城市信息');
+                    }
+                } catch (error) {
+                    console.error('IP查询错误:', error);
+                    showError('自动定位失败，请手动输入城市名称');
+                    hideLoading();
+                }
+            }
+            
+            // 根据城市名称获取天气
+            async function getWeatherByCity(city) {
+                showLoading();
+                hideError();
+                
+                try {
+                    const response = await fetch(`${weatherAPI}${encodeURIComponent(city)}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`天气查询失败: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.code === 200 && data.data) {
+                        displayWeather(data, city);
+                    } else {
+                        throw new Error(data.msg || '天气数据获取失败');
+                    }
+                } catch (error) {
+                    console.error('天气查询错误:', error);
+                    showError(`查询失败: ${error.message}`);
+                    hideLoading();
+                }
+            }
+            
+            // 显示天气信息
+            function displayWeather(weatherData, city) {
+                // 更新城市名称
+                cityName.textContent = weatherData.msg?.city || city || "未知城市";
+                
+                // 更新当前时间
+                const now = new Date();
+                const options = { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    weekday: 'long',
+                    hour: 'numeric',
+                    minute: 'numeric'
+                };
+                currentTime.textContent = now.toLocaleDateString('zh-CN', options);
+                
+                // 更新数据更新时间
+                updateTime.textContent = weatherData.msg?.updateTime || "未知";
+                
+                // 更新当前天气
+                if (weatherData.data) {
+                    const data = weatherData.data;
+                    
+                    // 更新温度
+                    temperature.textContent = `${data.wendu}°C`;
+                    
+                    // 更新天气状况和提示
+                    if (data.forecast && data.forecast.length > 0) {
+                        const today = data.forecast[0];
+                        weatherCondition.textContent = today.type;
+                        weatherNotice.textContent = today.notice;
+                        
+                        // 设置天气图标
+                        setWeatherIcon(today.type, weatherIcon);
+                    }
+                    
+                    // 生成当前天气详情
+                    generateCurrentDetails(data);
+                    
+                    // 生成天气预报
+                    generateForecast(data.forecast);
+                    
+                    // 生成昨天天气
+                    generateYesterdayWeather(data.yesterday);
+                }
+                
+                // 显示天气信息
+                hideLoading();
+                weatherDisplay.style.display = 'block';
+            }
+            
+            // 设置天气图标
+            function setWeatherIcon(condition, iconElement) {
+                const conditionLower = condition.toLowerCase();
+                let iconClass = 'fas fa-cloud';
+                
+                if (conditionLower.includes('晴')) {
+                    iconClass = 'fas fa-sun';
+                } else if (conditionLower.includes('多云')) {
+                    iconClass = 'fas fa-cloud-sun';
+                } else if (conditionLower.includes('阴')) {
+                    iconClass = 'fas fa-cloud';
+                } else if (conditionLower.includes('雨')) {
+                    if (conditionLower.includes('雷')) {
+                        iconClass = 'fas fa-bolt';
+                    } else if (conditionLower.includes('小雨')) {
+                        iconClass = 'fas fa-cloud-rain';
+                    } else {
+                        iconClass = 'fas fa-cloud-showers-heavy';
+                    }
+                } else if (conditionLower.includes('雪')) {
+                    iconClass = 'fas fa-snowflake';
+                } else if (conditionLower.includes('雾') || conditionLower.includes('霾')) {
+                    iconClass = 'fas fa-smog';
+                }
+                
+                iconElement.innerHTML = `<i class="${iconClass}"></i>`;
+            }
+            
+            // 生成当前天气详情
+            function generateCurrentDetails(weatherData) {
+                currentDetails.innerHTML = '';
+                
+                const metrics = [
+                    { icon: 'fas fa-tint', label: '湿度', value: weatherData.shidu || '--' },
+                    { icon: 'fas fa-wind', label: '空气质量', value: weatherData.quality || '--' },
+                    { icon: 'fas fa-smog', label: 'PM2.5', value: weatherData.pm25 || '--' },
+                    { icon: 'fas fa-industry', label: 'PM10', value: weatherData.pm10 || '--' },
+                    { icon: 'fas fa-temperature-high', label: '高温', value: weatherData.forecast?.[0]?.high || '--' },
+                    { icon: 'fas fa-temperature-low', label: '低温', value: weatherData.forecast?.[0]?.low || '--' }
+                ];
+                
+                metrics.forEach(metric => {
+                    const card = document.createElement('div');
+                    card.className = 'metric-card';
+                    card.innerHTML = `
+                        <div class="metric-icon">
+                            <i class="${metric.icon}"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-label">${metric.label}</div>
+                            <div class="metric-value">${metric.value}</div>
+                        </div>
+                    `;
+                    currentDetails.appendChild(card);
+                });
+            }
+            
+            // 生成天气预报
+            function generateForecast(forecastData) {
+                if (!forecastData || forecastData.length === 0) return;
+                
+                forecastContainer.innerHTML = '';
+                
+                const daysToShow = Math.min(forecastData.length, 7);
+                
+                for (let i = 0; i < daysToShow; i++) {
+                    const day = forecastData[i];
+                    const dayCard = document.createElement('div');
+                    dayCard.className = 'forecast-card';
+                    
+                    // 设置日期显示
+                    let dateDisplay = day.date;
+                    if (i === 0) {
+                        dateDisplay = '今天';
+                    } else if (i === 1) {
+                        dateDisplay = '明天';
+                    } else if (i === 2) {
+                        dateDisplay = '后天';
+                    } else {
+                        dateDisplay = `${day.date}日`;
+                    }
+                    
+                    // 设置天气图标
+                    let iconClass = 'fas fa-cloud';
+                    const conditionLower = day.type.toLowerCase();
+                    
+                    if (conditionLower.includes('晴')) {
+                        iconClass = 'fas fa-sun';
+                    } else if (conditionLower.includes('多云')) {
+                        iconClass = 'fas fa-cloud-sun';
+                    } else if (conditionLower.includes('阴')) {
+                        iconClass = 'fas fa-cloud';
+                    } else if (conditionLower.includes('雨')) {
+                        if (conditionLower.includes('雷')) {
+                            iconClass = 'fas fa-bolt';
+                        } else if (conditionLower.includes('小雨')) {
+                            iconClass = 'fas fa-cloud-rain';
+                        } else {
+                            iconClass = 'fas fa-cloud-showers-heavy';
+                        }
+                    } else if (conditionLower.includes('雪')) {
+                        iconClass = 'fas fa-snowflake';
+                    } else if (conditionLower.includes('雾') || conditionLower.includes('霾')) {
+                        iconClass = 'fas fa-smog';
+                    }
+                    
+                    dayCard.innerHTML = `
+                        <div class="forecast-date">${dateDisplay}</div>
+                        <div class="forecast-day">${day.week}</div>
+                        <div class="forecast-icon">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="forecast-temp">${day.low} ~ ${day.high}</div>
+                        <div class="forecast-condition">${day.type}</div>
+                    `;
+                    
+                    forecastContainer.appendChild(dayCard);
+                }
+            }
+            
+            // 生成昨天天气
+            function generateYesterdayWeather(yesterdayData) {
+                if (!yesterdayData) {
+                    yesterdayCard.innerHTML = `
+                        <div class="yesterday-icon">
+                            <i class="fas fa-question"></i>
+                        </div>
+                        <div class="yesterday-info">
+                            <h3>数据不可用</h3>
+                            <p>昨天的天气数据暂时无法获取</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let iconClass = 'fas fa-cloud';
+                const conditionLower = yesterdayData.type.toLowerCase();
+                
+                if (conditionLower.includes('晴')) {
+                    iconClass = 'fas fa-sun';
+                } else if (conditionLower.includes('多云')) {
+                    iconClass = 'fas fa-cloud-sun';
+                } else if (conditionLower.includes('阴')) {
+                    iconClass = 'fas fa-cloud';
+                } else if (conditionLower.includes('雨')) {
+                    if (conditionLower.includes('雷')) {
+                        iconClass = 'fas fa-bolt';
+                    } else if (conditionLower.includes('小雨')) {
+                        iconClass = 'fas fa-cloud-rain';
+                    } else {
+                        iconClass = 'fas fa-cloud-showers-heavy';
+                    }
+                } else if (conditionLower.includes('雪')) {
+                    iconClass = 'fas fa-snowflake';
+                } else if (conditionLower.includes('雾') || conditionLower.includes('霾')) {
+                    iconClass = 'fas fa-smog';
+                }
+                
+                yesterdayCard.innerHTML = `
+                    <div class="yesterday-icon">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <div class="yesterday-info">
+                        <h3>${yesterdayData.ymd} ${yesterdayData.week}</h3>
+                        <p><strong>天气:</strong> ${yesterdayData.type}</p>
+                        <p><strong>温度:</strong> ${yesterdayData.low} ~ ${yesterdayData.high}</p>
+                        <p><strong>风向:</strong> ${yesterdayData.fx} ${yesterdayData.fl}</p>
+                    </div>
+                `;
+            }
+            
+            // 显示加载状态
+            function showLoading() {
+                loading.style.display = 'block';
+                weatherDisplay.style.display = 'none';
+                errorMessage.style.display = 'none';
+            }
+            
+            // 隐藏加载状态
+            function hideLoading() {
+                loading.style.display = 'none';
+            }
+            
+            // 显示错误信息
+            function showError(message) {
+                errorText.textContent = message;
+                errorMessage.style.display = 'flex';
+                weatherDisplay.style.display = 'none';
+                loading.style.display = 'none';
+            }
+            
+            // 隐藏错误信息
+            function hideError() {
+                errorMessage.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
