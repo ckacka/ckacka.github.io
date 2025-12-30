@@ -78,7 +78,6 @@
             background-color: var(--md-sys-color-surface);
             color: var(--md-sys-color-on-surface);
             transition: background-color 0.3s ease, color 0.3s ease;
-            padding-bottom: 100px; /* 为底部导航留空 */
             min-height: 100vh;
         }
 
@@ -245,126 +244,6 @@
         .tool-name { font-size: 16px; font-weight: 500; margin-bottom: 4px; color: var(--md-sys-color-on-surface); }
         .tool-desc { font-size: 12px; color: var(--md-sys-color-on-surface-variant); opacity: 0.8; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        .favorite-btn {
-            position: absolute; top: 8px; right: 8px;
-            background: none; border: none;
-            color: var(--md-sys-color-outline);
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 2; cursor: pointer;
-        }
-        
-        .favorite-btn.favorited { color: var(--md-sys-color-error); }
-        .favorite-btn.favorited span { font-variation-settings: 'FILL' 1; }
-
-        /* --- 个人中心 --- */
-        .profile-header {
-            display: flex; flex-direction: column; align-items: center;
-            padding: 40px 0 32px;
-            background-color: var(--md-sys-color-surface-container-low);
-            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-            margin-bottom: 24px; margin-top: -64px; padding-top: 88px;
-        }
-
-        .profile-avatar {
-            width: 96px; height: 96px;
-            border-radius: 50%;
-            background-color: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .profile-avatar:active {
-            transform: scale(0.95);
-        }
-
-        .profile-menu { list-style: none; }
-        .profile-menu-item {
-            display: flex; align-items: center;
-            padding: 16px; margin-bottom: 8px;
-            background-color: var(--md-sys-color-surface-container-low);
-            border-radius: 12px; cursor: pointer;
-        }
-        
-        .switch {
-            position: relative; display: inline-block; width: 52px; height: 32px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--md-sys-color-outline-variant);
-            border: 2px solid var(--md-sys-color-outline);
-            border-radius: 32px; transition: .3s;
-        }
-        .slider:before {
-            position: absolute; content: "";
-            height: 16px; width: 16px;
-            left: 6px; bottom: 6px;
-            background-color: var(--md-sys-color-outline);
-            border-radius: 50%; transition: .3s;
-        }
-        input:checked + .slider {
-            background-color: var(--md-sys-color-primary);
-            border-color: var(--md-sys-color-primary);
-        }
-        input:checked + .slider:before {
-            transform: translateX(20px);
-            background-color: var(--md-sys-color-on-primary);
-            width: 20px; height: 20px; left: 4px; bottom: 4px;
-        }
-
-        /* --- 底部导航 --- */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: 80px;
-            background-color: var(--md-sys-color-surface-container);
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 1000;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        @media (min-width: 800px) {
-            .bottom-nav {
-                max-width: 400px; left: 50%; transform: translateX(-50%);
-                bottom: 24px; border-radius: var(--radius-full);
-                height: 72px; padding-bottom: 0;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            }
-        }
-
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; text-decoration: none;
-            color: var(--md-sys-color-on-surface-variant);
-            flex: 1; height: 100%; cursor: pointer;
-        }
-
-        .nav-icon-container {
-            width: 64px; height: 32px;
-            border-radius: 16px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 4px;
-            transition: background-color 0.2s;
-        }
-
-        .nav-item.active .nav-icon-container { background-color: var(--md-sys-color-secondary-container); }
-        .nav-item.active .nav-icon-container span {
-            color: var(--md-sys-color-on-secondary-container);
-            font-variation-settings: 'FILL' 1;
-        }
-        .nav-item.active .nav-label { color: var(--md-sys-color-on-surface); font-weight: 700; }
-        .nav-label { font-size: 12px; font-weight: 500; }
-
-        /* --- 页面切换动画 --- */
-        .page-content { display: none; animation: fadeIn 0.25s ease-out; }
-        .page-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         /* --- 模态框 --- */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -386,24 +265,13 @@
         .modal-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; }
         .modal-body { padding: 0 24px 24px; overflow-y: auto; }
         
-        .form-input {
-            width: 100%; padding: 14px 16px;
-            border: 1px solid var(--md-sys-color-outline);
-            border-radius: 8px; background: transparent;
-            color: var(--md-sys-color-on-surface);
-            margin-bottom: 16px; font-family: inherit;
-        }
-        .form-input:focus { border-color: var(--md-sys-color-primary); outline: none; border-width: 2px; padding: 13px 15px; }
-
         .btn {
             height: 40px; padding: 0 24px; border-radius: 20px;
             font-weight: 500; border: none; cursor: pointer;
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             font-family: inherit; font-size: 14px;
         }
-        .btn-primary { background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
         .btn-text { background: none; color: var(--md-sys-color-primary); }
-        .btn-outline { background: transparent; border: 1px solid var(--md-sys-color-outline); color: var(--md-sys-color-primary); }
 
         /* --- 关于模态框 --- */
         .about-modal .modal-content {
@@ -432,61 +300,10 @@
         </div>
 
         <div class="container">
-            <h2 class="section-title" id="homeTitle">常用应用</h2>
+            <h2 class="section-title" id="homeTitle">所有应用</h2>
             <div class="tools-grid" id="toolsGrid"></div>
         </div>
     </div>
-
-    <div class="page-content" id="profilePage">
-        <div class="profile-header">
-            <div class="profile-avatar" id="profileAvatar">
-                <span class="material-symbols-rounded" style="font-size: 48px;">person</span>
-            </div>
-            <div class="profile-info">
-                <h2>欢迎使用</h2>
-                <center>版本号：v3.0</center>
-            </div>
-        </div>
-        
-        <div class="container">
-            <h2 class="section-title">我的收藏</h2>
-            <div class="tools-grid" id="favoritesGrid"></div>
-            
-            <h2 class="section-title">设置</h2>
-            <ul class="profile-menu">
-                <li class="profile-menu-item" id="themeSettingRow">
-                    <span class="material-symbols-rounded" style="color: var(--md-sys-color-primary); margin-right: 16px;">palette</span>
-                    <div style="flex: 1;">
-                        <h3>深色模式</h3>
-                        <p style="font-size: 12px; opacity: 0.7;">跟随系统或手动切换</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="themeSwitch">
-                        <span class="slider"></span>
-                    </label>
-                </li>
-                <li class="profile-menu-item" id="aboutOption">
-                    <span class="material-symbols-rounded" style="color: var(--md-sys-color-primary); margin-right: 16px;">info</span>
-                    <div style="flex: 1;">
-                        <h3>关于应用</h3>
-                        <p style="font-size: 12px; opacity: 0.7;">查看版本信息</p>
-                    </div>
-                    <span class="material-symbols-rounded" style="color: var(--md-sys-color-outline)">chevron_right</span>
-                </li>
-            </ul>
-        </div>
-    </div>
-
-    <nav class="bottom-nav">
-        <a href="#" class="nav-item active" data-page="homePage">
-            <div class="nav-icon-container"><span class="material-symbols-rounded">home</span></div>
-            <span class="nav-label">首页</span>
-        </a>
-        <a href="#" class="nav-item" data-page="profilePage">
-            <div class="nav-icon-container"><span class="material-symbols-rounded">person</span></div>
-            <span class="nav-label">我的</span>
-        </a>
-    </nav>
 
     <!-- 关于模态框 -->
     <div class="modal about-modal" id="aboutModal">
@@ -507,41 +324,40 @@
     <script>
         // --- 数据源 ---
         const toolsData = [
-    { id: 1, name: "百度百科", desc: "百度百科", icon: "edit_note", category: "百科", url: "https://vhsagj.smartapps.baidu.com/" },
-    { id: 2, name: "芒果TV", desc: "芒果TV", icon: "live_tv", category: "视频", url: "https://gbmqsu.smartapps.cn/" },
-    { id: 3, name: "新浪新闻", desc: "新浪新闻", icon: "newspaper", category: "新闻", url: "https://05vig8.smartapps.cn/" },
-    { id: 4, name: "番茄时钟", desc: "番茄时钟", icon: "timer", category: "工具", url: "https://eiv7ds.smartapps.cn/" },
-    { id: 5, name: "爱奇艺", desc: "爱奇艺", icon: "live_tv", category: "视频", url: "https://ich5p0.smartapps.cn/" },
-    { id: 6, name: "百度知道", desc: "百度知道", icon: "question_answer", category: "问答", url: "https://sa93g4.smartapps.baidu.com/" },
-    { id: 7, name: "小红书", desc: "小红书", icon: "photo_library", category: "社交", url: "https://km6pli.smartapps.cn/" },
-    { id: 8, name: "汽车之家", desc: "汽车之家", icon: "directions_car", category: "汽车", url: "https://kj1e9g.smartapps.cn/" },
-    { id: 9, name: "顺丰速递", desc: "顺丰速递", icon: "local_shipping", category: "快递", url: "https://exiavs.smartapps.cn/" },
-    { id: 10, name: "豆果美食", desc: "豆果美食", icon: "restaurant", category: "美食", url: "https://wl4c3m.smartapps.cn/" },
-    { id: 11, name: "ZAKER新闻", desc: "ZAKER新闻", icon: "newspaper", category: "新闻", url: "https://1qxtps.smartapps.cn/" },
-    { id: 12, name: "百度文库", desc: "百度文库", icon: "library_books", category: "文档", url: "https://6viyij.smartapps.baidu.com/" },
-    { id: 13, name: "喜马拉雅", desc: "喜马拉雅", icon: "headphones", category: "音频", url: "https://3ch6m4.smartapps.cn/" },
-    { id: 14, name: "当当", desc: "当当", icon: "shopping_cart", category: "购物", url: "https://uepcuz.smartapps.cn/" },
-    { id: 15, name: "百度汉语诗词", desc: "百度汉语诗词", icon: "library_books", category: "教育", url: "https://zpdmxc.smartapps.baidu.com/" },
-    { id: 16, name: "携程旅行", desc: "携程旅行", icon: "flight", category: "旅游", url: "https://2dn9ap.smartapps.cn/" },
-    { id: 17, name: "搜狐网", desc: "搜狐网", icon: "newspaper", category: "新闻", url: "https://2ly4hg.smartapps.cn/" },
-    { id: 18, name: "邮编君", desc: "邮编君", icon: "location_on", category: "工具", url: "https://1yz5q1.smartapps.cn/" },
-    { id: 19, name: "爱查快递", desc: "爱查快递", icon: "local_shipping", category: "快递", url: "https://f64h5p.smartapps.cn/" },
-    { id: 20, name: "圆通速递+", desc: "圆通速递+", icon: "local_shipping", category: "快递", url: "https://0b06o1.smartapps.cn/" },
-    { id: 21, name: "搜狐视频", desc: "搜狐视频", icon: "live_tv", category: "视频", url: "https://e84oah.smartapps.cn/" },
-    { id: 22, name: "百度作文", desc: "百度作文", icon: "create", category: "教育", url: "https://nyhqkz.smartapps.baidu.com/" },
-    { id: 23, name: "百度贴吧", desc: "百度贴吧", icon: "forum", category: "社交", url: "https://byokpg.smartapps.baidu.com/" },
-    { id: 24, name: "新浪微博", desc: "新浪微博", icon: "chat", category: "社交", url: "https://ivomzm.smartapps.cn/" },
-    { id: 25, name: "百度股市通", desc: "百度股市通", icon: "trending_up", category: "金融", url: "https://pqa9p2.smartapps.baidu.com/" },
-    { id: 26, name: "百度经验", desc: "百度经验", icon: "lightbulb", category: "经验", url: "https://7dapi7.smartapps.baidu.com/" },
-    { id: 27, name: "风行视频", desc: "风行视频", icon: "live_tv", category: "视频", url: "https://2wuwzp.smartapps.cn/" },
-    { id: 28, name: "马蜂窝", desc: "马蜂窝", icon: "flight", category: "旅游", url: "https://r58h90.smartapps.cn/" },
-    { id: 29, name: "EMS邮政快递", desc: "EMS邮政快递", icon: "local_shipping", category: "快递", url: "https://s1zc8m.smartapps.cn/" },
-    { id: 30, name: "京东快递", desc: "京东快递", icon: "local_shipping", category: "快递", url: "https://3lasz2.smartapps.cn/" }
-]
+            { id: 1, name: "百度百科", desc: "百度百科", icon: "edit_note", category: "百科", url: "https://vhsagj.smartapps.baidu.com/" },
+            { id: 2, name: "芒果TV", desc: "芒果TV", icon: "live_tv", category: "视频", url: "https://gbmqsu.smartapps.cn/" },
+            { id: 3, name: "新浪新闻", desc: "新浪新闻", icon: "newspaper", category: "新闻", url: "https://05vig8.smartapps.cn/" },
+            { id: 4, name: "番茄时钟", desc: "番茄时钟", icon: "timer", category: "工具", url: "https://eiv7ds.smartapps.cn/" },
+            { id: 5, name: "爱奇艺", desc: "爱奇艺", icon: "live_tv", category: "视频", url: "https://ich5p0.smartapps.cn/" },
+            { id: 6, name: "百度知道", desc: "百度知道", icon: "question_answer", category: "问答", url: "https://sa93g4.smartapps.baidu.com/" },
+            { id: 7, name: "小红书", desc: "小红书", icon: "photo_library", category: "社交", url: "https://km6pli.smartapps.cn/" },
+            { id: 8, name: "汽车之家", desc: "汽车之家", icon: "directions_car", category: "汽车", url: "https://kj1e9g.smartapps.cn/" },
+            { id: 9, name: "顺丰速递", desc: "顺丰速递", icon: "local_shipping", category: "快递", url: "https://exiavs.smartapps.cn/" },
+            { id: 10, name: "豆果美食", desc: "豆果美食", icon: "restaurant", category: "美食", url: "https://wl4c3m.smartapps.cn/" },
+            { id: 11, name: "ZAKER新闻", desc: "ZAKER新闻", icon: "newspaper", category: "新闻", url: "https://1qxtps.smartapps.cn/" },
+            { id: 12, name: "百度文库", desc: "百度文库", icon: "library_books", category: "文档", url: "https://6viyij.smartapps.baidu.com/" },
+            { id: 13, name: "喜马拉雅", desc: "喜马拉雅", icon: "headphones", category: "音频", url: "https://3ch6m4.smartapps.cn/" },
+            { id: 14, name: "当当", desc: "当当", icon: "shopping_cart", category: "购物", url: "https://uepcuz.smartapps.cn/" },
+            { id: 15, name: "百度汉语诗词", desc: "百度汉语诗词", icon: "library_books", category: "教育", url: "https://zpdmxc.smartapps.baidu.com/" },
+            { id: 16, name: "携程旅行", desc: "携程旅行", icon: "flight", category: "旅游", url: "https://2dn9ap.smartapps.cn/" },
+            { id: 17, name: "搜狐网", desc: "搜狐网", icon: "newspaper", category: "新闻", url: "https://2ly4hg.smartapps.cn/" },
+            { id: 18, name: "邮编君", desc: "邮编君", icon: "location_on", category: "工具", url: "https://1yz5q1.smartapps.cn/" },
+            { id: 19, name: "爱查快递", desc: "爱查快递", icon: "local_shipping", category: "快递", url: "https://f64h5p.smartapps.cn/" },
+            { id: 20, name: "圆通速递+", desc: "圆通速递+", icon: "local_shipping", category: "快递", url: "https://0b06o1.smartapps.cn/" },
+            { id: 21, name: "搜狐视频", desc: "搜狐视频", icon: "live_tv", category: "视频", url: "https://e84oah.smartapps.cn/" },
+            { id: 22, name: "百度作文", desc: "百度作文", icon: "create", category: "教育", url: "https://nyhqkz.smartapps.baidu.com/" },
+            { id: 23, name: "百度贴吧", desc: "百度贴吧", icon: "forum", category: "社交", url: "https://byokpg.smartapps.baidu.com/" },
+            { id: 24, name: "新浪微博", desc: "新浪微博", icon: "chat", category: "社交", url: "https://ivomzm.smartapps.cn/" },
+            { id: 25, name: "百度股市通", desc: "百度股市通", icon: "trending_up", category: "金融", url: "https://pqa9p2.smartapps.baidu.com/" },
+            { id: 26, name: "百度经验", desc: "百度经验", icon: "lightbulb", category: "经验", url: "https://7dapi7.smartapps.baidu.com/" },
+            { id: 27, name: "风行视频", desc: "风行视频", icon: "live_tv", category: "视频", url: "https://2wuwzp.smartapps.cn/" },
+            { id: 28, name: "马蜂窝", desc: "马蜂窝", icon: "flight", category: "旅游", url: "https://r58h90.smartapps.cn/" },
+            { id: 29, name: "EMS邮政快递", desc: "EMS邮政快递", icon: "local_shipping", category: "快递", url: "https://s1zc8m.smartapps.cn/" },
+            { id: 30, name: "京东快递", desc: "京东快递", icon: "local_shipping", category: "快递", url: "https://3lasz2.smartapps.cn/" }
+        ];
 
-        // --- 状态与缓存 ---
+        // --- 状态 ---
         const state = {
-            favorites: JSON.parse(localStorage.getItem('favs') || '[]'),
             filterCategory: '全部',
             searchText: ''
         };
@@ -550,15 +366,10 @@
             appBar: document.getElementById('appBar'),
             homeTitle: document.getElementById('homeTitle'),
             toolsGrid: document.getElementById('toolsGrid'),
-            catFilters: document.getElementById('categoryFilters'),
-            favoritesGrid: document.getElementById('favoritesGrid')
+            catFilters: document.getElementById('categoryFilters')
         };
 
         // --- 核心逻辑 ---
-
-        function saveState() {
-            localStorage.setItem('favs', JSON.stringify(state.favorites));
-        }
 
         // 首页渲染
         function renderHome() {
@@ -571,13 +382,12 @@
                 `<button class="chip ${state.filterCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`
             ).join('');
 
-            renderTools(dom.toolsGrid, toolsData);
+            renderTools(dom.toolsGrid);
         }
 
-        function renderTools(targetGrid, sourceData, isFavMode = false) {
+        function renderTools(targetGrid) {
             targetGrid.innerHTML = '';
-            const filtered = sourceData.filter(t => {
-                if (isFavMode) return true;
+            const filtered = toolsData.filter(t => {
                 const matchCat = state.filterCategory === '全部' || t.category === state.filterCategory;
                 const matchText = t.name.toLowerCase().includes(state.searchText) || t.desc.toLowerCase().includes(state.searchText);
                 return matchCat && matchText;
@@ -589,25 +399,18 @@
             }
 
             filtered.forEach(tool => {
-                const isFav = state.favorites.includes(tool.id);
                 const el = document.createElement('div');
                 el.className = 'tool-card';
                 el.innerHTML = `
-                    <button class="favorite-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav(event, ${tool.id})">
-                        <span class="material-symbols-rounded">${isFav ? 'favorite' : 'favorite'}</span>
-                    </button>
                     <div class="tool-icon"><span class="material-symbols-rounded">${tool.icon}</span></div>
                     <div class="tool-name">${tool.name}</div>
                     <div class="tool-desc">${tool.desc}</div>
                 `;
-                el.onclick = (e) => { 
-                    if(!e.target.closest('.favorite-btn')) {
-                        if (tool.url) {
-                            // 修改这里：从 _blank 改为 _self，在当前页面打开链接
-                            window.open(tool.url, '_self');
-                        } else {
-                            alert(`应用 ${tool.name} 缺少链接信息。`);
-                        }
+                el.onclick = () => { 
+                    if (tool.url) {
+                        window.open(tool.url, '_self');
+                    } else {
+                        alert(`应用 ${tool.name} 缺少链接信息。`);
                     }
                 };
                 targetGrid.appendChild(el);
@@ -619,22 +422,6 @@
             renderHome();
         };
 
-        window.toggleFav = (e, id) => {
-            e.stopPropagation();
-            if (state.favorites.includes(id)) {
-                state.favorites = state.favorites.filter(fid => fid !== id);
-            } else {
-                state.favorites.push(id);
-            }
-            saveState();
-            renderHome();
-            renderFavorites();
-        };
-
-        function renderFavorites() {
-            renderTools(dom.favoritesGrid, toolsData.filter(t => state.favorites.includes(t.id)), true);
-        }
-
         function init() {
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
@@ -642,47 +429,37 @@
                 });
             }
             
+            // 主题切换功能
             const themeToggle = () => {
                 const isDark = document.body.getAttribute('data-theme') === 'dark';
                 document.body.setAttribute('data-theme', isDark ? '' : 'dark');
                 document.getElementById('themeIcon').innerText = isDark ? 'dark_mode' : 'light_mode';
-                document.getElementById('themeSwitch').checked = !isDark;
                 localStorage.setItem('theme', isDark ? 'light' : 'dark');
             };
             
             if(localStorage.getItem('theme') === 'dark') {
                 document.body.setAttribute('data-theme', 'dark');
                 document.getElementById('themeIcon').innerText = 'light_mode';
-                document.getElementById('themeSwitch').checked = true;
             }
 
             document.getElementById('themeToggle').onclick = themeToggle;
-            document.getElementById('themeSwitch').onchange = themeToggle;
 
+            // 搜索功能
             document.getElementById('searchInput').oninput = (e) => {
                 state.searchText = e.target.value.toLowerCase().trim();
                 renderHome();
             };
 
-            document.querySelectorAll('.nav-item').forEach(nav => {
-                nav.onclick = (e) => {
-                    e.preventDefault();
-                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                    nav.classList.add('active');
-                    document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-                    document.getElementById(nav.dataset.page).classList.add('active');
-                    window.scrollTo(0,0);
-                    if(nav.dataset.page === 'profilePage') renderFavorites();
-                };
-            });
-
+            // 滚动效果
             window.addEventListener('scroll', () => {
                 dom.appBar.classList.toggle('scrolled', window.scrollY > 10);
             });
 
+            // 关于模态框
             const toggleModal = (id, show) => document.getElementById(id).classList.toggle('show', show);
             
-            document.getElementById('aboutOption').onclick = () => toggleModal('aboutModal', true);
+            // 显示关于信息
+            document.getElementById('themeToggle').ondblclick = () => toggleModal('aboutModal', true);
             document.getElementById('closeAbout').onclick = () => toggleModal('aboutModal', false);
             
             window.onclick = (e) => {
@@ -691,10 +468,6 @@
 
             renderHome();
         }
-
-        const styleSheet = document.createElement("style");
-        styleSheet.innerText = "@keyframes spin { 100% { transform:rotate(360deg); } }";
-        document.head.appendChild(styleSheet);
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
