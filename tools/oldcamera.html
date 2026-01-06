@@ -29,7 +29,7 @@
             height: 60px;
             background: linear-gradient(to bottom, #2d2d2d, #1a1a1a);
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             padding: 0 20px;
             color: #fff;
@@ -42,6 +42,66 @@
             font-weight: bold;
             color: #ccc;
             text-shadow: 0 -1px 0 #000;
+        }
+
+        /* 右上角：切换摄像头 */
+        .camera-switch-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .camera-label {
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .camera-switch {
+            position: relative;
+            width: 50px;
+            height: 20px;
+        }
+
+        .camera-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .camera-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, #444, #222);
+            border-radius: 10px;
+            border: 1px solid #111;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+            transition: .4s;
+        }
+
+        .camera-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 1px;
+            background: linear-gradient(to bottom, #ccc, #888);
+            border-radius: 50%;
+            border: 1px solid #666;
+            transition: .4s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        input:checked + .camera-slider {
+            background: linear-gradient(to bottom, #4a6b9e, #2a4a7a);
+        }
+
+        input:checked + .camera-slider:before {
+            transform: translateX(30px);
         }
 
         /* --- 取景器区域 --- */
@@ -74,6 +134,21 @@
             transition: opacity 0.1s ease-out;
         }
 
+        /* 录像时长显示 */
+        .recording-timer {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #ff0000;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+            z-index: 5;
+        }
+
         /* --- 底部控制栏 --- */
         .bottom-bar {
             height: 140px;
@@ -85,7 +160,7 @@
             padding-bottom: 20px;
         }
 
-        /* 左侧：相册预览 */
+        /* 左侧：相册/视频预览 */
         .gallery-btn {
             width: 50px;
             height: 50px;
@@ -105,7 +180,18 @@
             display: none;
         }
 
-        /* 中间：快门按钮 */
+        .video-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background-color: #ff0000;
+            border-radius: 50%;
+            display: none;
+        }
+
+        /* 中间：快门/录像按钮 */
         .shutter-btn-container {
             position: relative;
             width: 80px;
@@ -122,6 +208,7 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
         .shutter-btn:active {
@@ -129,7 +216,8 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
 
-        .shutter-inner {
+        /* 拍照模式按钮样式 */
+        .shutter-btn.photo-mode .shutter-inner {
             width: 60px;
             height: 60px;
             border-radius: 50%;
@@ -140,6 +228,7 @@
             align-items: center;
         }
         
+        /* 相机图标样式 - 只在拍照模式显示 */
         .camera-icon {
             width: 30px;
             height: 24px;
@@ -171,34 +260,61 @@
             border: 2px solid #555;
         }
 
-        /* 右侧：切换摄像头 */
-        .switch-container {
+        /* 录像模式按钮样式 - 未录制时显示相机图标 */
+        .shutter-btn.video-mode .shutter-inner {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, #666, #333);
+            border: 2px solid #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 录制时样式 - 只显示红色圆角方块，隐藏相机图标 */
+        .shutter-btn.recording .shutter-inner {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            border: 2px solid #cc0000;
+            transition: all 0.3s;
+        }
+        
+        .shutter-btn.recording .camera-icon {
+            display: none;
+        }
+
+        /* 右下角：切换拍照/录像模式 */
+        .mode-switch-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
         }
 
-        .switch-label {
+        .mode-label {
             font-size: 10px;
             font-weight: bold;
             color: #444;
             text-shadow: 0 1px 0 #fff;
         }
 
-        .switch {
+        .mode-switch {
             position: relative;
             width: 50px;
             height: 28px;
         }
 
-        .switch input {
+        .mode-switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
 
-        .slider {
+        .mode-slider {
             position: absolute;
             cursor: pointer;
             top: 0;
@@ -212,7 +328,7 @@
             transition: .4s;
         }
 
-        .slider:before {
+        .mode-slider:before {
             position: absolute;
             content: "";
             height: 22px;
@@ -226,11 +342,11 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
-        input:checked + .slider {
-            background: linear-gradient(to bottom, #4a6b9e, #2a4a7a);
+        input:checked + .mode-slider {
+            background: linear-gradient(to bottom, #ff4a4a, #cc0000);
         }
 
-        input:checked + .slider:before {
+        input:checked + .mode-slider:before {
             transform: translateX(22px);
         }
 
@@ -258,10 +374,15 @@
             align-items: center;
         }
 
-        .preview-img {
+        .preview-img, .preview-video {
             width: 100%;
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        .preview-video {
+            background: #000;
         }
 
         .preview-controls {
@@ -308,42 +429,52 @@
 <body>
     <div class="top-bar">
         <div class="top-label">复古3GS相机</div>
+        <div class="camera-switch-container">
+            <div class="camera-label" id="cameraLabel">后置</div>
+            <label class="camera-switch">
+                <input type="checkbox" id="cameraSwitch">
+                <span class="camera-slider"></span>
+            </label>
+        </div>
     </div>
 
     <div class="viewfinder">
         <video id="video" autoplay playsinline muted></video>
         <div class="shutter-overlay" id="shutterOverlay"></div>
+        <div class="recording-timer" id="recordingTimer">00:00</div>
         <div id="error-msg">请允许摄像头权限或使用HTTPS访问本页面</div>
     </div>
 
     <div class="bottom-bar">
         <div class="gallery-btn" id="galleryBtn">
-            <img id="photoPreview" alt="最近的照片">
+            <img id="photoPreview" alt="最近的照片/视频">
+            <div class="video-indicator" id="videoIndicator"></div>
         </div>
 
         <div class="shutter-btn-container">
-            <div class="shutter-btn" id="shutterBtn">
+            <div class="shutter-btn photo-mode" id="shutterBtn">
                 <div class="shutter-inner">
                     <div class="camera-icon"></div>
                 </div>
             </div>
         </div>
 
-        <div class="switch-container">
-            <div class="switch-label" id="cameraLabel">后置</div>
-            <label class="switch">
-                <input type="checkbox" id="cameraSwitch">
-                <span class="slider"></span>
+        <div class="mode-switch-container">
+            <div class="mode-label" id="modeLabel">拍照</div>
+            <label class="mode-switch">
+                <input type="checkbox" id="modeSwitch">
+                <span class="mode-slider"></span>
             </label>
         </div>
     </div>
 
-    <!-- 照片预览模态框 -->
+    <!-- 照片/视频预览模态框 -->
     <div class="preview-modal" id="previewModal">
         <div class="preview-content">
             <img id="previewImage" class="preview-img" alt="照片预览">
+            <video id="previewVideo" class="preview-video" controls></video>
             <div class="preview-controls">
-                <button class="preview-btn" id="downloadBtn">下载照片</button>
+                <button class="preview-btn" id="downloadBtn">下载</button>
                 <button class="preview-btn" id="closeBtn">返回相机</button>
             </div>
         </div>
@@ -358,18 +489,32 @@
         const shutterBtn = document.getElementById('shutterBtn');
         const shutterOverlay = document.getElementById('shutterOverlay');
         const photoPreview = document.getElementById('photoPreview');
+        const videoIndicator = document.getElementById('videoIndicator');
         const galleryBtn = document.getElementById('galleryBtn');
         const cameraSwitch = document.getElementById('cameraSwitch');
         const cameraLabel = document.getElementById('cameraLabel');
+        const modeSwitch = document.getElementById('modeSwitch');
+        const modeLabel = document.getElementById('modeLabel');
         const errorMsg = document.getElementById('error-msg');
         const previewModal = document.getElementById('previewModal');
         const previewImage = document.getElementById('previewImage');
+        const previewVideo = document.getElementById('previewVideo');
         const downloadBtn = document.getElementById('downloadBtn');
         const closeBtn = document.getElementById('closeBtn');
+        const recordingTimer = document.getElementById('recordingTimer');
 
         let currentStream = null;
         let facingMode = 'environment'; // 默认后置摄像头
         let lastPhotoUrl = null; // 存储最后一张照片的URL
+        let lastVideoUrl = null; // 存储最后一个视频的URL
+        let lastMediaType = 'photo'; // 最后媒体类型：'photo' 或 'video'
+        
+        // 录像相关变量
+        let isRecording = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let recordingStartTime = 0;
+        let recordingTimerInterval = null;
 
         // 1. 初始化摄像头
         async function initCamera() {
@@ -383,7 +528,7 @@
                     width: { ideal: 1280 },
                     height: { ideal: 720 }
                 },
-                audio: false
+                audio: true // 录像需要音频
             };
 
             try {
@@ -399,7 +544,7 @@
         }
 
         // 2. 拍照功能
-        shutterBtn.addEventListener('click', () => {
+        function takePhoto() {
             if (!currentStream) return;
 
             // 快门效果
@@ -427,35 +572,204 @@
             // 导出图片并更新预览
             const dataURL = canvas.toDataURL('image/jpeg', 0.9);
             lastPhotoUrl = dataURL;
+            lastMediaType = 'photo';
+            
+            // 更新预览缩略图
             photoPreview.src = dataURL;
             photoPreview.style.display = 'block';
+            videoIndicator.style.display = 'none';
 
             // 震动反馈
             if (navigator.vibrate) {
                 navigator.vibrate(50);
             }
-        });
+        }
 
-        // 3. 切换摄像头
-        cameraSwitch.addEventListener('change', () => {
-            facingMode = cameraSwitch.checked ? 'user' : 'environment';
-            cameraLabel.textContent = cameraSwitch.checked ? '前置' : '后置';
-            initCamera();
-        });
+        // 3. 开始录像
+        function startRecording() {
+            if (!currentStream || isRecording) return;
+            
+            recordedChunks = [];
+            
+            try {
+                // 创建 MediaRecorder 实例
+                mediaRecorder = new MediaRecorder(currentStream, {
+                    mimeType: 'video/webm;codecs=vp9,opus'
+                });
+                
+                // 如果没有vp9，尝试vp8
+                if (!MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+                    mediaRecorder = new MediaRecorder(currentStream, {
+                        mimeType: 'video/webm;codecs=vp8,opus'
+                    });
+                }
+                
+                // 如果没有vp8，使用默认
+                if (!mediaRecorder) {
+                    mediaRecorder = new MediaRecorder(currentStream);
+                }
+                
+                // 监听数据可用事件
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                // 监听录像停止事件
+                mediaRecorder.onstop = () => {
+                    // 创建视频Blob
+                    const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+                    lastVideoUrl = URL.createObjectURL(videoBlob);
+                    lastMediaType = 'video';
+                    
+                    // 更新预览缩略图 - 显示视频第一帧
+                    const videoElement = document.createElement('video');
+                    videoElement.src = lastVideoUrl;
+                    videoElement.addEventListener('loadeddata', () => {
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = videoElement.videoWidth;
+                        tempCanvas.height = videoElement.videoHeight;
+                        const tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.drawImage(videoElement, 0, 0);
+                        
+                        photoPreview.src = tempCanvas.toDataURL('image/jpeg', 0.9);
+                        photoPreview.style.display = 'block';
+                        videoIndicator.style.display = 'block';
+                    });
+                    
+                    // 更新UI状态
+                    shutterBtn.classList.remove('recording');
+                    shutterBtn.classList.add('video-mode');
+                    recordingTimer.style.display = 'none';
+                    
+                    // 清除计时器
+                    if (recordingTimerInterval) {
+                        clearInterval(recordingTimerInterval);
+                        recordingTimerInterval = null;
+                    }
+                };
+                
+                // 开始录像
+                mediaRecorder.start(100); // 每100ms收集一次数据
+                isRecording = true;
+                
+                // 更新UI状态
+                shutterBtn.classList.add('recording');
+                recordingTimer.style.display = 'block';
+                
+                // 开始计时
+                recordingStartTime = Date.now();
+                updateRecordingTimer();
+                recordingTimerInterval = setInterval(updateRecordingTimer, 1000);
+                
+                // 震动反馈
+                if (navigator.vibrate) {
+                    navigator.vibrate(100);
+                }
+                
+            } catch (error) {
+                console.error('录像启动失败:', error);
+                alert('录像启动失败: ' + error.message);
+            }
+        }
 
-        // 4. 预览照片功能
-        galleryBtn.addEventListener('click', () => {
-            if (lastPhotoUrl) {
-                previewImage.src = lastPhotoUrl;
-                previewModal.style.display = 'flex';
+        // 4. 停止录像
+        function stopRecording() {
+            if (!isRecording || !mediaRecorder) return;
+            
+            mediaRecorder.stop();
+            isRecording = false;
+            
+            // 震动反馈
+            if (navigator.vibrate) {
+                navigator.vibrate([50, 50, 50]);
+            }
+        }
+
+        // 5. 更新录像计时器
+        function updateRecordingTimer() {
+            if (!isRecording) return;
+            
+            const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            
+            recordingTimer.textContent = `${minutes}:${seconds}`;
+        }
+
+        // 6. 快门按钮点击事件
+        shutterBtn.addEventListener('click', () => {
+            if (modeSwitch.checked) {
+                // 录像模式
+                if (isRecording) {
+                    stopRecording();
+                } else {
+                    startRecording();
+                }
             } else {
-                alert('还没有照片，先拍一张吧！');
+                // 拍照模式
+                takePhoto();
             }
         });
 
-        // 5. 下载照片功能
+        // 7. 切换摄像头
+        cameraSwitch.addEventListener('change', () => {
+            facingMode = cameraSwitch.checked ? 'user' : 'environment';
+            cameraLabel.textContent = cameraSwitch.checked ? '前置' : '后置';
+            
+            // 如果正在录像，先停止录像
+            if (isRecording) {
+                stopRecording();
+                setTimeout(() => {
+                    initCamera();
+                }, 500);
+            } else {
+                initCamera();
+            }
+        });
+
+        // 8. 切换拍照/录像模式
+        modeSwitch.addEventListener('change', () => {
+            const isVideoMode = modeSwitch.checked;
+            modeLabel.textContent = isVideoMode ? '录像' : '拍照';
+            
+            // 更新快门按钮样式
+            if (isVideoMode) {
+                shutterBtn.classList.remove('photo-mode');
+                shutterBtn.classList.add('video-mode');
+            } else {
+                shutterBtn.classList.remove('video-mode', 'recording');
+                shutterBtn.classList.add('photo-mode');
+                
+                // 如果正在录像，先停止录像
+                if (isRecording) {
+                    stopRecording();
+                }
+            }
+        });
+
+        // 9. 预览照片/视频功能
+        galleryBtn.addEventListener('click', () => {
+            if (lastMediaType === 'photo' && lastPhotoUrl) {
+                previewImage.src = lastPhotoUrl;
+                previewImage.style.display = 'block';
+                previewVideo.style.display = 'none';
+                previewVideo.pause();
+                previewModal.style.display = 'flex';
+            } else if (lastMediaType === 'video' && lastVideoUrl) {
+                previewVideo.src = lastVideoUrl;
+                previewVideo.style.display = 'block';
+                previewImage.style.display = 'none';
+                previewModal.style.display = 'flex';
+            } else {
+                alert('还没有照片或视频，先拍摄一个吧！');
+            }
+        });
+
+        // 10. 下载功能
         downloadBtn.addEventListener('click', () => {
-            if (lastPhotoUrl) {
+            if (lastMediaType === 'photo' && lastPhotoUrl) {
                 const link = document.createElement('a');
                 link.href = lastPhotoUrl;
                 const timestamp = new Date().toLocaleString('zh-CN').replace(/[/:\\]/g, '-');
@@ -469,26 +783,41 @@
                     navigator.vibrate([20, 20, 20]);
                 }
                 
-                // 关闭预览
-                previewModal.style.display = 'none';
+            } else if (lastMediaType === 'video' && lastVideoUrl) {
+                const link = document.createElement('a');
+                link.href = lastVideoUrl;
+                const timestamp = new Date().toLocaleString('zh-CN').replace(/[/:\\]/g, '-');
+                link.download = `复古3GS相机_${timestamp}.webm`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 下载反馈
+                if (navigator.vibrate) {
+                    navigator.vibrate([20, 20, 20]);
+                }
             }
+            
+            // 不关闭预览，让用户可以继续预览
         });
 
-        // 6. 关闭预览功能
+        // 11. 关闭预览功能
         closeBtn.addEventListener('click', () => {
             previewModal.style.display = 'none';
+            previewVideo.pause();
         });
 
         // 点击模态框背景关闭
         previewModal.addEventListener('click', (e) => {
             if (e.target === previewModal) {
                 previewModal.style.display = 'none';
+                previewVideo.pause();
             }
         });
 
-        // 7. 键盘快捷键
+        // 12. 键盘快捷键
         document.addEventListener('keydown', (e) => {
-            // 空格键拍照
+            // 空格键拍照/开始停止录像
             if (e.code === 'Space') {
                 e.preventDefault();
                 shutterBtn.click();
@@ -501,19 +830,61 @@
                 cameraSwitch.dispatchEvent(new Event('change'));
             }
             
+            // M键切换模式
+            if (e.code === 'KeyM') {
+                e.preventDefault();
+                modeSwitch.checked = !modeSwitch.checked;
+                modeSwitch.dispatchEvent(new Event('change'));
+            }
+            
             // ESC键关闭预览
             if (e.code === 'Escape') {
                 previewModal.style.display = 'none';
+                previewVideo.pause();
+                
+                // 如果正在录像，停止录像
+                if (isRecording) {
+                    stopRecording();
+                }
+            }
+            
+            // P键预览
+            if (e.code === 'KeyP') {
+                e.preventDefault();
+                galleryBtn.click();
             }
         });
 
-        // 8. 启动应用
+        // 13. 启动应用
         window.addEventListener('load', initCamera);
 
-        // 9. 页面可见性变化时重新启动摄像头
+        // 14. 页面可见性变化时重新启动摄像头
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && !currentStream) {
                 initCamera();
+            }
+            
+            // 如果页面隐藏且正在录像，停止录像
+            if (document.hidden && isRecording) {
+                stopRecording();
+            }
+        });
+
+        // 15. 页面关闭前清理资源
+        window.addEventListener('beforeunload', () => {
+            // 停止录像
+            if (isRecording) {
+                stopRecording();
+            }
+            
+            // 释放视频URL
+            if (lastVideoUrl) {
+                URL.revokeObjectURL(lastVideoUrl);
+            }
+            
+            // 停止摄像头
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
             }
         });
     </script>
