@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>复古3GS相机</title>
+    <style>
+        /* --- 全局重置 --- */
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            font-family: "Helvetica", sans-serif;
+        }
+
+        /* --- 顶部控制栏 --- */
+        .top-bar {
+            height: 60px;
+            background: linear-gradient(to bottom, #2d2d2d, #1a1a1a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+            color: #fff;
+            border-bottom: 1px solid #000;
+            z-index: 10;
+        }
+
+        .top-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ccc;
+            text-shadow: 0 -1px 0 #000;
+        }
+
+        /* --- 取景器区域 --- */
+        .viewfinder {
+            flex: 1;
+            position: relative;
+            background: #000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: contrast(1.1) sepia(0.1);
+        }
+
+        .shutter-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s ease-out;
+        }
+
+        /* --- 底部控制栏 --- */
+        .bottom-bar {
+            height: 140px;
+            background: linear-gradient(to bottom, #dcdcdc 0%, #b0b0b0 50%, #8c8c8c 100%);
+            border-top: 1px solid #efefef;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+
+        /* 左侧：相册预览 */
+        .gallery-btn {
+            width: 50px;
+            height: 50px;
+            background: #111;
+            border-radius: 4px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .gallery-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        /* 中间：快门按钮 */
+        .shutter-btn-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .shutter-btn {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, #e6e6e6, #a1a1a1);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .shutter-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .shutter-inner {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, #666, #333);
+            border: 2px solid #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .camera-icon {
+            width: 30px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 4px;
+            position: relative;
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.5);
+        }
+        .camera-icon::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 4px;
+            background: #ccc;
+        }
+        .camera-icon::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #333;
+            border: 2px solid #555;
+        }
+
+        /* 右侧：切换摄像头 */
+        .switch-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .switch-label {
+            font-size: 10px;
+            font-weight: bold;
+            color: #444;
+            text-shadow: 0 1px 0 #fff;
+        }
+
+        .switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, #8c8c8c, #666);
+            border-radius: 14px;
+            border: 1px solid #333;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 2px;
+            bottom: 2px;
+            background: linear-gradient(to bottom, #f0f0f0, #ccc);
+            border-radius: 50%;
+            border: 1px solid #999;
+            transition: .4s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(to bottom, #4a6b9e, #2a4a7a);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* --- 预览模态框 --- */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .preview-content {
+            position: relative;
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .preview-img {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .preview-controls {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .preview-btn {
+            padding: 10px 20px;
+            background: linear-gradient(to bottom, #dcdcdc, #b0b0b0);
+            border: none;
+            border-radius: 4px;
+            color: #333;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .preview-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* --- 隐藏的 Canvas --- */
+        #canvas {
+            display: none;
+        }
+
+        /* --- 错误提示 --- */
+        #error-msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            width: 80%;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="top-label">复古3GS相机</div>
+    </div>
+
+    <div class="viewfinder">
+        <video id="video" autoplay playsinline muted></video>
+        <div class="shutter-overlay" id="shutterOverlay"></div>
+        <div id="error-msg">请允许摄像头权限或使用HTTPS访问本页面</div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="gallery-btn" id="galleryBtn">
+            <img id="photoPreview" alt="最近的照片">
+        </div>
+
+        <div class="shutter-btn-container">
+            <div class="shutter-btn" id="shutterBtn">
+                <div class="shutter-inner">
+                    <div class="camera-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="switch-container">
+            <div class="switch-label" id="cameraLabel">后置</div>
+            <label class="switch">
+                <input type="checkbox" id="cameraSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 照片预览模态框 -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <img id="previewImage" class="preview-img" alt="照片预览">
+            <div class="preview-controls">
+                <button class="preview-btn" id="downloadBtn">下载照片</button>
+                <button class="preview-btn" id="closeBtn">返回相机</button>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        // DOM元素
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const shutterBtn = document.getElementById('shutterBtn');
+        const shutterOverlay = document.getElementById('shutterOverlay');
+        const photoPreview = document.getElementById('photoPreview');
+        const galleryBtn = document.getElementById('galleryBtn');
+        const cameraSwitch = document.getElementById('cameraSwitch');
+        const cameraLabel = document.getElementById('cameraLabel');
+        const errorMsg = document.getElementById('error-msg');
+        const previewModal = document.getElementById('previewModal');
+        const previewImage = document.getElementById('previewImage');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const closeBtn = document.getElementById('closeBtn');
+
+        let currentStream = null;
+        let facingMode = 'environment'; // 默认后置摄像头
+        let lastPhotoUrl = null; // 存储最后一张照片的URL
+
+        // 1. 初始化摄像头
+        async function initCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+
+            const constraints = {
+                video: {
+                    facingMode: facingMode,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
+                audio: false
+            };
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                currentStream = stream;
+                errorMsg.style.display = 'none';
+            } catch (err) {
+                console.error("摄像头错误:", err);
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = "无法访问摄像头: " + err.message;
+            }
+        }
+
+        // 2. 拍照功能
+        shutterBtn.addEventListener('click', () => {
+            if (!currentStream) return;
+
+            // 快门效果
+            shutterOverlay.style.opacity = '0.3';
+            setTimeout(() => {
+                shutterOverlay.style.opacity = '0';
+            }, 100);
+
+            // 绘制画面到Canvas
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            
+            // 应用复古滤镜效果
+            ctx.filter = 'contrast(1.1) sepia(0.1)';
+            
+            // 镜像翻转处理（如果是前置摄像头）
+            if (facingMode === 'user') {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // 导出图片并更新预览
+            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+            lastPhotoUrl = dataURL;
+            photoPreview.src = dataURL;
+            photoPreview.style.display = 'block';
+
+            // 震动反馈
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        });
+
+        // 3. 切换摄像头
+        cameraSwitch.addEventListener('change', () => {
+            facingMode = cameraSwitch.checked ? 'user' : 'environment';
+            cameraLabel.textContent = cameraSwitch.checked ? '前置' : '后置';
+            initCamera();
+        });
+
+        // 4. 预览照片功能
+        galleryBtn.addEventListener('click', () => {
+            if (lastPhotoUrl) {
+                previewImage.src = lastPhotoUrl;
+                previewModal.style.display = 'flex';
+            } else {
+                alert('还没有照片，先拍一张吧！');
+            }
+        });
+
+        // 5. 下载照片功能
+        downloadBtn.addEventListener('click', () => {
+            if (lastPhotoUrl) {
+                const link = document.createElement('a');
+                link.href = lastPhotoUrl;
+                const timestamp = new Date().toLocaleString('zh-CN').replace(/[/:\\]/g, '-');
+                link.download = `复古3GS相机_${timestamp}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 下载反馈
+                if (navigator.vibrate) {
+                    navigator.vibrate([20, 20, 20]);
+                }
+                
+                // 关闭预览
+                previewModal.style.display = 'none';
+            }
+        });
+
+        // 6. 关闭预览功能
+        closeBtn.addEventListener('click', () => {
+            previewModal.style.display = 'none';
+        });
+
+        // 点击模态框背景关闭
+        previewModal.addEventListener('click', (e) => {
+            if (e.target === previewModal) {
+                previewModal.style.display = 'none';
+            }
+        });
+
+        // 7. 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            // 空格键拍照
+            if (e.code === 'Space') {
+                e.preventDefault();
+                shutterBtn.click();
+            }
+            
+            // C键切换摄像头
+            if (e.code === 'KeyC') {
+                e.preventDefault();
+                cameraSwitch.checked = !cameraSwitch.checked;
+                cameraSwitch.dispatchEvent(new Event('change'));
+            }
+            
+            // ESC键关闭预览
+            if (e.code === 'Escape') {
+                previewModal.style.display = 'none';
+            }
+        });
+
+        // 8. 启动应用
+        window.addEventListener('load', initCamera);
+
+        // 9. 页面可见性变化时重新启动摄像头
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && !currentStream) {
+                initCamera();
+            }
+        });
+    </script>
+</body>
+</html>
