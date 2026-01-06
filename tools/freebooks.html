@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>免费小说王</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -10,128 +10,320 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        body {
-            background-color: #f5f5f5;
-            color: #333;
-            min-height: 100vh;
+        body, html {
+            width: 100%;
+            height: 100%;
             overflow: hidden;
+            background-color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
         }
 
-        .app-header {
-            height: 56px;
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .app-container {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            z-index: 100;
-            background-color: #ffffff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            bottom: 0;
+            z-index: 1;
         }
 
-        .app-title {
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* --- 可拖拽胶囊按钮 --- */
+        .capsule-menu {
+            position: fixed;
+            top: 15%;
+            right: 12px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 0.5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            z-index: 9999;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            touch-action: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            opacity: 0.9;
+            cursor: move;
         }
 
-        .app-title h1 {
-            font-weight: 600;
-            font-size: 18px;
-            color: #1E4B87;
-            letter-spacing: -0.5px;
+        .capsule-menu:hover {
+            opacity: 1;
         }
 
-        .icon-btn {
+        /* 展开状态 */
+        .capsule-menu.expanded {
+            opacity: 1;
+        }
+
+        /* 收起状态 */
+        .capsule-menu.collapsed {
             width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        .capsule-menu.collapsed:hover {
+            opacity: 1;
+        }
+
+        .capsule-item {
+            min-width: 44px;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: #555;
-            transition: all 0.3s ease;
+            color: white;
+            transition: opacity 0.2s;
         }
 
-        .icon-btn:hover {
-            background-color: rgba(0,0,0,0.05);
-            transform: scale(1.1);
-        }
-        
-        .embedded-container {
-            position: fixed;
-            top: 56px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: none;
+        .capsule-item:hover {
+            opacity: 0.9;
         }
 
-        .embedded-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        .capsule-item:active {
+            opacity: 0.7;
+        }
+
+        .capsule-item .material-icons {
+            font-size: 22px;
+            pointer-events: none;
+        }
+
+        .divider {
+            width: 1px;
+            height: 20px;
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3), transparent);
+        }
+
+        /* 收起时隐藏除切换按钮外的内容 */
+        .capsule-menu.collapsed .divider,
+        .capsule-menu.collapsed .close-btn {
+            display: none;
+        }
+
+        /* 触摸反馈 */
+        .capsule-menu.dragging {
+            opacity: 0.9;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 375px) {
+            .capsule-menu {
+                right: 8px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="app-header">
-        <div class="app-title">
-            <div class="icon-btn" onclick="goBackOrClose()">
-                <span class="material-icons">arrow_back</span>
-            </div>
-            <h1>免费小说王</h1>
+
+    <div class="capsule-menu collapsed" id="mainCapsule">
+        <div class="capsule-item" id="toggleBtn">
+            <span class="material-icons" id="toggleIcon">chevron_left</span>
         </div>
-        <div class="toolbar-actions">
-            <div class="icon-btn" onclick="refreshPage()">
-                <span class="material-icons">refresh</span>
-            </div>
+        <div class="divider"></div>
+        <div class="capsule-item close-btn" id="closeBtn">
+            <span class="material-icons">close</span>
         </div>
     </div>
-    
-    <div class="embedded-container">
-        <iframe id="loungeFrame" src="https://reader.browser.miui.com/v2/#tab=store&source=oldhotcard&_miui_orientation=portrait&_miui_fullscreen=1"></iframe>
+
+    <div class="app-container">
+        <iframe id="loungeFrame" src="https://reader.browser.miui.com/v2/#tab=store&source=oldhotcard&_miui_orientation=portrait&_miui_fullscreen=1" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
     </div>
-    
+
     <script>
-        // 刷新嵌入页面
-        function refreshPage() {
-            const frame = document.getElementById('loungeFrame');
-            const originalSrc = frame.src;
-            
-            // 显示加载状态
-            const refreshBtn = document.querySelector('.toolbar-actions .icon-btn');
-            refreshBtn.innerHTML = '<span class="material-icons">hourglass_top</span>';
-            refreshBtn.style.pointerEvents = 'none';
-            
-            // 重置iframe
-            frame.src = originalSrc;
-            
-            // 恢复按钮状态
-            setTimeout(() => {
-                refreshBtn.innerHTML = '<span class="material-icons">refresh</span>';
-                refreshBtn.style.pointerEvents = 'auto';
-            }, 1500);
+        // DOM 元素
+        const capsule = document.getElementById('mainCapsule');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const closeBtn = document.getElementById('closeBtn');
+
+        // 状态变量
+        let isDragging = false;
+        let dragStartY = 0;
+        let capsuleStartTop = 0;
+        let dragStartTime = 0;
+        let currentTouchId = null;
+
+        // 切换胶囊菜单状态
+        function toggleCapsule() {
+            if (capsule.classList.contains('collapsed')) {
+                // 收起 -> 展开
+                capsule.classList.remove('collapsed');
+                capsule.classList.add('expanded');
+                toggleIcon.textContent = 'chevron_right';
+            } else {
+                // 展开 -> 收起
+                capsule.classList.remove('expanded');
+                capsule.classList.add('collapsed');
+                toggleIcon.textContent = 'chevron_left';
+            }
         }
-        
-        // 返回或关闭功能
+
+        // 返回或关闭处理
         function goBackOrClose() {
+            // 添加点击反馈
+            closeBtn.style.opacity = '0.5';
+            setTimeout(() => {
+                closeBtn.style.opacity = '';
+            }, 150);
+            
             if (window.history.length > 1) {
                 window.history.back();
             } else {
-                window.close();
+                // 优雅关闭效果
+                capsule.style.opacity = '0';
+                setTimeout(() => {
+                    window.close();
+                }, 300);
             }
         }
+
+        // 获取当前触摸点
+        function getCurrentTouch(e) {
+            if (!e.touches) return e;
+            
+            // 如果有多个触摸点，找到我们开始的那个
+            if (currentTouchId !== null) {
+                for (let i = 0; i < e.touches.length; i++) {
+                    if (e.touches[i].identifier === currentTouchId) {
+                        return e.touches[i];
+                    }
+                }
+            }
+            return e.touches[0] || e;
+        }
+
+        // 开始拖拽
+        function onDragStart(e) {
+            // 防止右键菜单
+            if (e.type === 'mousedown' && e.button !== 0) return;
+            
+            const touch = getCurrentTouch(e);
+            currentTouchId = touch.identifier || Date.now();
+            
+            isDragging = false;
+            dragStartY = touch.clientY;
+            capsuleStartTop = capsule.offsetTop;
+            dragStartTime = Date.now();
+            
+            capsule.classList.add('dragging');
+            
+            // 阻止默认行为，防止滚动
+            e.preventDefault();
+        }
+
+        // 拖拽移动
+        function onDragMove(e) {
+            if (currentTouchId === null) return;
+            
+            const touch = getCurrentTouch(e);
+            const deltaY = touch.clientY - dragStartY;
+            
+            // 判断是否是拖拽操作（移动超过5px）
+            if (!isDragging && Math.abs(deltaY) > 5) {
+                isDragging = true;
+            }
+            
+            // 如果是拖拽，更新位置
+            if (isDragging) {
+                let newTop = capsuleStartTop + deltaY;
+                
+                // 限制在屏幕范围内
+                const minTop = 50;
+                const maxTop = window.innerHeight - capsule.offsetHeight - 20;
+                newTop = Math.max(minTop, Math.min(newTop, maxTop));
+                
+                capsule.style.top = `${newTop}px`;
+            }
+        }
+
+        // 结束拖拽
+        function onDragEnd(e) {
+            if (currentTouchId === null) return;
+            
+            capsule.classList.remove('dragging');
+            const dragDuration = Date.now() - dragStartTime;
+            
+            // 判断是点击还是拖拽
+            if (isDragging) {
+                // 拖拽结束，自动吸附到最近的边缘
+                const currentTop = parseInt(capsule.style.top) || capsuleStartTop;
+                const midPoint = window.innerHeight / 2;
+                const targetTop = currentTop < midPoint ? 50 : window.innerHeight - capsule.offsetHeight - 20;
+                
+                capsule.style.top = `${targetTop}px`;
+            } else if (dragDuration < 200) {
+                // 短按，执行切换操作
+                toggleCapsule();
+            }
+            
+            // 重置状态
+            isDragging = false;
+            currentTouchId = null;
+        }
+
+        // 事件监听器绑定
+        function setupEventListeners() {
+            // 触摸事件
+            toggleBtn.addEventListener('touchstart', onDragStart);
+            document.addEventListener('touchmove', onDragMove, { passive: false });
+            document.addEventListener('touchend', onDragEnd);
+            
+            // 鼠标事件
+            toggleBtn.addEventListener('mousedown', onDragStart);
+            document.addEventListener('mousemove', onDragMove);
+            document.addEventListener('mouseup', onDragEnd);
+            document.addEventListener('mouseleave', onDragEnd);
+            
+            // 点击事件
+            closeBtn.addEventListener('click', goBackOrClose);
+            
+            // ESC键关闭
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    goBackOrClose();
+                }
+            });
+            
+            // 窗口大小变化时重新计算位置
+            window.addEventListener('resize', () => {
+                // 如果胶囊位置超出屏幕，重新调整
+                const currentTop = parseInt(capsule.style.top) || 0;
+                const maxTop = window.innerHeight - capsule.offsetHeight - 20;
+                
+                if (currentTop > maxTop && maxTop > 0) {
+                    capsule.style.top = `${maxTop}px`;
+                }
+            });
+        }
+
+        // 初始化
+        function init() {
+            setupEventListeners();
+            
+            // 初始位置设置
+            capsule.style.top = '15%';
+            
+            // 初始显示胶囊
+            capsule.style.opacity = '1';
+        }
+
+        // 启动应用
+        init();
     </script>
 </body>
 </html>
-
-
-
