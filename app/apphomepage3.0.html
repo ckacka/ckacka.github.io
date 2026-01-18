@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#6750A4">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>树洞工具箱</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* --- Material Design 3 Color Tokens (Light) --- */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+
+            --md-sys-color-surface: #FDF8FD;
+            --md-sys-color-surface-container-low: #F7F2FA;
+            --md-sys-color-surface-container: #F3EDF7;
+            --md-sys-color-surface-container-high: #ECE6F0;
+            
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #C4C7C5;
+
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-on-error: #FFFFFF;
+
+            /* --- 样式变量 --- */
+            --radius-full: 9999px;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 8px;
+            
+            --transition-standard: 0.3s cubic-bezier(0.2, 0.0, 0, 1.0);
+        }
+
+        [data-theme="dark"] {
+            /* --- Material Design 3 Color Tokens (Dark) --- */
+            --md-sys-color-primary: #D0BCFF;
+            --md-sys-color-on-primary: #381E72;
+            --md-sys-color-primary-container: #4F378B;
+            --md-sys-color-on-primary-container: #EADDFF;
+            
+            --md-sys-color-secondary: #CCC2DC;
+            --md-sys-color-secondary-container: #4A4458;
+            --md-sys-color-on-secondary-container: #E8DEF8;
+
+            --md-sys-color-surface: #141218;
+            --md-sys-color-surface-container-low: #1D1B20;
+            --md-sys-color-surface-container: #211F26;
+            --md-sys-color-surface-container-high: #2B2930;
+            
+            --md-sys-color-on-surface: #E6E1E5;
+            --md-sys-color-on-surface-variant: #CAC4D0;
+            --md-sys-color-outline: #938F99;
+            --md-sys-color-outline-variant: #444746;
+            
+            --md-sys-color-error: #F2B8B5;
+            --md-sys-color-on-error: #601410;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Roboto', 'PingFang SC', system-ui, sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding-bottom: 100px; /* 为底部导航留空 */
+            min-height: 100vh;
+        }
+
+        /* Material Symbols 设置 */
+        .material-symbols-rounded {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .material-symbols-rounded.filled { font-variation-settings: 'FILL' 1; }
+
+        /* --- 通用容器 --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+            width: 100%;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface-variant);
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        @media (hover: hover) {
+            .icon-btn:hover { background-color: rgba(128, 128, 128, 0.1); color: var(--md-sys-color-on-surface); }
+            .chip:hover { background-color: rgba(128,128,128, 0.08); }
+            .tool-card:hover { transform: translateY(-4px); background-color: var(--md-sys-color-surface-container); }
+        }
+
+        /* --- 搜索与筛选 --- */
+        .filters-section {
+            padding: 16px 0 8px; /* 减少底部padding */
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            background-color: var(--md-sys-color-surface);
+            transition: background-color var(--transition-standard);
+            border-bottom: 1px solid transparent; 
+        }
+        
+        /* 滚动时增加一点背景色区分 */
+        .filters-section.scrolled {
+             background-color: var(--md-sys-color-surface-container);
+             border-bottom-color: var(--md-sys-color-outline-variant);
+        }
+
+        .search-bar {
+            display: flex; align-items: center;
+            background-color: var(--md-sys-color-surface-container-high);
+            border-radius: var(--radius-full);
+            padding: 0 16px;
+            height: 56px;
+            margin-bottom: 12px; /* 减少间距 */
+        }
+
+        .search-input {
+            flex: 1; border: none; background: none;
+            font-size: 16px; color: var(--md-sys-color-on-surface);
+            height: 100%; outline: none; margin-left: 12px;
+        }
+        
+        .search-icon { color: var(--md-sys-color-on-surface-variant); }
+
+        .category-scroll {
+            display: flex; gap: 8px;
+            overflow-x: auto; padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        .category-scroll::-webkit-scrollbar { display: none; }
+
+        .chip {
+            background-color: transparent;
+            border: 1px solid var(--md-sys-color-outline);
+            color: var(--md-sys-color-on-surface-variant);
+            border-radius: 8px;
+            padding: 6px 16px;
+            font-size: 14px; font-weight: 500;
+            cursor: pointer; white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .chip.active {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            border-color: transparent;
+        }
+
+        /* --- 工具卡片网格 --- */
+        .section-title {
+            font-size: 20px; font-weight: 500;
+            margin: 16px 0 12px; padding: 0 4px; /* 减少上下边距 */
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px; /* 减少卡片间距 */
+        }
+
+        @media (min-width: 600px) {
+            .tools-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 16px; /* 减少卡片间距 */
+            }
+        }
+
+        .tool-card {
+            position: relative;
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: var(--radius-md);
+            padding: 24px 16px;
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            user-select: none;
+        }
+
+        .tool-card:active { transform: scale(0.98); }
+
+        .tool-icon {
+            font-size: 32px; margin-bottom: 12px;
+            color: var(--md-sys-color-primary);
+            background-color: var(--md-sys-color-primary-container);
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .tool-icon span { font-size: 28px; color: var(--md-sys-color-on-primary-container); }
+
+        .tool-name { font-size: 16px; font-weight: 500; margin-bottom: 4px; color: var(--md-sys-color-on-surface); }
+        .tool-desc { font-size: 12px; color: var(--md-sys-color-on-surface-variant); opacity: 0.8; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .favorite-btn {
+            position: absolute; top: 8px; right: 8px;
+            background: none; border: none;
+            color: var(--md-sys-color-outline);
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2; cursor: pointer;
+        }
+        
+        .favorite-btn.favorited { color: var(--md-sys-color-error); }
+        .favorite-btn.favorited span { font-variation-settings: 'FILL' 1; }
+
+        /* --- 发现页卡片 --- */
+        .discover-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .collapse-card {
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: var(--radius-md);
+            overflow: hidden; margin-bottom: 16px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .collapse-card.expanded {
+            background-color: var(--md-sys-color-surface-container);
+            border-color: var(--md-sys-color-outline-variant);
+        }
+
+        .collapse-card-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; cursor: pointer; user-select: none;
+        }
+
+        .collapse-card-title {
+            font-size: 16px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            color: var(--md-sys-color-on-surface);
+            flex: 1;
+        }
+        
+        .collapse-actions {
+            display: flex; align-items: center; gap: 4px;
+        }
+
+        .collapse-card-content {
+            display: none; padding: 0;
+            position: relative;
+            background-color: var(--md-sys-color-surface);
+        }
+        
+        .collapse-card.expanded .collapse-card-content {
+            display: block;
+            animation: slideDown 0.3s ease;
+            height: 500px;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; height: 0; }
+            to { opacity: 1; height: 500px; }
+        }
+
+        .webview-container {
+            width: 100%; height: 100%;
+            border: none;
+            background-color: #fff;
+        }
+        
+        .loading-spinner {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--md-sys-color-primary);
+            z-index: 0;
+        }
+
+        /* --- 个人中心 --- */
+        .profile-header {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 40px 0 32px;
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            margin-bottom: 24px; 
+            margin-top: 0;
+            position: relative; /* 为计数器定位提供参考 */
+        }
+
+        .profile-avatar {
+            width: 96px; height: 96px;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative; /* 确保计数器定位正确 */
+        }
+        
+        .profile-avatar:active {
+            transform: scale(0.95);
+        }
+
+        .profile-menu { list-style: none; }
+        .profile-menu-item {
+            display: flex; align-items: center;
+            padding: 16px; margin-bottom: 8px;
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: 12px; cursor: pointer;
+        }
+        
+        .switch {
+            position: relative; display: inline-block; width: 52px; height: 32px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--md-sys-color-outline-variant);
+            border: 2px solid var(--md-sys-color-outline);
+            border-radius: 32px; transition: .3s;
+        }
+        .slider:before {
+            position: absolute; content: "";
+            height: 16px; width: 16px;
+            left: 6px; bottom: 6px;
+            background-color: var(--md-sys-color-outline);
+            border-radius: 50%; transition: .3s;
+        }
+        input:checked + .slider {
+            background-color: var(--md-sys-color-primary);
+            border-color: var(--md-sys-color-primary);
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+            background-color: var(--md-sys-color-on-primary);
+            width: 20px; height: 20px; left: 4px; bottom: 4px;
+        }
+
+        /* --- 底部导航 --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 80px;
+            background-color: var(--md-sys-color-surface-container);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        @media (min-width: 800px) {
+            .bottom-nav {
+                max-width: 400px; left: 50%; transform: translateX(-50%);
+                bottom: 24px; border-radius: var(--radius-full);
+                height: 72px; padding-bottom: 0;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            }
+        }
+
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; text-decoration: none;
+            color: var(--md-sys-color-on-surface-variant);
+            flex: 1; height: 100%; cursor: pointer;
+        }
+
+        .nav-icon-container {
+            width: 64px; height: 32px;
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item.active .nav-icon-container { background-color: var(--md-sys-color-secondary-container); }
+        .nav-item.active .nav-icon-container span {
+            color: var(--md-sys-color-on-secondary-container);
+            font-variation-settings: 'FILL' 1;
+        }
+        .nav-item.active .nav-label { color: var(--md-sys-color-on-surface); font-weight: 700; }
+        .nav-label { font-size: 12px; font-weight: 500; }
+
+        /* --- 页面切换动画 --- */
+        .page-content { display: none; animation: fadeIn 0.25s ease-out; }
+        .page-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- 模态框 --- */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); 
+            z-index: 2000;
+            align-items: center; justify-content: center; padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+        .modal.show { display: flex; animation: fadeModal 0.2s; }
+        @keyframes fadeModal { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-content {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: 28px; width: 100%; max-width: 400px;
+            max-height: 85vh; display: flex; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .modal-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 0 24px 24px; overflow-y: auto; }
+        
+        .form-input {
+            width: 100%; padding: 14px 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 8px; background: transparent;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 16px; font-family: inherit;
+        }
+        .form-input:focus { border-color: var(--md-sys-color-primary); outline: none; border-width: 2px; padding: 13px 15px; }
+
+        .btn {
+            height: 40px; padding: 0 24px; border-radius: 20px;
+            font-weight: 500; border: none; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            font-family: inherit; font-size: 14px;
+        }
+        .btn-primary { background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+        .btn-text { background: none; color: var(--md-sys-color-primary); }
+        .btn-outline { background: transparent; border: 1px solid var(--md-sys-color-outline); color: var(--md-sys-color-primary); }
+
+        /* --- 列表管理样式 --- */
+        .card-item {
+            display: flex; align-items: center; padding: 12px;
+            background-color: var(--md-sys-color-surface);
+            margin-bottom: 8px; border-radius: 12px;
+        }
+        .card-item-content { flex: 1; padding: 0 12px; overflow: hidden; }
+        .card-item-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-item-url { font-size: 11px; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .order-actions { display: flex; flex-direction: column; }
+        .mini-btn { background: none; border: none; color: var(--md-sys-color-on-surface-variant); padding: 2px; }
+        
+        /* --- 彩蛋模态框样式 --- */
+        .easter-egg-modal .modal-content {
+            max-width: 520px;
+            max-height: 320px;
+            background-color: transparent;
+            box-shadow: none;
+        }
+        
+        .easter-egg-modal .modal-body {
+            padding: 0;
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background-color: var(--md-sys-color-surface);
+        }
+        
+        .easter-egg-iframe {
+            width: 100%;
+            height: 250px;
+            border: none;
+            background-color: #fff;
+            display: block;
+        }
+        
+        .easter-egg-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            border: none;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        
+        .easter-egg-close-btn:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .easter-egg-close-btn:active {
+            transform: scale(0.9);
+        }
+        
+        /* 修复点击计数器样式 */
+        .click-counter {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.2s;
+            z-index: 5;
+            padding: 0 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .click-counter.show {
+            opacity: 1;
+        }
+        
+        .click-counter.hide {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+        
+        /* 确认对话框样式 */
+        .confirm-dialog {
+            max-width: 340px;
+        }
+        
+        .confirm-dialog .modal-body {
+            padding: 24px;
+        }
+        
+        .confirm-dialog .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .confirm-dialog .button-group .btn {
+            flex: 1;
+        }
+        
+        .confirm-dialog .btn-secondary {
+            background-color: var(--md-sys-color-outline-variant);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        /* 修复层级问题：提高确认和提示对话框的z-index */
+        #confirmDialog,
+        #alertDialog {
+            z-index: 3000; /* 比普通模态框的2000更高 */
+        }
+        
+        /* 确保彩蛋模态框关闭按钮的层级正确 */
+        .easter-egg-modal .modal-content {
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-content active" id="homePage">
+        <div class="filters-section" id="filtersSection">
+            <div class="container">
+                <div class="search-bar">
+                    <span class="material-symbols-rounded search-icon">search</span>
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索工具...">
+                </div>
+                <div class="category-scroll" id="categoryFilters"></div>
+            </div>
+        </div>
+
+        <div class="container">
+            <h2 class="section-title" id="homeTitle">常用工具</h2>
+            <div class="tools-grid" id="toolsGrid"></div>
+        </div>
+    </div>
+
+    <div class="page-content" id="discoverPage">
+        <div class="container" style="padding-top: 16px;">
+            <div class="discover-header">
+                <h2 class="section-title" style="margin: 0;">发现</h2>
+                <button class="btn btn-outline" id="discoverSettingsBtn">
+                    <span class="material-symbols-rounded">tune</span>
+                    管理
+                </button>
+            </div>
+            <div id="discoverCards"></div>
+        </div>
+    </div>
+
+    <div class="page-content" id="profilePage">
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">
+                <span class="material-symbols-rounded" style="font-size: 48px;">person</span>
+                <div class="click-counter hide" id="clickCounter">0</div>
+            </div>
+            <div class="profile-info">
+                <h2>欢迎使用</h2>
+                <center>版本号：v3.0</center>
+            </div>
+        </div>
+        
+        <div class="container">
+            <h2 class="section-title">我的收藏</h2>
+            <div class="tools-grid" id="favoritesGrid"></div>
+            
+            <h2 class="section-title">设置</h2>
+            <ul class="profile-menu">
+                <li class="profile-menu-item" id="themeSettingRow">
+                    <span class="material-symbols-rounded" style="color: var(--md-sys-color-primary); margin-right: 16px;">palette</span>
+                    <div style="flex: 1;">
+                        <h3>深色模式</h3>
+                        <p style="font-size: 12px; opacity: 0.7;">跟随系统或手动切换</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="themeSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </li>
+                <li class="profile-menu-item" id="aboutOption">
+                    <span class="material-symbols-rounded" style="color: var(--md-sys-color-primary); margin-right: 16px;">info</span>
+                    <div style="flex: 1;">
+                        <h3>关于应用</h3>
+                        <p style="font-size: 12px; opacity: 0.7;">查看版本信息</p>
+                    </div>
+                    <span class="material-symbols-rounded" style="color: var(--md-sys-color-outline)">chevron_right</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" data-page="homePage">
+            <div class="nav-icon-container"><span class="material-symbols-rounded">home</span></div>
+            <span class="nav-label">首页</span>
+        </a>
+        <a href="#" class="nav-item" data-page="discoverPage">
+            <div class="nav-icon-container"><span class="material-symbols-rounded">explore</span></div>
+            <span class="nav-label">发现</span>
+        </a>
+        <a href="#" class="nav-item" data-page="profilePage">
+            <div class="nav-icon-container"><span class="material-symbols-rounded">person</span></div>
+            <span class="nav-label">我的</span>
+        </a>
+    </nav>
+
+    <!-- 彩蛋模态框 -->
+    <div class="modal easter-egg-modal" id="easterEggModal">
+        <div class="modal-content">
+            <div class="modal-body">
+                <iframe class="easter-egg-iframe" id="dinosaurGame" src="https://dinosaur.game/zh/dinosaur-game" allow="fullscreen"></iframe>
+                <button class="easter-egg-close-btn" id="closeEasterEgg" aria-label="关闭">
+                    <span class="material-symbols-rounded" style="font-size: 20px;">close</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认对话框 -->
+    <div class="modal" id="confirmDialog">
+        <div class="modal-content confirm-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title" id="confirmTitle">确认操作</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">确定执行此操作吗？</p>
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="confirmCancel">取消</button>
+                    <button class="btn btn-primary" id="confirmOk">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示对话框 -->
+    <div class="modal" id="alertDialog">
+        <div class="modal-content confirm-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title" id="alertTitle">提示</h3>
+            </div>
+            <div class="modal-body">
+                <p id="alertMessage"></p>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="alertOk" style="flex: 1;">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">卡片管理</h3>
+                <button class="icon-btn" id="closeSettings"><span class="material-symbols-rounded">close</span></button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; border-bottom: 1px solid var(--md-sys-color-outline-variant); margin-bottom: 20px;">
+                    <button class="btn btn-text" id="tabAdd" style="flex:1; border-bottom: 2px solid var(--md-sys-color-primary); border-radius: 0;">新增</button>
+                    <button class="btn btn-text" id="tabManage" style="flex:1; color: var(--md-sys-color-on-surface-variant); border-radius: 0;">列表</button>
+                </div>
+
+                <div id="viewAdd">
+                    <input type="hidden" id="editCardId">
+                    <label style="display:block; margin-bottom:8px; font-weight:500">标题</label>
+                    <input type="text" class="form-input" id="cardTitle" placeholder="例如：每日新闻">
+                    
+                    <label style="display:block; margin-bottom:8px; font-weight:500">链接 URL</label>
+                    <input type="url" class="form-input" id="cardUrl" placeholder="https://...">
+                    
+                    <label style="display:block; margin-bottom:8px; font-weight:500">图标 (Material Symbol)</label>
+                    <input type="text" class="form-input" id="cardIcon" placeholder="选填，默认显示地球图标 (public)">
+                    
+                    <button class="btn btn-primary" id="saveCardBtn" style="width:100%">保存卡片</button>
+                    <button class="btn btn-text" id="cancelEditBtn" style="width:100%; display:none; margin-top:8px;">取消编辑</button>
+                </div>
+
+                <div id="viewManage" style="display:none;">
+                    <div id="cardsManagerList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="aboutModal">
+        <div class="modal-content" style="max-width: 320px;">
+            <div class="modal-header">
+                <h3 class="modal-title">关于</h3>
+            </div>
+            <div class="modal-body">
+                <p>树洞工具箱 v3.0</p>
+                <p style="margin-top: 10px; opacity: 0.7; font-size: 14px;">基于 Material Design 3 设计规范构建。</p>
+            </div>
+            <div style="padding: 16px 24px; text-align: right;">
+                <button class="btn btn-text" id="closeAbout">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 数据源 ---
+        const toolsData = [
+            { id: 1, name: "妙笔生花", desc: "AI 辅助的文本创作工具", icon: "edit_note", category: "AI", url: "https://ckacka.github.io/tools/mbsh.html" },
+            { id: 2, name: "菜谱助手", desc: "智能菜谱生成与查询", icon: "restaurant_menu", category: "AI", url: "https://ckacka.github.io/tools/aifood.html" },
+            { id: 3, name: "树洞应用市场", desc: "一个万能口袋", icon: "shopping_bag", category: "应用市场", url: "https://ckacka.github.io/appmarket.html" },
+            { id: 4, name: "二维码生成器", desc: "快速生成二维码", icon: "qr_code", category: "二维码", url: "https://ckacka.github.io/tools/qrcode.html" },
+            { id: 5, name: "商务候车区查询", desc: "查询铁路商务候车区", icon: "train", category: "铁路", url: "https://ckacka.github.io/tools/railwayswz.html" },
+            { id: 6, name: "铁路温馨服务", desc: "铁路相关服务查询", icon: "luggage", category: "铁路", url: "https://ckacka.github.io/tools/railwaywxfw.html" },
+            { id: 7, name: "树洞便签", desc: "清爽的记事便签", icon: "note", category: "文字", url: "https://ckacka.github.io/tools/sdnote.html" },
+            { id: 8, name: "随机生词", desc: "随机生成词汇", icon: "sort_by_alpha", category: "文字", url: "https://ckacka.github.io/tools/sjsc.html" },
+            { id: 9, name: "南苑台配", desc: "音视频播放与服务", icon: "live_tv", category: "音视频", url: "https://ckacka.github.io/tools/southparktw.html" },
+            { id: 10, name: "数字电视", desc: "在线数字电视与广播", icon: "tv", category: "音视频", url: "https://ckacka.github.io/tools/tvradio.html" },
+            { id: 11, name: "视频播放器", desc: "在线视频播放", icon: "movie", category: "音视频", url: "https://ckacka.github.io/tools/videoplayer.html" },
+            { id: 12, name: "免费小说王", desc: "免费小说王", icon: "book", category: "小说", url: "https://ckacka.github.io/tools/freebooks.html" },
+            { id: 13, name: "树洞翻译", desc: "让语言不再是沟通的壁垒", icon: "translate", category: "AI", url: "https://ckacka.github.io/tools/translate.html" },
+            { id: 14, name: "树洞短视频", desc: "这里有一些好「康」的～", icon: "auto_awesome_motion", category: "音视频", url: "https://ckacka.github.io/tools/shortvideo.html" },
+            { id: 15, name: "树洞天气助手", desc: "冷暖先知", icon: "thunderstorm", category: "天气", url: "https://ckacka.github.io/tools/weather.html" },
+            { id: 16, name: "复古相机", desc: "复古3GS相机", icon: "photo_camera", category: "相机", url: "https://ckacka.github.io/tools/oldcamera.html" },
+            { id: 17, name: "是女人就扇他一百耳光", desc: "休闲小游戏", icon: "sports_esports", category: "游戏", url: "https://ckacka.github.io/games/guaiwu.html" }
+         ];
+
+        const defaultCards = [
+            { id: 101, title: "计算器", url: "https://tool.browser.qq.com/calculator?addressbar=hide&callfrom=gongjuxiang", icon: "calculate", expanded: false },
+            { id: 102, title: "新闻资讯", url: "https://hot.browser.miui.com/v7/#status=open&cate=%E6%8E%A8%E8%8D%90", icon: "newspaper", expanded: false },
+            { id: 103, title: "每天认识一种文物", url: "https://ysxwyzl.4dage.com/4dwall/index.html", icon: "museum", expanded: false }
+        ];
+
+        // --- 状态与缓存 ---
+        const state = {
+            favorites: JSON.parse(localStorage.getItem('favs') || '[]'),
+            discoverCards: JSON.parse(localStorage.getItem('cards') || JSON.stringify(defaultCards)),
+            filterCategory: '全部',
+            searchText: '',
+            // 彩蛋相关状态
+            easterEggClickCount: 0,
+            easterEggLastClickTime: 0,
+            easterEggTimer: null,
+            // 对话框回调
+            confirmCallback: null,
+            alertCallback: null
+        };
+
+        const dom = {
+            homeTitle: document.getElementById('homeTitle'),
+            toolsGrid: document.getElementById('toolsGrid'),
+            catFilters: document.getElementById('categoryFilters'),
+            discoverCards: document.getElementById('discoverCards'),
+            cardsManagerList: document.getElementById('cardsManagerList'),
+            favoritesGrid: document.getElementById('favoritesGrid'),
+            filtersSection: document.getElementById('filtersSection'),
+            // 彩蛋相关DOM
+            profileAvatar: document.getElementById('profileAvatar'),
+            clickCounter: document.getElementById('clickCounter'),
+            easterEggModal: document.getElementById('easterEggModal'),
+            closeEasterEgg: document.getElementById('closeEasterEgg'),
+            // 对话框相关DOM
+            confirmDialog: document.getElementById('confirmDialog'),
+            confirmTitle: document.getElementById('confirmTitle'),
+            confirmMessage: document.getElementById('confirmMessage'),
+            confirmCancel: document.getElementById('confirmCancel'),
+            confirmOk: document.getElementById('confirmOk'),
+            alertDialog: document.getElementById('alertDialog'),
+            alertTitle: document.getElementById('alertTitle'),
+            alertMessage: document.getElementById('alertMessage'),
+            alertOk: document.getElementById('alertOk'),
+            inputs: {
+                title: document.getElementById('cardTitle'),
+                url: document.getElementById('cardUrl'),
+                icon: document.getElementById('cardIcon'),
+                id: document.getElementById('editCardId')
+            }
+        };
+
+        // --- 对话框工具函数 ---
+        function showConfirm(title, message, callback) {
+            dom.confirmTitle.textContent = title;
+            dom.confirmMessage.textContent = message;
+            state.confirmCallback = callback;
+            dom.confirmDialog.classList.add('show');
+        }
+
+        function showAlert(title, message, callback) {
+            dom.alertTitle.textContent = title;
+            dom.alertMessage.textContent = message;
+            state.alertCallback = callback;
+            dom.alertDialog.classList.add('show');
+        }
+
+        // 初始化对话框事件
+        function initDialogs() {
+            // 确认对话框
+            dom.confirmCancel.addEventListener('click', () => {
+                dom.confirmDialog.classList.remove('show');
+                if (state.confirmCallback) state.confirmCallback(false);
+            });
+            
+            dom.confirmOk.addEventListener('click', () => {
+                dom.confirmDialog.classList.remove('show');
+                if (state.confirmCallback) state.confirmCallback(true);
+            });
+            
+            // 提示对话框
+            dom.alertOk.addEventListener('click', () => {
+                dom.alertDialog.classList.remove('show');
+                if (state.alertCallback) state.alertCallback();
+            });
+            
+            // 点击对话框外部关闭
+            dom.confirmDialog.addEventListener('click', (e) => {
+                if (e.target === dom.confirmDialog) {
+                    dom.confirmDialog.classList.remove('show');
+                    if (state.confirmCallback) state.confirmCallback(false);
+                }
+            });
+            
+            dom.alertDialog.addEventListener('click', (e) => {
+                if (e.target === dom.alertDialog) {
+                    dom.alertDialog.classList.remove('show');
+                    if (state.alertCallback) state.alertCallback();
+                }
+            });
+        }
+
+        // --- 彩蛋功能 ---
+        function initEasterEgg() {
+            // 加载保存的点击次数
+            const savedCount = localStorage.getItem('easterEggClickCount');
+            if (savedCount) {
+                state.easterEggClickCount = parseInt(savedCount);
+                updateClickCounter();
+            }
+            
+            // 添加头像点击事件监听
+            dom.profileAvatar.addEventListener('click', handleAvatarClick);
+            
+            // 关闭彩蛋模态框事件
+            dom.closeEasterEgg.addEventListener('click', () => {
+                dom.easterEggModal.classList.remove('show');
+            });
+            
+            // 点击模态框外部关闭
+            dom.easterEggModal.addEventListener('click', (e) => {
+                if (e.target === dom.easterEggModal) {
+                    dom.easterEggModal.classList.remove('show');
+                }
+            });
+        }
+        
+        function handleAvatarClick() {
+            const currentTime = Date.now();
+            
+            // 如果距离上次点击超过3秒，重置计数
+            if (currentTime - state.easterEggLastClickTime > 3000) {
+                state.easterEggClickCount = 0;
+                dom.clickCounter.classList.add('hide');
+                setTimeout(() => {
+                    updateClickCounter();
+                    dom.clickCounter.classList.remove('hide');
+                }, 50);
+            }
+            
+            // 更新点击次数和时间
+            state.easterEggClickCount++;
+            state.easterEggLastClickTime = currentTime;
+            
+            // 更新点击计数器显示
+            updateClickCounter();
+            
+            // 保存到本地存储
+            localStorage.setItem('easterEggClickCount', state.easterEggClickCount);
+            
+            // 清除之前的计时器
+            if (state.easterEggTimer) {
+                clearTimeout(state.easterEggTimer);
+            }
+            
+            // 设置3秒后重置计数
+            state.easterEggTimer = setTimeout(() => {
+                state.easterEggClickCount = 0;
+                dom.clickCounter.classList.add('hide');
+                setTimeout(() => {
+                    updateClickCounter();
+                    localStorage.setItem('easterEggClickCount', 0);
+                }, 300);
+            }, 3000);
+            
+            // 如果点击次数达到10次，触发彩蛋
+            if (state.easterEggClickCount === 10) {
+                triggerEasterEgg();
+                state.easterEggClickCount = 0;
+                dom.clickCounter.classList.add('hide');
+                setTimeout(() => {
+                    updateClickCounter();
+                    localStorage.setItem('easterEggClickCount', 0);
+                }, 300);
+            }
+        }
+        
+        function updateClickCounter() {
+            if (state.easterEggClickCount > 0) {
+                dom.clickCounter.textContent = state.easterEggClickCount;
+                dom.clickCounter.classList.add('show');
+                dom.clickCounter.classList.remove('hide');
+            } else {
+                dom.clickCounter.textContent = '0';
+                dom.clickCounter.classList.remove('show');
+            }
+        }
+        
+        function triggerEasterEgg() {
+            // 显示彩蛋模态框
+            dom.easterEggModal.classList.add('show');
+            
+            // 添加庆祝动画
+            dom.profileAvatar.style.animation = 'none';
+            setTimeout(() => {
+                dom.profileAvatar.style.animation = 'spin 0.5s linear 3';
+            }, 10);
+            
+            // 确保iframe正确加载
+            const iframe = document.getElementById('dinosaurGame');
+            iframe.src = iframe.src; // 重新加载iframe
+        }
+
+        // --- 核心逻辑 ---
+
+        function saveState() {
+            localStorage.setItem('favs', JSON.stringify(state.favorites));
+            localStorage.setItem('cards', JSON.stringify(state.discoverCards));
+        }
+
+        // 首页渲染
+        function renderHome() {
+            dom.homeTitle.textContent = state.filterCategory === '全部' 
+                ? '所有工具' 
+                : `${state.filterCategory} 工具`;
+
+            const cats = ['全部', ...new Set(toolsData.map(t => t.category))];
+            dom.catFilters.innerHTML = cats.map(c => 
+                `<button class="chip ${state.filterCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`
+            ).join('');
+
+            renderTools(dom.toolsGrid, toolsData);
+        }
+
+        function renderTools(targetGrid, sourceData, isFavMode = false) {
+            targetGrid.innerHTML = '';
+            const filtered = sourceData.filter(t => {
+                if (isFavMode) return true;
+                const matchCat = state.filterCategory === '全部' || t.category === state.filterCategory;
+                const matchText = t.name.toLowerCase().includes(state.searchText) || t.desc.toLowerCase().includes(state.searchText);
+                return matchCat && matchText;
+            });
+
+            if (filtered.length === 0) {
+                targetGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--md-sys-color-outline);">未找到相关内容</div>`;
+                return;
+            }
+
+            filtered.forEach(tool => {
+                const isFav = state.favorites.includes(tool.id);
+                const el = document.createElement('div');
+                el.className = 'tool-card';
+                el.innerHTML = `
+                    <button class="favorite-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav(event, ${tool.id})">
+                        <span class="material-symbols-rounded">${isFav ? 'favorite' : 'favorite'}</span>
+                    </button>
+                    <div class="tool-icon"><span class="material-symbols-rounded">${tool.icon}</span></div>
+                    <div class="tool-name">${tool.name}</div>
+                    <div class="tool-desc">${tool.desc}</div>
+                `;
+                el.onclick = (e) => { 
+                    if(!e.target.closest('.favorite-btn')) {
+                        if (tool.url) {
+                            window.open(tool.url, '_self');
+                        } else {
+                            showAlert('提示', `工具 ${tool.name} 缺少链接信息。`);
+                        }
+                    }
+                };
+                targetGrid.appendChild(el);
+            });
+        }
+
+        // 发现页渲染
+        function renderDiscover() {
+            dom.discoverCards.innerHTML = '';
+            if(state.discoverCards.length === 0) {
+                if (localStorage.getItem('cards') === null) {
+                    state.discoverCards = defaultCards;
+                    saveState();
+                } else {
+                    dom.discoverCards.innerHTML = '<div style="text-align:center; padding:40px; color:var(--md-sys-color-outline);">暂无卡片，请点击右上角管理</div>';
+                    return;
+                }
+            }
+
+            state.discoverCards.forEach(card => {
+                const el = document.createElement('div');
+                el.className = `collapse-card ${card.expanded ? 'expanded' : ''}`;
+                
+                el.innerHTML = `
+                    <div class="collapse-card-header">
+                        <div class="collapse-card-title">
+                            <span class="material-symbols-rounded collapse-card-icon" style="color:var(--md-sys-color-primary)">${card.icon}</span>
+                            ${card.title}
+                        </div>
+                        <div class="collapse-actions">
+                            <button class="icon-btn" onclick="openExternal(event, '${card.url}')" title="在浏览器打开">
+                                <span class="material-symbols-rounded" style="font-size:20px;">open_in_new</span>
+                            </button>
+                            <span class="material-symbols-rounded" style="transition:transform 0.3s; transform: rotate(${card.expanded ? 180 : 0}deg)">expand_more</span>
+                        </div>
+                    </div>
+                    <div class="collapse-card-content">
+                        ${card.expanded ? `
+                            <div class="loading-spinner"><span class="material-symbols-rounded" style="animation:spin 1s linear infinite">progress_activity</span></div>
+                            <iframe class="webview-container" src="${card.url}" onload="this.previousElementSibling.style.display='none'"></iframe>
+                        ` : ''}
+                    </div>
+                `;
+                
+                el.querySelector('.collapse-card-header').onclick = (e) => {
+                    if(e.target.closest('.icon-btn')) return;
+                    card.expanded = !card.expanded;
+                    saveState();
+                    renderDiscover();
+                };
+                dom.discoverCards.appendChild(el);
+            });
+        }
+
+        window.setCategory = (cat) => {
+            state.filterCategory = cat;
+            renderHome();
+        };
+
+        window.toggleFav = (e, id) => {
+            e.stopPropagation();
+            if (state.favorites.includes(id)) {
+                state.favorites = state.favorites.filter(fid => fid !== id);
+            } else {
+                state.favorites.push(id);
+            }
+            saveState();
+            renderHome();
+            renderFavorites();
+        };
+
+        window.openExternal = (e, url) => {
+            e.stopPropagation();
+            window.open(url, '_blank');
+        };
+
+        function renderFavorites() {
+            renderTools(dom.favoritesGrid, toolsData.filter(t => state.favorites.includes(t.id)), true);
+        }
+
+        function renderManagerList() {
+            dom.cardsManagerList.innerHTML = '';
+            state.discoverCards.forEach((card, index) => {
+                const item = document.createElement('div');
+                item.className = 'card-item';
+                item.innerHTML = `
+                    <div class="order-actions">
+                        <button class="mini-btn" onclick="moveCard(${index}, -1)" ${index === 0 ? 'disabled style="opacity:0.3"' : ''}>
+                            <span class="material-symbols-rounded">keyboard_arrow_up</span>
+                        </button>
+                        <button class="mini-btn" onclick="moveCard(${index}, 1)" ${index === state.discoverCards.length - 1 ? 'disabled style="opacity:0.3"' : ''}>
+                            <span class="material-symbols-rounded">keyboard_arrow_down</span>
+                        </button>
+                    </div>
+                    <div class="card-item-content">
+                        <div class="card-item-title">${card.title}</div>
+                        <div class="card-item-url">${card.url}</div>
+                    </div>
+                    <div>
+                        <button class="icon-btn" onclick="editCard(${card.id})" style="width:32px; height:32px;"><span class="material-symbols-rounded" style="font-size:18px">edit</span></button>
+                        <button class="icon-btn" onclick="deleteCard(${card.id})" style="width:32px; height:32px; color:var(--md-sys-color-error)"><span class="material-symbols-rounded" style="font-size:18px">delete</span></button>
+                    </div>
+                `;
+                dom.cardsManagerList.appendChild(item);
+            });
+        }
+
+        window.moveCard = (index, dir) => {
+            const temp = state.discoverCards[index];
+            state.discoverCards[index] = state.discoverCards[index + dir];
+            state.discoverCards[index + dir] = temp;
+            saveState(); renderManagerList(); renderDiscover();
+        };
+
+        window.deleteCard = (id) => {
+            showConfirm('确认删除', '确定删除此卡片吗？', (confirmed) => {
+                if (confirmed) {
+                    state.discoverCards = state.discoverCards.filter(c => c.id !== id);
+                    saveState(); renderManagerList(); renderDiscover();
+                }
+            });
+        };
+
+        window.editCard = (id) => {
+            const card = state.discoverCards.find(c => c.id === id);
+            if(card) {
+                dom.inputs.title.value = card.title;
+                dom.inputs.url.value = card.url;
+                dom.inputs.icon.value = card.icon;
+                dom.inputs.id.value = card.id;
+                switchTab('add');
+                document.getElementById('saveCardBtn').innerText = "更新卡片";
+                document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+            }
+        };
+
+        function init() {
+            initEasterEgg(); // 初始化彩蛋功能
+            initDialogs(); // 初始化对话框
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+                });
+            }
+            
+            const themeToggle = () => {
+                const isDark = document.body.getAttribute('data-theme') === 'dark';
+                document.body.setAttribute('data-theme', isDark ? '' : 'dark');
+                document.getElementById('themeSwitch').checked = !isDark;
+                localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            };
+            
+            if(localStorage.getItem('theme') === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                document.getElementById('themeSwitch').checked = true;
+            }
+
+            document.getElementById('themeSwitch').onchange = themeToggle;
+
+            document.getElementById('searchInput').oninput = (e) => {
+                state.searchText = e.target.value.toLowerCase().trim();
+                renderHome();
+            };
+
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.onclick = (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                    nav.classList.add('active');
+                    document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+                    document.getElementById(nav.dataset.page).classList.add('active');
+                    window.scrollTo(0,0);
+                    if(nav.dataset.page === 'profilePage') renderFavorites();
+                };
+            });
+            
+            // 简单的滚动监听，仅用于给搜索栏增加背景色区分
+            window.addEventListener('scroll', () => {
+                dom.filtersSection.classList.toggle('scrolled', window.scrollY > 0);
+            });
+
+            const toggleModal = (id, show) => document.getElementById(id).classList.toggle('show', show);
+            
+            document.getElementById('discoverSettingsBtn').onclick = () => {
+                toggleModal('settingsModal', true);
+                switchTab('add'); resetForm();
+            };
+            document.getElementById('closeSettings').onclick = () => toggleModal('settingsModal', false);
+            document.getElementById('aboutOption').onclick = () => toggleModal('aboutModal', true);
+            document.getElementById('closeAbout').onclick = () => toggleModal('aboutModal', false);
+            
+            window.onclick = (e) => {
+                if(e.target.classList.contains('modal')) e.target.classList.remove('show');
+            };
+
+            document.getElementById('tabAdd').onclick = () => switchTab('add');
+            document.getElementById('tabManage').onclick = () => switchTab('manage');
+            
+            document.getElementById('saveCardBtn').onclick = () => {
+                const title = dom.inputs.title.value.trim();
+                const url = dom.inputs.url.value.trim();
+                const icon = dom.inputs.icon.value.trim() || 'public';
+                const id = dom.inputs.id.value;
+
+                if(!title || !url) { 
+                    showAlert('提示', '请输入标题和链接');
+                    return; 
+                }
+
+                if(id) {
+                    const idx = state.discoverCards.findIndex(c => c.id == id);
+                    if(idx > -1) state.discoverCards[idx] = { ...state.discoverCards[idx], title, url, icon };
+                } else {
+                    state.discoverCards.push({ id: Date.now(), title, url, icon, expanded: false });
+                }
+                
+                saveState(); renderDiscover(); resetForm();
+                switchTab('manage');
+            };
+            
+            document.getElementById('cancelEditBtn').onclick = resetForm;
+
+            renderHome();
+            renderDiscover();
+        }
+
+        function switchTab(tab) {
+            const isAdd = tab === 'add';
+            document.getElementById('viewAdd').style.display = isAdd ? 'block' : 'none';
+            document.getElementById('viewManage').style.display = isAdd ? 'none' : 'block';
+            
+            const activeStyle = 'border-bottom: 2px solid var(--md-sys-color-primary); color: var(--md-sys-color-primary);';
+            const inactiveStyle = 'border-bottom: none; color: var(--md-sys-color-on-surface-variant);';
+            
+            document.getElementById('tabAdd').style.cssText = `flex:1; border-radius:0; ${isAdd ? activeStyle : inactiveStyle}`;
+            document.getElementById('tabManage').style.cssText = `flex:1; border-radius:0; ${!isAdd ? activeStyle : inactiveStyle}`;
+            
+            if(!isAdd) renderManagerList();
+        }
+
+        function resetForm() {
+            dom.inputs.title.value = ''; dom.inputs.url.value = ''; dom.inputs.icon.value = ''; dom.inputs.id.value = '';
+            document.getElementById('saveCardBtn').innerText = "保存卡片";
+            document.getElementById('cancelEditBtn').style.display = 'none';
+        }
+
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = "@keyframes spin { 100% { transform:rotate(360deg); } }";
+        document.head.appendChild(styleSheet);
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
