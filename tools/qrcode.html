@@ -17,6 +17,7 @@
 
         body {
             background-color: var(--weui-BG-0);
+            color: var(--weui-FG-0); /* 添加默认字体颜色 */
             overscroll-behavior-y: none;
             margin: 0; padding: 0;
             min-height: 100vh;
@@ -55,6 +56,7 @@
             padding: 16px; font-size: 15px; font-weight: 600;
             display: flex; justify-content: space-between; align-items: center;
             cursor: pointer; -webkit-tap-highlight-color: transparent;
+            color: var(--weui-FG-0); /* 添加字体颜色 */
         }
 
         .settings-content {
@@ -139,7 +141,11 @@
             padding: 24px 24px 12px; /* 减小标题上下间距 */
         }
         
-        .weui-dialog__title { font-size: 17px; font-weight: 600; }
+        .weui-dialog__title { 
+            font-size: 17px; 
+            font-weight: 600; 
+            color: var(--weui-FG-0); /* 添加字体颜色 */
+        }
         
         .weui-dialog__bd {
             padding: 0 24px 20px; /* 减小正文底部与按钮的间距 */
@@ -157,6 +163,37 @@
             margin: 24px 16px 8px; /* 调整页边距，让它跟随上方卡片 */
         }
 
+        /* 修复 WeUI 组件在暗黑模式下的显示 */
+        .weui-textarea {
+            background-color: var(--weui-BG-2);
+            color: var(--weui-FG-0);
+        }
+        
+        .weui-textarea::placeholder {
+            color: var(--weui-FG-1);
+        }
+        
+        .weui-cells {
+            background-color: transparent;
+        }
+        
+        .weui-cell {
+            background-color: var(--weui-BG-2);
+            color: var(--weui-FG-0);
+        }
+        
+        .weui-cell__bd p {
+            color: var(--weui-FG-0);
+        }
+        
+        .weui-link {
+            color: var(--weui-FG-1);
+        }
+        
+        .weui-switch:checked {
+            background-color: var(--weui-BRAND);
+        }
+
         @media (prefers-color-scheme: dark) {
             :root { 
                 --weui-BG-0: #111; 
@@ -164,9 +201,49 @@
                 --weui-FG-0: rgba(255, 255, 255, 0.8); 
                 --weui-FG-1: rgba(255, 255, 255, 0.5); 
             }
-            .weui-textarea { background: #2c2c2e; color: var(--weui-FG-0); }
+            
+            .weui-textarea { 
+                background: var(--weui-BG-2); 
+                color: var(--weui-FG-0); 
+            }
+            
+            .weui-textarea::placeholder {
+                color: var(--weui-FG-1);
+            }
+            
             .custom-slider { background: #444; }
+            
             .history-item:active { background-color: rgba(255,255,255,0.05); }
+            
+            .history-item:not(:last-child)::after {
+                border-bottom: 0.5px solid rgba(255,255,255,0.05);
+            }
+            
+            .history-header {
+                border-bottom: 0.5px solid rgba(255,255,255,0.05);
+            }
+            
+            .dialog-header {
+                border-bottom: 0.5px solid rgba(255,255,255,0.05);
+            }
+            
+            .dialog-footer {
+                border-top: 0.5px solid rgba(255,255,255,0.05);
+            }
+            
+            .qrcode-wrapper {
+                background: #2c2c2e;
+            }
+            
+            /* 修复 WeUI 对话框在暗黑模式下的显示 */
+            .weui-dialog {
+                color: var(--weui-FG-0);
+            }
+            
+            /* 修复滑块拇指在暗黑模式下的边框 */
+            .custom-slider::-webkit-slider-thumb {
+                border: 2px solid var(--weui-BG-2);
+            }
         }
     </style>
 </head>
