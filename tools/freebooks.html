@@ -1,329 +1,394 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>免费小说王</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>免费小说王</title>
 
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #000;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-        }
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-        .app-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1;
-        }
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-        }
+:root {
+    --header-height: 56px;
+    --capsule-btn-width: 42px;
+    --capsule-btn-height: 32px;
+    --menu-width: 170px;
+    --menu-radius: 14px;
+    --divider-height: 18px;
+    --icon-size: 20px;
+    --menu-padding: 12px 14px;
+    --menu-gap: 10px;
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    
+    /* 暗色模式颜色变量（默认） */
+    --color-background: #000;
+    --color-header-bg: rgba(28, 28, 28, 0.95);
+    --color-header-text: #fff;
+    --color-capsule-bg: rgba(255, 255, 255, 0.08);
+    --color-capsule-active: rgba(255, 255, 255, 0.15);
+    --color-divider: rgba(255, 255, 255, 0.2);
+    --color-menu-bg: rgba(40, 40, 40, 0.96);
+    --color-menu-text: #fff;
+    --color-menu-hover: rgba(255, 255, 255, 0.08);
+    --color-menu-active: rgba(255, 255, 255, 0.12);
+    --color-icon: #fff;
+    --color-shadow: rgba(0, 0, 0, 0.45);
+    
+    /* 过渡动画 */
+    --transition-duration: 0.2s;
+    --transition-timing: ease;
+}
 
-        /* --- 可拖拽胶囊按钮 --- */
-        .capsule-menu {
-            position: fixed;
-            top: 15%;
-            right: 12px;
-            height: 40px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 0.5px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            z-index: 9999;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-            touch-action: none;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            user-select: none;
-            opacity: 0.9;
-            cursor: move;
-        }
+/* 亮色模式适配 */
+@media (prefers-color-scheme: light) {
+    :root {
+        --color-background: #f5f5f7;
+        --color-header-bg: rgba(255, 255, 255, 0.95);
+        --color-header-text: #000;
+        --color-capsule-bg: rgba(0, 0, 0, 0.08);
+        --color-capsule-active: rgba(0, 0, 0, 0.15);
+        --color-divider: rgba(0, 0, 0, 0.2);
+        --color-menu-bg: rgba(255, 255, 255, 0.96);
+        --color-menu-text: #000;
+        --color-menu-hover: rgba(0, 0, 0, 0.08);
+        --color-menu-active: rgba(0, 0, 0, 0.12);
+        --color-icon: #000;
+        --color-shadow: rgba(0, 0, 0, 0.15);
+    }
+}
 
-        .capsule-menu:hover {
-            opacity: 1;
-        }
+/* 高对比度模式适配 */
+@media (prefers-contrast: high) {
+    :root {
+        --color-capsule-bg: rgba(255, 255, 255, 0.15);
+        --color-capsule-active: rgba(255, 255, 255, 0.25);
+        --color-divider: rgba(255, 255, 255, 0.3);
+        --color-menu-hover: rgba(255, 255, 255, 0.15);
+        --color-menu-active: rgba(255, 255, 255, 0.25);
+    }
+}
 
-        /* 展开状态 */
-        .capsule-menu.expanded {
-            opacity: 1;
-        }
+html, body {
+    height: 100%;
+    background: var(--color-background);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    overflow: hidden;
+    transition: background-color var(--transition-duration) var(--transition-timing);
+}
 
-        /* 收起状态 */
-        .capsule-menu.collapsed {
-            width: 40px;
-            opacity: 0.7;
-        }
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
 
-        .capsule-menu.collapsed:hover {
-            opacity: 1;
-        }
+/* ===== 标题栏 ===== */
+.header {
+    height: calc(var(--header-height) + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px 0 16px;
+    background: var(--color-header-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--color-header-text);
+    flex-shrink: 0;
+    position: relative;
+    transition: background-color var(--transition-duration) var(--transition-timing),
+                color var(--transition-duration) var(--transition-timing);
+}
 
-        .capsule-item {
-            min-width: 44px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            transition: opacity 0.2s;
-        }
+.title {
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    padding-right: 16px;
+}
 
-        .capsule-item:hover {
-            opacity: 0.9;
-        }
+/* ===== 右侧胶囊按钮 ===== */
+.capsule {
+    display: flex;
+    align-items: center;
+    background: var(--color-capsule-bg);
+    border-radius: 999px;
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: background-color var(--transition-duration) var(--transition-timing);
+}
 
-        .capsule-item:active {
-            opacity: 0.7;
-        }
+.capsule__button {
+    width: var(--capsule-btn-width);
+    height: var(--capsule-btn-height);
+    border: none;
+    background: transparent;
+    color: var(--color-icon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--transition-duration) var(--transition-timing);
+}
 
-        .capsule-item .material-icons {
-            font-size: 22px;
-            pointer-events: none;
-        }
+.capsule__button:active {
+    background: var(--color-capsule-active);
+    transition: background-color 0.1s ease;
+}
 
-        .divider {
-            width: 1px;
-            height: 20px;
-            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3), transparent);
-        }
+.capsule__divider {
+    width: 1px;
+    height: var(--divider-height);
+    background: var(--color-divider);
+    transition: background-color var(--transition-duration) var(--transition-timing);
+}
 
-        /* 收起时隐藏除切换按钮外的内容 */
-        .capsule-menu.collapsed .divider,
-        .capsule-menu.collapsed .close-btn {
-            display: none;
-        }
+.material-icons {
+    font-size: var(--icon-size);
+}
 
-        /* 触摸反馈 */
-        .capsule-menu.dragging {
-            opacity: 0.9;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-        }
+/* ===== iframe 内容区 ===== */
+.content {
+    flex: 1;
+    position: relative;
+    min-height: 0; /* 防止iframe溢出 */
+}
 
-        /* 响应式调整 */
-        @media (max-width: 375px) {
-            .capsule-menu {
-                right: 8px;
-            }
-        }
-    </style>
+.webview {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* ===== 菜单 ===== */
+.menu {
+    position: absolute;
+    top: calc(env(safe-area-inset-top) + var(--header-height) + 4px);
+    right: 12px;
+    width: var(--menu-width);
+    background: var(--color-menu-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: var(--menu-radius);
+    box-shadow: 0 8px 30px var(--color-shadow);
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s,
+                background-color var(--transition-duration) var(--transition-timing),
+                box-shadow var(--transition-duration) var(--transition-timing);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.menu--open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.menu__button {
+    width: 100%;
+    padding: var(--menu-padding);
+    border: none;
+    background: none;
+    color: var(--color-menu-text);
+    text-align: left;
+    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--menu-gap);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--transition-duration) var(--transition-timing),
+                background-color var(--transition-duration) var(--transition-timing);
+}
+
+.menu__button:hover,
+.menu__button:focus-visible {
+    background: var(--color-menu-hover);
+}
+
+.menu__button:active {
+    background: var(--color-menu-active);
+}
+
+/* ===== 遮罩层 ===== */
+.overlay {
+    position: fixed;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s;
+    z-index: 999;
+    background: transparent;
+}
+
+.overlay--open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 减少运动偏好适配 */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --transition-duration: 0.01s;
+    }
+    
+    .menu,
+    .overlay {
+        transition: none;
+    }
+}
+</style>
 </head>
+
 <body>
+<div class="app">
+    <header class="header" role="banner">
+        <h1 class="title" id="page-title">免费小说王</h1>
 
-    <div class="capsule-menu collapsed" id="mainCapsule">
-        <div class="capsule-item" id="toggleBtn">
-            <span class="material-icons" id="toggleIcon">chevron_left</span>
+        <div class="capsule" role="toolbar">
+            <button class="capsule__button" onclick="toggleMenu()" aria-label="更多选项" aria-expanded="false" aria-haspopup="true">
+                <span class="material-icons" aria-hidden="true">more_horiz</span>
+            </button>
+            <div class="capsule__divider" role="separator"></div>
+            <button class="capsule__button" onclick="closePage()" aria-label="关闭页面">
+                <span class="material-icons" aria-hidden="true">close</span>
+            </button>
         </div>
-        <div class="divider"></div>
-        <div class="capsule-item close-btn" id="closeBtn">
-            <span class="material-icons">close</span>
-        </div>
-    </div>
+    </header>
 
-    <div class="app-container">
-        <iframe id="loungeFrame" src="https://reader.browser.miui.com/v2/#tab=store&source=oldhotcard&_miui_orientation=portrait&_miui_fullscreen=1" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
-    </div>
+    <main class="content" role="main">
+        <iframe 
+            id="webframe" 
+            class="webview" 
+            src="https://reader.browser.miui.com/v2/#tab=store&source=oldhotcard&_miui_orientation=portrait&_miui_fullscreen=1"
+            title="免费小说王"
+            loading="eager"
+            allow="fullscreen"
+        ></iframe>
+    </main>
+</div>
 
-    <script>
-        // DOM 元素
-        const capsule = document.getElementById('mainCapsule');
-        const toggleBtn = document.getElementById('toggleBtn');
-        const toggleIcon = document.getElementById('toggleIcon');
-        const closeBtn = document.getElementById('closeBtn');
+<!-- 菜单 -->
+<nav class="menu" id="menu" role="menu" aria-labelledby="page-title">
+    <button class="menu__button" onclick="refreshPage()" role="menuitem">
+        <span class="material-icons" aria-hidden="true">refresh</span>
+        刷新
+    </button>
+</nav>
 
-        // 状态变量
-        let isDragging = false;
-        let dragStartY = 0;
-        let capsuleStartTop = 0;
-        let dragStartTime = 0;
-        let currentTouchId = null;
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
-        // 切换胶囊菜单状态
-        function toggleCapsule() {
-            if (capsule.classList.contains('collapsed')) {
-                // 收起 -> 展开
-                capsule.classList.remove('collapsed');
-                capsule.classList.add('expanded');
-                toggleIcon.textContent = 'chevron_right';
-            } else {
-                // 展开 -> 收起
-                capsule.classList.remove('expanded');
-                capsule.classList.add('collapsed');
-                toggleIcon.textContent = 'chevron_left';
-            }
-        }
+<script>
+// 使用严格模式
+'use strict';
 
-        // 返回或关闭处理
-        function goBackOrClose() {
-            // 添加点击反馈
-            closeBtn.style.opacity = '0.5';
-            setTimeout(() => {
-                closeBtn.style.opacity = '';
-            }, 150);
-            
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                // 优雅关闭效果
-                capsule.style.opacity = '0';
-                setTimeout(() => {
-                    window.close();
-                }, 300);
-            }
-        }
+// DOM 元素缓存
+const dom = {
+    menu: document.getElementById('menu'),
+    overlay: document.getElementById('overlay'),
+    iframe: document.getElementById('webframe'),
+    menuToggle: document.querySelector('[aria-expanded]')
+};
 
-        // 获取当前触摸点
-        function getCurrentTouch(e) {
-            if (!e.touches) return e;
-            
-            // 如果有多个触摸点，找到我们开始的那个
-            if (currentTouchId !== null) {
-                for (let i = 0; i < e.touches.length; i++) {
-                    if (e.touches[i].identifier === currentTouchId) {
-                        return e.touches[i];
-                    }
-                }
-            }
-            return e.touches[0] || e;
-        }
+// 菜单状态
+let isMenuOpen = false;
 
-        // 开始拖拽
-        function onDragStart(e) {
-            // 防止右键菜单
-            if (e.type === 'mousedown' && e.button !== 0) return;
-            
-            const touch = getCurrentTouch(e);
-            currentTouchId = touch.identifier || Date.now();
-            
-            isDragging = false;
-            dragStartY = touch.clientY;
-            capsuleStartTop = capsule.offsetTop;
-            dragStartTime = Date.now();
-            
-            capsule.classList.add('dragging');
-            
-            // 阻止默认行为，防止滚动
-            e.preventDefault();
-        }
+// 切换菜单显示/隐藏
+function toggleMenu() {
+    isMenuOpen = !isMenuOpen;
+    
+    if (isMenuOpen) {
+        dom.menu.classList.add('menu--open');
+        dom.overlay.classList.add('overlay--open');
+        dom.menuToggle.setAttribute('aria-expanded', 'true');
+    } else {
+        closeMenu();
+    }
+}
 
-        // 拖拽移动
-        function onDragMove(e) {
-            if (currentTouchId === null) return;
-            
-            const touch = getCurrentTouch(e);
-            const deltaY = touch.clientY - dragStartY;
-            
-            // 判断是否是拖拽操作（移动超过5px）
-            if (!isDragging && Math.abs(deltaY) > 5) {
-                isDragging = true;
-            }
-            
-            // 如果是拖拽，更新位置
-            if (isDragging) {
-                let newTop = capsuleStartTop + deltaY;
-                
-                // 限制在屏幕范围内
-                const minTop = 50;
-                const maxTop = window.innerHeight - capsule.offsetHeight - 20;
-                newTop = Math.max(minTop, Math.min(newTop, maxTop));
-                
-                capsule.style.top = `${newTop}px`;
-            }
-        }
+// 关闭菜单
+function closeMenu() {
+    isMenuOpen = false;
+    dom.menu.classList.remove('menu--open');
+    dom.overlay.classList.remove('overlay--open');
+    dom.menuToggle.setAttribute('aria-expanded', 'false');
+}
 
-        // 结束拖拽
-        function onDragEnd(e) {
-            if (currentTouchId === null) return;
-            
-            capsule.classList.remove('dragging');
-            const dragDuration = Date.now() - dragStartTime;
-            
-            // 判断是点击还是拖拽
-            if (isDragging) {
-                // 拖拽结束，自动吸附到最近的边缘
-                const currentTop = parseInt(capsule.style.top) || capsuleStartTop;
-                const midPoint = window.innerHeight / 2;
-                const targetTop = currentTop < midPoint ? 50 : window.innerHeight - capsule.offsetHeight - 20;
-                
-                capsule.style.top = `${targetTop}px`;
-            } else if (dragDuration < 200) {
-                // 短按，执行切换操作
-                toggleCapsule();
-            }
-            
-            // 重置状态
-            isDragging = false;
-            currentTouchId = null;
-        }
+// 刷新页面
+function refreshPage() {
+    const currentSrc = dom.iframe.src;
+    // 通过重新设置src来刷新，避免缓存问题
+    dom.iframe.src = '';
+    setTimeout(() => {
+        dom.iframe.src = currentSrc;
+    }, 0);
+    closeMenu();
+}
 
-        // 事件监听器绑定
-        function setupEventListeners() {
-            // 触摸事件
-            toggleBtn.addEventListener('touchstart', onDragStart);
-            document.addEventListener('touchmove', onDragMove, { passive: false });
-            document.addEventListener('touchend', onDragEnd);
-            
-            // 鼠标事件
-            toggleBtn.addEventListener('mousedown', onDragStart);
-            document.addEventListener('mousemove', onDragMove);
-            document.addEventListener('mouseup', onDragEnd);
-            document.addEventListener('mouseleave', onDragEnd);
-            
-            // 点击事件
-            closeBtn.addEventListener('click', goBackOrClose);
-            
-            // ESC键关闭
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    goBackOrClose();
-                }
-            });
-            
-            // 窗口大小变化时重新计算位置
-            window.addEventListener('resize', () => {
-                // 如果胶囊位置超出屏幕，重新调整
-                const currentTop = parseInt(capsule.style.top) || 0;
-                const maxTop = window.innerHeight - capsule.offsetHeight - 20;
-                
-                if (currentTop > maxTop && maxTop > 0) {
-                    capsule.style.top = `${maxTop}px`;
-                }
-            });
-        }
+// 关闭页面
+function closePage() {
+    if (window.history.length > 1) {
+        window.history.back();
+    } else if (window.close) {
+        window.close();
+    }
+}
 
-        // 初始化
-        function init() {
-            setupEventListeners();
-            
-            // 初始位置设置
-            capsule.style.top = '15%';
-            
-            // 初始显示胶囊
-            capsule.style.opacity = '1';
-        }
+// 点击遮罩层关闭菜单
+dom.overlay.addEventListener('click', closeMenu);
 
-        // 启动应用
-        init();
-    </script>
+// 点击菜单外部关闭菜单
+document.addEventListener('click', (event) => {
+    if (isMenuOpen && !dom.menu.contains(event.target) && !dom.menuToggle.contains(event.target)) {
+        closeMenu();
+    }
+});
+
+// 键盘事件支持
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isMenuOpen) {
+        closeMenu();
+    }
+});
+
+// 检测主题变化并更新
+const colorSchemeMedia = window.matchMedia('(prefers-color-scheme: light)');
+
+// 主题变化时的处理函数
+function handleThemeChange(e) {
+    // 添加一个短暂的过渡类，让主题切换更平滑
+    document.documentElement.classList.add('theme-transitioning');
+    
+    // 移除过渡类（允许浏览器重新计算样式）
+    setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+    }, 300);
+}
+
+// 监听主题变化
+colorSchemeMedia.addEventListener('change', handleThemeChange);
+
+// 可选的：为高对比度模式添加监听
+const contrastMedia = window.matchMedia('(prefers-contrast: high)');
+contrastMedia.addEventListener('change', handleThemeChange);
+</script>
 </body>
 </html>
