@@ -8,28 +8,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-    /* --- 全局变量定义 --- */
     :root {
-        /* 浅色模式变量 */
         --bg-color: #f7f7f7;
         --card-bg: #ffffff;
         --text-main: rgba(0, 0, 0, 0.9);
         --text-desc: rgba(0, 0, 0, 0.5);
         --primary-blue: #2c80ff;
         --hero-gradient: linear-gradient(160deg, #2c80ff 0%, #5a9dff 100%);
-        --shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-        --border-color: rgba(0, 0, 0, 0.05);
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --border-color: rgba(0, 0, 0, 0.1);
         --weui-BG: #f7f7f7;
         --weui-BG-0: #ffffff;
         --weui-BG-1: #f7f7f7;
-        --weui-FG: #000000;
         --weui-FG-0: rgba(0, 0, 0, 0.9);
-        --weui-FG-1: rgba(0, 0, 0, 0.55);
+        --weui-FG-1: rgba(0, 0, 0, 0.5);
         --weui-BRAND: #2c80ff;
         --weui-RED: #fa5151;
     }
 
-    /* 当 body 标记为 dark 时覆盖变量 */
     body[data-weui-theme='dark'] {
         --bg-color: #111111;
         --card-bg: #1f1f1f;
@@ -37,405 +33,134 @@
         --text-desc: rgba(255, 255, 255, 0.5);
         --primary-blue: #5a9dff;
         --hero-gradient: linear-gradient(160deg, #1a5fcc 0%, #2c80ff 100%);
-        --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        --border-color: rgba(255, 255, 255, 0.05);
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        --border-color: rgba(255, 255, 255, 0.1);
         --weui-BG: #000000;
-        --weui-BG-0: #111111;
-        --weui-BG-1: #1f1f1f;
-        --weui-FG: #ffffff;
+        --weui-BG-0: #191919;
+        --weui-BG-1: #111111;
         --weui-FG-0: rgba(255, 255, 255, 0.9);
-        --weui-FG-1: rgba(255, 255, 255, 0.55);
+        --weui-FG-1: rgba(255, 255, 255, 0.5);
         --weui-BRAND: #5a9dff;
-        --weui-RED: #fa5151;
     }
 
     body {
         background-color: var(--weui-BG);
         color: var(--weui-FG-0);
         font-family: -apple-system-font, Helvetica Neue, sans-serif;
+        margin: 0;
         transition: background-color 0.3s ease;
-        padding-bottom: constant(safe-area-inset-bottom);
         padding-bottom: env(safe-area-inset-bottom);
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    /* --- 顶部提示条修复 --- */
+    /* --- 顶部提示 --- */
     .weui-toptips {
-        position: fixed !important;
-        top: 8px !important;
-        left: 8px !important;
-        right: 8px !important;
-        z-index: 5001 !important;
-        border-radius: 8px !important;
-        padding: 10px 16px !important;
-        line-height: 1.4 !important;
-        height: auto !important;
-        min-height: auto !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-        margin-top: env(safe-area-inset-top, 0) !important;
-        display: none !important;
+        border-radius: 8px;
+        margin: 8px;
+        width: auto;
+        display: none;
     }
 
-    .weui-toptips.weui-toptips_warn {
-        display: block !important;
-        background-color: var(--weui-RED) !important;
-        color: #fff !important;
-    }
-
-    /* 确保提示条在深色模式下正确显示 */
-    .weui-toptips_warn {
-        background-color: #fa5151 !important;
-        color: #fff !important;
-    }
-
-    body[data-weui-theme='dark'] .weui-toptips_warn {
-        background-color: #d44 !important;
-    }
-
-    /* --- 搜索栏修复 --- */
+    /* --- 搜索栏适配 --- */
     .search-container {
         position: sticky;
         top: 0;
         z-index: 100;
         background-color: var(--weui-BG);
-        transition: background-color 0.3s ease;
-        padding-top: env(safe-area-inset-top, 0);
         border-bottom: 1px solid var(--border-color);
+        padding-top: env(safe-area-inset-top, 0);
     }
     
-    /* WeUI搜索栏深色模式适配 */
-    body[data-weui-theme='dark'] .weui-search-bar {
-        background-color: #000000 !important;
-    }
-    
-    body[data-weui-theme='dark'] .weui-search-bar__box {
-        background-color: #1f1f1f !important;
-    }
-    
-    body[data-weui-theme='dark'] .weui-search-bar__label {
-        background-color: #1f1f1f !important;
-        color: rgba(255, 255, 255, 0.55) !important;
-    }
-    
-    body[data-weui-theme='dark'] .weui-search-bar__input {
-        color: rgba(255, 255, 255, 0.9) !important;
-        background-color: #1f1f1f !important;
-    }
-    
-    .weui-search-bar__label {
-        border-radius: 8px;
-    }
-    
-    .weui-search-bar__form {
-        border-radius: 8px;
-    }
+    .weui-search-bar { background-color: transparent !important; }
+    .weui-search-bar:before, .weui-search-bar:after { display: none; }
+    .weui-search-bar__form { background-color: var(--weui-BG-0); border-radius: 8px; }
+    .weui-search-bar__box .weui-search-bar__input { color: var(--weui-FG-0); }
+    .weui-search-bar__label { background-color: var(--weui-BG-0); border-radius: 8px; }
 
-    /* 自动定位行 - 深色模式修复 */
     .location-cell {
         display: none;
-        margin-top: 0;
         background-color: var(--weui-BG-0);
         border-top: 1px solid var(--border-color);
     }
-    
-    .location-cell.active {
-        display: block;
-        animation: slideDown 0.2s ease-out;
-    }
+    .location-cell.active { display: block; animation: fadeInDown 0.3s ease; }
 
-    @keyframes slideDown {
+    /* --- 天气主卡片 --- */
+    .weather-hero {
+        margin: 16px;
+        padding: 40px 20px;
+        background: var(--hero-gradient);
+        border-radius: 20px;
+        color: #fff;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 10px 25px rgba(44, 128, 255, 0.3);
+        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .hero-city { font-size: 26px; font-weight: 700; }
+    .hero-date { font-size: 14px; opacity: 0.8; margin-bottom: 25px; }
+    .hero-main { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; }
+    .hero-temp { font-size: 72px; font-weight: 200; line-height: 1; }
+    .hero-icon { font-size: 48px; }
+    .update-badge { position: absolute; top: 15px; right: 15px; font-size: 11px; background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 12px; backdrop-filter: blur(5px); }
+
+    /* --- 详情网格 --- */
+    .custom-grids {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        padding: 10px 16px;
+        gap: 1px;
+        background-color: var(--border-color);
+        margin: 0 16px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+    }
+    .grid-item { background-color: var(--weui-BG-0); padding: 20px 0; text-align: center; }
+    .grid-icon i { font-size: 18px; color: var(--weui-BRAND); margin-bottom: 8px; }
+    .grid-label { font-size: 12px; color: var(--weui-FG-1); }
+    .grid-value { font-size: 15px; font-weight: 600; color: var(--weui-FG-0); display: block; }
+
+    /* --- 未来预报滚动 --- */
+    .section-title { padding: 24px 16px 12px; font-size: 15px; color: var(--weui-FG-0); font-weight: 600; }
+    .forecast-scroll-container { display: flex; overflow-x: auto; padding: 0 16px 10px; gap: 12px; scrollbar-width: none; }
+    .forecast-scroll-container::-webkit-scrollbar { display: none; }
+    .forecast-item { flex: 0 0 90px; background: var(--weui-BG-0); padding: 16px 8px; border-radius: 14px; text-align: center; border: 1px solid var(--border-color); }
+    .f-day { color: var(--weui-FG-0); font-size: 13px; font-weight: 500; }
+    .f-date { font-size: 11px; color: var(--weui-FG-1); }
+    .f-icon { font-size: 24px; margin: 12px 0; color: var(--weui-BRAND); }
+    .f-temp { font-weight: 600; font-size: 15px; }
+
+    /* --- 昨天卡片 --- */
+    .yesterday-card { margin: 0 16px 30px; background: var(--weui-BG-0); border-radius: 14px; overflow: hidden; border: 1px solid var(--border-color); }
+    .weui-form-preview__hd:after { left: 16px; border-color: var(--border-color); }
+
+    /* --- 加载动画补丁 --- */
+    .weui-loading { vertical-align: middle; }
+    #initialLoading { height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--weui-FG-1); }
+
+    @keyframes fadeInDown {
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* WeUI单元格深色模式修复 */
-    .weui-cells {
-        margin-top: 0 !important;
-        background-color: var(--weui-BG-0) !important;
-    }
-    
-    body[data-weui-theme='dark'] .weui-cells:before,
-    body[data-weui-theme='dark'] .weui-cells:after {
-        border-color: var(--border-color) !important;
-    }
-    
-    .weui-cell {
-        background-color: var(--weui-BG-0) !important;
-        color: var(--weui-FG-0) !important;
-    }
-    
+    /* 修复WeUI深色模式边框 */
+    body[data-weui-theme='dark'] .weui-cells:before, 
+    body[data-weui-theme='dark'] .weui-cells:after,
     body[data-weui-theme='dark'] .weui-cell:before {
-        border-color: var(--border-color) !important;
+        border-color: rgba(255,255,255,0.1) !important;
     }
-    
-    .weui-cell__bd p {
-        color: var(--weui-FG-0) !important;
-    }
-    
-    .weui-cell__ft {
-        color: var(--weui-FG-1) !important;
-    }
-
-    /* --- 天气主卡片 (Hero) - 深色模式修复 --- */
-    .weather-hero {
-        margin: 16px;
-        padding: 30px 20px;
-        background: var(--hero-gradient);
-        border-radius: 16px;
-        color: #fff;
-        text-align: center;
-        position: relative;
-        box-shadow: 0 8px 20px rgba(44, 128, 255, 0.25);
-        /* 确保在深色模式下文本颜色正确 */
-        text-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-
-    .hero-city { font-size: 24px; font-weight: 600; }
-    .hero-date { font-size: 13px; opacity: 0.85; margin-bottom: 20px; }
-    
-    .hero-main {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-    
-    .hero-temp { font-size: 60px; font-weight: 300; line-height: 1; }
-    .hero-icon { font-size: 44px; opacity: 0.95; }
-    
-    .hero-status { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
-    .hero-range { font-size: 14px; opacity: 0.8; }
-    
-    .update-badge {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        font-size: 10px;
-        background: rgba(255,255,255,0.2);
-        padding: 2px 8px;
-        border-radius: 10px;
-        backdrop-filter: blur(4px);
-    }
-
-    /* --- 详情网格 - 深色模式修复 --- */
-    .custom-grids {
-        display: flex;
-        flex-wrap: wrap;
-        padding: 10px 16px;
-        background-color: var(--weui-BG-0);
-        margin: 0;
-        border-radius: 0;
-    }
-    
-    .grid-item {
-        width: 33.33%;
-        text-align: center;
-        padding: 15px 0;
-        margin-bottom: 10px;
-    }
-    
-    .grid-icon { font-size: 20px; margin-bottom: 6px; }
-    .grid-label { font-size: 12px; color: var(--weui-FG-1); }
-    .grid-value { font-size: 15px; font-weight: 600; color: var(--weui-FG-0); display: block; margin-top: 2px; }
-
-    /* --- 横向滚动预报 - 深色模式修复 --- */
-    .section-title {
-        padding: 20px 16px 10px;
-        font-size: 14px;
-        color: var(--weui-FG-1);
-        font-weight: 500;
-        background-color: var(--weui-BG);
-    }
-
-    .forecast-scroll-container {
-        display: flex;
-        overflow-x: auto;
-        padding: 0 16px 20px;
-        gap: 12px;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        background-color: var(--weui-BG);
-    }
-    
-    .forecast-scroll-container::-webkit-scrollbar { display: none; }
-
-    .forecast-item {
-        flex: 0 0 85px;
-        background: var(--weui-BG-0);
-        padding: 16px 5px;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: var(--shadow);
-        border: 1px solid var(--border-color);
-    }
-
-    .f-day { color: var(--weui-FG-1); font-size: 12px; margin-bottom: 4px; }
-    .f-date { font-size: 10px; color: var(--weui-FG-1); opacity: 0.6; margin-bottom: 10px; }
-    .f-icon { font-size: 22px; margin: 8px 0; }
-    .f-cond { font-size: 12px; color: var(--weui-FG-0); margin-bottom: 8px; }
-    .f-temp { font-weight: 600; color: var(--weui-FG-0); font-size: 14px; }
-    .f-temp-low { font-size: 12px; color: var(--weui-FG-1); margin-top: 2px; }
-
-    /* --- 昨天天气卡片 - 深色模式修复 --- */
-    .yesterday-card {
-        margin: 10px 16px 30px;
-        background: var(--weui-BG-0);
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: var(--shadow);
-        border: 1px solid var(--border-color);
-    }
-    
-    /* WeUI表单预览深色模式适配 */
-    .weui-form-preview {
-        background-color: var(--weui-BG-0) !important;
-    }
-    
-    .weui-form-preview__hd {
-        padding: 16px;
-        border-bottom: 1px solid var(--border-color) !important;
-        color: var(--weui-FG-0) !important;
-        background-color: var(--weui-BG-0) !important;
-    }
-    
-    .weui-form-preview__bd {
-        padding: 16px;
-        color: var(--weui-FG-1) !important;
-        background-color: var(--weui-BG-0) !important;
-    }
-    
-    .weui-form-preview__label {
-        color: var(--weui-FG-1) !important;
-    }
-    
-    .weui-form-preview__value {
-        color: var(--weui-FG-0) !important;
-    }
-    
-    body[data-weui-theme='dark'] .weui-form-preview__item {
-        border-color: var(--border-color) !important;
-    }
-
-    /* --- Footer - 深色模式修复 --- */
-    .weui-footer { 
-        margin-top: 40px; 
-        margin-bottom: calc(20px + env(safe-area-inset-bottom, 0));
-        background-color: var(--weui-BG);
-        padding-top: 0;
-    }
-    
-    .weui-footer__text { 
-        color: var(--weui-FG-1) !important;
-    }
-    
-    .weui-footer__link {
-        color: var(--weui-FG-1) !important;
-    }
-
-    /* 初始加载状态 - 使用WeUI加载动画 */
-    #initialLoading {
-        text-align: center;
-        padding: 60px 20px;
-        color: var(--weui-FG-1);
-        background-color: var(--weui-BG);
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .weui-loading {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .weui-icon_toast.weui-loading {
-        margin: 0;
-    }
-
-    /* WeUI Toast深色模式修复 */
-    .weui-toast {
-        background-color: var(--weui-BG-0) !important;
-        color: var(--weui-FG-0) !important;
-        border: 1px solid var(--border-color);
-    }
-    
-    .weui-toast__content {
-        color: var(--weui-FG-0) !important;
-    }
-    
-    /* WeUI加载动画深色模式适配 */
-    .weui-loading {
-        color: var(--weui-FG-0) !important;
-    }
-    
-    body[data-weui-theme='dark'] .weui-loading {
-        filter: invert(1);
-    }
-
-    /* 主内容区域 */
-    #mainContent {
-        background-color: var(--weui-BG);
-        min-height: 100vh;
-    }
-    
-    /* 自定义加载动画类 - 移除FontAwesome旋转 */
-    .loading-spinner {
-        display: none;
-    }
-    
-    /* 确保天气图标不旋转 */
-    .hero-icon .fa-spinner {
-        display: none;
-    }
-    
-    /* WeUI mask深色模式修复 */
-    .weui-mask_transparent {
-        background: transparent !important;
-    }
-    
-    /* --- 修复图标颜色 --- */
-    /* 亮色模式下图标颜色为蓝色 */
-    .fa-location-arrow,
-    .grid-icon i,
-    .f-icon i {
-        color: #2c80ff !important;
-    }
-
-    /* 深色模式下图标颜色为浅蓝色 */
-    body[data-weui-theme='dark'] .fa-location-arrow,
-    body[data-weui-theme='dark'] .grid-icon i,
-    body[data-weui-theme='dark'] .f-icon i {
-        color: #5a9dff !important;
-    }
-
-    /* 天气主图标颜色 */
-    .hero-icon i {
-        color: rgba(255, 255, 255, 0.95) !important;
-    }
-
-    /* 温度箭头颜色 */
-    .fa-arrow-up, .fa-arrow-down {
-        color: rgba(255, 255, 255, 0.8) !important;
-    }
-    
     </style>
 </head>
 
 <body>
-    <!-- 错误提示 - 移除了 weui-toptips_warn 类，只保留基本类 -->
-    <div class="weui-toptips" id="topTips">错误提示</div>
+    <div class="weui-toptips weui-toptips_warn" id="topTips">错误提示</div>
 
-    <!-- 搜索栏 -->
     <div class="search-container">
         <div class="weui-search-bar" id="searchBar">
-            <form class="weui-search-bar__form" id="searchForm">
+            <form class="weui-search-bar__form">
                 <div class="weui-search-bar__box">
                     <i class="weui-icon-search"></i>
-                    <input type="search" class="weui-search-bar__input" id="searchInput" placeholder="搜索城市" required/>
+                    <input type="search" class="weui-search-bar__input" id="searchInput" placeholder="搜索城市名称" required/>
                     <a href="javascript:" class="weui-icon-clear" id="searchClear"></a>
                 </div>
                 <label class="weui-search-bar__label" id="searchText">
@@ -448,25 +173,21 @@
 
         <div class="weui-cells location-cell" id="locationCell">
             <div class="weui-cell weui-cell_active weui-cell_access" id="locationBtn">
-                <div class="weui-cell__hd" style="margin-right: 12px;">
+                <div class="weui-cell__hd" style="margin-right: 12px; color: var(--weui-BRAND);">
                     <i class="fas fa-location-arrow"></i>
                 </div>
-                <div class="weui-cell__bd">
-                    <p style="font-size: 15px;">点击获取当前定位</p>
-                </div>
-                <div class="weui-cell__ft" id="gpsStatus"></div>
+                <div class="weui-cell__bd"><p style="font-size: 15px;">获取当前位置天气</p></div>
+                <div class="weui-cell__ft" id="gpsStatus" style="font-size: 13px;">自动定位</div>
             </div>
         </div>
     </div>
 
-    <!-- 初始加载状态 - 使用WeUI加载动画 -->
     <div id="initialLoading">
-        <div class="weui-loading"></div>
-        <p style="margin-top: 20px;">正在获取天气信息...</p>
+        <i class="weui-loading" style="width: 32px; height: 32px;"></i>
+        <p style="margin-top: 15px; font-size: 14px;">正在连接树洞天气...</p>
     </div>
 
-    <!-- 主内容区域 -->
-    <div id="mainContent" style="display:none; opacity: 0; transition: opacity 0.5s;">
+    <div id="mainContent" style="display:none; opacity: 0; transition: opacity 0.6s ease-out;">
         
         <div class="weather-hero">
             <div class="update-badge">更新于 <span id="updateTime">--:--</span></div>
@@ -474,24 +195,20 @@
             <div class="hero-date" id="uiDate">--</div>
             
             <div class="hero-main">
-                <div class="hero-icon" id="weatherIcon">
-                    <div class="weui-loading" style="width: 44px; height: 44px;"></div>
-                </div>
+                <div class="hero-icon" id="weatherIcon"><i class="fas fa-sun"></i></div>
                 <div class="hero-temp" id="uiTemp">--°</div>
             </div>
             
-            <div class="hero-status" id="uiWea">--</div>
-            <div class="hero-range">
-                <i class="fas fa-arrow-down" style="font-size:10px"></i> <span id="uiLowTemp">--</span>
-                &nbsp;&nbsp;
-                <i class="fas fa-arrow-up" style="font-size:10px"></i> <span id="uiHighTemp">--</span>
+            <div class="hero-status" id="uiWea" style="font-size: 20px; font-weight: 500;">--</div>
+            <div class="hero-range" style="margin-top: 5px; opacity: 0.9;">
+                <span id="uiLowTemp">--</span> ~ <span id="uiHighTemp">--</span>
             </div>
-            <div style="margin-top: 15px; font-size: 13px; opacity: 0.9;" id="weatherNotice">--</div>
+            <div style="margin-top: 20px; font-size: 13px; background: rgba(0,0,0,0.1); padding: 8px 15px; border-radius: 10px; display: inline-block;" id="weatherNotice">--</div>
         </div>
 
         <div class="custom-grids" id="currentDetails"></div>
 
-        <div class="section-title">未来预报</div>
+        <div class="section-title">未来天气预报</div>
         <div class="forecast-scroll-container" id="forecastContainer"></div>
 
         <div class="section-title">昨日回顾</div>
@@ -500,134 +217,83 @@
                 <div class="weui-form-preview__hd">
                     <div class="weui-form-preview__item">
                         <label class="weui-form-preview__label">昨日日期</label>
-                        <em class="weui-form-preview__value" id="yesterdayDate">--</em>
+                        <em class="weui-form-preview__value" id="yesterdayDate" style="font-size: 16px;">--</em>
                     </div>
                 </div>
                 <div class="weui-form-preview__bd" id="yesterdayBody"></div>
             </div>
         </div>
 
-        <div class="weui-footer">
-            <p class="weui-footer__links">
-                <a href="javascript:;" class="weui-footer__link">树洞天气助手</a>
-            </p>
+        <div class="weui-footer" style="padding-bottom: 30px;">
+            <p class="weui-footer__links"><a href="javascript:;" class="weui-footer__link">树洞天气助手</a></p>
             <p class="weui-footer__text">天气数据由第三方提供·定位信息来自你的网络IP</p>
         </div>
     </div>
 
-    <!-- 加载提示 - 使用WeUI Toast -->
     <div id="loadingToast" style="display: none;">
         <div class="weui-mask_transparent"></div>
         <div class="weui-toast">
             <i class="weui-loading weui-icon_toast"></i>
-            <p class="weui-toast__content">加载中</p>
+            <p class="weui-toast__content">查询中</p>
         </div>
     </div>
 
     <script>
-        // --- 系统级深色模式自适应逻辑 ---
-        function initAdaptiveTheme() {
-            const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
-            
-            // 核心函数：设置 body 的 data-weui-theme 属性
-            const applyTheme = (e) => {
-                const theme = e.matches ? 'dark' : 'light';
-                document.body.setAttribute('data-weui-theme', theme);
-                // 适配 iOS 状态栏颜色
-                let metaThemeColor = document.querySelector("meta[name=theme-color]");
-                if (!metaThemeColor) {
-                    metaThemeColor = document.createElement('meta');
-                    metaThemeColor.name = 'theme-color';
-                    document.head.appendChild(metaThemeColor);
-                }
-                metaThemeColor.setAttribute("content", theme === 'dark' ? '#111111' : '#f7f7f7');
-                
-                // 修复WeUI组件深色模式
-                fixDarkModeComponents(theme);
-            };
-
-            // 初始化执行
-            applyTheme(themeMedia);
-            // 监听系统切换
-            themeMedia.addEventListener('change', applyTheme);
-        }
-
-        // 修复WeUI组件深色模式
-        function fixDarkModeComponents(theme) {
-            // 搜索栏修复
-            const searchBars = document.querySelectorAll('.weui-search-bar');
-            searchBars.forEach(bar => {
-                if (theme === 'dark') {
-                    bar.style.backgroundColor = '#000000';
-                } else {
-                    bar.style.backgroundColor = '#f7f7f7';
-                }
-            });
-            
-            // 单元格修复
-            const cells = document.querySelectorAll('.weui-cell');
-            cells.forEach(cell => {
-                if (theme === 'dark') {
-                    cell.style.backgroundColor = '#111111';
-                } else {
-                    cell.style.backgroundColor = '#ffffff';
-                }
-            });
-        }
-
-        // --- 配置 ---
+        // --- 核心配置 ---
         const API_KEY = "Nub0tYQ9brRDfSOfUXvA6xgoxb";
         const WEATHER_URL = "https://api.hewoyi.com/api/weather/v1";
         const IP_URL = "https://api.hewoyi.com/api/ipjwd/get";
 
-        // --- 状态管理 ---
-        let currentCity = "北京";
-        let tipTimer = null; // 用于管理错误提示的定时器
+        let currentCity = "";
 
         // --- 初始化 ---
         document.addEventListener('DOMContentLoaded', () => {
-            initAdaptiveTheme(); // 启动主题监听
-            initSearch();
-            initEventListeners();
+            initTheme();
+            initSearchUI();
             getWeatherByIP();
         });
 
-        function initEventListeners() {
-            // 定位按钮点击事件
-            document.getElementById('locationBtn').addEventListener('click', getWeatherByIP);
+        // --- 主题适配 ---
+        function initTheme() {
+            const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
+            const apply = (e) => {
+                const theme = e.matches ? 'dark' : 'light';
+                document.body.setAttribute('data-weui-theme', theme);
+                document.querySelector("meta[name=theme-color]")?.setAttribute("content", theme === 'dark' ? '#000000' : '#f7f7f7');
+            };
+            apply(themeMedia);
+            themeMedia.addEventListener('change', apply);
         }
 
-        // --- UI 交互逻辑 ---
-        function initSearch() {
+        // --- 搜索UI逻辑 ---
+        function initSearchUI() {
             const $searchBar = document.getElementById('searchBar');
             const $searchText = document.getElementById('searchText');
             const $searchInput = document.getElementById('searchInput');
             const $searchClear = document.getElementById('searchClear');
             const $searchCancel = document.getElementById('searchCancel');
-            const $searchForm = document.getElementById('searchForm');
             const $locationCell = document.getElementById('locationCell');
 
-            $searchText.addEventListener('click', function(){
+            $searchText.addEventListener('click', () => {
                 $searchBar.classList.add('weui-search-bar_focusing');
                 $searchInput.focus();
                 $locationCell.classList.add('active');
             });
 
-            $searchCancel.addEventListener('click', function(){
+            $searchCancel.addEventListener('click', () => {
                 $searchBar.classList.remove('weui-search-bar_focusing');
-                $searchInput.value = '';
                 $locationCell.classList.remove('active');
             });
 
-            $searchClear.addEventListener('click', function(){
+            $searchClear.addEventListener('click', () => {
                 $searchInput.value = '';
                 $searchInput.focus();
             });
 
-            $searchForm.addEventListener('submit', function(e){
+            document.querySelector('.weui-search-bar__form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const city = $searchInput.value.trim();
-                if(city){
+                if(city) {
                     $searchInput.blur();
                     $searchBar.classList.remove('weui-search-bar_focusing');
                     $locationCell.classList.remove('active');
@@ -635,260 +301,138 @@
                 }
             });
 
-            // 输入框失去焦点时，如果为空，则关闭搜索状态
-            $searchInput.addEventListener('blur', function() {
-                if (!this.value.trim()) {
-                    setTimeout(() => {
-                        $searchBar.classList.remove('weui-search-bar_focusing');
-                        $locationCell.classList.remove('active');
-                    }, 200);
-                }
-            });
+            document.getElementById('locationBtn').addEventListener('click', getWeatherByIP);
         }
 
-        function showLoading() {
-            document.getElementById('loadingToast').style.display = 'block';
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingToast').style.display = 'none';
-        }
-
-        function showTopTips(msg) {
-            const $tips = document.getElementById('topTips');
-            $tips.textContent = msg;
-            
-            // 清除之前的定时器
-            if (tipTimer) {
-                clearTimeout(tipTimer);
-                tipTimer = null;
-            }
-            
-            // 添加警告类以显示提示
-            $tips.classList.add('weui-toptips_warn');
-            
-            // 3秒后隐藏提示
-            tipTimer = setTimeout(function() {
-                $tips.classList.remove('weui-toptips_warn');
-                tipTimer = null;
-            }, 3000);
-        }
-
-        // --- API 逻辑 ---
+        // --- 数据请求 ---
         async function getWeatherByIP() {
-            showLoading();
-            const gpsStatus = document.getElementById('gpsStatus');
-            gpsStatus.innerText = "定位中...";
-            gpsStatus.style.color = "var(--weui-FG-1)";
+            toggleToast(true);
+            const $status = document.getElementById('gpsStatus');
+            $status.innerText = "正在定位...";
             
             try {
-                const res = await fetch(`${IP_URL}?key=${API_KEY}&ip=`);
+                const res = await fetch(`${IP_URL}?key=${API_KEY}`);
                 const data = await res.json();
-                
-                if (data.code === 200 && data.data && data.data.info) {
+                if (data.code === 200 && data.data?.info?.city) {
                     const city = data.data.info.city.replace(/市$/, '');
-                    currentCity = city;
-                    gpsStatus.innerText = "已定位: " + city;
-                    gpsStatus.style.color = "var(--weui-BRAND)";
+                    $status.innerText = "当前: " + city;
                     getWeatherByCity(city);
                 } else {
-                    gpsStatus.innerText = "定位失败";
-                    gpsStatus.style.color = "var(--weui-RED)";
-                    // 使用上次成功的城市或默认城市
-                    getWeatherByCity(currentCity || "北京");
-                    showTopTips("定位失败，显示上次城市天气");
+                    throw new Error("定位失败");
                 }
-            } catch (error) {
-                console.error('定位错误:', error);
-                gpsStatus.innerText = "网络错误";
-                gpsStatus.style.color = "var(--weui-RED)";
+            } catch (err) {
+                $status.innerText = "定位失败";
                 getWeatherByCity(currentCity || "北京");
-                showTopTips("网络错误，显示上次城市天气");
+                showTips("定位失败，已切换至默认城市");
             }
         }
 
         async function getWeatherByCity(city) {
-            if (!city) {
-                showTopTips("请输入城市名称");
-                return;
-            }
-            
-            showLoading();
+            toggleToast(true);
             try {
-                const response = await fetch(`${WEATHER_URL}?key=${API_KEY}&city=${encodeURIComponent(city)}`);
-                const data = await response.json();
+                const res = await fetch(`${WEATHER_URL}?key=${API_KEY}&city=${encodeURIComponent(city)}`);
+                const data = await res.json();
+                toggleToast(false);
                 
-                hideLoading();
-                if (data.code === 200 && data.data) {
+                if (data.code === 200) {
                     currentCity = city;
-                    renderWeather(data, city);
-                    // 隐藏初始加载状态
-                    document.getElementById('initialLoading').style.display = 'none';
+                    renderUI(data.data, city);
                 } else {
-                    showTopTips(data.msg || "无法查询该城市");
+                    showTips(data.msg || "未找到该城市");
                 }
-            } catch (error) {
-                hideLoading();
-                console.error('天气请求错误:', error);
-                showTopTips("网络请求失败");
+            } catch (err) {
+                toggleToast(false);
+                showTips("网络异常，请稍后重试");
             }
         }
 
-        // --- 渲染逻辑 ---
-        function renderWeather(weatherData, city) {
-            const mainContent = document.getElementById('mainContent');
-            const data = weatherData.data;
-            const meta = weatherData.msg;
-
-            // 1. Hero Section
-            document.getElementById('uiCity').textContent = city || currentCity;
-            document.getElementById('uiTemp').textContent = (data.wendu || "--") + "°";
+        // --- UI 渲染 ---
+        function renderUI(data, city) {
+            // 基础信息
+            document.getElementById('uiCity').textContent = city;
+            document.getElementById('uiTemp').textContent = (data.wendu || "0") + "°";
+            document.getElementById('updateTime').textContent = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
             
-            // 更新时间设为当前时间
-            const now = new Date();
-            const updateTimeStr = now.toLocaleTimeString('zh-CN', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: false 
-            });
-            document.getElementById('updateTime').textContent = updateTimeStr;
-            
-            const weekStr = ['周日','周一','周二','周三','周四','周五','周六'][now.getDay()];
-            document.getElementById('uiDate').textContent = `${now.getMonth()+1}月${now.getDate()}日 ${weekStr}`;
+            const today = new Date();
+            const weekNames = ['周日','周一','周二','周三','周四','周五','周六'];
+            document.getElementById('uiDate').textContent = `${today.getMonth()+1}月${today.getDate()}日 ${weekNames[today.getDay()]}`;
 
-            if (data.forecast && data.forecast.length > 0) {
-                const today = data.forecast[0];
-                document.getElementById('uiHighTemp').textContent = today.high ? today.high.replace('高温 ', '') : "--";
-                document.getElementById('uiLowTemp').textContent = today.low ? today.low.replace('低温 ', '') : "--";
-                document.getElementById('uiWea').textContent = today.type || "--";
-                document.getElementById('weatherNotice').textContent = today.notice || "--";
-                
-                // 移除加载动画，设置天气图标
-                const weatherIconEl = document.getElementById('weatherIcon');
-                weatherIconEl.innerHTML = getIconClass(today.type || "晴");
+            if(data.forecast?.[0]) {
+                const f0 = data.forecast[0];
+                document.getElementById('uiWea').textContent = f0.type;
+                document.getElementById('uiHighTemp').textContent = f0.high.replace('高温 ','');
+                document.getElementById('uiLowTemp').textContent = f0.low.replace('低温 ','');
+                document.getElementById('weatherNotice').textContent = f0.notice || "今日天气晴好，祝心情愉快";
+                document.getElementById('weatherIcon').innerHTML = getIcon(f0.type);
             }
 
-            // 2. Grids
-            renderGrid(data);
-
-            // 3. Forecast
-            renderForecast(data.forecast || []);
-
-            // 4. Yesterday
-            renderYesterday(data.yesterday);
-
-            // 显示内容并带有淡入效果
-            mainContent.style.display = 'block';
-            requestAnimationFrame(() => {
-                mainContent.style.opacity = 1;
-            });
-        }
-
-        function renderGrid(data) {
-            const container = document.getElementById('currentDetails');
-            container.innerHTML = '';
-            
-            const createItem = (label, value, icon) => `
+            // 网格详情
+            const grids = [
+                { l: '湿度', v: data.shidu, i: 'fa-droplet' },
+                { l: '空气质素', v: data.quality, i: 'fa-leaf' },
+                { l: 'PM2.5', v: data.pm25, i: 'fa-mask' },
+                { l: '风向', v: data.forecast[0]?.fx, i: 'fa-compass' },
+                { l: '风力', v: data.forecast[0]?.fl, i: 'fa-wind' },
+                { l: 'PM10', v: data.pm10, i: 'fa-smog' }
+            ];
+            document.getElementById('currentDetails').innerHTML = grids.map(g => `
                 <div class="grid-item">
-                    <div class="grid-icon"><i class="fas ${icon}"></i></div>
-                    <div class="grid-label">${label}</div>
-                    <span class="grid-value">${value || '--'}</span>
+                    <div class="grid-icon"><i class="fas ${g.i}"></i></div>
+                    <div class="grid-label">${g.l}</div>
+                    <div class="grid-value">${g.v || '--'}</div>
                 </div>
-            `;
+            `).join('');
 
-            let html = '';
-            html += createItem('湿度', data.shidu, 'fa-tint');
-            html += createItem('空气质量', data.quality, 'fa-leaf');
-            html += createItem('PM2.5', data.pm25, 'fa-smog');
-            
-            if (data.forecast && data.forecast[0]) {
-                const today = data.forecast[0];
-                html += createItem('风向', today.fx, 'fa-compass');
-                html += createItem('风力', today.fl, 'fa-wind');
-            } else {
-                html += createItem('风向', '--', 'fa-compass');
-                html += createItem('风力', '--', 'fa-wind');
-            }
-            
-            html += createItem('PM10', data.pm10, 'fa-industry');
-            
-            container.innerHTML = html;
-        }
+            // 未来预报
+            document.getElementById('forecastContainer').innerHTML = data.forecast.map(f => `
+                <div class="forecast-item">
+                    <div class="f-day">${f.week.replace('星期','周')}</div>
+                    <div class="f-date">${f.date.split('日')[0]}日</div>
+                    <div class="f-icon">${getIcon(f.type)}</div>
+                    <div class="f-temp">${f.high.replace('高温 ','')}</div>
+                    <div style="font-size:11px; color:var(--weui-FG-1); margin-top:2px;">${f.low.replace('低温 ','')}</div>
+                </div>
+            `).join('');
 
-        function renderForecast(forecast) {
-            const container = document.getElementById('forecastContainer');
-            container.innerHTML = '';
-            
-            if (!forecast || forecast.length === 0) {
-                container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--weui-FG-1); width: 100%;">暂无预报数据</div>';
-                return;
-            }
-            
-            forecast.forEach(day => {
-                const html = `
-                    <div class="forecast-item">
-                        <div class="f-day">${day.week ? day.week.replace('星期','周') : '--'}</div>
-                        <div class="f-date">${day.date ? day.date.split('日')[0]+'日' : '--'}</div>
-                        <div class="f-icon">${getIconClass(day.type || "晴")}</div>
-                        <div class="f-cond">${day.type || '--'}</div>
-                        <div class="f-temp">${day.high ? day.high.replace('高温 ','') : '--'}</div>
-                        <div class="f-temp-low">${day.low ? day.low.replace('低温 ','') : '--'}</div>
-                    </div>
-                `;
-                container.innerHTML += html;
-            });
-        }
-
-        function renderYesterday(y) {
-            if(!y) {
-                document.getElementById('yesterdayDate').innerText = "--";
+            // 昨日回顾
+            if(data.yesterday) {
+                const y = data.yesterday;
+                document.getElementById('yesterdayDate').innerText = `${y.ymd} ${y.week}`;
                 document.getElementById('yesterdayBody').innerHTML = `
-                    <div class="weui-form-preview__item">
-                        <label class="weui-form-preview__label">暂无昨日数据</label>
-                    </div>
+                    <div class="weui-form-preview__item"><label class="weui-form-preview__label">天气状况</label><span class="weui-form-preview__value">${y.type}</span></div>
+                    <div class="weui-form-preview__item"><label class="weui-form-preview__label">气温跨度</label><span class="weui-form-preview__value">${y.low.replace('低温 ','')} / ${y.high.replace('高温 ','')}</span></div>
+                    <div class="weui-form-preview__item"><label class="weui-form-preview__label">风力指数</label><span class="weui-form-preview__value">${y.fx} ${y.fl}</span></div>
                 `;
-                return;
             }
-            
-            document.getElementById('yesterdayDate').innerText = `${y.ymd || '--'} ${y.week || ''}`;
-            
-            const body = document.getElementById('yesterdayBody');
-            body.innerHTML = `
-                <div class="weui-form-preview__item">
-                    <label class="weui-form-preview__label">天气</label>
-                    <span class="weui-form-preview__value">${y.type || '--'}</span>
-                </div>
-                <div class="weui-form-preview__item">
-                    <label class="weui-form-preview__label">气温</label>
-                    <span class="weui-form-preview__value">${y.low || '--'} / ${y.high || '--'}</span>
-                </div>
-                <div class="weui-form-preview__item">
-                    <label class="weui-form-preview__label">风力</label>
-                    <span class="weui-form-preview__value">${y.fx || '--'} ${y.fl || '--'}</span>
-                </div>
-            `;
+
+            // 显示切换
+            document.getElementById('initialLoading').style.display = 'none';
+            const $main = document.getElementById('mainContent');
+            $main.style.display = 'block';
+            setTimeout(() => $main.style.opacity = "1", 50);
         }
 
-        // 工具：图标映射
-        function getIconClass(type) {
-            if (!type) return '<i class="fas fa-cloud"></i>';
-            const typeLower = type.toLowerCase();
+        // --- 工具函数 ---
+        function getIcon(type) {
             let icon = 'fa-cloud';
-            
-            if (typeLower.includes('晴')) icon = 'fa-sun';
-            else if (typeLower.includes('多云')) icon = 'fa-cloud-sun';
-            else if (typeLower.includes('阴')) icon = 'fa-cloud';
-            else if (typeLower.includes('雨')) {
-                if (typeLower.includes('雷')) icon = 'fa-bolt';
-                else if (typeLower.includes('暴雨')) icon = 'fa-cloud-showers-heavy';
-                else if (typeLower.includes('小雨')) icon = 'fa-cloud-rain';
-                else icon = 'fa-cloud-showers-heavy';
-            }
-            else if (typeLower.includes('雪')) icon = 'fa-snowflake';
-            else if (typeLower.includes('雾') || typeLower.includes('霾')) icon = 'fa-smog';
-            else if (typeLower.includes('风') || typeLower.includes('扬沙')) icon = 'fa-wind';
-            
+            if (type.includes('晴')) icon = 'fa-sun';
+            else if (type.includes('云')) icon = 'fa-cloud-sun';
+            else if (type.includes('阴')) icon = 'fa-cloud';
+            else if (type.includes('雨')) icon = type.includes('雷') ? 'fa-cloud-bolt' : 'fa-cloud-showers-heavy';
+            else if (type.includes('雪')) icon = 'fa-snowflake';
+            else if (type.includes('雾') || type.includes('霾')) icon = 'fa-smog';
             return `<i class="fas ${icon}"></i>`;
+        }
+
+        function toggleToast(show) {
+            document.getElementById('loadingToast').style.display = show ? 'block' : 'none';
+        }
+
+        function showTips(msg) {
+            const $tips = document.getElementById('topTips');
+            $tips.innerText = msg;
+            $tips.style.display = 'block';
+            setTimeout(() => $tips.style.display = 'none', 3000);
         }
     </script>
 </body>
