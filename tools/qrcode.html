@@ -15,21 +15,24 @@
             --weui-BRAND: #07c160;
         }
 
+        /* 核心修复：确保全局盒模型一致，防止宽度溢出 */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         body {
             background-color: var(--weui-BG-0);
-            color: var(--weui-FG-0); /* 添加默认字体颜色 */
+            color: var(--weui-FG-0);
             overscroll-behavior-y: none;
             margin: 0; padding: 0;
             min-height: 100vh;
             font-family: -apple-system-font, Helvetica Neue, sans-serif;
         }
 
-        /* 优化：移除 min-height: 100vh，让容器高度随内容变化 */
         .weui-form {
             padding: 32px 0;
             background-color: transparent;
-            box-sizing: border-box;
-            display: block; /* 覆盖 WeUI 默认的 flex 布局，使按钮随流移动 */
+            display: block; 
         }
 
         .custom-card {
@@ -56,7 +59,6 @@
             padding: 16px; font-size: 15px; font-weight: 600;
             display: flex; justify-content: space-between; align-items: center;
             cursor: pointer; -webkit-tap-highlight-color: transparent;
-            color: var(--weui-FG-0); /* 添加字体颜色 */
         }
 
         .settings-content {
@@ -64,7 +66,7 @@
             transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s;
         }
 
-        .settings-content.expanded { max-height: 500px; padding-bottom: 16px; }
+        .settings-content.expanded { max-height: 600px; padding-bottom: 16px; }
 
         .history-header {
             padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
@@ -91,6 +93,7 @@
             background: var(--weui-BRAND); border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
+        /* 半屏弹窗修复 */
         .custom-half-screen-dialog {
             position: fixed; left: 0; right: 0; bottom: 0;
             background-color: var(--weui-BG-2); 
@@ -100,7 +103,6 @@
             transition: transform 0.3s ease;
             display: flex; flex-direction: column;
             max-height: 85vh;
-            padding-bottom: env(safe-area-inset-bottom);
             box-shadow: 0 -2px 20px rgba(0,0,0,0.1);
         }
         
@@ -109,14 +111,12 @@
         .dialog-header {
             padding: 20px 16px;
             position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             border-bottom: 0.5px solid rgba(0,0,0,0.05);
             flex-shrink: 0;
         }
         
-        .dialog-title { font-size: 17px; font-weight: 600; color: var(--weui-FG-0); }
+        .dialog-title { font-size: 17px; font-weight: 600; }
         .dialog-close-btn {
             position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
             width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
@@ -124,75 +124,38 @@
         }
         
         .dialog-body { flex: 1; overflow-y: auto; padding: 32px 16px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* 修复底部按钮区域 */
         .dialog-footer {
-            padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom));
-            border-top: 0.5px solid rgba(0,0,0,0.05); display: flex; gap: 12px; flex-shrink: 0; align-items: center;
+            padding: 16px; 
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            border-top: 0.5px solid rgba(0,0,0,0.05); 
+            display: flex; 
+            gap: 12px; 
+            flex-shrink: 0; 
+            width: 100%;
         }
         
-        .dialog-footer .weui-btn { flex: 1; margin: 0 !important; height: 48px; line-height: 48px; border-radius: 8px; font-size: 16px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
+        .dialog-footer .weui-btn { 
+            flex: 1; 
+            margin: 0 !important; /* 强制移除 WeUI 默认的上下外边距 */
+            width: auto; /* 覆盖 WeUI 可能存在的 width: 100% */
+            min-width: 0; /* 允许 Flex 子元素收缩，防止文字溢出 */
+            height: 48px; 
+            line-height: 48px; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            display: flex; align-items: center; justify-content: center; 
+        }
 
         .qrcode-wrapper { padding: 16px; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin: 0 auto; }
         #qrcode-container img { display: block; max-width: 100%; height: auto; }
         
-        /* --- 修复后的确认对话框：收紧间距 --- */
         .weui-dialog { background-color: var(--weui-BG-2); border-radius: 12px; }
-        
-        .weui-dialog__hd {
-            padding: 24px 24px 12px; /* 减小标题上下间距 */
-        }
-        
-        .weui-dialog__title { 
-            font-size: 17px; 
-            font-weight: 600; 
-            color: var(--weui-FG-0); /* 添加字体颜色 */
-        }
-        
-        .weui-dialog__bd {
-            padding: 0 24px 20px; /* 减小正文底部与按钮的间距 */
-            color: var(--weui-FG-1);
-            font-size: 15px; 
-            line-height: 1.5;
-            min-height: auto; /* 移除最小高度限制 */
-        }
-        
-        .weui-dialog__ft { min-height: 52px; line-height: 52px; }
-        .weui-dialog__btn { font-size: 16px; font-weight: 600; }
-
-        /* 优化：操作按钮区域间距 */
-        .weui-form__opr-area {
-            margin: 24px 16px 8px; /* 调整页边距，让它跟随上方卡片 */
-        }
-
-        /* 修复 WeUI 组件在暗黑模式下的显示 */
-        .weui-textarea {
-            background-color: var(--weui-BG-2);
-            color: var(--weui-FG-0);
-        }
-        
-        .weui-textarea::placeholder {
-            color: var(--weui-FG-1);
-        }
-        
-        .weui-cells {
-            background-color: transparent;
-        }
-        
-        .weui-cell {
-            background-color: var(--weui-BG-2);
-            color: var(--weui-FG-0);
-        }
-        
-        .weui-cell__bd p {
-            color: var(--weui-FG-0);
-        }
-        
-        .weui-link {
-            color: var(--weui-FG-1);
-        }
-        
-        .weui-switch:checked {
-            background-color: var(--weui-BRAND);
-        }
+        .weui-dialog__hd { padding: 24px 24px 12px; }
+        .weui-dialog__bd { padding: 0 24px 20px; color: var(--weui-FG-1); font-size: 15px; line-height: 1.5; min-height: auto; }
+        .weui-form__opr-area { margin: 24px 16px 8px; }
 
         @media (prefers-color-scheme: dark) {
             :root { 
@@ -201,49 +164,10 @@
                 --weui-FG-0: rgba(255, 255, 255, 0.8); 
                 --weui-FG-1: rgba(255, 255, 255, 0.5); 
             }
-            
-            .weui-textarea { 
-                background: var(--weui-BG-2); 
-                color: var(--weui-FG-0); 
-            }
-            
-            .weui-textarea::placeholder {
-                color: var(--weui-FG-1);
-            }
-            
+            .weui-textarea { background: var(--weui-BG-2); color: var(--weui-FG-0); }
             .custom-slider { background: #444; }
-            
             .history-item:active { background-color: rgba(255,255,255,0.05); }
-            
-            .history-item:not(:last-child)::after {
-                border-bottom: 0.5px solid rgba(255,255,255,0.05);
-            }
-            
-            .history-header {
-                border-bottom: 0.5px solid rgba(255,255,255,0.05);
-            }
-            
-            .dialog-header {
-                border-bottom: 0.5px solid rgba(255,255,255,0.05);
-            }
-            
-            .dialog-footer {
-                border-top: 0.5px solid rgba(255,255,255,0.05);
-            }
-            
-            .qrcode-wrapper {
-                background: #2c2c2e;
-            }
-            
-            /* 修复 WeUI 对话框在暗黑模式下的显示 */
-            .weui-dialog {
-                color: var(--weui-FG-0);
-            }
-            
-            /* 修复滑块拇指在暗黑模式下的边框 */
-            .custom-slider::-webkit-slider-thumb {
-                border: 2px solid var(--weui-BG-2);
-            }
+            .qrcode-wrapper { background: #2c2c2e; }
         }
     </style>
 </head>
@@ -399,13 +323,18 @@
                     document.getElementById('settingsTitle').classList.toggle('expanded');
                 });
 
-                document.getElementById('selectLogoBtn').addEventListener('click', () => els.logoUpload.click());
+                document.getElementById('selectLogoBtn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    els.logoUpload.click();
+                });
+                
                 document.getElementById('removeLogoBtn').addEventListener('click', () => {
                     settings.logo = null; 
                     els.logoPreview.style.display = 'none'; 
                     els.removeLogoBtn.style.display = 'none'; 
                     saveSettings();
                 });
+
                 els.logoUpload.addEventListener('change', e => {
                     const file = e.target.files[0];
                     if(!file) return;
@@ -476,7 +405,7 @@
                 }
                 
                 if(settings.autoFormat) {
-                    if(text.includes('.') && !text.startsWith('http')) {
+                    if(text.includes('.') && !text.startsWith('http') && !text.includes('://')) {
                         text = 'https://' + text;
                     }
                 }
@@ -499,10 +428,10 @@
                             const ctx = canvas.getContext('2d');
                             const img = new Image();
                             img.onload = () => {
-                                const s = settings.qrSize * 0.22; 
+                                const s = canvas.width * 0.22; 
                                 const p = (canvas.width - s) / 2;
                                 ctx.fillStyle = '#fff'; 
-                                ctx.fillRect(p-3, p-3, s+6, s+6);
+                                ctx.fillRect(p-2, p-2, s+4, s+4);
                                 ctx.drawImage(img, p, p, s, s);
                                 finalizeQR();
                             };
@@ -511,60 +440,42 @@
                             finalizeQR();
                         }
                     }
-                }, 200);
+                }, 100);
 
                 function finalizeQR() {
                     const canvas = els.container.querySelector('canvas');
                     if(!canvas) return;
-                    
                     const img = document.createElement('img');
                     img.src = canvas.toDataURL("image/png");
-                    img.alt = "生成的二维码";
-                    
                     els.container.innerHTML = ''; 
                     els.container.appendChild(img);
-                    
-                    if(settings.saveHistory) {
-                        saveToHistory(text); 
-                    }
+                    if(settings.saveHistory) saveToHistory(text); 
                     showDialog();
                 }
             }
 
             function showDialog() {
                 els.mask.style.display = 'block';
-                void els.dialog.offsetWidth;
-                els.dialog.classList.add('show');
+                setTimeout(() => els.dialog.classList.add('show'), 10);
             }
 
             function hideDialog() {
                 els.dialog.classList.remove('show');
-                setTimeout(() => {
-                    els.mask.style.display = 'none';
-                }, 300);
+                setTimeout(() => { els.mask.style.display = 'none'; }, 300);
             }
 
             function saveToHistory(text) {
                 const idx = historyRecords.findIndex(r => r.text === text);
-                if(idx !== -1) {
-                    const [existing] = historyRecords.splice(idx, 1);
-                    existing.time = Date.now();
-                    historyRecords.unshift(existing);
-                } else {
-                    const displayText = text.length > 30 ? text.substring(0, 27) + '...' : text;
-                    historyRecords.unshift({ 
-                        text, 
-                        time: Date.now(), 
-                        display: displayText 
-                    });
-                }
+                if(idx !== -1) historyRecords.splice(idx, 1);
+                const displayText = text.length > 30 ? text.substring(0, 27) + '...' : text;
+                historyRecords.unshift({ text, time: Date.now(), display: displayText });
                 historyRecords = historyRecords.slice(0, 10);
                 localStorage.setItem('qrHistory', JSON.stringify(historyRecords));
                 renderHistory();
             }
 
             function renderHistory() {
-                if(historyRecords.length === 0) { 
+                if(historyRecords.length === 0 || !settings.saveHistory) { 
                     els.historyPanel.style.display = 'none'; 
                     return; 
                 }
@@ -572,7 +483,7 @@
                 els.historyList.innerHTML = historyRecords.map(item => `
                     <div class="history-item" data-text="${item.text.replace(/"/g, '&quot;')}">
                         <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px;">
-                            ${item.display.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                            ${item.display.replace(/</g, '&lt;')}
                         </div>
                         <div style="font-size:12px; color:var(--weui-FG-1); margin-left:12px;">
                             ${new Date(item.time).getHours().toString().padStart(2,'0')}:${new Date(item.time).getMinutes().toString().padStart(2,'0')}
@@ -594,10 +505,7 @@
                 }
                 const savedHistory = localStorage.getItem('qrHistory');
                 if(savedHistory) {
-                    try {
-                        historyRecords = JSON.parse(savedHistory);
-                        renderHistory();
-                    } catch(e) {}
+                    try { historyRecords = JSON.parse(savedHistory); renderHistory(); } catch(e) {}
                 }
                 const savedLogo = localStorage.getItem('qrLogo');
                 if(savedLogo) { 
@@ -623,4 +531,3 @@
     </script>
 </body>
 </html>
-
