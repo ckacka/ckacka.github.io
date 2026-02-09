@@ -1,1775 +1,862 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-weui-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>树洞翻译</title>
+    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.25/weui.min.css"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
     <style>
         :root {
-            /* Material Design 3 风格配色 (基于蓝色/靛蓝) */
-            --md-sys-color-primary: #005AC1;
-            --md-sys-color-on-primary: #FFFFFF;
-            --md-sys-color-primary-container: #D8E2FF;
-            --md-sys-color-on-primary-container: #001A41;
-            --md-sys-color-background: #FDFBFF;
-            --md-sys-color-surface: #F2F6FC; /* Google 翻译标志性的浅灰背景 */
-            --md-sys-color-surface-variant: #E1E2EC;
-            --md-sys-color-on-surface: #1B1B1F;
-            --md-sys-color-outline: #74777F;
-            
-            --border-radius-lg: 24px;
-            --border-radius-md: 12px;
-            --font-family: 'Google Sans', 'Roboto', system-ui, sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            --card-radius: 16px;
+            --btn-radius: 12px;
+            --header-height: 60px;
         }
 
         body {
-            font-family: var(--font-family);
-            background-color: var(--md-sys-color-background);
-            color: var(--md-sys-color-on-surface);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            transition: background-color 0.3s, color 0.3s;
+            background-color: var(--weui-BG-0);
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+            padding-bottom: env(safe-area-inset-bottom);
+            color: var(--weui-FG-0);
+            padding-top: var(--header-height); /* 给fixed header留出空间 */
         }
 
-        body.dark-mode {
-            --md-sys-color-background: #1B1B1F;
-            --md-sys-color-surface: #27272F;
-            --md-sys-color-surface-variant: #3A3A44;
-            --md-sys-color-on-surface: #E4E2E6;
-            --md-sys-color-primary: #AEC6FF;
-            --md-sys-color-on-primary: #002E69;
-            --md-sys-color-primary-container: #004493;
-            --md-sys-color-on-primary-container: #D8E2FF;
-        }
+        /* 移除 WeUI 默认边框 */
+        .weui-cells:before, .weui-cells:after, .weui-cell:before, .weui-cell:after { display: none !important; }
+        .weui-cells { margin-top: 0; background: transparent; }
 
-        /* 顶部导航栏 - 安卓原生样式 */
-        header {
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: var(--md-sys-color-surface);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .app-title {
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--md-sys-color-on-surface);
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .header-btn {
-            background: none;
-            border: none;
-            padding: 8px;
-            border-radius: 50%;
-            cursor: pointer;
-            color: var(--md-sys-color-on-surface);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s;
-        }
-
-        .header-btn:hover {
-            background-color: rgba(0,0,0,0.1);
-        }
-
-        .dark-mode .header-btn:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-
-        /* 主容器 */
-        main {
-            flex: 1;
-            padding: 0 24px 24px;
-            max-width: 1280px;
-            margin: 0 auto;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            height: calc(100vh - 64px); /* 减去header高度 */
-        }
-
-        /* 语言选择栏 */
-        .language-bar {
-            background-color: var(--md-sys-color-surface);
-            border-radius: var(--border-radius-lg);
-            padding: 8px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            margin-top: 16px;
+        /* 卡片通用样式 */
+        .app-card {
+            background-color: var(--weui-BG-2);
+            border-radius: var(--card-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            margin-bottom: 16px;
+            overflow: hidden;
             position: relative;
+            transition: box-shadow 0.2s;
         }
 
-        .lang-selector {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-        }
-
-        .lang-btn {
-            background: none;
-            border: none;
-            color: var(--md-sys-color-primary);
-            font-weight: 600;
-            font-size: 14px;
-            padding: 10px 16px;
-            border-radius: var(--border-radius-md);
-            cursor: pointer;
-            transition: background 0.2s;
-            min-width: 120px;
-            text-align: center;
-            position: relative;
-        }
-
-        .lang-btn:hover {
-            background-color: rgba(0, 90, 193, 0.08);
-        }
-
-        .lang-btn.active {
-            background-color: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-        }
-
-        .lang-btn::after {
-            content: '▼';
-            font-size: 10px;
-            margin-left: 4px;
-            opacity: 0.7;
-        }
-
-        .lang-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: var(--md-sys-color-surface);
-            border-radius: var(--border-radius-md);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            padding: 8px 0;
-            min-width: 200px;
-            max-height: 400px;
-            overflow-y: auto;
-            z-index: 10;
-            display: none;
-        }
-
-        .lang-dropdown.show {
-            display: block;
-        }
-
-        .lang-option {
-            padding: 10px 16px;
-            cursor: pointer;
-            color: var(--md-sys-color-on-surface);
-            transition: background-color 0.2s;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .lang-option:hover {
-            background-color: var(--md-sys-color-surface-variant);
-        }
-
-        .lang-flag {
-            font-size: 16px;
-            width: 24px;
-            text-align: center;
-        }
-
-        .swap-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: transform 0.3s, background 0.2s;
-            color: var(--md-sys-color-outline);
-        }
-
-        .swap-btn:hover {
-            background-color: rgba(0,0,0,0.05);
-            color: var(--md-sys-color-primary);
-        }
-
-        /* 翻译区域容器 */
-        .translate-container {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 0;
-            flex: 1;
-            height: 100%;
-            position: relative;
-            align-items: center;
-        }
-
-        /* 中间翻译按钮容器 */
-        .center-translate-btn-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* 顶部导航 - 毛玻璃效果 */
+        .app-header {
             padding: 0 20px;
-            height: 100%;
-            opacity: 1;
-            transition: opacity 0.3s;
-            visibility: visible;
-        }
-
-        .center-translate-btn-container.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .center-translate-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 28px;
-            background-color: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-            border: none;
-            border-radius: var(--border-radius-lg);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(0, 90, 193, 0.25);
-            white-space: nowrap;
-        }
-
-        .center-translate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 90, 193, 0.35);
-        }
-
-        .center-translate-btn:active {
-            transform: translateY(0);
-        }
-
-        .center-translate-btn:disabled {
-            background-color: var(--md-sys-color-outline);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* 输入和输出卡片 */
-        .card {
-            background-color: var(--md-sys-color-surface);
-            border-radius: var(--border-radius-lg);
-            border: 1px solid transparent;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            transition: background 0.2s, box-shadow 0.2s;
-            height: 100%;
-            max-height: 100%;
-        }
-
-        .card:focus-within {
-            background-color: var(--md-sys-color-surface);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-            border-color: #dadce0;
-        }
-
-        /* 文本区域 */
-        textarea, .output-div {
-            width: 100%;
-            flex: 1;
-            padding: 24px;
-            border: none;
-            background: transparent;
-            font-family: var(--font-family);
-            font-size: 24px;
-            line-height: 1.5;
-            resize: none;
-            outline: none;
-            color: var(--md-sys-color-on-surface);
-            overflow-y: auto;
-            min-height: 200px;
-        }
-
-        textarea::placeholder {
-            color: #70757a;
-        }
-
-        .output-div {
-            white-space: pre-wrap;
-            color: var(--md-sys-color-on-surface);
-        }
-
-        /* 卡片底部工具栏 */
-        .card-footer {
-            padding: 12px 16px;
+            height: var(--header-height);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-top: 1px solid var(--md-sys-color-surface-variant);
-            position: sticky;
-            bottom: 0;
-            z-index: 2;
-        }
-
-        .dark-mode .card-footer {
-            background-color: rgba(39, 39, 47, 0.9);
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            color: var(--md-sys-color-outline);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .icon-btn:hover {
-            background-color: rgba(0,0,0,0.05);
-            color: var(--md-sys-color-primary);
-        }
-
-        .char-count {
-            font-size: 12px;
-            color: var(--md-sys-color-outline);
-        }
-
-        /* 只有输出卡片有的背景色微调 */
-        .card.output-card {
-            background-color: var(--md-sys-color-surface-variant);
-        }
-        
-        /* 翻译按钮 (FAB 风格) */
-        .translate-fab {
-            display: none;
-        }
-
-        /* 模拟 AI 打字效果的光标 */
-        .typing::after {
-            content: '|';
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-
-        /* 弹窗样式 */
-        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
+            z-index: 100;
+            background-color: var(--weui-BG-0); /* 降级回退 */
+            background-color: rgba(var(--weui-BG-0-rgb), 0.85); /* 需JS动态设置RGB变量，这里用伪类模拟 */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        /* 暗色模式下的边框调整 */
+        [data-weui-theme='dark'] .app-header { border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
             align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(3px);
+            gap: 8px;
         }
 
-        .modal-overlay.active {
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--weui-FG-0);
             display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
         }
+        .icon-btn:active { background-color: var(--weui-BG-COLOR-ACTIVE); }
 
-        .modal {
-            background-color: var(--md-sys-color-surface);
-            border-radius: var(--border-radius-lg);
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            animation: modalSlideIn 0.3s ease-out;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--md-sys-color-surface-variant);
+        /* 语言切换栏 */
+        .lang-container {
+            margin: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .modal-title {
-            font-size: 18px;
+        .lang-btn {
+            flex: 1;
+            background-color: var(--weui-BG-2);
+            padding: 12px 8px;
+            border-radius: var(--card-radius);
+            text-align: center;
             font-weight: 600;
-            color: var(--md-sys-color-on-surface);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            padding: 8px;
-            border-radius: 50%;
-            cursor: pointer;
-            color: var(--md-sys-color-outline);
+            font-size: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 4px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .lang-btn:active { background-color: var(--weui-BG-COLOR-ACTIVE); }
+
+        .swap-container {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--weui-BG-2);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin: 0 10px;
+            color: var(--weui-BRAND);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            flex-shrink: 0;
+        }
+        .swap-container:active { transform: scale(0.9); }
+
+        /* 输入输出区 */
+        .trans-wrapper { padding: 0 16px; }
+        .input-area, .output-area { padding: 16px; position: relative; }
+        
+        /* 自动增高输入框 */
+        .weui-textarea {
+            font-size: 17px;
+            line-height: 1.6;
+            background: transparent;
+            color: var(--weui-FG-0);
+            border: none;
+            resize: none;
+            width: 100%;
+            font-family: inherit;
+            min-height: 80px;
+            max-height: 40vh; /* 限制最大高度 */
+            padding: 0;
+            display: block;
         }
 
-        .modal-close:hover {
-            background-color: rgba(0,0,0,0.05);
-        }
-
-        .modal-content {
-            flex: 1;
-            padding: 24px;
+        #outputText {
+            min-height: 100px;
+            max-height: 50vh;
             overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid var(--md-sys-color-surface-variant);
+        .input-footer {
             display: flex;
-            justify-content: flex-end;
-            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            color: var(--weui-FG-2);
+            font-size: 12px;
         }
 
-        /* 历史记录样式 */
-        .history-list {
+        .output-area { background-color: var(--weui-BG-1); }
+        
+        .output-header {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px dashed var(--weui-FG-3);
+            padding-bottom: 8px;
         }
 
-        .history-item {
-            background-color: var(--md-sys-color-background);
-            border-radius: var(--border-radius-md);
-            padding: 16px;
-            border: 1px solid var(--md-sys-color-surface-variant);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .history-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .history-source {
+        /* 翻译按钮 */
+        .translate-btn-container { margin: 0 16px 20px; }
+        .btn-translate {
+            background-color: var(--weui-BRAND);
+            color: #fff;
+            border-radius: var(--btn-radius);
             font-weight: 600;
-            color: var(--md-sys-color-primary);
-            margin-bottom: 8px;
-            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(var(--weui-BRAND-RGB), 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .btn-translate:active { transform: scale(0.98); }
+        .btn-translate.disabled { opacity: 0.6; pointer-events: none; }
+
+        /* 历史记录项 */
+        .history-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--weui-BG-1);
+            background: var(--weui-BG-2);
+        }
+        .history-item:active { background-color: var(--weui-BG-COLOR-ACTIVE); }
+        
+        .history-langs {
+            font-size: 12px;
+            color: var(--weui-BRAND);
+            margin-bottom: 6px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .history-txt {
+            font-size: 15px;
+            color: var(--weui-FG-0);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        .history-text {
-            font-size: 15px;
-            line-height: 1.5;
-            margin-bottom: 8px;
-            max-height: 100px;
+        /* 红色清空按钮样式 */
+        .btn-clear-history {
+            background-color: rgba(250, 81, 81, 0.1);
+            color: var(--weui-RED);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-clear-history:active { background-color: rgba(250, 81, 81, 0.2); }
+
+        /* 语言网格 */
+        .lang-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 16px 16px 32px;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+        .lang-chip {
+            background-color: var(--weui-BG-1);
+            padding: 10px 4px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            transition: all 0.2s;
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        .history-time {
-            font-size: 12px;
-            color: var(--md-sys-color-outline);
-            text-align: right;
-        }
-
-        .empty-history {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--md-sys-color-outline);
-        }
-
-        /* 设置样式 */
-        .settings-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-label {
-            font-size: 14px;
+        .lang-chip.active {
+            background-color: var(--weui-BRAND);
+            color: #fff;
             font-weight: 600;
-            color: var(--md-sys-color-on-surface);
         }
 
-        .form-input {
-            padding: 12px 16px;
-            border-radius: var(--border-radius-md);
-            border: 1px solid var(--md-sys-color-surface-variant);
-            background-color: var(--md-sys-color-background);
-            color: var(--md-sys-color-on-surface);
-            font-family: var(--font-family);
-            font-size: 14px;
-            transition: border-color 0.2s;
+        /* 工具类 */
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--weui-BG-2);
+            opacity: 0.8;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: var(--card-radius);
         }
+        .typing::after { content: '|'; color: var(--weui-BRAND); animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .hidden { display: none !important; }
 
-        .form-input:focus {
-            outline: none;
-            border-color: var(--md-sys-color-primary);
-        }
-
-        .form-hint {
-            font-size: 12px;
-            color: var(--md-sys-color-outline);
-            margin-top: 4px;
-        }
-
-        /* Switch开关样式 */
-        .switch-container {
+        /* 弹窗头部布局优化 */
+        .weui-half-screen-dialog__hd {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--md-sys-color-surface-variant);
-        }
-
-        .switch-container:last-child {
-            border-bottom: none;
-        }
-
-        .switch-label {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-        }
-
-        .switch-title {
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--md-sys-color-on-surface);
-        }
-
-        .switch-description {
-            font-size: 13px;
-            color: var(--md-sys-color-outline);
-        }
-
-        .switch {
             position: relative;
-            display: inline-block;
-            width: 52px;
-            height: 28px;
-            margin-left: 12px;
+            padding: 0 24px;
+            height: 64px;
         }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
+        .weui-half-screen-dialog__hd__main {
             position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--md-sys-color-outline);
-            transition: .4s;
-            border-radius: 34px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            text-align: center;
+            pointer-events: none;
         }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
+        .weui-half-screen-dialog__hd__side {
+            position: relative;
+            z-index: 10;
+            min-width: 44px; /* 增大点击热区 */
         }
-
-        input:checked + .slider {
-            background-color: var(--md-sys-color-primary);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
-
-        /* 按钮样式 */
-        .btn {
-            padding: 12px 24px;
-            border-radius: var(--border-radius-md);
-            border: none;
-            font-family: var(--font-family);
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background-color: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
-
-        .btn-secondary {
-            background-color: var(--md-sys-color-surface-variant);
-            color: var(--md-sys-color-on-surface);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--md-sys-color-outline);
-            color: white;
-        }
-
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
-
-        /* 加载动画 */
-        .loading {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .loading-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--md-sys-color-primary);
-            border-radius: 50%;
-            animation: loading 1.4s infinite ease-in-out both;
-        }
-
-        .loading-dot:nth-child(1) {
-            animation-delay: -0.32s;
-        }
-
-        .loading-dot:nth-child(2) {
-            animation-delay: -0.16s;
-        }
-
-        @keyframes loading {
-            0%, 80%, 100% {
-                transform: scale(0);
-                opacity: 0.5;
-            }
-            40% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* 错误提示 */
-        .error-message {
-            color: #dc3545;
-            font-size: 14px;
-            padding: 12px;
-            background-color: rgba(220, 53, 69, 0.1);
-            border-radius: var(--border-radius-md);
-            margin-top: 8px;
-        }
-
-        /* 移动端适配 */
-        @media (max-width: 768px) {
-            header {
-                padding: 8px 12px;
-            }
-            
-            main {
-                padding: 0 16px 16px;
-                gap: 8px;
-                height: calc(100vh - 56px);
-            }
-
-            .translate-container {
-                grid-template-columns: 1fr;
-                gap: 8px;
-                height: auto;
-            }
-
-            .card {
-                min-height: 200px;
-                border-radius: 16px;
-                max-height: 50vh;
-            }
-
-            textarea, .output-div {
-                font-size: 20px;
-                padding: 16px;
-            }
-
-            .lang-btn {
-                min-width: 100px;
-                font-size: 13px;
-                padding: 8px 12px;
-            }
-
-            .modal {
-                width: 95%;
-                max-height: 90vh;
-            }
-
-            .card-footer {
-                position: sticky;
-                bottom: 0;
-                padding: 10px 12px;
-            }
-
-            /* 移动端隐藏中间的翻译按钮 */
-            .center-translate-btn-container {
-                display: none;
-            }
-
-            /* 移动端需要一个明确的翻译按钮 */
-            .translate-fab {
-                display: flex;
-                position: fixed;
-                bottom: 24px;
-                right: 24px;
-                background-color: var(--md-sys-color-primary);
-                color: var(--md-sys-color-on-primary);
-                border: none;
-                padding: 16px 24px;
-                border-radius: 16px;
-                font-size: 16px;
-                font-weight: 600;
-                align-items: center;
-                gap: 8px;
-                box-shadow: 0 4px 8px 3px rgba(0,0,0,0.15);
-                z-index: 100;
-                cursor: pointer;
-                transition: transform 0.2s;
-            }
-            
-            .translate-fab:active {
-                transform: scale(0.95);
-            }
-        }
-
-        /* 平板适配 */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            main {
-                padding: 0 20px 20px;
-            }
-            
-            .card {
-                min-height: 250px;
-            }
-            
-            textarea, .output-div {
-                font-size: 22px;
-            }
+        .weui-half-screen-dialog__hd__side:last-child {
+            display: flex;
+            justify-content: flex-end;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-left">
-            <span class="material-symbols-rounded" style="font-size: 28px; color: var(--md-sys-color-primary);">translate</span>
-            <h1 class="app-title">树洞翻译</h1>
+    <header class="app-header">
+        <div class="app-title">
+            <span class="material-symbols-rounded" style="color: var(--weui-BRAND); font-size: 28px;">translate</span>
+            树洞翻译
         </div>
-        <div class="header-right">
-            <button class="header-btn" id="darkModeBtn" title="深色模式">
-                <span class="material-symbols-rounded">dark_mode</span>
-            </button>
-            <button class="header-btn" id="historyBtn" title="翻译历史">
+        <div style="display: flex; gap: 4px;">
+            <button class="icon-btn" id="historyBtn">
                 <span class="material-symbols-rounded">history</span>
             </button>
-            <button class="header-btn" id="settingsBtn" title="设置">
+            <button class="icon-btn" id="settingsBtn">
                 <span class="material-symbols-rounded">settings</span>
             </button>
         </div>
     </header>
 
-    <main>
-        <div class="language-bar">
-            <div class="lang-selector">
-                <button class="lang-btn active" id="sourceLangBtn">检测语言</button>
-                <div class="lang-dropdown" id="sourceLangDropdown">
-                    <!-- 语言选项将通过JavaScript动态添加 -->
+    <div class="lang-container">
+        <div class="lang-btn" id="sourceLangBtn">
+            <span>检测语言</span>
+            <span class="material-symbols-rounded" style="font-size: 18px; opacity: 0.5;">expand_more</span>
+        </div>
+        <div class="swap-container" id="swapBtn">
+            <span class="material-symbols-rounded" style="font-size: 24px;">swap_horiz</span>
+        </div>
+        <div class="lang-btn" id="targetLangBtn">
+            <span>英语</span>
+            <span class="material-symbols-rounded" style="font-size: 18px; opacity: 0.5;">expand_more</span>
+        </div>
+    </div>
+
+    <div class="trans-wrapper">
+        <div class="app-card input-area">
+            <textarea class="weui-textarea" id="inputText" placeholder="请输入要翻译的文本..." rows="1" maxlength="5000"></textarea>
+            <div class="input-footer">
+                <span id="charCount">0/5000</span>
+                <div id="clearInputBtn" style="display: none; align-items: center; gap: 4px; padding: 4px 10px; background: var(--weui-BG-1); border-radius: 12px; cursor: pointer; transition: background 0.2s;">
+                    <span class="material-symbols-rounded" style="font-size: 14px;">close</span>
+                    <span>清空</span>
                 </div>
             </div>
-            
-            <button class="swap-btn" id="swapBtn">
-                <span class="material-symbols-rounded">swap_horiz</span>
+        </div>
+
+        <div class="translate-btn-container">
+            <button class="weui-btn btn-translate disabled" id="translateBtn">
+                <span class="material-symbols-rounded">translate</span>
+                开始翻译
             </button>
+        </div>
+
+        <div class="app-card output-area">
+            <div class="output-header">
+                <span style="font-size: 13px; color: var(--weui-FG-1);">译文</span>
+                <button class="icon-btn" id="copyBtn" style="width: 32px; height: 32px; background: var(--weui-BG-0);">
+                    <span class="material-symbols-rounded" id="copyIcon" style="font-size: 18px;">content_copy</span>
+                </button>
+            </div>
+            <div class="weui-textarea" id="outputText"></div>
+            <div class="loading-overlay hidden" id="loadingSpinner"><i class="weui-loading"></i></div>
+        </div>
+    </div>
+
+    <div class="weui-footer" style="padding: 24px 0;">
+        <p class="weui-footer__text">Powered by DeepSeek AI</p>
+    </div>
+
+    <div class="js_dialog" id="settingsDialog" style="display: none;">
+        <div class="weui-mask" id="settingsMask"></div>
+        <div class="weui-half-screen-dialog">
+            <div class="weui-half-screen-dialog__hd">
+                <div class="weui-half-screen-dialog__hd__side">
+                    <button class="weui-icon-btn" id="closeSettingsBtn">关闭<i class="weui-icon-close-thin"></i></button>
+                </div>
+                <div class="weui-half-screen-dialog__hd__main">
+                    <strong class="weui-half-screen-dialog__title">设置</strong>
+                </div>
+                <div class="weui-half-screen-dialog__hd__side"></div>
+            </div>
+            <div class="weui-half-screen-dialog__bd">
+                <div class="weui-cells__title" style="padding-left: 0;">API 配置</div>
+                <div class="app-card" style="margin-bottom: 24px;">
+                    <div class="weui-cell weui-cell_active" style="padding: 16px;">
+                        <div class="weui-cell__bd">
+                            <input id="apiKey" class="weui-input" type="password" placeholder="请输入 DeepSeek API Key"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="weui-cells__title" style="padding-left: 0;">功能开关</div>
+                <div class="app-card">
+                    <div class="weui-cell weui-cell_active weui-cell_switch" style="padding: 16px;">
+                        <div class="weui-cell__bd">自动翻译</div>
+                        <div class="weui-cell__ft">
+                            <input class="weui-switch" type="checkbox" id="autoTranslateSwitch" checked/>
+                        </div>
+                    </div>
+                    <div class="weui-cell weui-cell_active weui-cell_switch" style="padding: 16px;">
+                        <div class="weui-cell__bd">打字机效果</div>
+                        <div class="weui-cell__ft">
+                            <input class="weui-switch" type="checkbox" id="typingEffectSwitch" checked/>
+                        </div>
+                    </div>
+                </div>
+                <button class="weui-btn weui-btn_primary" id="saveSettingsBtn" style="margin-top: 16px;">保存配置</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="js_dialog" id="historyDialog" style="display: none;">
+        <div class="weui-mask" id="historyMask"></div>
+        <div class="weui-half-screen-dialog" style="min-height: 70%;">
+            <div class="weui-half-screen-dialog__hd">
+                <div class="weui-half-screen-dialog__hd__side">
+                    <button class="weui-icon-btn" id="closeHistoryBtn">关闭<i class="weui-icon-close-thin"></i></button>
+                </div>
+                <div class="weui-half-screen-dialog__hd__main">
+                    <strong class="weui-half-screen-dialog__title">翻译历史</strong>
+                </div>
+                <div class="weui-half-screen-dialog__hd__side">
+                    <button class="btn-clear-history" id="clearHistoryBtn">
+                        <span class="material-symbols-rounded" style="font-size: 16px;">delete</span>
+                        清空
+                    </button>
+                </div>
+            </div>
             
-            <div class="lang-selector">
-                <button class="lang-btn active" id="targetLangBtn">英语</button>
-                <div class="lang-dropdown" id="targetLangDropdown">
-                    <!-- 语言选项将通过JavaScript动态添加 -->
+            <div class="weui-half-screen-dialog__bd" style="padding: 0;">
+                <div id="historyList"></div>
+                <div id="emptyHistory" class="weui-loadmore weui-loadmore_line hidden" style="margin-top: 60px;">
+                    <span class="weui-loadmore__tips">暂无历史记录</span>
                 </div>
-            </div>
-        </div>
-
-        <!-- 翻译区域容器 -->
-        <div class="translate-container">
-            <div class="card input-card">
-                <textarea id="inputText" placeholder="请输入要翻译的文本..." maxlength="5000"></textarea>
-                <div class="card-footer">
-                    <span class="char-count" id="charCount">0 / 5000</span>
-                </div>
-            </div>
-
-            <!-- 中间翻译按钮（只在桌面端且自动翻译关闭时显示） -->
-            <div class="center-translate-btn-container" id="centerTranslateContainer">
-                <button class="center-translate-btn" id="centerTranslateBtn">
-                    <span class="material-symbols-rounded">translate</span>
-                    翻译
-                </button>
-            </div>
-
-            <div class="card output-card">
-                <div class="output-div" id="outputText"></div>
-                <div class="card-footer">
-                    <div style="display: flex; gap: 4px;">
-                        <button class="icon-btn" title="复制" id="copyBtn">
-                            <span class="material-symbols-rounded">content_copy</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- 翻译历史弹窗 -->
-    <div class="modal-overlay" id="historyModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 class="modal-title">翻译历史</h2>
-                <button class="modal-close" id="closeHistoryModal">
-                    <span class="material-symbols-rounded">close</span>
-                </button>
-            </div>
-            <div class="modal-content">
-                <div class="history-list" id="historyList">
-                    <!-- 历史记录将通过JavaScript动态添加 -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-danger" id="clearHistoryBtn">清除历史记录</button>
-                <button class="btn btn-secondary" id="closeHistoryBtn">关闭</button>
             </div>
         </div>
     </div>
 
-    <!-- 设置弹窗 -->
-    <div class="modal-overlay" id="settingsModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 class="modal-title">设置</h2>
-                <button class="modal-close" id="closeSettingsModal">
-                    <span class="material-symbols-rounded">close</span>
-                </button>
+    <div class="js_dialog" id="langDialog" style="display: none;">
+        <div class="weui-mask" id="langMask"></div>
+        <div class="weui-half-screen-dialog" style="height: 80%;">
+            <div class="weui-half-screen-dialog__hd">
+                <div class="weui-half-screen-dialog__hd__side">
+                    <button class="weui-icon-btn" id="closeLangBtn">取消<i class="weui-icon-close-thin"></i></button>
+                </div>
+                <div class="weui-half-screen-dialog__hd__main">
+                    <strong class="weui-half-screen-dialog__title" id="langDialogTitle">选择语言</strong>
+                </div>
+                <div class="weui-half-screen-dialog__hd__side"></div>
             </div>
-            <div class="modal-content">
-                <form class="settings-form" id="settingsForm">
-                    <div class="form-group">
-                        <label for="apiKey" class="form-label">DeepSeek API 密钥</label>
-                        <input type="password" id="apiKey" class="form-input" placeholder="输入您的DeepSeek API密钥">
-                        <div class="form-hint">您的API密钥将本地存储在浏览器中，不会发送到其他服务器</div>
-                        <div class="form-hint">获取API密钥：<a href="https://platform.deepseek.com/api_keys" target="_blank">DeepSeek平台</a></div>
-                    </div>
-                    
-                    <div class="switch-container">
-                        <div class="switch-label">
-                            <span class="switch-title">自动翻译</span>
-                            <span class="switch-description">启用后，在桌面端停止输入后会自动翻译</span>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="autoTranslateSwitch" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    
-                    <div class="switch-container">
-                        <div class="switch-label">
-                            <span class="switch-title">打字机效果</span>
-                            <span class="switch-description">启用后，翻译结果将以打字机效果显示</span>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="typingEffectSwitch" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="saveSettingsBtn">保存设置</button>
-                <button class="btn btn-secondary" id="closeSettingsBtn">关闭</button>
+            <div class="weui-half-screen-dialog__bd" style="padding: 0;">
+                <div class="lang-grid" id="langGrid"></div>
             </div>
         </div>
     </div>
 
-    <button class="translate-fab" id="mobileTranslateBtn">
-        <span>翻译</span>
-        <span class="material-symbols-rounded">arrow_forward</span>
-    </button>
+    <div class="js_dialog" id="confirmDialog" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__hd"><strong class="weui-dialog__title">确认清空</strong></div>
+            <div class="weui-dialog__bd">确定要删除所有历史记录吗？</div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:" class="weui-dialog__btn weui-dialog__btn_default" id="confirmCancel">取消</a>
+                <a href="javascript:" class="weui-dialog__btn weui-dialog__btn_primary" id="confirmOk" style="color: var(--weui-RED);">清空</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+            <p class="weui-toast__content" id="toastMsg">已完成</p>
+        </div>
+    </div>
+    
+    <div id="topTips" class="weui-toptips weui-toptips_warn" style="display: none;">错误提示</div>
 
     <script>
-        // DOM 元素获取
-        const inputText = document.getElementById('inputText');
-        const outputText = document.getElementById('outputText');
-        const charCount = document.getElementById('charCount');
-        const swapBtn = document.getElementById('swapBtn');
-        const sourceLangBtn = document.getElementById('sourceLangBtn');
-        const targetLangBtn = document.getElementById('targetLangBtn');
-        const mobileTranslateBtn = document.getElementById('mobileTranslateBtn');
-        const copyBtn = document.getElementById('copyBtn');
-        const darkModeBtn = document.getElementById('darkModeBtn');
-        const historyBtn = document.getElementById('historyBtn');
-        const settingsBtn = document.getElementById('settingsBtn');
-        const sourceLangDropdown = document.getElementById('sourceLangDropdown');
-        const targetLangDropdown = document.getElementById('targetLangDropdown');
-        
-        // 新的中间翻译按钮相关元素
-        const centerTranslateContainer = document.getElementById('centerTranslateContainer');
-        const centerTranslateBtn = document.getElementById('centerTranslateBtn');
-        
-        // 弹窗相关元素
-        const historyModal = document.getElementById('historyModal');
-        const settingsModal = document.getElementById('settingsModal');
-        const closeHistoryModal = document.getElementById('closeHistoryModal');
-        const closeSettingsModal = document.getElementById('closeSettingsModal');
-        const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-        const historyList = document.getElementById('historyList');
-        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-        const settingsForm = document.getElementById('settingsForm');
-        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-        const apiKeyInput = document.getElementById('apiKey');
-        const autoTranslateSwitch = document.getElementById('autoTranslateSwitch');
-        const typingEffectSwitch = document.getElementById('typingEffectSwitch');
+        // 自动设置暗黑模式背景变量，用于 Header 毛玻璃
+        const setBgVar = (dark) => {
+            const bg = dark ? '25, 25, 25' : '255, 255, 255';
+            document.documentElement.style.setProperty('--weui-BG-0-rgb', bg);
+        }
 
-        // 扩展的语言数据 - 包含40多种语言
+        const darkModeListener = window.matchMedia('(prefers-color-scheme: dark)');
+        function handleTheme(e) { 
+            const isDark = e.matches;
+            document.documentElement.setAttribute('data-weui-theme', isDark ? 'dark' : 'light'); 
+            setBgVar(isDark);
+        }
+        handleTheme(darkModeListener);
+        darkModeListener.addEventListener('change', handleTheme);
+
         const languages = {
             'auto': '检测语言',
-            'zh': '中文',
-            'en': '英语',
-            'ja': '日语',
-            'ko': '韩语',
-            'fr': '法语',
-            'de': '德语',
-            'es': '西班牙语',
-            'ru': '俄语',
-            'ar': '阿拉伯语',
-            'pt': '葡萄牙语',
-            'it': '意大利语',
-            'nl': '荷兰语',
-            'tr': '土耳其语',
-            'pl': '波兰语',
-            'sv': '瑞典语',
-            'da': '丹麦语',
-            'no': '挪威语',
-            'fi': '芬兰语',
-            'hi': '印地语',
-            'th': '泰语',
-            'vi': '越南语',
-            'id': '印尼语',
-            'ms': '马来语',
-            'tl': '菲律宾语',
-            'uk': '乌克兰语',
-            'cs': '捷克语',
-            'el': '希腊语',
-            'hu': '匈牙利语',
-            'ro': '罗马尼亚语',
-            'bg': '保加利亚语',
-            'hr': '克罗地亚语',
-            'sk': '斯洛伐克语',
-            'sl': '斯洛文尼亚语',
-            'et': '爱沙尼亚语',
-            'lv': '拉脱维亚语',
-            'lt': '立陶宛语',
-            'ca': '加泰罗尼亚语',
-            'sr': '塞尔维亚语',
-            'he': '希伯来语',
-            'fa': '波斯语',
-            'bn': '孟加拉语',
-            'te': '泰卢固语',
-            'ta': '泰米尔语',
-            'ur': '乌尔都语',
-            'pa': '旁遮普语',
-            'my': '缅甸语',
-            'km': '高棉语',
-            'lo': '老挝语',
-            'si': '僧伽罗语',
-            'hmn': '苗语'
+            'zh-CN': '简体中文', 'zh-TW': '繁体中文', 'en': '英语',
+            'ja': '日语', 'ko': '韩语', 'fr': '法语', 'es': '西班牙语',
+            'de': '德语', 'it': '意大利语', 'ru': '俄语', 'pt': '葡萄牙语',
+            'ar': '阿拉伯语', 'sv': '瑞典语', 'no': '挪威语', 'da': '丹麦语',
+            'nl': '荷兰语', 'pl': '波兰语', 'tr': '土耳其语', 'el': '希腊语',
+            'th': '泰语', 'vi': '越南语', 'id': '印尼语', 'ms': '马来语',
+            'hi': '印地语', 'bn': '孟加拉语', 'ta': '泰米尔语'
         };
 
-        // 语言国旗/符号映射
-        const languageFlags = {
-            'auto': '🌐',
-            'zh': '🇨🇳',
-            'en': '🇬🇧',
-            'ja': '🇯🇵',
-            'ko': '🇰🇷',
-            'fr': '🇫🇷',
-            'de': '🇩🇪',
-            'es': '🇪🇸',
-            'ru': '🇷🇺',
-            'ar': '🇸🇦',
-            'pt': '🇵🇹',
-            'it': '🇮🇹',
-            'nl': '🇳🇱',
-            'tr': '🇹🇷',
-            'pl': '🇵🇱',
-            'sv': '🇸🇪',
-            'da': '🇩🇰',
-            'no': '🇳🇴',
-            'fi': '🇫🇮',
-            'hi': '🇮🇳',
-            'th': '🇹🇭',
-            'vi': '🇻🇳',
-            'id': '🇮🇩',
-            'ms': '🇲🇾',
-            'tl': '🇵🇭',
-            'uk': '🇺🇦',
-            'cs': '🇨🇿',
-            'el': '🇬🇷',
-            'hu': '🇭🇺',
-            'ro': '🇷🇴',
-            'bg': '🇧🇬',
-            'hr': '🇭🇷',
-            'sk': '🇸🇰',
-            'sl': '🇸🇮',
-            'et': '🇪🇪',
-            'lv': '🇱🇻',
-            'lt': '🇱🇹',
-            'ca': '🇪🇸',
-            'sr': '🇷🇸',
-            'he': '🇮🇱',
-            'fa': '🇮🇷',
-            'bn': '🇧🇩',
-            'te': '🇮🇳',
-            'ta': '🇮🇳',
-            'ur': '🇵🇰',
-            'pa': '🇮🇳',
-            'my': '🇲🇲',
-            'km': '🇰🇭',
-            'lo': '🇱🇦',
-            'si': '🇱🇰',
-            'hmn': '🌏'
+        let state = {
+            sourceLang: 'auto', targetLang: 'en',
+            history: [],
+            settings: { apiKey: '', autoTranslate: true, typingEffect: true },
+            timer: null
         };
 
-        // DeepSeek API 语言代码映射
-        const deepSeekLangCodes = {
-            'zh': 'Chinese',
-            'en': 'English',
-            'ja': 'Japanese',
-            'ko': 'Korean',
-            'fr': 'French',
-            'de': 'German',
-            'es': 'Spanish',
-            'ru': 'Russian',
-            'ar': 'Arabic',
-            'pt': 'Portuguese',
-            'it': 'Italian',
-            'nl': 'Dutch',
-            'tr': 'Turkish',
-            'pl': 'Polish',
-            'sv': 'Swedish',
-            'da': 'Danish',
-            'no': 'Norwegian',
-            'fi': 'Finnish',
-            'hi': 'Hindi',
-            'th': 'Thai',
-            'vi': 'Vietnamese',
-            'id': 'Indonesian',
-            'ms': 'Malay',
-            'tl': 'Filipino',
-            'uk': 'Ukrainian',
-            'cs': 'Czech',
-            'el': 'Greek',
-            'hu': 'Hungarian',
-            'ro': 'Romanian',
-            'bg': 'Bulgarian',
-            'hr': 'Croatian',
-            'sk': 'Slovak',
-            'sl': 'Slovenian',
-            'et': 'Estonian',
-            'lv': 'Latvian',
-            'lt': 'Lithuanian',
-            'ca': 'Catalan',
-            'sr': 'Serbian',
-            'he': 'Hebrew',
-            'fa': 'Persian',
-            'bn': 'Bengali',
-            'te': 'Telugu',
-            'ta': 'Tamil',
-            'ur': 'Urdu',
-            'pa': 'Punjabi',
-            'my': 'Burmese',
-            'km': 'Khmer',
-            'lo': 'Lao',
-            'si': 'Sinhala',
-            'hmn': 'Hmong'
+        const els = {
+            input: document.getElementById('inputText'),
+            output: document.getElementById('outputText'),
+            count: document.getElementById('charCount'),
+            clearInput: document.getElementById('clearInputBtn'),
+            translateBtn: document.getElementById('translateBtn'),
+            sourceBtn: document.getElementById('sourceLangBtn'),
+            targetBtn: document.getElementById('targetLangBtn'),
+            loading: document.getElementById('loadingSpinner'),
+            copyIcon: document.getElementById('copyIcon'),
+            dialogs: {
+                settings: document.getElementById('settingsDialog'),
+                history: document.getElementById('historyDialog'),
+                lang: document.getElementById('langDialog'),
+                confirm: document.getElementById('confirmDialog')
+            }
         };
 
-        let typingTimer; // 用于防抖
-        let isDarkMode = false;
-        let currentSourceLang = 'auto';
-        let currentTargetLang = 'en';
-        let translationHistory = [];
-        let settings = {
-            apiKey: '',
-            autoTranslate: true,
-            typingEffect: true
-        };
-
-        // 初始化语言下拉菜单
-        function initLanguageDropdowns() {
-            // 清空现有的下拉菜单
-            sourceLangDropdown.innerHTML = '';
-            targetLangDropdown.innerHTML = '';
-            
-            // 为源语言下拉菜单添加选项（包括"检测语言"）
-            for (const [code, name] of Object.entries(languages)) {
-                const option = document.createElement('div');
-                option.className = 'lang-option';
-                option.setAttribute('data-lang', code);
-                
-                const flag = languageFlags[code] || '🌐';
-                option.innerHTML = `
-                    <span class="lang-flag">${flag}</span>
-                    <span>${name}</span>
-                `;
-                
-                // 源语言菜单包含"检测语言"
-                if (code === 'auto' || code !== 'auto') {
-                    sourceLangDropdown.appendChild(option.cloneNode(true));
-                }
-                
-                // 目标语言菜单不包含"检测语言"
-                if (code !== 'auto') {
-                    targetLangDropdown.appendChild(option);
-                }
-            }
-            
-            // 为源语言选项添加点击事件
-            document.querySelectorAll('#sourceLangDropdown .lang-option').forEach(option => {
-                option.addEventListener('click', () => {
-                    const langCode = option.getAttribute('data-lang');
-                    currentSourceLang = langCode;
-                    sourceLangBtn.textContent = languages[langCode];
-                    sourceLangDropdown.classList.remove('show');
-                    
-                    // 如果目标语言和源语言相同，自动切换目标语言
-                    if (langCode !== 'auto' && langCode === currentTargetLang) {
-                        // 找到另一个不同的语言
-                        for (const code in languages) {
-                            if (code !== langCode && code !== 'auto') {
-                                currentTargetLang = code;
-                                targetLangBtn.textContent = languages[code];
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // 更新翻译按钮状态
-                    updateCenterTranslateButton();
-                    
-                    // 如果当前有文本，重新翻译
-                    if (inputText.value.trim()) {
-                        if (settings.autoTranslate) {
-                            performTranslation(inputText.value);
-                        }
-                    }
-                });
-            });
-            
-            // 为目标语言选项添加点击事件
-            document.querySelectorAll('#targetLangDropdown .lang-option').forEach(option => {
-                option.addEventListener('click', () => {
-                    const langCode = option.getAttribute('data-lang');
-                    currentTargetLang = langCode;
-                    targetLangBtn.textContent = languages[langCode];
-                    targetLangDropdown.classList.remove('show');
-                    
-                    // 如果源语言不是auto且和目标语言相同，自动切换源语言
-                    if (currentSourceLang !== 'auto' && currentSourceLang === langCode) {
-                        // 找到另一个不同的语言
-                        for (const code in languages) {
-                            if (code !== langCode && code !== 'auto') {
-                                currentSourceLang = code;
-                                sourceLangBtn.textContent = languages[code];
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // 更新翻译按钮状态
-                    updateCenterTranslateButton();
-                    
-                    // 如果当前有文本，重新翻译
-                    if (inputText.value.trim()) {
-                        if (settings.autoTranslate) {
-                            performTranslation(inputText.value);
-                        }
-                    }
-                });
-            });
-        }
-
-        // 页面加载时从localStorage加载数据
-        function loadData() {
-            const savedHistory = localStorage.getItem('translationHistory');
-            if (savedHistory) {
-                translationHistory = JSON.parse(savedHistory);
-            }
-            
-            const savedSettings = localStorage.getItem('translationSettings');
-            if (savedSettings) {
-                settings = JSON.parse(savedSettings);
-                apiKeyInput.value = settings.apiKey || '';
-                autoTranslateSwitch.checked = settings.autoTranslate !== false;
-                typingEffectSwitch.checked = settings.typingEffect !== false;
-            }
-            
-            // 加载深色模式设置
-            const savedDarkMode = localStorage.getItem('darkMode');
-            if (savedDarkMode === 'true') {
-                isDarkMode = true;
-                document.body.classList.add('dark-mode');
-                darkModeBtn.innerHTML = '<span class="material-symbols-rounded">light_mode</span>';
-                darkModeBtn.title = '浅色模式';
-            }
-            
-            // 更新中间翻译按钮的显示状态
-            updateCenterTranslateButton();
-            
-            // 初始化语言下拉菜单
-            initLanguageDropdowns();
-        }
-
-        // 更新中间翻译按钮的显示状态
-        function updateCenterTranslateButton() {
-            const isDesktop = window.innerWidth > 768;
-            const hasText = inputText.value.trim().length > 0;
-            const hasApiKey = settings.apiKey.trim().length > 0;
-            
-            // 更新中间翻译按钮的状态
-            if (centerTranslateBtn) {
-                centerTranslateBtn.disabled = !(hasText && hasApiKey);
-            }
-            
-            // 只有在桌面端且自动翻译关闭时才显示中间翻译按钮
-            if (isDesktop && !settings.autoTranslate) {
-                centerTranslateContainer.classList.remove('hidden');
-            } else {
-                centerTranslateContainer.classList.add('hidden');
-            }
-            
-            // 更新移动端按钮状态
-            if (mobileTranslateBtn) {
-                mobileTranslateBtn.disabled = !(hasText && hasApiKey);
-                mobileTranslateBtn.style.opacity = (hasText && hasApiKey) ? '1' : '0.5';
-                mobileTranslateBtn.style.cursor = (hasText && hasApiKey) ? 'pointer' : 'not-allowed';
-            }
-        }
-
-        // 保存设置到localStorage
-        function saveSettings() {
-            settings.apiKey = apiKeyInput.value;
-            settings.autoTranslate = autoTranslateSwitch.checked;
-            settings.typingEffect = typingEffectSwitch.checked;
-            
-            localStorage.setItem('translationSettings', JSON.stringify(settings));
-            showToast('设置已保存');
-            
-            // 更新中间翻译按钮的显示状态
-            updateCenterTranslateButton();
-        }
-
-        // 保存历史记录到localStorage
-        function saveHistory() {
-            localStorage.setItem('translationHistory', JSON.stringify(translationHistory));
-        }
-
-        // 添加翻译历史
-        function addToHistory(sourceText, translatedText) {
-            const historyItem = {
-                id: Date.now(),
-                sourceLang: currentSourceLang,
-                targetLang: currentTargetLang,
-                sourceText: sourceText,
-                translatedText: translatedText,
-                timestamp: new Date().toLocaleString('zh-CN'),
-                date: new Date().toISOString()
-            };
-            
-            // 添加到历史记录数组开头
-            translationHistory.unshift(historyItem);
-            
-            // 只保留最近50条记录
-            if (translationHistory.length > 50) {
-                translationHistory = translationHistory.slice(0, 50);
-            }
-            
-            saveHistory();
-            
-            // 如果历史弹窗是打开的，更新显示
-            if (historyModal.classList.contains('active')) {
-                renderHistory();
-            }
-        }
-
-        // 渲染历史记录
-        function renderHistory() {
-            if (translationHistory.length === 0) {
-                historyList.innerHTML = '<div class="empty-history">暂无翻译历史</div>';
-                return;
-            }
-            
-            historyList.innerHTML = '';
-            translationHistory.forEach(item => {
-                const historyItem = document.createElement('div');
-                historyItem.className = 'history-item';
-                historyItem.innerHTML = `
-                    <div class="history-source">${languages[item.sourceLang]} → ${languages[item.targetLang]}</div>
-                    <div class="history-text">${item.sourceText}</div>
-                    <div class="history-text" style="color: var(--md-sys-color-primary);">${item.translatedText}</div>
-                    <div class="history-time">${item.timestamp}</div>
-                `;
-                
-                // 点击历史记录可以重新加载
-                historyItem.addEventListener('click', () => {
-                    inputText.value = item.sourceText;
-                    outputText.innerText = item.translatedText;
-                    charCount.textContent = `${item.sourceText.length} / 5000`;
-                    
-                    // 设置对应的语言
-                    currentSourceLang = item.sourceLang;
-                    currentTargetLang = item.targetLang;
-                    sourceLangBtn.textContent = languages[currentSourceLang];
-                    targetLangBtn.textContent = languages[currentTargetLang];
-                    
-                    // 更新翻译按钮状态
-                    updateCenterTranslateButton();
-                    
-                    // 关闭弹窗
-                    historyModal.classList.remove('active');
-                });
-                
-                historyList.appendChild(historyItem);
-            });
-        }
-
-        // 清除历史记录
-        function clearHistory() {
-            if (confirm('确定要清除所有翻译历史记录吗？此操作不可撤销。')) {
-                translationHistory = [];
-                saveHistory();
-                renderHistory();
-                showToast('历史记录已清除');
-            }
-        }
-
-        // 显示提示消息
-        function showToast(message) {
-            // 移除现有的提示
-            const existingToast = document.querySelector('.toast');
-            if (existingToast) {
-                existingToast.remove();
-            }
-            
-            // 创建新的提示
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 24px;
-                left: 50%;
-                transform: translateX(-50%);
-                background-color: var(--md-sys-color-primary);
-                color: var(--md-sys-color-on-primary);
-                padding: 12px 24px;
-                border-radius: var(--border-radius-md);
-                font-size: 14px;
-                z-index: 1001;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-                animation: toastSlideIn 0.3s ease-out;
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // 3秒后自动移除
-            setTimeout(() => {
-                toast.style.animation = 'toastSlideOut 0.3s ease-out forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // 添加CSS动画
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes toastSlideIn {
-                from {
-                    opacity: 0;
-                    transform: translateX(-50%) translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(-50%) translateY(0);
-                }
-            }
-            
-            @keyframes toastSlideOut {
-                from {
-                    opacity: 1;
-                    transform: translateX(-50%) translateY(0);
-                }
-                to {
-                    opacity: 0;
-                    transform: translateX(-50%) translateY(20px);
-                }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // 1. 深色模式切换
-        darkModeBtn.addEventListener('click', () => {
-            isDarkMode = !isDarkMode;
-            if (isDarkMode) {
-                document.body.classList.add('dark-mode');
-                darkModeBtn.innerHTML = '<span class="material-symbols-rounded">light_mode</span>';
-                darkModeBtn.title = '浅色模式';
-                localStorage.setItem('darkMode', 'true');
-            } else {
-                document.body.classList.remove('dark-mode');
-                darkModeBtn.innerHTML = '<span class="material-symbols-rounded">dark_mode</span>';
-                darkModeBtn.title = '深色模式';
-                localStorage.setItem('darkMode', 'false');
-            }
-        });
-
-        // 2. 翻译历史和设置按钮的点击事件
-        historyBtn.addEventListener('click', () => {
-            renderHistory();
-            historyModal.classList.add('active');
-        });
-
-        settingsBtn.addEventListener('click', () => {
-            settingsModal.classList.add('active');
-        });
-
-        // 关闭弹窗
-        closeHistoryModal.addEventListener('click', () => {
-            historyModal.classList.remove('active');
-        });
-
-        closeSettingsModal.addEventListener('click', () => {
-            settingsModal.classList.remove('active');
-        });
-
-        closeHistoryBtn.addEventListener('click', () => {
-            historyModal.classList.remove('active');
-        });
-
-        closeSettingsBtn.addEventListener('click', () => {
-            settingsModal.classList.remove('active');
-        });
-
-        // 点击弹窗外部关闭
-        [historyModal, settingsModal].forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
-        });
-
-        // 清除历史记录按钮
-        clearHistoryBtn.addEventListener('click', clearHistory);
-
-        // 保存设置按钮
-        saveSettingsBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            saveSettings();
-            settingsModal.classList.remove('active');
-        });
-
-        // 3. 语言选择功能
-        sourceLangBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            sourceLangDropdown.classList.toggle('show');
-            targetLangDropdown.classList.remove('show');
-        });
-
-        targetLangBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            targetLangDropdown.classList.toggle('show');
-            sourceLangDropdown.classList.remove('show');
-        });
-
-        // 点击页面其他位置关闭下拉菜单
-        document.addEventListener('click', () => {
-            sourceLangDropdown.classList.remove('show');
-            targetLangDropdown.classList.remove('show');
-        });
-
-        // 4. 输入监听 (实现字符计数与自动翻译)
-        inputText.addEventListener('input', () => {
-            const text = inputText.value;
-            charCount.textContent = `${text.length} / 5000`;
-
-            // 更新翻译按钮状态
-            updateCenterTranslateButton();
-
-            // 清除之前的定时器 (防抖：用户停止输入 800ms 后再翻译)
-            clearTimeout(typingTimer);
-            
-            if (text.trim() === '') {
-                outputText.innerHTML = '';
-                return;
-            }
-
-            // 桌面端且自动翻译开启时，启用自动翻译
-            if (window.innerWidth > 768 && settings.autoTranslate) {
-                typingTimer = setTimeout(() => {
-                    performTranslation(text);
-                }, 800);
-            }
-        });
-
-        // 5. 中间翻译按钮点击事件（桌面端）
-        centerTranslateBtn.addEventListener('click', () => {
-            const text = inputText.value;
-            if (text.trim() && settings.apiKey) {
-                performTranslation(text);
-            }
-        });
-
-        // 移动端按钮点击翻译
-        mobileTranslateBtn.addEventListener('click', () => {
-            const text = inputText.value;
-            if (text.trim() && settings.apiKey) {
-                performTranslation(text);
-            } else if (!settings.apiKey) {
-                showToast('请先在设置中配置API密钥');
-            }
-        });
-
-        // 6. 语言交换逻辑
-        swapBtn.addEventListener('click', () => {
-            // 交换语言
-            if (currentSourceLang === 'auto') {
-                currentSourceLang = currentTargetLang;
-                currentTargetLang = 'en'; // 默认切换到英语
-            } else {
-                const temp = currentSourceLang;
-                currentSourceLang = currentTargetLang;
-                currentTargetLang = temp;
-            }
-            
-            // 更新按钮文本
-            sourceLangBtn.textContent = languages[currentSourceLang];
-            targetLangBtn.textContent = languages[currentTargetLang];
-            
-            // 交换输入输出内容
-            const currentInput = inputText.value;
-            const currentOutput = outputText.innerText;
-            
-            inputText.value = currentOutput;
-            outputText.innerText = currentInput;
-            
-            // 更新字符计数
-            charCount.textContent = `${inputText.value.length} / 5000`;
-            
-            // 更新翻译按钮状态
-            updateCenterTranslateButton();
-            
-            // 触发旋转动画
-            swapBtn.style.transform = 'rotate(180deg)';
-            setTimeout(() => swapBtn.style.transform = 'rotate(0deg)', 300);
-        });
-
-        // 7. 调用 DeepSeek API 翻译核心函数
-        async function performTranslation(text) {
-            outputText.innerHTML = '<div class="loading"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>';
-            
-            // 检查API密钥
-            if (!settings.apiKey) {
-                outputText.innerHTML = '<div class="error-message">请先在设置中配置DeepSeek API密钥</div>';
-                return;
-            }
+        function init() {
+            // 安全读取 JSON
+            try {
+                const hist = localStorage.getItem('translationHistory');
+                if (hist) state.history = JSON.parse(hist);
+            } catch(e) { state.history = []; }
 
             try {
-                // 构建系统提示词
-                const systemPrompt = buildSystemPrompt();
+                const set = localStorage.getItem('translationSettings');
+                if (set) {
+                    state.settings = JSON.parse(set);
+                    document.getElementById('apiKey').value = state.settings.apiKey || '';
+                    document.getElementById('autoTranslateSwitch').checked = state.settings.autoTranslate;
+                    document.getElementById('typingEffectSwitch').checked = state.settings.typingEffect;
+                }
+            } catch(e) {}
+
+            bindEvents();
+            updateLangUI();
+        }
+
+        function bindEvents() {
+            // 输入框自适应高度
+            els.input.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+                handleInput();
+            });
+
+            els.clearInput.addEventListener('click', () => {
+                els.input.value = '';
+                els.input.style.height = 'auto'; // 重置高度
+                els.output.innerText = '';
+                handleInput();
+            });
+
+            els.translateBtn.addEventListener('click', () => {
+                const text = els.input.value.trim();
+                if (!text) {
+                    showTopTips('请输入要翻译的内容');
+                    els.input.focus();
+                    return;
+                }
+                if (!state.settings.apiKey) {
+                    showTopTips('请先配置 API Key');
+                    openDialog('settings');
+                    return;
+                }
+                translate();
+            });
+
+            document.getElementById('settingsBtn').addEventListener('click', () => openDialog('settings'));
+            document.getElementById('historyBtn').addEventListener('click', () => {
+                renderHistory();
+                openDialog('history');
+            });
+            document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+            
+            document.getElementById('swapBtn').addEventListener('click', () => {
+                if(state.sourceLang === 'auto') {
+                    state.sourceLang = state.targetLang;
+                    state.targetLang = 'en';
+                } else {
+                    [state.sourceLang, state.targetLang] = [state.targetLang, state.sourceLang];
+                }
+                updateLangUI();
+                const btn = document.getElementById('swapBtn');
+                btn.style.transform = 'rotate(180deg)';
+                setTimeout(() => btn.style.transform = 'rotate(0deg)', 300);
+                if(els.input.value && els.output.innerText) {
+                    const tmp = els.input.value;
+                    els.input.value = els.output.innerText;
+                    els.output.innerText = tmp;
+                    handleInput();
+                }
+            });
+
+            els.sourceBtn.addEventListener('click', () => showLangPicker('source'));
+            els.targetBtn.addEventListener('click', () => showLangPicker('target'));
+
+            ['settings', 'history', 'lang'].forEach(key => {
+                const d = els.dialogs[key];
+                d.querySelector('.weui-mask').addEventListener('click', () => closeDialog(key));
+                const closeBtn = d.querySelector('#close' + key.charAt(0).toUpperCase() + key.slice(1) + 'Btn');
+                if(closeBtn) closeBtn.addEventListener('click', () => closeDialog(key));
+            });
+
+            document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+                els.dialogs.confirm.style.display = 'block';
+            });
+            document.getElementById('confirmCancel').addEventListener('click', () => els.dialogs.confirm.style.display = 'none');
+            document.getElementById('confirmOk').addEventListener('click', () => {
+                state.history = [];
+                localStorage.setItem('translationHistory', '[]');
+                renderHistory();
+                els.dialogs.confirm.style.display = 'none';
+                showToast('历史已清空');
+            });
+            
+            // 复制反馈优化
+            document.getElementById('copyBtn').addEventListener('click', () => {
+                if(els.output.innerText) {
+                    navigator.clipboard.writeText(els.output.innerText);
+                    els.copyIcon.innerText = 'check'; // 变成对勾
+                    els.copyIcon.style.color = 'var(--weui-BRAND)';
+                    setTimeout(() => {
+                        els.copyIcon.innerText = 'content_copy';
+                        els.copyIcon.style.color = '';
+                    }, 1500);
+                    showToast('已复制');
+                }
+            });
+        }
+
+        function handleInput() {
+            const text = els.input.value;
+            els.count.innerText = `${text.length}/5000`;
+            els.clearInput.style.display = text.length > 0 ? 'flex' : 'none';
+            
+            if(text.trim().length > 0) {
+                els.translateBtn.classList.remove('disabled');
+            } else {
+                els.translateBtn.classList.add('disabled');
+            }
+
+            clearTimeout(state.timer);
+            // 改为1000ms防抖
+            if(state.settings.autoTranslate && text.trim()) {
+                state.timer = setTimeout(translate, 1000);
+            }
+        }
+
+        async function translate() {
+            const text = els.input.value.trim();
+            if(!text || !state.settings.apiKey) return;
+
+            els.loading.classList.remove('hidden');
+            els.output.classList.remove('typing');
+
+            try {
+                const sName = languages[state.sourceLang];
+                const tName = languages[state.targetLang];
                 
-                // 调用DeepSeek API
-                const response = await fetch('https://api.deepseek.com/chat/completions', {
+                const prompt = state.sourceLang === 'auto' 
+                    ? `You are a professional translator. Translate the text to ${tName}. Output translation only.`
+                    : `You are a professional translator. Translate from ${sName} to ${tName}. Output translation only.`;
+
+                const res = await fetch('https://api.deepseek.com/chat/completions', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${settings.apiKey}`
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.settings.apiKey}` },
                     body: JSON.stringify({
                         model: 'deepseek-chat',
                         messages: [
-                            { role: 'system', content: systemPrompt },
+                            { role: 'system', content: prompt },
                             { role: 'user', content: text }
                         ],
-                        stream: false,
-                        max_tokens: 2000
+                        stream: false
                     })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `API请求失败: ${response.status}`);
-                }
-
-                const data = await response.json();
+                if(!res.ok) throw new Error('API Error');
+                const data = await res.json();
                 const result = data.choices[0].message.content.trim();
 
-                // 添加到历史记录
                 addToHistory(text, result);
 
-                // 显示结果
-                outputText.innerHTML = '';
-                if (settings.typingEffect) {
-                    outputText.classList.add('typing');
-                    let index = 0;
-                    
-                    function typeWriter() {
-                        if (index < result.length) {
-                            outputText.innerHTML += result.charAt(index);
-                            index++;
-                            setTimeout(typeWriter, 30);
-                        } else {
-                            outputText.classList.remove('typing');
-                        }
+                if(state.settings.typingEffect) {
+                    els.output.innerText = '';
+                    els.output.classList.add('typing');
+                    let i = 0;
+                    function type() {
+                        if(i < result.length) {
+                            els.output.innerText += result.charAt(i);
+                            i++;
+                            setTimeout(type, 10); // 打字速度微调
+                            els.output.scrollTop = els.output.scrollHeight;
+                        } else els.output.classList.remove('typing');
                     }
-                    typeWriter();
+                    type();
                 } else {
-                    outputText.innerText = result;
+                    els.output.innerText = result;
                 }
-                
-            } catch (error) {
-                console.error('翻译错误:', error);
-                outputText.innerHTML = `<div class="error-message">翻译失败: ${error.message}</div>`;
+
+            } catch(e) {
+                showTopTips('翻译失败，请检查网络或Key');
+            } finally {
+                els.loading.classList.add('hidden');
             }
         }
 
-        // 构建系统提示词
-        function buildSystemPrompt() {
-            const targetLangName = deepSeekLangCodes[currentTargetLang] || languages[currentTargetLang];
+        function addToHistory(src, dist) {
+            if(state.history.length > 0 && state.history[0].src === src && state.history[0].dist === dist) return;
             
-            if (currentSourceLang === 'auto') {
-                return `You are a professional translation assistant. Please translate the user's text into ${targetLangName}. Detect the source language automatically. Only output the translation result, no explanations.`;
-            } else {
-                const sourceLangName = deepSeekLangCodes[currentSourceLang] || languages[currentSourceLang];
-                return `You are a professional translation assistant. Please translate the user's text from ${sourceLangName} to ${targetLangName}. Only output the translation result, no explanations.`;
-            }
+            state.history.unshift({
+                src: src, 
+                dist: dist,
+                sLang: state.sourceLang,
+                tLang: state.targetLang,
+                time: new Date().toLocaleTimeString()
+            });
+            if(state.history.length > 30) state.history.pop();
+            localStorage.setItem('translationHistory', JSON.stringify(state.history));
+            if(els.dialogs.history.style.display === 'block') renderHistory();
         }
 
-        // 9. 复制功能
-        copyBtn.addEventListener('click', () => {
-            if(outputText.innerText) {
-                navigator.clipboard.writeText(outputText.innerText);
-                showToast('已复制到剪贴板');
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            const empty = document.getElementById('emptyHistory');
+            list.innerHTML = '';
+            
+            if(state.history.length === 0) {
+                empty.classList.remove('hidden');
+                return;
             }
-        });
+            empty.classList.add('hidden');
 
-        // 初始加载
-        window.addEventListener('load', () => {
-            loadData();
-            
-            // 更新字符计数
-            charCount.textContent = `${inputText.value.length} / 5000`;
-            
-            // 初始渲染历史记录
-            renderHistory();
-            
-            // 调整主容器高度
-            adjustMainHeight();
-            
-            // 初始更新翻译按钮状态
-            updateCenterTranslateButton();
-        });
+            state.history.forEach(item => {
+                const sLabel = languages[item.sLang] || item.sLang;
+                const tLabel = languages[item.tLang] || item.tLang;
 
-        // 窗口大小变化时调整布局和按钮状态
-        window.addEventListener('resize', () => {
-            adjustMainHeight();
-            updateCenterTranslateButton();
-        });
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div class="history-langs">
+                        <span>${sLabel} → ${tLabel}</span>
+                        <span style="color:var(--weui-FG-2); font-weight:400;">${item.time}</span>
+                    </div>
+                    <div class="history-txt" style="color:var(--weui-FG-0);margin-bottom:4px;">${item.src}</div>
+                    <div class="history-txt" style="color:var(--weui-FG-1);">${item.dist}</div>
+                `;
+                div.onclick = () => {
+                    els.input.value = item.src;
+                    els.output.innerText = item.dist;
+                    state.sourceLang = item.sLang;
+                    state.targetLang = item.tLang;
+                    
+                    updateLangUI();
+                    
+                    // 手动触发高度调整
+                    els.input.style.height = 'auto';
+                    els.input.style.height = els.input.scrollHeight + 'px';
+                    
+                    els.count.innerText = `${item.src.length}/5000`;
+                    els.clearInput.style.display = 'flex';
+                    els.translateBtn.classList.remove('disabled');
 
-        // 自动翻译设置变化时更新按钮显示
-        autoTranslateSwitch.addEventListener('change', () => {
-            updateCenterTranslateButton();
-        });
-
-        // API密钥输入变化时更新按钮状态
-        apiKeyInput.addEventListener('input', () => {
-            settings.apiKey = apiKeyInput.value;
-            updateCenterTranslateButton();
-        });
-
-        // 调整主容器高度
-        function adjustMainHeight() {
-            const headerHeight = document.querySelector('header').offsetHeight;
-            const mainElement = document.querySelector('main');
-            mainElement.style.height = `calc(100vh - ${headerHeight}px)`;
+                    clearTimeout(state.timer);
+                    closeDialog('history');
+                };
+                list.appendChild(div);
+            });
         }
 
+        function updateLangUI() {
+            els.sourceBtn.querySelector('span').innerText = languages[state.sourceLang];
+            els.targetBtn.querySelector('span').innerText = languages[state.targetLang];
+        }
+
+        function showLangPicker(type) {
+            const isSrc = type === 'source';
+            document.getElementById('langDialogTitle').innerText = isSrc ? '源语言' : '目标语言';
+            const grid = document.getElementById('langGrid');
+            grid.innerHTML = '';
+            
+            for(const [code, name] of Object.entries(languages)) {
+                if(!isSrc && code === 'auto') continue;
+                const div = document.createElement('div');
+                div.className = 'lang-chip';
+                if((isSrc && code === state.sourceLang) || (!isSrc && code === state.targetLang)) div.classList.add('active');
+                div.innerText = name;
+                div.onclick = () => {
+                    if(isSrc) {
+                        state.sourceLang = code;
+                        // 智能互斥：如果源=目标，重置目标
+                        if(state.sourceLang === state.targetLang) state.targetLang = 'en';
+                    } else {
+                        state.targetLang = code;
+                        // 智能互斥：如果目标=源，重置源
+                        if(state.sourceLang === state.targetLang) state.sourceLang = 'auto';
+                    }
+                    updateLangUI();
+                    closeDialog('lang');
+                    if(els.input.value.trim() && state.settings.autoTranslate) translate();
+                };
+                grid.appendChild(div);
+            }
+            openDialog('lang');
+        }
+
+        function saveSettings() {
+            state.settings.apiKey = document.getElementById('apiKey').value;
+            state.settings.autoTranslate = document.getElementById('autoTranslateSwitch').checked;
+            state.settings.typingEffect = document.getElementById('typingEffectSwitch').checked;
+            localStorage.setItem('translationSettings', JSON.stringify(state.settings));
+            closeDialog('settings');
+            showToast('保存成功');
+        }
+
+        function openDialog(k) {
+            const d = els.dialogs[k];
+            d.style.display = 'block';
+            d.classList.add('weui-animate-fade-in');
+            d.querySelector('.weui-half-screen-dialog').classList.add('weui-animate-slide-up');
+        }
+        function closeDialog(k) {
+            const d = els.dialogs[k];
+            d.classList.remove('weui-animate-fade-in');
+            d.querySelector('.weui-half-screen-dialog').classList.remove('weui-animate-slide-up');
+            d.classList.add('weui-animate-fade-out');
+            d.querySelector('.weui-half-screen-dialog').classList.add('weui-animate-slide-down');
+            setTimeout(() => {
+                d.style.display = 'none';
+                d.classList.remove('weui-animate-fade-out');
+                d.querySelector('.weui-half-screen-dialog').classList.remove('weui-animate-slide-down');
+            }, 200);
+        }
+        function showToast(m) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = m;
+            t.style.display = 'block';
+            setTimeout(()=>t.style.display='none', 1500);
+        }
+        function showTopTips(m) {
+            const t = document.getElementById('topTips');
+            t.innerText = m;
+            t.style.display = 'block';
+            setTimeout(()=>t.style.display='none', 2000);
+        }
+
+        init();
     </script>
 </body>
 </html>
