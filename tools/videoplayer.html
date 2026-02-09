@@ -2,770 +2,313 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
     <title>视频播放器</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.25/weui.min.css"/>
     <style>
-        :root {
-            --color-primary: #6750A4;
-            --color-primary-container: #EADDFF;
-            --color-on-primary: #FFFFFF;
-            --color-surface: #FEF7FF;
-            --color-surface-variant: #E7E0EC;
-            --color-on-surface: #1D1B20;
-            --color-on-surface-variant: #49454F;
-            --color-shadow: rgba(0, 0, 0, 0.15);
-            --color-backdrop: rgba(0, 0, 0, 0.25);
-            --card-radius: 24px;
-            --header-height: 56px;
-            --transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
-            --card-padding: 24px;
+        /* --- 全局样式 --- */
+        body, html {
+            height: 100%;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        [data-theme="dark"] {
-            --color-primary: #D0BCFF;
-            --color-primary-container: #4F378B;
-            --color-on-primary: #381E72;
-            --color-surface: #1D1B20;
-            --color-surface-variant: #49454F;
-            --color-on-surface: #E6E1E5;
-            --color-on-surface-variant: #CAC4D0;
-            --color-shadow: rgba(0, 0, 0, 0.3);
-            --color-backdrop: rgba(0, 0, 0, 0.5);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Roboto', sans-serif;
-        }
-
+        
+        /* 这里的背景色和文字颜色已经使用了 WeUI 变量，会自动适配 */
         body {
-            background-color: var(--color-surface);
-            color: var(--color-on-surface);
-            min-height: 100vh;
-            transition: background-color var(--transition), color var(--transition);
-            overflow-x: hidden;
+            background-color: var(--weui-BG-0);
+            color: var(--weui-FG-0);
         }
 
-        .app-header {
-            height: var(--header-height);
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            background-color: var(--color-surface);
-            box-shadow: 0 2px 4px var(--color-shadow);
-        }
-
-        .app-title {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .app-title h1 {
-            font-weight: 500;
-            font-size: 20px;
-            color: var(--color-primary);
-        }
-
-        .icon-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--color-on-surface);
-            transition: all 0.3s ease;
-        }
-
-        .icon-btn:hover {
-            background-color: rgba(0,0,0,0.08);
-            transform: scale(1.1);
-        }
-
-        .main-content {
-            padding: 16px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .card {
-            border-radius: var(--card-radius);
-            background: var(--color-surface);
-            box-shadow: 0 2px 6px var(--color-shadow);
-            border: 1px solid var(--color-surface-variant);
-            padding: var(--card-padding);
+        /* --- 视频容器 (16:9) --- */
+        .video-wrapper {
             position: relative;
-            overflow: hidden;
-            margin-bottom: 32px;
+            width: 100%;
+            padding-bottom: 56.25%;
+            background: #000; /* 视频背景始终由黑色保持沉浸感 */
         }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 500;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .card-title .material-icons {
-            color: var(--color-primary);
-        }
-
-        /* 视频容器样式 */
-        .video-container {
-            position: relative;
-            width: 极速工具小站
-            height: 0;
-            padding-bottom: 56.25%; /* 16:9 宽高比 */
-            background-color: #000;
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 12px var(--color-shadow);
-        }
-
-        video {
+        .video-content {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             object-fit: contain;
-            background-color: #000;
-            cursor: pointer;
         }
 
-        /* 播放提示 */
-        #playHint {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 20px;
-            border-radius: 24px;
-            font-size: 14px;
-            pointer-events: none;
-            backdrop-filter: blur(4px);
-            transition: opacity 0.3s ease;
-        }
-
-        video:hover ~ #playHint {
-            opacity: 0.3;
-        }
-
-        /* 控制区域样式 */
-        .control-panel {
-            background: var(--color-surface-variant);
-            padding: 20px;
-            border极速工具小站;
-        }
-
-        /* URL输入框样式 */
-        .url-input-group {
+        /* --- 诊断组件优化 (关键修改) --- */
+        .diagnostic-dialog {
+            max-height: 85vh !important;
+            height: 85vh !important;
             display: flex;
-            align-items: stretch;
-            gap: 12px;
+            flex-direction: column;
+            /* 弹窗整体背景也跟随主题 */
+            background-color: var(--weui-BG-2); 
         }
 
-        .url-input-container {
+        .diagnostic-body {
+            padding: 0 !important;
             flex: 1;
-            position: relative;
-        }
-
-        .url-input-label {
-            position: absolute;
-            top: 14px;
-            left: 16px;
-            font-size: 14px;
-            color: var(--color-on-surface-variant);
-            pointer-events: none;
-            transition: all 0.3s ease;
-        }
-
-        #videoUrlInput {
-            width: 100%;
-            padding: 34px 16px 14px;
-            border: 2px solid var(--color-surface-variant);
-            border-radius: 12px;
-            font-size: 16px;
-            background: var(--color-surface);
-            color: var(--color-on-surface);
-            transition: all 0.3s ease;
-        }
-
-        #videoUrlInput:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 2px rgba(var(--color-primary), 0.2);
-        }
-
-        #videoUrlInput:focus + .url-input-label,
-        #videoUrlInput:not(:placeholder-shown) + .url-input-label {
-            top: 8px;
-            font-size: 12px;
-        }
-
-        .play-icon {
-            color: var(--color-primary);
-            position: absolute;
-            top: 16px;
-            right: 16px;
-        }
-
-        /* 按钮样式 */
-        .btn {
-            padding: 16px 24px;
-            background: var(--color-primary);
-            color: var(--color-on-primary);
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px var(--color-shadow);
-            height: 100%;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px var(--color-shadow);
-        }
-
-        /* 通知样式 */
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--color-primary);
-            color: var(--color-on-primary);
-            padding: 12px 24px;
-            border-radius: 12px;
-            z-index: 1000;
-            box-shadow: 0 4px 12px var(--color-shadow);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-        
-        .notification.show {
-            opacity: 1;
-        }
-        
-        /* 设置菜单样式 */
-        .settings-menu {
-            position: fixed;
-            top: 60px;
-            right: 20px;
-            background: var(--color-surface);
-            border-radius: 16px;
-            box-shadow: 0 8px 24px var(--color-shadow);
-            z-index: 1000;
-            display: none;
-            width: 240px;
-            transform: translateY(-10px);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            border: 1px solid var(--color-surface-variant);
-            overflow: hidden;
-        }
-
-        .settings-menu.show {
-            display: block;
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 20px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .menu-item:hover {
-            background-color: var(--color-surface-variant);
-        }
-
-        .menu-content {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            font-size: 16px;
-            color: var(--color-on-surface);
-        }
-
-        /* 开关样式 */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 48px;
-            height: 26px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--color-on-surface-variant);
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--color-primary);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(22px);
-        }
-
-        /* 诊断弹窗样式 */
-        .diagnostic-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--color-backdrop);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity var(--transition);
-        }
-
-        .diagnostic-modal.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-container {
-            width: 90%;
-            max-width: 900px;
-            height: 80%;
-            background: var(--color-surface);
-            border-radius: var(--card-radius);
-            box-shadow: 0 12px 32px var(--color-shadow);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            /* [修改点]：之前是 #fff，现在改为跟随主题的背景色 */
+            background-color: var(--weui-BG-2); 
         }
 
-        .modal-header {
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--color-surface-variant);
-        }
-
-        .modal-title {
-            font-weight: 500;
-            font-size: 18px;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--color-on-surface);
-            font-size: 24px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-        }
-
-        .modal-close:hover {
-            background: var(--color-surface-variant);
-        }
-
-        .modal-content {
-            flex: 1;
-            padding: 0;
-            border: none;
-            overflow: hidden;
-        }
-
-        .diagnostic-frame {
+        iframe.full-frame {
             width: 100%;
             height: 100%;
             border: none;
-            display: block;
+            flex: 1;
+            /* 防止 iframe 加载前闪白 */
+            background-color: transparent; 
         }
 
-        /* 响应式布局 */
-        @media (max-width: 700px) {
-            .main-content {
-                padding: 8px;
-            }
-            
-            .card {
-                padding: 16px;
-            }
-            
-            .url-input-group {
-                flex-direction: column;
-            }
-            
-            .url-input-container {
-                width: 100%;
-            }
-            
-            .btn {
-                width: 100%;
-                padding: 16px;
-            }
-            
-            .app-title h1 {
-                font-size: 18px;
-            }
-            
-            .settings-menu {
-                width: 200px;
-            }
-
-            .modal-container {
-                height: 90%;
-            }
-        }
-        
-        @media (max-width: 500px) {
-            :root {
-                --card-padding: 16px;
-            }
-            
-            #videoUrlInput {
-                padding-top: 30px;
-                padding-bottom: 12px;
-            }
-            
-            .control-panel {
-                padding: 16px;
-            }
-            
-            .app-title h1 {
-                font-size: 16px;
-            }
-            
-            .settings-menu {
-                top: 56px;
-                right: 10px;
-                width: 180px;
-            }
-
-            .modal-container {
-                width: 95%;
-            }
-        }
-
-        @media (min-width: 1000px) {
-            .main-content {
-                max-width: 900极速工具小站
-            }
-        }
-        
-        /* 动画效果 */
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .settings-menu {
-            animation: slideIn 0.3s ease forwards;
-        }
+        /* 错误提示条 */
+        .weui-toptips { display: none; }
     </style>
 </head>
-<body data-theme="light">
-    <div class="app-header">
-        <div class="app-title">
-            <div class="icon-btn" onclick="goBackOrClose()">
-                <span class="material-icons">arrow_back</span>
-            </div>
-            <h1>视频播放器</h1>
-        </div>
-        <div class="icon-btn" id="menuButton">
-            <span class="material-icons">more_vert</span>
-        </div>
-    </div>
-    
-    <!-- 设置菜单 -->
-    <div class="settings-menu" id="settingsMenu">
-        <div class="menu-item" onclick="toggleTheme()">
-            <div class="menu-content">
-                <span class="material-icons">dark_mode</span>
-                <span>深色模式</span>
-            </div>
-            <label class="toggle-switch">
-                <input type="checkbox" id="themeToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
-        <div class="menu-item" onclick="openDiagnostic()">
-            <div class="menu-content">
-                <!-- 修复诊断功能的图标 -->
-                <span class="material-icons">medical_services</span>
-                <span>疑难诊断</span>
-            </div>
-        </div>
-        <div class="menu-item" onclick="resetVideoPlayer()">
-            <div class="menu-content">
-                <span class="material-icons">refresh</span>
-                <span>重置播放器</span>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 主内容 -->
-    <div class="main-content">
-        <div class="card">
-            <div class="card-title">
-                <span class="material-icons">play_circle</span>
-                视频播放器
-            </div>
-            
-            <!-- 视频容器 -->
-            <div class="video-container">
-                <video id="myVideo" controls>
-                    <source src="https://ckacka.github.io/djs.mp4" type="video/mp4">
-                    您的浏览器不支持视频播放
-                </video>
-                <div id="playHint">点击播放视频</div>
-            </div>
-            
-            <!-- 控制面板 -->
-            <div class="control-panel">
-                <!-- URL输入控制 -->
-                <div class="url-input-group">
-                    <div class="url-input-container">
-                        <input type="text" id="videoUrlInput" class="url-input" placeholder="https://example.com/video.mp4">
-                        <div class="url-input-label">视频播放地址</div>
-                        <!-- 修复链接图标 -->
-                        <i class="material-icons play-icon">link</i>
+<body data-weui-theme="light">
+
+    <div class="weui-toptips weui-toptips_warn" id="topTips">错误提示</div>
+
+    <div class="page">
+        <div class="weui-panel weui-panel_access">
+            <div class="weui-panel__hd">视频播放器</div>
+            <div class="weui-panel__bd">
+                <div class="weui-media-box weui-media-box_text" style="padding: 0;">
+                    <div class="video-wrapper">
+                        <video id="myVideo" class="video-content" controls playsinline webkit-playsinline x5-video-player-type="h5-page">
+                            <source src="https://ckacka.github.io/djs.mp4" type="video/mp4">
+                        </video>
                     </div>
-                    <button class="btn" onclick="changeVideoSource()">
-                        <span class="material-icons">play_arrow</span>
-                        <span>加载视频</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="weui-cells__title">视频源设置</div>
+        <div class="weui-cells weui-cells_form">
+            <div class="weui-cell weui-cell_active">
+                <div class="weui-cell__hd"><label class="weui-label">视频地址</label></div>
+                <div class="weui-cell__bd">
+                    <input id="urlInput" class="weui-input" type="url" placeholder="输入 mp4/m3u8 地址"/>
+                </div>
+                <div class="weui-cell__ft">
+                    <button class="weui-btn_reset weui-btn_icon" id="clearBtn">
+                        <i class="weui-icon-clear"></i>
                     </button>
                 </div>
             </div>
         </div>
+
+        <div class="weui-btn-area">
+            <a href="javascript:" class="weui-btn weui-btn_primary" id="btnLoad">加载播放</a>
+            <a href="javascript:" class="weui-btn weui-btn_default" id="btnMore">更多选项</a>
+        </div>
     </div>
-    
-    <!-- 诊断弹窗 -->
-    <div class="diagnostic-modal" id="diagnosticModal">
-        <div class="modal-container">
-            <div class="modal-header">
-                <div class="modal-title">播放器诊断工具</div>
-                <!-- 修复关闭按钮图标 -->
-                <button class="modal-close" onclick="closeDiagnostic()">
-                    <span class="material-icons">close</span>
-                </button>
-            </div>
-            <div class="modal-content">
-                <iframe class="diagnostic-frame" src="https://video.aliyuncs.com/player-detection/index.html?"></iframe>
+
+    <div id="loadingToast" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-loading weui-icon_toast"></i>
+            <p class="weui-toast__content">加载中</p>
+        </div>
+    </div>
+
+    <div id="toast" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+            <p class="weui-toast__content" id="toastMsg">已完成</p>
+        </div>
+    </div>
+
+    <div class="js_dialog" id="iosDialog" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__hd"><strong class="weui-dialog__title" id="dialogTitle">标题</strong></div>
+            <div class="weui-dialog__bd" id="dialogContent">内容</div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:" class="weui-dialog__btn weui-dialog__btn_default" id="dialogCancel">取消</a>
+                <a href="javascript:" class="weui-dialog__btn weui-dialog__btn_primary" id="dialogConfirm">确定</a>
             </div>
         </div>
     </div>
-    
-    <script>
-        // 应用返回或关闭功能
-        function goBackOrClose() {
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                window.close();
-            }
-        }
-        
-        // 菜单控制
-        const menuButton = document.getElementById('menuButton');
-        const settingsMenu = document.getElementById('settingsMenu');
-        
-        function toggleMenu() {
-            settingsMenu.classList.toggle('show');
-        }
-        
-        menuButton.addEventListener('click', (e) => {
-            toggleMenu();
-            e.stopPropagation(); // 阻止事件冒泡
-        });
-        
-        // 初始化主题
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.body.dataset.theme = savedTheme;
-            document.getElementById('themeToggle').checked = savedTheme === 'dark';
-        }
-        
-        function toggleTheme() {
-            const isDarkMode = document.getElementById('themeToggle').checked;
-            const theme = isDarkMode ? 'dark' : 'light';
-            
-            document.body.dataset.theme = theme;
-            localStorage.setItem('theme', theme);
-            
-            // 更新应用标题颜色
-            document.querySelector('.app-title h1').style.color = 
-                theme === 'dark' ? 'var(--color-primary)' : 'var(--color-primary)';
-                
-            showNotification(`已切换至${isDarkMode ? '深色' : '浅色'}模式`);
-        }
-        
-        // 主题切换事件
-        document.getElementById('themeToggle').addEventListener('change', toggleTheme);
-        
-        // 视频源切换功能
-        function changeVideoSource() {
-            const inputUrl = document.getElementById('videoUrlInput').value;
-            const videoElement = document.getElementById('myVideo');
-            
-            if (inputUrl) {
-                videoElement.src = inputUrl;
-                videoElement.load();
-                videoElement.play().catch(error => {
-                    console.error('视频播放失败:', error);
-                    showNotification('视频加载失败，请检查地址有效性');
-                });
-                showNotification('视频加载中...');
-            } else {
-                showNotification('请输入视频地址');
-            }
-        }
-        
-        // 显示通知信息
-        function showNotification(message) {
-            // 移除现有的通知
-            const existingNote = document.querySelector('.notification');
-            if (existingNote) document.body.removeChild(existingNote);
-            
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            // 显示通知并添加动画
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
-            
-            // 3秒后淡出并移除
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 3000);
-        }
-        
-        // 重置播放器
-        function resetVideoPlayer() {
-            const videoElement = document.getElementById('myVideo');
-            videoElement.src = "https://ckacka.github.io/djs.mp4";
-            videoElement.load();
-            document.getElementById('videoUrlInput').value = '';
-            showNotification('播放器已重置');
-            settingsMenu.classList.remove('show'); // 关闭菜单
-        }
-        
-        // 视频控制逻辑
-        const video = document.getElementById('myVideo');
-        const playHint = document.getElementById('playHint');
 
-        video.addEventListener('play', () => playHint.style.display = 'none');
-        video.addEventListener('pause', () => playHint.style.display = 'block');
-        video.addEventListener('click', () => video.paused && video.play());
+    <div class="weui-mask" id="asMask" style="display: none; opacity: 0; transition: opacity .3s;"></div>
+    <div class="weui-actionsheet" id="asMenu">
+        <div class="weui-actionsheet__title">
+            <p class="weui-actionsheet__title-text">更多选项</p>
+        </div>
+        <div class="weui-actionsheet__menu">
+            <div class="weui-actionsheet__cell" id="menuDiag">疑难诊断工具</div>
+            <div class="weui-actionsheet__cell weui-actionsheet__cell_warn" id="menuReset">重置播放器</div>
+        </div>
+        <div class="weui-actionsheet__action">
+            <div class="weui-actionsheet__cell" id="menuCancel">取消</div>
+        </div>
+    </div>
+
+    <div class="js_dialog" id="diagnosticDialog" style="display: none;">
+        <div class="weui-mask" id="diagMask"></div>
+        <div class="weui-half-screen-dialog diagnostic-dialog" style="transition: transform .3s; transform: translateY(100%);">
+            <div class="weui-half-screen-dialog__hd">
+                <div class="weui-half-screen-dialog__hd__side" id="diagCloseBtn">
+                    <button class="weui-icon-btn">关闭<i class="weui-icon-close-thin"></i></button>
+                </div>
+                <div class="weui-half-screen-dialog__hd__main">
+                    <strong class="weui-half-screen-dialog__title">播放器诊断工具</strong>
+                </div>
+            </div>
+            <div class="weui-half-screen-dialog__bd diagnostic-body">
+                <iframe id="diagFrame" class="full-frame" src="about:blank"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // 1. 初始化 DOM 查询简写
+        const $ = (sel) => document.querySelector(sel);
         
-        // 点击其他地方关闭菜单
-        document.addEventListener('click', (event) => {
-            if (!menuButton.contains(event.target) && 
-                !settingsMenu.contains(event.target) &&
-                settingsMenu.classList.contains('show')) {
-                settingsMenu.classList.remove('show');
-            }
-        });
+        // 2. 核心：深色模式适配逻辑
+        // 监听系统的颜色偏好
+        const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
         
-        // 诊断功能控制
-        const diagnosticModal = document.getElementById('diagnosticModal');
-        
-        function openDiagnostic() {
-            diagnosticModal.classList.add('show');
-            settingsMenu.classList.remove('show');
-        }
-        
-        function closeDiagnostic() {
-            diagnosticModal.classList.remove('show');
-        }
-        
-        // 点击弹窗外部关闭
-        diagnosticModal.addEventListener('click', (e) => {
-            if (e.target === diagnosticModal) {
-                closeDiagnostic();
-            }
-        });
-        
-        // 初始化
-        window.onload = function() {
-            loadTheme();
-            // 初始时显示播放提示
-            playHint.style.display = 'block';
+        // 设置主题函数：切换 body 上的 data-weui-theme 属性
+        const setTheme = (isDark) => {
+            document.body.setAttribute('data-weui-theme', isDark ? 'dark' : 'light');
         };
+
+        // 初始化时执行一次
+        setTheme(themeMedia.matches);
+
+        // 监听变化（当用户在系统设置里切换模式时自动响应）
+        themeMedia.addEventListener('change', e => setTheme(e.matches));
+
+        // --- 以下为业务逻辑 (保持不变) ---
+        const DEFAULT_VIDEO = "https://ckacka.github.io/djs.mp4";
+        const DIAG_URL = "https://video.aliyuncs.com/player-detection/index.html?";
+
+        const els = {
+            video: $('#myVideo'),
+            input: $('#urlInput'),
+            topTips: $('#topTips'),
+            loading: $('#loadingToast'),
+            toast: $('#toast'),
+            dialog: $('#iosDialog'),
+            asMask: $('#asMask'),
+            asMenu: $('#asMenu'),
+            diagDialog: $('#diagnosticDialog'),
+            diagInner: $('.weui-half-screen-dialog'),
+            diagFrame: $('#diagFrame')
+        };
+
+        function loadVideo() {
+            const url = els.input.value.trim();
+            if (!url) { showTopTips('请输入视频地址'); return; }
+            if (!/^https?:\/\/.+/.test(url)) { showTopTips('请输入以 http｜https 开头的有效地址'); return; }
+
+            toggleLoading(true);
+            setTimeout(() => {
+                els.video.src = url;
+                els.video.load();
+                const playPromise = els.video.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        toggleLoading(false);
+                        showToast('开始播放');
+                    }).catch(error => {
+                        toggleLoading(false);
+                        console.error(error);
+                        showDialog('加载失败', '无法播放，请检查地址有效性或跨域限制。');
+                    });
+                }
+            }, 500);
+        }
+
+        function resetPlayer() {
+            hideActionSheet();
+            showDialog('重置确认', '确定恢复到默认演示视频？', true, () => {
+                els.video.src = DEFAULT_VIDEO;
+                els.video.load();
+                els.input.value = '';
+                showToast('已重置');
+            });
+        }
+
+        function openDiagnostic() {
+            hideActionSheet();
+            if (els.diagFrame.src === 'about:blank') {
+                toggleLoading(true);
+                els.diagFrame.src = DIAG_URL;
+                els.diagFrame.onload = () => toggleLoading(false);
+            }
+            els.diagDialog.style.display = 'block';
+            els.diagInner.offsetHeight; 
+            els.diagInner.style.transform = 'translateY(0)';
+        }
+
+        function closeDiagnostic() {
+            els.diagInner.style.transform = 'translateY(100%)';
+            setTimeout(() => els.diagDialog.style.display = 'none', 300);
+        }
+
+        function showTopTips(msg) {
+            els.topTips.innerText = msg;
+            els.topTips.style.display = 'block';
+            setTimeout(() => els.topTips.style.display = 'none', 2000);
+        }
+
+        function toggleLoading(show) { els.loading.style.display = show ? 'block' : 'none'; }
+        
+        function showToast(msg) {
+            $('#toastMsg').innerText = msg;
+            els.toast.style.display = 'block';
+            setTimeout(() => els.toast.style.display = 'none', 1500);
+        }
+
+        function showDialog(title, content, showCancel, onConfirm) {
+            $('#dialogTitle').innerText = title;
+            $('#dialogContent').innerText = content;
+            const $cancel = $('#dialogCancel');
+            const $confirm = $('#dialogConfirm');
+            $cancel.style.display = showCancel ? 'block' : 'none';
+            
+            const newConfirm = $confirm.cloneNode(true);
+            $confirm.parentNode.replaceChild(newConfirm, $confirm);
+            const newCancel = $cancel.cloneNode(true);
+            $cancel.parentNode.replaceChild(newCancel, $cancel);
+
+            newCancel.addEventListener('click', () => els.dialog.style.display = 'none');
+            newConfirm.addEventListener('click', () => {
+                els.dialog.style.display = 'none';
+                if(onConfirm) onConfirm();
+            });
+            els.dialog.style.display = 'block';
+        }
+
+        function showActionSheet() {
+            els.asMask.style.display = 'block';
+            requestAnimationFrame(() => {
+                els.asMask.style.opacity = 1;
+                els.asMenu.classList.add('weui-actionsheet_toggle');
+            });
+        }
+
+        function hideActionSheet() {
+            els.asMask.style.opacity = 0;
+            els.asMenu.classList.remove('weui-actionsheet_toggle');
+            setTimeout(() => els.asMask.style.display = 'none', 300);
+        }
+
+        $('#btnLoad').addEventListener('click', loadVideo);
+        $('#clearBtn').addEventListener('click', () => els.input.value = '');
+        $('#btnMore').addEventListener('click', showActionSheet);
+        els.asMask.addEventListener('click', hideActionSheet);
+        $('#menuCancel').addEventListener('click', hideActionSheet);
+        $('#menuDiag').addEventListener('click', openDiagnostic);
+        $('#menuReset').addEventListener('click', resetPlayer);
+        $('#diagMask').addEventListener('click', closeDiagnostic);
+        $('#diagCloseBtn').addEventListener('click', closeDiagnostic);
     </script>
 </body>
 </html>
-
