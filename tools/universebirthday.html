@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
+    <title>宇宙生日映像</title>
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css"/>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.2.1/weui.min.js"></script>
+
+    <script type="text/javascript">
+        (function() {
+            function setTheme() {
+                var isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-weui-theme', isDarkMode ? 'dark' : 'light');
+            }
+            setTheme();
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(setTheme);
+        })();
+    </script>
+    
+    <style>
+        body {
+            background-color: var(--weui-BG-0);
+            color: var(--weui-FG-0);
+            font-family: -apple-system-font, Helvetica Neue, Helvetica, sans-serif;
+            transition: background-color 0.3s;
+            /* 防止底部 footer 遮挡内容 */
+            padding-bottom: constant(safe-area-inset-bottom);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .page-container { 
+            padding: 40px 0 80px 0; /* 底部留出 footer 空间 */
+            box-sizing: border-box;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-wrap {
+            flex: 1;
+        }
+
+        .weui-form__title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .date-placeholder { color: var(--weui-FG-2); }
+        .date-selected { color: var(--weui-FG-0) !important; font-weight: 500; }
+
+        /* Iframe 容器 */
+        .iframe-wrapper {
+            position: relative;
+            width: 100%;
+            height: 65vh; /* 稍微增加高度 */
+            background-color: var(--weui-BG-1);
+            overflow: hidden;
+            border-radius: 12px; /* 更柔和的圆角 */
+            margin-bottom: 10px;
+        }
+
+        /* 加载中的呼吸效果 */
+        .iframe-wrapper.loading::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--weui-BG-2);
+            animation: pulse 1.5s infinite ease-in-out;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border: none;
+            opacity: 0; 
+            transition: opacity 0.6s ease;
+            z-index: 2; /* 确保在 loading 层之上 */
+        }
+
+        /* 错误提示层 */
+        .error-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            padding: 20px;
+            text-align: center;
+            background-color: var(--weui-BG-1);
+            display: none;
+        }
+        
+        .error-text {
+            font-size: 14px;
+            color: var(--weui-FG-1);
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        /* 底部操作区微调 */
+        .dialog-footer-actions {
+            text-align: center;
+            padding: 0 16px;
+        }
+
+        /* 修复 Footer 位置，避免 fixed 在某些机型遮挡，改为 flex 布局底部 */
+        .app-footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 12px;
+            color: var(--weui-FG-2);
+        }
+        
+        /* 弹窗样式微调 */
+        .weui-half-screen-dialog {
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        <div class="content-wrap">
+            <div class="weui-form__text-area" style="text-align: center; margin-bottom: 40px;">
+                <h2 class="weui-form__title">宇宙生日映像</h2>
+                <div class="weui-form__desc">查看你出生那晚的星空</div>
+            </div>
+
+            <div class="weui-cells__group weui-cells__group_form">
+                <div class="weui-cells__title">时间设定</div>
+                <div class="weui-cells">
+                    <a class="weui-cell weui-cell_access" href="javascript:;" id="datePickerBtn">
+                        <div class="weui-cell__bd"><p>出生日期</p></div>
+                        <div class="weui-cell__ft date-placeholder" id="dateResult">点击选择</div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="weui-btn-area" style="margin-top: 40px;">
+                <a href="javascript:;" class="weui-btn weui-btn_primary" id="btnSubmit">开启传送门</a>
+            </div>
+        </div>
+        
+        <div class="app-footer">
+            <p>Source: NASA Astronomy Picture of the Day</p>
+        </div>
+    </div>
+
+    <div id="halfScreenDialog" class="weui-demo-dialog" style="display: none;">
+        <div class="weui-mask" id="dialogMask"></div>
+        <div class="weui-half-screen-dialog" style="max-height: 90%;">
+            <div class="weui-half-screen-dialog__hd">
+                <div class="weui-half-screen-dialog__hd__side">
+                    <button class="weui-icon-btn" id="dialogClose">
+                        <i class="weui-icon-close-thin"></i>
+                    </button>
+                </div>
+                <div class="weui-half-screen-dialog__hd__main">
+                    <strong class="weui-half-screen-dialog__title">当日星空</strong>
+                </div>
+            </div>
+            <div class="weui-half-screen-dialog__bd">
+                
+                <div class="iframe-wrapper loading" id="iframeWrapper">
+                    <div class="error-overlay" id="errorOverlay">
+                        <i class="weui-icon-info-circle" style="font-size: 48px; color: var(--weui-FG-2); margin-bottom:10px;"></i>
+                        <p class="error-text">遭异次元干扰(*ﾟﾛﾟ)!!<br>（浏览器安全策略限制预览）</p>
+                        <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_default" id="btnOpenBrowserOverlay">跳转浏览器查看</a>
+                    </div>
+                    
+                    <iframe id="nasaFrame" class="iframe-container" src="" sandbox="allow-scripts allow-popups allow-forms"></iframe>
+                </div>
+
+                <div class="dialog-footer-actions">
+                    <a href="javascript:;" class="weui-btn weui-btn_default" id="btnOpenBrowserBottom">查看原图</a>
+                </div>
+                <br>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // 状态管理
+        let state = {
+            selectedDate: null,
+            currentUrl: ""
+        };
+
+        // DOM 元素缓存
+        const els = {
+            dateBtn: document.querySelector('#datePickerBtn'),
+            dateResult: document.querySelector('#dateResult'),
+            submitBtn: document.querySelector('#btnSubmit'),
+            dialog: document.getElementById('halfScreenDialog'),
+            iframeWrapper: document.getElementById('iframeWrapper'),
+            nasaFrame: document.getElementById('nasaFrame'),
+            errorOverlay: document.getElementById('errorOverlay'),
+            mask: document.getElementById('dialogMask'),
+            closeBtn: document.getElementById('dialogClose'),
+            btnsOpen: [document.getElementById('btnOpenBrowserBottom'), document.getElementById('btnOpenBrowserOverlay')]
+        };
+
+        // 1. 日期选择器
+        els.dateBtn.addEventListener('click', function () {
+            // APOD 始于 1995-06-16
+            const today = new Date();
+            weui.datePicker({
+                start: 1995, 
+                end: today.getFullYear(), 
+                defaultValue: [2000, 1, 1], 
+                onConfirm: function (result) {
+                    state.selectedDate = { 
+                        year: result[0].value, 
+                        month: result[1].value, 
+                        day: result[2].value 
+                    };
+                    
+                    // 格式化显示
+                    const m = state.selectedDate.month.toString().padStart(2, '0');
+                    const d = state.selectedDate.day.toString().padStart(2, '0');
+                    
+                    els.dateResult.innerText = `${state.selectedDate.year}-${m}-${d}`;
+                    els.dateResult.classList.remove('date-placeholder');
+                    els.dateResult.classList.add('date-selected');
+                },
+                id: 'datePicker'
+            });
+        });
+
+        // 2. 提交逻辑
+        els.submitBtn.addEventListener('click', function() {
+            if (!state.selectedDate) {
+                weui.topTips('请先选择一个日期');
+                return;
+            }
+
+            const loading = weui.loading('信号接收中...');
+            
+            // 构造 NASA APOD URL: apYYMMDD.html
+            // 注意：年份只取后两位
+            let shortYear = String(state.selectedDate.year).slice(-2);
+            let shortMonth = String(state.selectedDate.month).padStart(2, '0');
+            let shortDay = String(state.selectedDate.day).padStart(2, '0');
+            
+            state.currentUrl = `https://apod.nasa.gov/apod/ap${shortYear}${shortMonth}${shortDay}.html`;
+
+            // 模拟短暂计算感，随后打开弹窗
+            setTimeout(function() {
+                loading.hide();
+                showHalfScreenDialog(state.currentUrl);
+            }, 600);
+        });
+
+        // 3. 弹窗控制逻辑
+        function showHalfScreenDialog(url) {
+            // 重置 UI 状态
+            els.nasaFrame.src = "";
+            els.nasaFrame.style.opacity = "0";
+            els.errorOverlay.style.display = 'none';
+            els.iframeWrapper.classList.add('loading'); // 开启骨架屏动画
+
+            // 显示弹窗
+            els.dialog.style.display = 'block';
+            els.mask.classList.add('weui-animate-fade-in');
+            els.dialog.querySelector('.weui-half-screen-dialog').classList.add('weui-animate-slide-up');
+
+            // 稍微延迟设置 src，避免卡顿
+            setTimeout(() => {
+                els.nasaFrame.src = url;
+                
+                // 监听 iframe 加载
+                // 注意：如果因跨域策略被拦截(X-Frame-Options)，onload 仍可能触发，但内容是空的
+                els.nasaFrame.onload = function() {
+                    iframeLoadedSuccess();
+                };
+                
+                // 兜底机制：如果加载极快，或浏览器未正确触发 onload
+                // 1.5秒后强制显示，如果被拦截则用户会看到浏览器的错误页，
+                // 此时下方的“跳转”按钮就很有用了。
+                setTimeout(() => {
+                    if (els.nasaFrame.style.opacity === "0") {
+                        iframeLoadedSuccess();
+                    }
+                }, 1500);
+
+            }, 200);
+        }
+
+        function iframeLoadedSuccess() {
+            els.iframeWrapper.classList.remove('loading'); // 停止骨架屏
+            els.nasaFrame.style.opacity = "1";
+        }
+
+        function hideHalfScreenDialog() {
+            const box = els.dialog.querySelector('.weui-half-screen-dialog');
+            
+            els.mask.classList.remove('weui-animate-fade-in');
+            box.classList.remove('weui-animate-slide-up');
+            
+            els.mask.classList.add('weui-animate-fade-out');
+            box.classList.add('weui-animate-slide-down');
+            
+            setTimeout(() => {
+                els.dialog.style.display = 'none';
+                els.mask.classList.remove('weui-animate-fade-out');
+                box.classList.remove('weui-animate-slide-down');
+                els.nasaFrame.src = "about:blank"; // 清空 iframe 停止后台加载
+            }, 200);
+        }
+
+        // 4. 跳转逻辑绑定
+        const openInBrowser = () => {
+            if(state.currentUrl) {
+                // 使用 window.open 体验更好，不打断当前页流
+                window.open(state.currentUrl, '_blank'); 
+            }
+        };
+
+        els.btnsOpen.forEach(btn => btn.addEventListener('click', openInBrowser));
+        els.mask.addEventListener('click', hideHalfScreenDialog);
+        els.closeBtn.addEventListener('click', hideHalfScreenDialog);
+
+    </script>
+</body>
+</html>
