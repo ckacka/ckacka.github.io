@@ -13,17 +13,16 @@
         --card-bg: #ffffff;
         --text-main: rgba(0, 0, 0, 0.9);
         --text-desc: rgba(0, 0, 0, 0.5);
-        --primary-blue: #2c80ff;
+        /* 核心蓝色变量，用于统一图标颜色 */
+        --primary-blue: #2c80ff; 
         --hero-gradient: linear-gradient(160deg, #2c80ff 0%, #5a9dff 100%);
-        --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        --border-color: rgba(0, 0, 0, 0.1);
+        --shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+        --border-color: rgba(0, 0, 0, 0.05); /* 边框更淡，更沉浸 */
         --weui-BG: #f7f7f7;
         --weui-BG-0: #ffffff;
         --weui-BG-1: #f7f7f7;
         --weui-FG-0: rgba(0, 0, 0, 0.9);
         --weui-FG-1: rgba(0, 0, 0, 0.5);
-        --weui-BRAND: #2c80ff;
-        --weui-RED: #fa5151;
     }
 
     body[data-weui-theme='dark'] {
@@ -31,16 +30,15 @@
         --card-bg: #1f1f1f;
         --text-main: rgba(255, 255, 255, 0.9);
         --text-desc: rgba(255, 255, 255, 0.5);
-        --primary-blue: #5a9dff;
+        --primary-blue: #5a9dff; /* 深色模式下的蓝色稍微亮一点 */
         --hero-gradient: linear-gradient(160deg, #1a5fcc 0%, #2c80ff 100%);
         --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        --border-color: rgba(255, 255, 255, 0.1);
+        --border-color: rgba(255, 255, 255, 0.08);
         --weui-BG: #000000;
         --weui-BG-0: #191919;
         --weui-BG-1: #111111;
         --weui-FG-0: rgba(255, 255, 255, 0.9);
         --weui-FG-1: rgba(255, 255, 255, 0.5);
-        --weui-BRAND: #5a9dff;
     }
 
     body {
@@ -67,72 +65,143 @@
         top: 0;
         z-index: 100;
         background-color: var(--weui-BG);
-        border-bottom: 1px solid var(--border-color);
+        /* 去掉底部边框，让视觉更干净 */
+        /* border-bottom: 1px solid var(--border-color); */
         padding-top: env(safe-area-inset-top, 0);
+        backdrop-filter: blur(10px);
+        background-color: rgba(var(--weui-BG), 0.8);
     }
     
     .weui-search-bar { background-color: transparent !important; }
     .weui-search-bar:before, .weui-search-bar:after { display: none; }
-    .weui-search-bar__form { background-color: var(--weui-BG-0); border-radius: 8px; }
+    .weui-search-bar__form { background-color: var(--weui-BG-0); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
     .weui-search-bar__box .weui-search-bar__input { color: var(--weui-FG-0); }
-    .weui-search-bar__label { background-color: var(--weui-BG-0); border-radius: 8px; }
+    .weui-search-bar__label { background-color: var(--weui-BG-0); border-radius: 12px; }
 
     .location-cell {
         display: none;
         background-color: var(--weui-BG-0);
-        border-top: 1px solid var(--border-color);
+        margin: 0 12px 12px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
     }
     .location-cell.active { display: block; animation: fadeInDown 0.3s ease; }
 
     /* --- 天气主卡片 --- */
     .weather-hero {
-        margin: 16px;
+        margin: 10px 16px 20px;
         padding: 40px 20px;
         background: var(--hero-gradient);
-        border-radius: 20px;
+        border-radius: 24px;
         color: #fff;
         text-align: center;
         position: relative;
-        box-shadow: 0 10px 25px rgba(44, 128, 255, 0.3);
+        box-shadow: 0 10px 30px rgba(44, 128, 255, 0.25);
         text-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
-    .hero-city { font-size: 26px; font-weight: 700; }
-    .hero-date { font-size: 14px; opacity: 0.8; margin-bottom: 25px; }
+    .hero-city { font-size: 28px; font-weight: 700; letter-spacing: 1px; }
+    .hero-date { font-size: 14px; opacity: 0.85; margin-bottom: 25px; font-weight: 500; }
     .hero-main { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; }
-    .hero-temp { font-size: 72px; font-weight: 200; line-height: 1; }
-    .hero-icon { font-size: 48px; }
-    .update-badge { position: absolute; top: 15px; right: 15px; font-size: 11px; background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 12px; backdrop-filter: blur(5px); }
+    .hero-temp { font-size: 76px; font-weight: 200; line-height: 1; letter-spacing: -2px; }
+    /* 主卡片图标保持白色，为了对比度 */
+    .hero-icon { font-size: 52px; color: #fff; } 
+    .update-badge { position: absolute; top: 15px; right: 15px; font-size: 11px; background: rgba(255,255,255,0.25); padding: 3px 10px; border-radius: 12px; backdrop-filter: blur(5px); font-weight: 600; }
 
-    /* --- 详情网格 --- */
+    /* --- 修复后的详情六宫格 --- */
     .custom-grids {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        padding: 10px 16px;
-        gap: 1px;
-        background-color: var(--border-color);
-        margin: 0 16px;
-        border-radius: 12px;
-        overflow: hidden;
+        /* 移除原来的 gap 和 背景色，解决色块问题 */
+        background-color: var(--weui-BG-0); 
+        margin: 0 16px 20px;
+        border-radius: 16px;
         box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden; /* 保证圆角 */
     }
-    .grid-item { background-color: var(--weui-BG-0); padding: 20px 0; text-align: center; }
-    .grid-icon i { font-size: 18px; color: var(--weui-BRAND); margin-bottom: 8px; }
-    .grid-label { font-size: 12px; color: var(--weui-FG-1); }
-    .grid-value { font-size: 15px; font-weight: 600; color: var(--weui-FG-0); display: block; }
+
+    .grid-item { 
+        background-color: transparent; 
+        padding: 24px 0; 
+        text-align: center; 
+        position: relative;
+    }
+
+    /* 使用伪元素制作细边框，实现沉浸感 */
+    .grid-item::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 20%;
+        height: 60%;
+        width: 1px;
+        background-color: var(--border-color);
+    }
+    .grid-item:nth-child(3n)::after { display: none; /* 每行最后一个去掉右边框 */ }
+    
+    .grid-item::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 10%;
+        width: 80%;
+        height: 1px;
+        background-color: var(--border-color);
+    }
+    .grid-item:nth-last-child(-n+3)::before { display: none; /* 最后一行去掉底边框 */ }
+
+    /* 统一蓝色图标 */
+    .grid-icon i { 
+        font-size: 22px; 
+        color: var(--primary-blue); /* 统一蓝色 */
+        margin-bottom: 10px;
+        filter: drop-shadow(0 4px 6px rgba(44, 128, 255, 0.2)); /* 轻微光晕 */
+    }
+    .grid-label { font-size: 12px; color: var(--weui-FG-1); margin-bottom: 2px;}
+    .grid-value { font-size: 16px; font-weight: 600; color: var(--weui-FG-0); font-family: 'DIN', -apple-system-font, sans-serif; }
 
     /* --- 未来预报滚动 --- */
-    .section-title { padding: 24px 16px 12px; font-size: 15px; color: var(--weui-FG-0); font-weight: 600; }
-    .forecast-scroll-container { display: flex; overflow-x: auto; padding: 0 16px 10px; gap: 12px; scrollbar-width: none; }
+    .section-title { padding: 10px 20px 15px; font-size: 16px; color: var(--weui-FG-0); font-weight: 700; }
+    
+    .forecast-scroll-container { display: flex; overflow-x: auto; padding: 0 16px 20px; gap: 12px; scrollbar-width: none; }
     .forecast-scroll-container::-webkit-scrollbar { display: none; }
-    .forecast-item { flex: 0 0 90px; background: var(--weui-BG-0); padding: 16px 8px; border-radius: 14px; text-align: center; border: 1px solid var(--border-color); }
-    .f-day { color: var(--weui-FG-0); font-size: 13px; font-weight: 500; }
-    .f-date { font-size: 11px; color: var(--weui-FG-1); }
-    .f-icon { font-size: 24px; margin: 12px 0; color: var(--weui-BRAND); }
-    .f-temp { font-weight: 600; font-size: 15px; }
+    
+    .forecast-item { 
+        flex: 0 0 95px; 
+        background: var(--weui-BG-0); 
+        padding: 20px 10px; 
+        border-radius: 16px; 
+        text-align: center; 
+        box-shadow: var(--shadow);
+        /* 去掉边框，改用投影让视觉更沉浸 */
+        border: none; 
+    }
+    
+    .f-day { color: var(--weui-FG-0); font-size: 14px; font-weight: 600; }
+    .f-date { font-size: 11px; color: var(--weui-FG-1); margin-top: 4px; }
+    
+    /* 预报图标也使用蓝色 */
+    .f-icon { 
+        font-size: 26px; 
+        margin: 15px 0; 
+        color: var(--primary-blue); 
+    }
+    
+    .f-temp { font-weight: 600; font-size: 16px; color: var(--weui-FG-0); }
+    .f-low { font-size: 12px; color: var(--weui-FG-1); margin-top: 4px; }
 
     /* --- 昨天卡片 --- */
-    .yesterday-card { margin: 0 16px 30px; background: var(--weui-BG-0); border-radius: 14px; overflow: hidden; border: 1px solid var(--border-color); }
-    .weui-form-preview__hd:after { left: 16px; border-color: var(--border-color); }
+    .yesterday-card { 
+        margin: 0 16px 40px; 
+        background: var(--weui-BG-0); 
+        border-radius: 16px; 
+        overflow: hidden; 
+        box-shadow: var(--shadow); 
+        border: none;
+    }
+    .weui-form-preview__hd:after { display: none; }
+    .weui-form-preview__value { color: var(--weui-FG-0); font-weight: 500;}
 
     /* --- 加载动画补丁 --- */
     .weui-loading { vertical-align: middle; }
@@ -147,7 +216,7 @@
     body[data-weui-theme='dark'] .weui-cells:before, 
     body[data-weui-theme='dark'] .weui-cells:after,
     body[data-weui-theme='dark'] .weui-cell:before {
-        border-color: rgba(255,255,255,0.1) !important;
+        border-color: rgba(255,255,255,0.05) !important;
     }
     </style>
 </head>
@@ -173,7 +242,7 @@
 
         <div class="weui-cells location-cell" id="locationCell">
             <div class="weui-cell weui-cell_active weui-cell_access" id="locationBtn">
-                <div class="weui-cell__hd" style="margin-right: 12px; color: var(--weui-BRAND);">
+                <div class="weui-cell__hd" style="margin-right: 12px; color: var(--primary-blue);">
                     <i class="fas fa-location-arrow"></i>
                 </div>
                 <div class="weui-cell__bd"><p style="font-size: 15px;">获取当前位置天气</p></div>
@@ -183,7 +252,7 @@
     </div>
 
     <div id="initialLoading">
-        <i class="weui-loading" style="width: 32px; height: 32px;"></i>
+        <i class="weui-loading" style="width: 32px; height: 32px; color: var(--primary-blue);"></i>
         <p style="margin-top: 15px; font-size: 14px;">正在连接树洞天气...</p>
     </div>
 
@@ -363,6 +432,7 @@
                 document.getElementById('uiHighTemp').textContent = f0.high.replace('高温 ','');
                 document.getElementById('uiLowTemp').textContent = f0.low.replace('低温 ','');
                 document.getElementById('weatherNotice').textContent = f0.notice || "今日天气晴好，祝心情愉快";
+                // 主图标保持白色
                 document.getElementById('weatherIcon').innerHTML = getIcon(f0.type);
             }
 
@@ -390,7 +460,7 @@
                     <div class="f-date">${f.date.split('日')[0]}日</div>
                     <div class="f-icon">${getIcon(f.type)}</div>
                     <div class="f-temp">${f.high.replace('高温 ','')}</div>
-                    <div style="font-size:11px; color:var(--weui-FG-1); margin-top:2px;">${f.low.replace('低温 ','')}</div>
+                    <div class="f-low">${f.low.replace('低温 ','')}</div>
                 </div>
             `).join('');
 
