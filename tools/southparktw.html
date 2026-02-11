@@ -3,364 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="南方公园台配版在线观看，支持多季切换与深色模式。">
     <title>《南方公园》台配版</title>
     
-    <!-- 预连接 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.25/weui.min.css"/>
+    
     <link rel="preconnect" href="https://player.dogecloud.com">
-    
-    <!-- 字体和图标 -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
+
     <style>
+        /* 全局变量配置 */
         :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f5f5f5;
-            --bg-tertiary: #eeeeee;
-            --text-primary: #212121;
-            --text-secondary: #757575;
-            --text-tertiary: #9e9e9e;
-            --accent-color: #1976d2;
-            --accent-hover: #1565c0;
-            --border-color: #e0e0e0;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-            --header-bg: rgba(255, 255, 255, 0.98);
-            --modal-bg: #ffffff;
-            --toast-bg: rgba(33, 33, 33, 0.95);
-            --toast-text: #ffffff;
-            --error-color: #d32f2f;
-            --success-color: #388e3c;
-            --safe-area-bottom: env(safe-area-inset-bottom);
+            --header-height: 50px;
+            --nav-height: 44px;
+            --content-gap: 16px; /* 标签栏与播放器的间距 */
         }
 
-        [data-theme="dark"] {
-            --bg-primary: #121212;
-            --bg-secondary: #1e1e1e;
-            --bg-tertiary: #2c2c2c;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --text-tertiary: #616161;
-            --accent-color: #64b5f6;
-            --accent-hover: #42a5f5;
-            --border-color: #333333;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.3);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
-            --header-bg: rgba(18, 18, 18, 0.98);
-            --modal-bg: #2c2c2c;
-            --toast-bg: rgba(255, 255, 255, 0.95);
-            --toast-text: #121212;
+        body, html {
+            height: 100%;
+            background-color: var(--weui-BG-0);
+            color: var(--weui-FG-0);
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden; 
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+        /* 1. Toptips 动画优化 */
+        .weui-toptips {
+            opacity: 0; /* 初始不可见 */
+            display: none; /* 初始不占位 */
+            transition: opacity 0.3s ease-in-out; /* 添加过渡效果 */
+            z-index: 5000; /* 确保层级最高 */
+        }
+        /* 显示状态类 */
+        .weui-toptips.weui-animate-fade-in {
+            opacity: 1;
         }
 
-        /* Header Styles */
-        .header {
-            height: 56px;
-            background-color: var(--header-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        /* 自定义成功提示颜色 (覆盖默认蓝色) */
+        .weui-toptips_success {
+            background-color: var(--weui-BRAND);
+        }
+
+        /* 2. 顶部 Header */
+        .app-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--header-height);
+            background-color: var(--weui-BG-2);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 16px;
-            box-shadow: var(--shadow-sm);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            z-index: 1000;
+            box-shadow: 0 1px 0 0 var(--weui-FG-3);
         }
-        .header-title { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
-        .header-controls { display: flex; gap: 8px; }
 
-        button { background: none; border: none; cursor: pointer; color: inherit; outline: none; }
-        
-        .icon-btn {
-            width: 40px; height: 40px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s;
-        }
-        .icon-btn:hover { background-color: var(--bg-tertiary); }
-        .material-icons { font-size: 24px; }
+        .header-title { font-size: 17px; font-weight: 600; }
+        .header-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: flex-end; cursor: pointer; }
+        .header-btn svg { width: 24px; height: 24px; fill: var(--weui-FG-0); }
 
-        /* Dropdown Menu */
-        .more-menu {
-            position: absolute; top: 60px; right: 12px;
-            width: 160px; background: var(--modal-bg);
-            border-radius: 8px; box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-color);
-            transform: scale(0.9); opacity: 0; pointer-events: none;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-origin: top right; z-index: 200;
+        /* 3. 滚动标签栏 */
+        .nav-wrapper {
+            position: fixed;
+            top: var(--header-height);
+            left: 0; right: 0;
+            height: var(--nav-height);
+            background-color: var(--weui-BG-2);
+            z-index: 900;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .more-menu.show { transform: scale(1); opacity: 1; pointer-events: auto; }
-        .menu-item {
-            padding: 12px 16px; display: flex; align-items: center; gap: 12px;
-            font-size: 14px; color: var(--text-primary); cursor: pointer;
-        }
-        .menu-item:hover { background-color: var(--bg-tertiary); }
-        .menu-item:first-child { border-radius: 8px 8px 0 0; }
-        .menu-item:last-child { border-radius: 0 0 8px 8px; }
 
-        /* Tabs */
-        .tabs-wrapper {
-            background-color: var(--bg-secondary);
-            box-shadow: var(--shadow-sm);
-            position: sticky; top: 56px; z-index: 90;
-        }
-        .tabs-scroll {
-            display: flex; overflow-x: auto; padding: 0 8px;
+        .scroll-navbar {
+            display: flex; height: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
+            padding: 0 16px; 
+            box-sizing: border-box;
         }
-        .tabs-scroll::-webkit-scrollbar { display: none; }
-        .tab {
-            padding: 14px 16px; font-size: 14px; font-weight: 500;
-            color: var(--text-secondary); white-space: nowrap;
-            position: relative; cursor: pointer; transition: color 0.3s;
+        .scroll-navbar::-webkit-scrollbar { display: none; }
+
+        .nav-item {
+            flex: none; padding: 0 16px;
+            height: 100%; display: flex; align-items: center; justify-content: center;
+            font-size: 15px; color: var(--weui-FG-1);
+            position: relative; cursor: pointer;
+            transition: color 0.2s;
         }
-        .tab.active { color: var(--accent-color); }
-        .tab.active::after {
+        .nav-item.active { color: var(--weui-BRAND); font-weight: 500; }
+        
+        /* 绿色指示条 */
+        .nav-item::after {
             content: ''; position: absolute; bottom: 0; left: 50%;
-            transform: translateX(-50%); width: 24px; height: 3px;
-            background-color: var(--accent-color); border-radius: 3px;
+            transform: translateX(-50%) scaleX(0);
+            width: 20px; height: 3px;
+            background-color: var(--weui-BRAND);
+            border-radius: 3px 3px 0 0;
+            transition: transform 0.2s;
+        }
+        .nav-item.active::after { transform: translateX(-50%) scaleX(1); }
+
+        /* 4. 内容区域 */
+        .page-content {
+            height: 100vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+            /* 顶部内边距计算：Header + Nav + 额外间距 */
+            padding-top: calc(var(--header-height) + var(--nav-height) + var(--content-gap));
+            padding-bottom: 20px;
+            padding-left: 16px; padding-right: 16px;
         }
 
-        /* Content Area */
-        .main-content {
-            flex: 1; padding: 16px; width: 100%; max-width: 1200px; margin: 0 auto;
-        }
         .tab-panel { display: none; animation: fadeIn 0.3s ease; }
         .tab-panel.active { display: block; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Player Container */
-        .player-wrapper {
-            width: 100%; aspect-ratio: 16/9; background-color: #000;
-            border-radius: 12px; overflow: hidden; position: relative;
-            box-shadow: var(--shadow-md);
+        /* 播放器容器 */
+        .player-box {
+            width: 100%; aspect-ratio: 16/9;
+            background-color: #000; border-radius: 8px;
+            overflow: hidden; position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        /* Fullscreen Fixes */
-        .player-wrapper:fullscreen, .player-wrapper:-webkit-full-screen {
-            width: 100vw; height: 100vh; border-radius: 0;
+        .status-layer {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: #2c2c2c; color: #888; font-size: 14px;
         }
-        
-        /* Empty/Error States */
-        .state-container {
-            width: 100%; height: 100%; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; color: var(--text-secondary);
-            background-color: var(--bg-tertiary); padding: 20px; text-align: center;
-        }
-        .state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.7; }
-        .btn-retry {
-            margin-top: 16px; padding: 8px 20px;
-            background-color: var(--accent-color); color: #fff;
-            border-radius: 20px; font-size: 14px; font-weight: 500;
-            transition: background 0.2s;
-        }
-        .btn-retry:hover { background-color: var(--accent-hover); }
 
-        /* Loading Spinner */
-        .spinner {
-            width: 36px; height: 36px; border: 3px solid rgba(0,0,0,0.1);
-            border-left-color: var(--accent-color); border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        [data-theme="dark"] .spinner { border-color: rgba(255,255,255,0.1); border-left-color: var(--accent-color); }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        /* 弹窗内容调整 */
+        .qr-container { display: flex; justify-content: space-around; margin-top: 10px; }
+        .qr-box { text-align: center; }
+        .qr-box img { width: 110px; height: 110px; border-radius: 8px; margin-bottom: 6px; display: block; }
+        .qr-box span { font-size: 12px; color: var(--weui-FG-2); }
 
-        /* Modals */
-        .modal {
-            display: flex; align-items: center; justify-content: center;
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1000; opacity: 0; pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .modal.active { opacity: 1; pointer-events: auto; }
-        .modal-backdrop {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-        }
-        .modal-content {
-            background: var(--modal-bg); width: 90%; max-width: 400px;
-            border-radius: 16px; padding: 24px; position: relative;
-            box-shadow: var(--shadow-md); transform: scale(0.95);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid var(--border-color);
-        }
-        .modal.active .modal-content { transform: scale(1); }
-        
-        /* QR Code Styles */
-        .qr-group { text-align: center; margin-bottom: 20px; }
-        .qr-img { width: 140px; height: 140px; border-radius: 8px; margin: 8px 0; object-fit: cover; }
-        .reward-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
-        .action-btn {
-            padding: 10px; border-radius: 8px; text-align: center;
-            text-decoration: none; font-size: 14px; color: white;
-            display: block;
-        }
-        .btn-alipay { background-color: #1677ff; }
-        .btn-wechat { background-color: #07c160; }
-
-        /* 修复Toast配色问题 */
-        .toast {
-            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
-            background: var(--toast-bg); color: var(--toast-text); padding: 10px 20px;
-            border-radius: 50px; font-size: 14px; opacity: 0; visibility: hidden;
-            transition: all 0.3s; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            font-weight: 500;
-        }
-        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
-        
-        .network-bar {
-            background: var(--error-color); color: white; text-align: center;
-            padding: 8px; font-size: 13px; display: none; position: sticky; top: 56px; z-index: 95;
-        }
-        
-        /* Bottom Menu (Mobile Third-party browsers) */
-        .bottom-nav {
-            display: none; position: fixed; bottom: 0; left: 0; width: 100%;
-            background: var(--header-bg); border-top: 1px solid var(--border-color);
-            padding-bottom: var(--safe-area-bottom); z-index: 90;
-        }
-        .bottom-nav-inner { 
-            display: flex; 
-            justify-content: space-around; 
-            height: 56px; 
-            align-items: center; 
-            padding: 0 8px;
-        }
-        .nav-item { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 4px; 
-            font-size: 10px; 
-            opacity: 0.7;
-            padding: 4px 0;
-        }
-        .nav-item:active { opacity: 1; }
-
-        body.is-embedded .bottom-nav { display: block; }
-        body.is-embedded .more-btn-desktop { display: none; }
-        body.is-embedded .main-content { padding-bottom: 80px; }
-
-        /* Desktop Adjustments */
         @media (min-width: 768px) {
-            .player-wrapper { height: 450px; aspect-ratio: auto; }
-            .header { padding: 0 24px; }
+            .page-content { max-width: 800px; margin: 0 auto; }
+            .player-box { height: 450px; aspect-ratio: auto; }
         }
     </style>
 </head>
-<body data-theme="dark">
+<body>
 
-    <div id="networkStatus" class="network-bar">网络连接不可用</div>
+    <div class="weui-toptips weui-toptips_warn" id="tipsError">网络连接已断开</div>
+    <div class="weui-toptips weui-toptips_success" id="tipsSuccess">网络连接已恢复</div>
 
-    <header class="header">
+    <header class="app-header">
         <div class="header-title">《南方公园》台配版</div>
-        <div class="header-controls">
-            <button class="icon-btn" id="themeToggle" aria-label="切换主题">
-                <span class="material-icons">dark_mode</span>
-            </button>
-            <div style="position: relative;" class="more-btn-desktop">
-                <button class="icon-btn" id="moreBtn" aria-label="更多选项">
-                    <span class="material-icons">more_vert</span>
-                </button>
-                <div class="more-menu" id="moreMenu">
-                    <div class="menu-item" data-action="refresh"><span class="material-icons">refresh</span>刷新播放器</div>
-                    <div class="menu-item" data-action="reward"><span class="material-icons">favorite</span>赞赏支持</div>
-                    <div class="menu-item" data-action="about"><span class="material-icons">info</span>关于本站</div>
-                </div>
-            </div>
+        <div class="header-btn" id="menuBtn">
+            <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
         </div>
     </header>
 
-    <nav class="tabs-wrapper">
-        <div class="tabs-scroll" id="tabsContainer">
-            </div>
+    <nav class="nav-wrapper">
+        <div class="scroll-navbar" id="tabsContainer"></div>
     </nav>
 
-    <main class="main-content" id="contentContainer">
-        </main>
+    <div class="page-content" id="contentContainer"></div>
 
-    <div class="bottom-nav">
-        <div class="bottom-nav-inner">
-            <div class="nav-item" data-action="refresh"><span class="material-icons">refresh</span>刷新</div>
-            <div class="nav-item" data-action="reward"><span class="material-icons">favorite</span>赞赏</div>
-            <div class="nav-item" data-action="about"><span class="material-icons">info</span>关于</div>
-        </div>
-    </div>
-
-    <div class="toast" id="toast">提示消息</div>
-
-    <div class="modal" id="rewardModal">
-        <div class="modal-backdrop" data-close></div>
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="font-size: 18px;">感谢支持</h3>
-                <button class="icon-btn" data-close><span class="material-icons">close</span></button>
+    <div>
+        <div class="weui-mask" id="asMask" style="display: none; opacity: 0; transition: opacity .3s;"></div>
+        <div class="weui-actionsheet" id="asSheet">
+            <div class="weui-actionsheet__menu">
+                <div class="weui-actionsheet__cell" data-action="refresh">刷新播放</div>
+                <div class="weui-actionsheet__cell" data-action="reward">赞赏支持</div>
+                <div class="weui-actionsheet__cell" data-action="about">关于</div>
             </div>
-            <p style="text-align: center; color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
-                如果喜欢本站内容，可以请开发者喝杯咖啡 ☕️
-            </p>
-            
-            <div class="qr-group">
-                <div style="font-size: 12px; color: var(--text-tertiary);">支付宝</div>
-                <img src="https://preview.cloud.189.cn/image/imageAction?param=4A9642D17F6D5436EA1C5CCE96C3A5C04297C32046CE18EE47E7C4A89F243180377639D6981343CED866A3432131B211B3B6B7155931B084E40AF7CC97CF147CE160B661A7738969158DDE1F22FBA3F7CE85F08E14BF4C8E6AC48545133F5323D511A4C51179A9EEEEA1275E796058BEB591ABD0" class="qr-img" alt="支付宝">
-            </div>
-            <div class="qr-group">
-                <div style="font-size: 12px; color: var(--text-tertiary);">微信支付</div>
-                <img src="https://preview.cloud.189.cn/image/imageAction?param=FC58E9905ECE52C8ECCD2E9906EBE63814CA2426562544EADAACA7846BACDBB6867DBF02562C5FB28D23386D9EB2279BA0C819603195837887E191C7F63C4B8EBE086C32B360905C16675344566E22E96A5C7BF6BE6519259DB10870A0A1BE382532C5D8B2F35F9749E8761A903E12DF63223C72" class="qr-img" alt="微信">
-            </div>
-            
-            <div class="reward-actions">
-                <a href="https://qr.alipay.com/tsx19575tdn3azsb7jedp8f" target="_blank" class="action-btn btn-alipay">打开支付宝</a>
-                <button class="action-btn btn-wechat" id="wechatBtn">打开微信</button>
+            <div class="weui-actionsheet__action">
+                <div class="weui-actionsheet__cell" id="asCancel">取消</div>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="aboutModal">
-        <div class="modal-backdrop" data-close></div>
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="font-size: 18px;">关于本站</h3>
-                <button class="icon-btn" data-close><span class="material-icons">close</span></button>
+    <div id="textToast" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast weui-toast_text">
+            <p class="weui-toast__content" id="toastMsg">操作成功</p>
+        </div>
+    </div>
+
+    <div class="weui-mask" id="rewardMask" style="display: none;"></div>
+    <div class="weui-dialog" id="rewardDialog" style="display: none;">
+        <div class="weui-dialog__hd"><strong class="weui-dialog__title">感谢支持</strong></div>
+        <div class="weui-dialog__bd">
+            <p style="margin-bottom: 15px;">如果觉得好用，可以请开发者喝瓶可乐🥤</p>
+            <div class="qr-container">
+                <div class="qr-box">
+                    <img src="https://preview.cloud.189.cn/image/imageAction?param=4A9642D17F6D5436EA1C5CCE96C3A5C04297C32046CE18EE47E7C4A89F243180377639D6981343CED866A3432131B211B3B6B7155931B084E40AF7CC97CF147CE160B661A7738969158DDE1F22FBA3F7CE85F08E14BF4C8E6AC48545133F5323D511A4C51179A9EEEEA1275E796058BEB591ABD0" alt="支付宝">
+                    <span>支付宝</span>
+                </div>
+                <div class="qr-box">
+                    <img src="https://preview.cloud.189.cn/image/imageAction?param=FC58E9905ECE52C8ECCD2E9906EBE63814CA2426562544EADAACA7846BACDBB6867DBF02562C5FB28D23386D9EB2279BA0C819603195837887E191C7F63C4B8EBE086C32B360905C16675344566E22E96A5C7BF6BE6519259DB10870A0A1BE382532C5D8B2F35F9749E8761A903E12DF63223C72" alt="微信">
+                    <span>微信</span>
+                </div>
             </div>
-            <div style="font-size: 14px; line-height: 1.6; color: var(--text-secondary);">
-                <p>这是一个视频季播页面优化版。</p>
-                <ul style="padding-left: 20px; margin-top: 10px;">
-                    <li>🔥 极速响应，数据驱动加载</li>
-                    <li>🌓 完美支持深色/浅色模式</li>
-                    <li>📱 针对微信/内嵌浏览器优化</li>
-                    <li>💾 自动记录播放位置</li>
-                </ul>
-                <p style="margin-top: 20px; text-align: right; font-size: 12px; color: var(--text-tertiary);">Version 3.0.0</p>
-            </div>
+        </div>
+        <div class="weui-dialog__ft">
+            <a href="https://qr.alipay.com/tsx19575tdn3azsb7jedp8f" class="weui-dialog__btn weui-dialog__btn_primary" target="_blank">支付宝跳转</a>
+            <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default" id="closeReward">关闭</a>
+        </div>
+    </div>
+
+    <div class="weui-mask" id="aboutMask" style="display: none;"></div>
+    <div class="weui-dialog" id="aboutDialog" style="display: none;">
+        <div class="weui-dialog__hd"><strong class="weui-dialog__title">关于</strong></div>
+        <div class="weui-dialog__bd">
+            <p style="text-align: center;">本视频资源来源于互联网，仅用于非商业用途，如有侵权，请联系删除。</p>
+</ul>
+            <p style="margin-top: 15px; font-size: 12px; color: var(--weui-FG-2); text-align: right;">版本号 3.6.0</p>
+        </div>
+        <div class="weui-dialog__ft">
+            <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" id="closeAbout">知道了</a>
         </div>
     </div>
 
     <script>
-        /**
-         * 核心配置数据
-         * 如需添加新季度，只需在此数组追加对象即可
-         */
-        const SEASON_CONFIG = [
+        // 1. 深色模式监听
+        (() => {
+            const setTheme = () => {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-weui-theme', isDark ? 'dark' : 'light');
+            };
+            setTheme();
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(setTheme);
+        })();
+
+        // 2. 数据配置
+        const SEASONS = [
             { name: "第一季", vcode: "2ef9dd48909dc300", plcode: "6b09b6b8d06b902c" },
             { name: "第二季", vcode: "bde20bed5c4aa872", plcode: "5ba17ace5a57ed42" },
             { name: "第三季", vcode: "07d05786e3db978e", plcode: "40fe8b96f8965f0f" },
@@ -370,342 +239,228 @@
             { name: "第七季", vcode: "7d60bf04640c45db", plcode: "1770679e3968fe04" }
         ];
 
-        // 状态管理
-        const state = {
-            activeTab: 0,
-            players: {},
-            scriptLoaded: false,
-            isOnline: navigator.onLine
-        };
-
-        // DOM 元素引用
-        const dom = {
-            body: document.body,
+        const state = { active: 0, players: {}, loaded: false, wasOffline: false };
+        
+        // 元素缓存
+        const els = {
             tabs: document.getElementById('tabsContainer'),
             content: document.getElementById('contentContainer'),
-            toast: document.getElementById('toast'),
-            networkBar: document.getElementById('networkStatus'),
-            themeIcon: document.querySelector('#themeToggle span'),
-            moreMenu: document.getElementById('moreMenu')
+            toast: document.getElementById('textToast'),
+            toastText: document.getElementById('toastMsg'),
+            tipErr: document.getElementById('tipsError'),
+            tipSucc: document.getElementById('tipsSuccess'),
+            asMask: document.getElementById('asMask'),
+            asSheet: document.getElementById('asSheet'),
+            asCancel: document.getElementById('asCancel')
         };
 
-        // --- 初始化渲染 ---
+        // 3. 封装通用的显示/隐藏动画逻辑
+        // 解决直接 display:block 导致无动画的问题
+        function toggleElement(el, show) {
+            if (show) {
+                // 1. 先 display: block 占据布局
+                el.style.display = 'block';
+                // 2. 强制重绘 (Force Reflow)，让浏览器意识到 display 变了
+                el.offsetHeight; 
+                // 3. 添加动画 class (opacity: 1)
+                el.classList.add('weui-animate-fade-in');
+            } else {
+                // 1. 移除 class (opacity: 0)
+                el.classList.remove('weui-animate-fade-in');
+                // 2. 等待过渡结束后再 display: none
+                setTimeout(() => {
+                    // 防止在动画过程中又被设为显示
+                    if (!el.classList.contains('weui-animate-fade-in')) {
+                        el.style.display = 'none';
+                    }
+                }, 300); // 对应 CSS transition 时间
+            }
+        }
 
+        // 4. 网络状态管理器
+        const NetManager = {
+            showError: () => {
+                toggleElement(els.tipSucc, false); // 确保成功提示隐藏
+                toggleElement(els.tipErr, true);
+                state.wasOffline = true;
+            },
+            showSuccess: () => {
+                if (!state.wasOffline) return;
+                toggleElement(els.tipErr, false);
+                toggleElement(els.tipSucc, true);
+                state.wasOffline = false;
+                // 2秒后自动隐藏成功提示
+                setTimeout(() => { toggleElement(els.tipSucc, false); }, 2000);
+            }
+        };
+
+        // 5. 初始化
         function init() {
-            renderTabsAndContainers();
-            initTheme();
-            checkBrowserEnv();
-            initNetworkListeners();
-            setupEventListeners();
-            
-            // 激活第一个标签页并加载
+            renderUI();
+            bindEvents();
+            if (!navigator.onLine) NetManager.showError();
             switchTab(0);
         }
 
-        // 动态生成HTML结构
-        function renderTabsAndContainers() {
-            const fragmentTabs = document.createDocumentFragment();
-            const fragmentContent = document.createDocumentFragment();
+        function renderUI() {
+            const fTabs = document.createDocumentFragment();
+            const fContent = document.createDocumentFragment();
 
-            SEASON_CONFIG.forEach((season, index) => {
-                // 创建 Tab
-                const tab = document.createElement('div');
-                tab.className = 'tab';
-                tab.textContent = season.name;
-                tab.dataset.index = index;
-                fragmentTabs.appendChild(tab);
+            SEASONS.forEach((s, i) => {
+                const nav = document.createElement('div');
+                nav.className = 'nav-item';
+                nav.textContent = s.name;
+                nav.dataset.idx = i;
+                fTabs.appendChild(nav);
 
-                // 创建 Content Panel
                 const panel = document.createElement('div');
                 panel.className = 'tab-panel';
-                panel.id = `panel-${index}`;
+                panel.id = `panel-${i}`;
                 
-                // 创建 Player Container (初始为空)
-                const playerBox = document.createElement('div');
-                playerBox.className = 'player-wrapper';
-                playerBox.id = `player_${season.vcode}`; // 保持原有ID格式以防兼容性问题
-                
-                panel.appendChild(playerBox);
-                fragmentContent.appendChild(panel);
+                const box = document.createElement('div');
+                box.className = 'player-box';
+                box.id = `player_${s.vcode}`;
+                panel.appendChild(box);
+                fContent.appendChild(panel);
             });
 
-            dom.tabs.appendChild(fragmentTabs);
-            dom.content.appendChild(fragmentContent);
+            els.tabs.appendChild(fTabs);
+            els.content.appendChild(fContent);
         }
 
-        // --- 播放器逻辑 ---
-
-        async function loadPlayerScript() {
-            if (state.scriptLoaded || document.querySelector('script[src*="player.dogecloud.com"]')) {
-                state.scriptLoaded = true;
-                return;
-            }
-            return new Promise((resolve, reject) => {
+        // 6. 播放器 SDK
+        async function loadSdk() {
+            if (state.loaded) return;
+            return new Promise(resolve => {
                 const script = document.createElement('script');
                 script.src = `https://player.dogecloud.com/js/loader?${Date.now()}`;
-                script.onload = () => {
-                    state.scriptLoaded = true;
-                    resolve();
-                };
-                script.onerror = () => reject(new Error('Script load failed'));
+                script.onload = () => { state.loaded = true; resolve(); };
                 document.head.appendChild(script);
             });
         }
 
-        async function initPlayer(index, retryCount = 0) {
-            const config = SEASON_CONFIG[index];
-            const containerId = `player_${config.vcode}`;
-            const container = document.getElementById(containerId);
+        async function initPlayer(idx) {
+            const conf = SEASONS[idx];
+            const divId = `player_${conf.vcode}`;
+            const container = document.getElementById(divId);
 
-            if (!container) return;
-            if (state.players[containerId]) return; // 已存在实例
+            if (!container || state.players[divId]) return;
 
             if (!navigator.onLine) {
-                renderState(container, 'wifi_off', '网络连接不可用', true, index);
+                container.innerHTML = `<div class="status-layer"><p>等待网络恢复...</p></div>`;
                 return;
             }
 
-            // 显示加载中
-            container.innerHTML = `<div class="state-container"><div class="spinner"></div><p style="margin-top:10px">正在加载播放器...</p></div>`;
+            container.innerHTML = `<div class="status-layer"><i class="weui-loading"></i><p style="margin-top:8px">加载中...</p></div>`;
 
             try {
-                await loadPlayerScript();
-                
-                // 确保DogePlayer可用
-                if (typeof DogePlayer === 'undefined') throw new Error('Player SDK not ready');
+                await loadSdk();
+                if (typeof DogePlayer === 'undefined') throw new Error('SDK Error');
 
-                const player = new DogePlayer({
+                state.players[divId] = new DogePlayer({
                     container: container,
                     userId: 14140,
-                    vcode: config.vcode,
+                    vcode: conf.vcode,
+                    plcode: conf.plcode,
                     autoPlay: false,
-                    plcode: config.plcode,
                     plsort: 'name'
                 });
 
-                // 全屏监听
-                player.on('fullscreenchange', (isFull) => {
-                   if (isFull) {
-                       try { screen.orientation.lock('landscape').catch(() => {}); } catch(e){}
-                   } else {
-                       try { screen.orientation.unlock(); } catch(e){}
-                   }
+                state.players[divId].on('fullscreenchange', (f) => {
+                     try { f ? screen.orientation.lock('landscape') : screen.orientation.unlock(); } catch(e){}
                 });
 
-                state.players[containerId] = player;
-
-            } catch (err) {
-                console.error('Player Init Error:', err);
-                if (retryCount < 3) {
-                    setTimeout(() => initPlayer(index, retryCount + 1), 2000);
-                } else {
-                    renderState(container, 'error_outline', '加载失败，请重试', true, index);
-                }
+            } catch (e) {
+                container.innerHTML = `<div class="status-layer"><p>加载失败</p><a onclick="initPlayer(${idx})" style="color:var(--weui-BRAND);margin-top:8px">点击重试</a></div>`;
             }
         }
 
-        function destroyPlayer(index) {
-            const config = SEASON_CONFIG[index];
-            const containerId = `player_${config.vcode}`;
-            if (state.players[containerId]) {
-                try {
-                    // 如果SDK有destroy方法则调用，否则移除DOM引用
-                    if (state.players[containerId].destroy) state.players[containerId].destroy();
-                } catch(e) {}
-                delete state.players[containerId];
-                // 重置容器HTML
-                const container = document.getElementById(containerId);
-                if (container) container.innerHTML = '';
-            }
-        }
+        // 7. 交互逻辑
+        function switchTab(idx) {
+            idx = parseInt(idx);
+            const items = els.tabs.querySelectorAll('.nav-item');
+            const panels = els.content.querySelectorAll('.tab-panel');
 
-        function renderState(container, icon, text, showRetry, index) {
-            let html = `<div class="state-container">
-                <span class="material-icons state-icon">${icon}</span>
-                <p>${text}</p>`;
-            if (showRetry) {
-                html += `<button class="btn-retry" onclick="initPlayer(${index})">重试</button>`;
-            }
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        // --- 交互逻辑 ---
-
-        function switchTab(index) {
-            index = parseInt(index);
-            if (isNaN(index)) return;
-
-            // 1. UI更新
-            const tabs = dom.tabs.querySelectorAll('.tab');
-            const panels = dom.content.querySelectorAll('.tab-panel');
+            items.forEach(el => el.classList.toggle('active', parseInt(el.dataset.idx) === idx));
+            panels.forEach(el => el.classList.toggle('active', parseInt(el.id.split('-')[1]) === idx));
             
-            tabs.forEach(t => t.classList.toggle('active', parseInt(t.dataset.index) === index));
-            panels.forEach(p => p.classList.toggle('active', parseInt(p.id.split('-')[1]) === index));
-            
-            // 2. 滚动Tab到可视区
-            tabs[index]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-
-            // 3. 逻辑处理
-            state.activeTab = index;
-            initPlayer(index);
+            items[idx]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            state.active = idx;
+            initPlayer(idx);
         }
 
-        function setupEventListeners() {
-            // Tab点击委托
-            dom.tabs.addEventListener('click', (e) => {
-                if (e.target.classList.contains('tab')) {
-                    switchTab(e.target.dataset.index);
-                }
+        function toggleActionSheet(show) {
+            const display = show ? 'block' : 'none';
+            els.asMask.style.display = display;
+            setTimeout(() => els.asMask.style.opacity = show ? '1' : '0', 10);
+            
+            if (show) els.asSheet.classList.add('weui-actionsheet_toggle');
+            else els.asSheet.classList.remove('weui-actionsheet_toggle');
+        }
+
+        function showToast(msg) {
+            els.toastText.textContent = msg;
+            els.toast.style.display = 'block';
+            setTimeout(() => els.toast.style.display = 'none', 1500);
+        }
+
+        function toggleDialog(id, show) {
+            const d = document.getElementById(id + 'Dialog');
+            const m = document.getElementById(id + 'Mask');
+            const disp = show ? 'block' : 'none';
+            d.style.display = disp;
+            m.style.display = disp;
+        }
+
+        // 8. 事件监听
+        function bindEvents() {
+            // Tab 切换
+            els.tabs.addEventListener('click', e => {
+                if(e.target.classList.contains('nav-item')) switchTab(e.target.dataset.idx);
             });
 
-            // 菜单点击
-            document.getElementById('moreBtn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                dom.moreMenu.classList.toggle('show');
-            });
+            // ActionSheet 触发与关闭
+            document.getElementById('menuBtn').addEventListener('click', () => toggleActionSheet(true));
+            els.asMask.addEventListener('click', () => toggleActionSheet(false));
+            els.asCancel.addEventListener('click', () => toggleActionSheet(false));
 
-            document.addEventListener('click', () => dom.moreMenu.classList.remove('show'));
-
-            // 菜单项动作委托 (PC & Mobile)
-            const handleAction = (action) => {
-                if (!action) return;
-                if (action === 'refresh') {
-                    showToast('正在刷新当前播放器...');
-                    destroyPlayer(state.activeTab);
-                    setTimeout(() => initPlayer(state.activeTab), 200);
-                } else if (action === 'reward') {
-                    openModal('rewardModal');
-                } else if (action === 'about') {
-                    openModal('aboutModal');
-                }
-            };
-
-            dom.moreMenu.addEventListener('click', e => handleAction(e.target.closest('.menu-item')?.dataset.action));
-            document.querySelector('.bottom-nav-inner').addEventListener('click', e => handleAction(e.target.closest('.nav-item')?.dataset.action));
-
-            // Modal 关闭逻辑
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    // 检查是否点击了关闭按钮或背景
-                    if (e.target.hasAttribute('data-close') || 
-                        e.target.classList.contains('modal-backdrop') ||
-                        e.target.closest('[data-close]')) {
-                        modal.classList.remove('active');
+            // 菜单项处理
+            els.asSheet.addEventListener('click', e => {
+                const item = e.target.closest('.weui-actionsheet__cell[data-action]');
+                if (!item) return;
+                toggleActionSheet(false);
+                
+                const act = item.dataset.action;
+                if (act === 'refresh') {
+                    showToast('已刷新');
+                    const pid = `player_${SEASONS[state.active].vcode}`;
+                    if(state.players[pid]) {
+                        try { state.players[pid].destroy(); } catch(e){}
+                        delete state.players[pid];
+                        document.getElementById(pid).innerHTML = '';
                     }
-                });
+                    setTimeout(() => initPlayer(state.active), 200);
+                } else if (act === 'reward') toggleDialog('reward', true);
+                else if (act === 'about') toggleDialog('about', true);
             });
 
-            // 微信按钮
-            document.getElementById('wechatBtn').addEventListener('click', () => {
-                if (/MicroMessenger/i.test(navigator.userAgent)) {
-                    window.location.href = 'weixin://';
-                } else {
-                    showToast('请使用微信扫描二维码');
-                    setTimeout(() => window.location.href = 'weixin://', 500);
-                }
+            // 弹窗关闭
+            ['reward', 'about'].forEach(id => {
+                const CapId = id.charAt(0).toUpperCase() + id.slice(1);
+                document.getElementById('close' + CapId).addEventListener('click', () => toggleDialog(id, false));
+                document.getElementById(id + 'Mask').addEventListener('click', () => toggleDialog(id, false));
             });
 
-            // 主题切换
-            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            // 网络事件监听
+            window.addEventListener('offline', NetManager.showError);
+            window.addEventListener('online', () => {
+                NetManager.showSuccess();
+                initPlayer(state.active);
+            });
         }
-
-        // --- 工具函数 ---
-
-        function toggleTheme() {
-            const current = dom.body.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            dom.body.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            dom.themeIcon.textContent = next === 'dark' ? 'dark_mode' : 'light_mode';
-            showToast(`已切换至${next === 'dark' ? '深色' : '浅色'}模式`);
-        }
-
-        function initTheme() {
-            const saved = localStorage.getItem('theme') || 'dark';
-            dom.body.setAttribute('data-theme', saved);
-            dom.themeIcon.textContent = saved === 'dark' ? 'dark_mode' : 'light_mode';
-        }
-
-        function checkBrowserEnv() {
-            const ua = navigator.userAgent.toLowerCase();
-            
-            // 检测所有主流第三方浏览器
-            const isEmbedded = (
-                // 社交应用内嵌
-                /micromessenger/.test(ua) || // 微信
-                /weibo/.test(ua) || // 微博
-                /qzone/.test(ua) || // QQ空间
-                
-                // 移动浏览器
-                /mqqbrowser/.test(ua) || // QQ浏览器
-                /quark/.test(ua) || // 夸克浏览器
-                /ucbrowser/.test(ua) || // UC浏览器
-                /ucweb/.test(ua) || // UC浏览器（旧版）
-                /sogoumobilebrowser/.test(ua) || // 搜狗浏览器
-                /baidubrowser/.test(ua) || // 百度浏览器
-                /360browser/.test(ua) || // 360浏览器
-                /2345browser/.test(ua) || // 2345浏览器
-                /maxthon/.test(ua) || // 傲游浏览器
-                /samsungbrowser/.test(ua) || // 三星浏览器
-                
-                // 其他常见内嵌环境
-                /aliapp/.test(ua) || // 阿里系应用
-                /dingtalk/.test(ua) || // 钉钉
-                /ywapp/.test(ua) || // 小红书
-                /douyin/.test(ua) || // 抖音
-                /tiktok/.test(ua) // 抖音国际版
-            );
-            
-            if (isEmbedded) {
-                dom.body.classList.add('is-embedded');
-                console.log('检测到第三方浏览器环境，启用底栏菜单');
-            }
-        }
-
-        function initNetworkListeners() {
-            const updateNetwork = () => {
-                const online = navigator.onLine;
-                dom.networkBar.style.display = online ? 'none' : 'block';
-                if (!online) {
-                    dom.networkBar.textContent = '网络连接已断开';
-                    // 显示所有播放器的网络错误状态
-                    SEASON_CONFIG.forEach((_, index) => {
-                        const container = document.getElementById(`player_${SEASON_CONFIG[index].vcode}`);
-                        if (container && !container.querySelector('.state-container')) {
-                            renderState(container, 'wifi_off', '网络连接不可用', true, index);
-                        }
-                    });
-                } else if (!state.isOnline) { // 从离线变在线
-                    dom.networkBar.style.display = 'block';
-                    dom.networkBar.style.background = 'var(--success-color)';
-                    dom.networkBar.textContent = '网络已恢复';
-                    setTimeout(() => dom.networkBar.style.display = 'none', 2000);
-                    // 尝试重新加载当前播放器
-                    initPlayer(state.activeTab);
-                }
-                state.isOnline = online;
-            };
-            window.addEventListener('online', updateNetwork);
-            window.addEventListener('offline', updateNetwork);
-        }
-
-        function showToast(msg, duration = 2000) {
-            dom.toast.textContent = msg;
-            dom.toast.classList.add('show');
-            setTimeout(() => dom.toast.classList.remove('show'), duration);
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.add('active');
-        }
-
-        // 导出全局函数供HTML中的onclick使用 (如重试按钮)
+        
         window.initPlayer = initPlayer;
-
-        // 启动
         document.addEventListener('DOMContentLoaded', init);
-
     </script>
 </body>
 </html>
