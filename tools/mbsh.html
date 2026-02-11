@@ -2,709 +2,763 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>妙笔生花</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>妙笔生花 - 智能写作助手</title>
+    
+    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.25/weui.min.css"/>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     
     <style>
-        /* --- Material Design 3 Token System --- */
+        /* --- 全局样式 & 变量 --- */
         :root {
-            /* Light Theme */
-            --md-sys-color-primary: #6750A4;
-            --md-sys-color-on-primary: #FFFFFF;
-            --md-sys-color-primary-container: #EADDFF;
-            --md-sys-color-on-primary-container: #21005D;
-            --md-sys-color-secondary-container: #E8DEF8;
-            --md-sys-color-on-secondary-container: #1D192B;
-            --md-sys-color-background: #FEF7FF;
-            --md-sys-color-surface: #FEF7FF;
-            --md-sys-color-surface-container: #F3EDF7;
-            --md-sys-color-surface-container-high: #ECE6F0;
-            --md-sys-color-on-surface: #1C1B1F;
-            --md-sys-color-on-surface-variant: #49454F;
-            --md-sys-color-outline: #79747E;
-            --md-sys-color-outline-variant: #CAC4D0;
-            --md-sys-color-error: #B3261E;
-            --md-sys-color-success: #2E7D32;
-
-            --md-sys-shape-corner-large: 16px;
-            --md-sys-shape-corner-full: 9999px;
-            --md-sys-elevation-2: 0px 1px 2px 0px rgba(0,0,0,0.3), 0px 2px 6px 2px rgba(0,0,0,0.15);
-            
-            --nav-rail-width: 80px;
+            --header-height: 50px;
+            --tabbar-height: 56px;
+            --api-card-bg: #f7f7f7;
+            --card-bg: #ffffff;
         }
 
-        /* Dark Theme Override */
-        [data-theme="dark"] {
-            --md-sys-color-primary: #D0BCFF;
-            --md-sys-color-on-primary: #381E72;
-            --md-sys-color-primary-container: #4F378B;
-            --md-sys-color-on-primary-container: #EADDFF;
-            --md-sys-color-secondary-container: #4A4458;
-            --md-sys-color-on-secondary-container: #E8DEF8;
-            --md-sys-color-background: #141218;
-            --md-sys-color-surface: #141218;
-            --md-sys-color-surface-container: #1D1B20;
-            --md-sys-color-surface-container-high: #2B2930;
-            --md-sys-color-on-surface: #E6E1E5;
-            --md-sys-color-on-surface-variant: #CAC4D0;
-            --md-sys-color-outline: #938F99;
-            --md-sys-color-outline-variant: #49454F;
+        [data-weui-theme="dark"] {
+            --api-card-bg: #2c2c2c;
+            --card-bg: #2c2c2c;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body {
-            font-family: 'Roboto', 'Noto Sans SC', sans-serif;
-            background-color: var(--md-sys-color-background);
-            color: var(--md-sys-color-on-surface);
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        /* --- Navigation Rail (Left) --- */
-        .nav-rail {
-            width: var(--nav-rail-width);
-            background-color: var(--md-sys-color-surface);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 24px 0;
-            border-right: 1px solid var(--md-sys-color-outline-variant);
-            z-index: 20;
-            flex-shrink: 0;
-        }
-
-        .nav-item {
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--md-sys-color-on-surface-variant);
-            cursor: pointer;
-            margin-bottom: 12px;
-            transition: 0.2s;
-            position: relative;
-        }
-
-        .nav-item i { font-size: 24px; margin-bottom: 4px; }
-        .nav-item span { font-size: 10px; font-weight: 500; }
-
-        .nav-item:hover {
-            background-color: rgba(0,0,0,0.05);
-            background-color: var(--md-sys-color-on-surface-variant, rgba(0,0,0,0.05)); /* For better dark mode */
-        }
-        
-        .nav-item.active {
-            background-color: var(--md-sys-color-secondary-container);
-            color: var(--md-sys-color-on-secondary-container);
-        }
-        
-        .theme-toggle { margin-top: auto; }
-
-        /* --- Main Layout --- */
-        .app-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
+        body, html {
+            height: 100%;
+            width: 100%;
+            background-color: var(--weui-BG-0);
+            color: var(--weui-FG-0);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
         }
 
-        /* --- Top Bar --- */
-        .top-app-bar {
-            height: 64px;
+        /* --- 顶栏 --- */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            background-color: var(--weui-BG-2);
+            border-bottom: 1px solid var(--weui-FG-3);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
-            background-color: var(--md-sys-color-surface);
-            border-bottom: 1px solid var(--md-sys-color-outline-variant);
-            flex-shrink: 0;
+            padding: 0 16px;
+            box-sizing: border-box;
+            z-index: 5000;
+            font-weight: 500;
+            font-size: 17px;
+        }
+        
+        .app-header .title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .app-title { font-size: 22px; font-weight: 500; color: var(--md-sys-color-on-surface); display: flex; align-items: center; gap: 12px; }
-        .app-title i { color: var(--md-sys-color-primary); }
-
-        .app-actions { display: flex; gap: 8px; align-items: center; }
-
-        /* --- Buttons --- */
-        .btn-icon {
-            width: 40px; height: 40px; border-radius: 50%; border: none;
-            background: transparent; color: var(--md-sys-color-on-surface-variant);
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: 0.2s; flex-shrink: 0;
+        .app-header .action-btn {
+            font-size: 18px;
+            color: var(--weui-FG-0);
+            padding: 8px;
+            cursor: pointer;
+            transition: opacity 0.2s;
         }
-        .btn-icon:hover { background-color: rgba(128,128,128,0.1); }
-        .btn-icon.active { background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+        .app-header .action-btn:active { opacity: 0.6; }
 
-        .btn {
-            height: 40px; padding: 0 24px; border-radius: 20px; border: none;
-            font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex;
-            align-items: center; gap: 8px; white-space: nowrap; transition: 0.2s;
+        /* --- 页面容器 --- */
+        .page-container {
+            position: absolute;
+            top: var(--header-height);
+            bottom: var(--tabbar-height);
+            left: 0;
+            width: 100%;
+            overflow-y: hidden;
+            background-color: var(--weui-BG-0);
+            z-index: 1;
+            transition: bottom 0.3s;
         }
-        .btn-filled { background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
-        .btn-tonal { background-color: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
-        .btn-text { background: transparent; color: var(--md-sys-color-primary); }
+        
+        .page-container.full-height { bottom: 0; }
 
-        /* --- Views Management --- */
-        .view-container {
+        .view-section { display: none; height: 100%; flex-direction: column; }
+        .view-section.active { display: flex; }
+
+        /* --- 创作区 Step 容器 --- */
+        .step-container {
+            display: none;
             flex: 1;
+            flex-direction: column;
             overflow-y: auto;
-            padding: 16px;
-            background-color: var(--md-sys-color-surface-container);
-            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        .step-container.active-step { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .view { display: none; max-width: 1000px; margin: 0 auto; width: 100%; animation: fadeIn 0.3s; }
-        .view.active { display: block; }
+        /* --- 编辑器样式 --- */
+        .editor-layout { display: flex; flex-direction: column; height: 100%; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- VIEW 1: Editor --- */
-        .editor-layout { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 16px; 
-            height: 100%; 
-            min-height: calc(100vh - 64px - 32px - 16px - 16px); /* Full height minus top bar, padding, etc. */
+        .editor-toolbar-scroll {
+            white-space: nowrap; overflow-x: auto; padding: 10px 16px;
+            background-color: var(--weui-BG-2); border-bottom: 1px solid var(--weui-FG-3); flex-shrink: 0;
         }
+        .editor-toolbar-scroll::-webkit-scrollbar { display: none; }
         
-        .toolbar-card {
-            background: var(--md-sys-color-surface);
-            border-radius: var(--md-sys-shape-corner-large);
-            padding: 12px;
-            display: flex; gap: 8px; align-items: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            overflow-x: auto;
-            flex-shrink: 0;
+        .toolbar-btn {
+            display: inline-block; margin-right: 8px; font-size: 13px;
+            padding: 6px 12px; border-radius: 4px;
         }
 
-        .editor-card {
-            flex: 1;
-            background: var(--md-sys-color-surface);
-            border-radius: var(--md-sys-shape-corner-large);
-            display: flex; flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            min-height: 500px;
-        }
+        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid var(--weui-FG-3) !important; background-color: var(--weui-BG-2); }
+        .ql-container.ql-snow { border: none !important; flex: 1; background-color: var(--weui-BG-2); font-size: 16px; overflow-y: auto; }
+        .ql-editor { padding: 16px; min-height: 100%; }
+        [data-weui-theme="dark"] .ql-stroke { stroke: #b2b2b2 !important; }
+        [data-weui-theme="dark"] .ql-fill { fill: #b2b2b2 !important; }
+        [data-weui-theme="dark"] .ql-picker { color: #b2b2b2 !important; }
 
-        #doc-title {
-            color: var(--md-sys-color-on-surface); /* Fix color in dark mode */
-        }
-
-        #editor { flex: 1; border: none !important; font-size: 16px; color: var(--md-sys-color-on-surface); }
-        .ql-toolbar { border: none !important; border-bottom: 1px solid var(--md-sys-color-outline-variant) !important; flex-shrink: 0;}
-        .ql-container { border: none !important; flex: 1; }
-        .ql-editor { height: 100%; overflow-y: auto; }
-        
-        /* Dark Mode Quill Fixes */
-        [data-theme="dark"] .ql-stroke { stroke: #E6E1E5 !important; }
-        [data-theme="dark"] .ql-fill { fill: #E6E1E5 !important; }
-        [data-theme="dark"] .ql-picker { color: #E6E1E5 !important; }
-
-        /* Stats Bar (Bottom Bar Fix) */
+        /* 底部统计栏 */
         .stats-bar {
-            display: flex; gap: 16px; font-size: 12px; color: var(--md-sys-color-on-surface-variant); padding: 8px 16px;
-            border-top: 1px solid var(--md-sys-color-outline-variant);
-            flex-shrink: 0;
-            background-color: var(--md-sys-color-surface); /* Ensure background is solid */
-        }
-        .stats-bar span i { margin-right: 4px; }
-        .autosave-indicator {
-            margin-left: auto;
-            color: var(--md-sys-color-success);
+            padding: 8px 16px; font-size: 12px; color: var(--weui-FG-1);
+            background-color: var(--weui-BG-1); border-top: 1px solid var(--weui-FG-3);
+            display: flex; justify-content: space-between; flex-shrink: 0;
         }
 
-        /* --- VIEW 2: Generator --- */
-        .generator-card {
-            background: var(--md-sys-color-surface);
-            padding: 32px;
-            border-radius: 24px;
-            box-shadow: var(--md-sys-elevation-2);
+        /* --- 底栏 Tabbar --- */
+        .weui-tabbar {
+            position: fixed !important; bottom: 0 !important; left: 0; width: 100%; height: var(--tabbar-height);
+            background-color: var(--weui-BG-2); z-index: 5000; display: flex; align-items: center; transition: transform 0.3s;
+        }
+        .weui-tabbar.hidden { transform: translateY(100%); }
+        .weui-tabbar__item { padding-top: 4px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; -webkit-tap-highlight-color: rgba(0,0,0,0); }
+        .weui-tabbar__icon i { font-size: 20px; color: var(--weui-FG-1); }
+        .weui-tabbar__item.weui-bar__item_on .weui-tabbar__icon i { color: var(--weui-BRAND); }
+        .weui-tabbar__label { font-size: 10px; color: var(--weui-FG-1); margin-top: 2px;}
+        .weui-tabbar__item.weui-bar__item_on .weui-tabbar__label { color: var(--weui-BRAND); }
+
+        /* ========================================= */
+        /* 文库 UI 优化样式 (修复对齐问题) */
+        /* ========================================= */
+
+        .library-toolbar {
+            padding: 8px 16px; background-color: var(--weui-BG-0); display: flex;
+            justify-content: space-between; align-items: center; font-size: 14px;
+            color: var(--weui-FG-1); border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        [data-weui-theme="dark"] .library-toolbar { border-bottom-color: rgba(255,255,255,0.05); }
+
+        .mode-switch-btn { color: var(--weui-BLUE); font-weight: 500; cursor: pointer; padding: 4px 8px; }
+
+        .library-list-container { padding: 12px; padding-bottom: 100px; }
+
+        /* 卡片整体布局 - 关键对齐修正 */
+        .lib-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid transparent;
+            
+            /* Flex 布局，垂直居中 */
+            display: flex;
+            align-items: center; /* 关键：子元素垂直居中 */
+            justify-content: space-between;
+        }
+
+        [data-weui-theme="dark"] .lib-card { box-shadow: none; background: var(--api-card-bg); }
+        .lib-card:active { background: var(--weui-BG-1); }
+        .lib-card.selected { border-color: var(--weui-BRAND); background-color: rgba(7, 193, 96, 0.04); }
+        [data-weui-theme="dark"] .lib-card.selected { background-color: rgba(7, 193, 96, 0.1); }
+
+        /* 左侧复选框区 */
+        .lib-check-visual {
+            width: 0; overflow: hidden; opacity: 0; transition: all 0.3s ease;
+            display: flex; align-items: center; flex-shrink: 0; 
+        }
+        .lib-card.edit-mode .lib-check-visual { width: 36px; opacity: 1; margin-right: 8px; }
+
+        .custom-checkbox {
+            width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--weui-FG-2);
+            box-sizing: border-box; position: relative; transition: all 0.2s;
+        }
+        .lib-card.selected .custom-checkbox { border-color: var(--weui-BRAND); background-color: var(--weui-BRAND); }
+        .lib-card.selected .custom-checkbox::after {
+            content: ''; position: absolute; top: 4px; left: 7px; width: 5px; height: 9px;
+            border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
+        }
+
+        /* 中间文字内容区 - 对齐优化 */
+        .lib-content {
+            flex: 1; 
+            min-width: 0; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* 内容垂直居中 */
+            padding-right: 12px; 
+        }
+
+        .lib-title {
+            font-size: 17px; font-weight: 600; color: var(--weui-FG-0);
+            margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            line-height: 1.2; /* 紧凑行高 */
+        }
+
+        .lib-preview {
+            font-size: 13px; color: var(--weui-FG-1);
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+            overflow: hidden; line-height: 1.5; margin-bottom: 6px;
+            /* 移除固定高度，允许内容自适应居中 */
+        }
+
+        .lib-meta { font-size: 12px; color: var(--weui-FG-2); line-height: 1; }
+
+        /* 右侧操作按钮区 */
+        .lib-right-actions {
+            display: flex; align-items: center; gap: 12px; 
+            flex-shrink: 0; opacity: 1; transition: all 0.2s;
+        }
+        .lib-card.edit-mode .lib-right-actions { display: none; }
+
+        /* 按钮样式：大号圆形 */
+        .lib-act-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            background-color: var(--weui-BG-1); color: var(--weui-FG-0);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; transition: background-color 0.2s; cursor: pointer;
+        }
+        .lib-act-btn:active { background-color: var(--weui-FG-2); }
+        .lib-act-btn.delete-btn { color: var(--weui-RED); background-color: rgba(250, 81, 81, 0.08); }
+        .lib-act-btn.export-btn { color: var(--weui-BLUE); background-color: rgba(16, 174, 255, 0.08); }
+
+        /* 底部浮动批量操作栏 */
+        .batch-bottom-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 60px;
+            background: var(--weui-BG-2); padding: 0 24px;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.06); display: flex;
+            justify-content: space-between; align-items: center;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 5001; box-sizing: border-box; border-top: 1px solid var(--weui-FG-3);
+        }
+        .batch-bottom-bar.active { transform: translateY(0); }
+        .batch-info { font-size: 14px; font-weight: 500; }
+        .batch-btns { display: flex; gap: 12px; }
+
+        /* ========================================= */
+        /* Picker 模拟样式 */
+        /* ========================================= */
+        .picker-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            min-height: 24px;
+        }
+        .picker-value {
+            color: var(--weui-FG-0);
+            margin-right: 8px;
+        }
+        .picker-arrow {
+            color: var(--weui-FG-2);
+            font-size: 12px;
         }
         
-        .form-group { margin-bottom: 24px; }
-        .form-label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--md-sys-color-primary); }
-        
-        .input-field, .select-field {
-            width: 100%; padding: 12px 16px;
-            background: var(--md-sys-color-surface-container-high);
-            border: 1px solid transparent;
-            border-radius: 8px;
-            color: var(--md-sys-color-on-surface);
-            font-size: 16px; outline: none; transition: 0.2s;
+        /* 自定义 ActionSheet 样式用于 Picker */
+        .custom-picker-menu {
+            max-height: 50vh;
+            overflow-y: auto;
+            background-color: var(--weui-BG-2);
         }
-        .input-field:focus, .select-field:focus {
-            border-color: var(--md-sys-color-primary);
-            background: var(--md-sys-color-surface);
+        .custom-picker-item {
+            padding: 16px;
+            text-align: center;
+            font-size: 17px;
+            border-bottom: 1px solid var(--weui-BG-0);
+            background-color: var(--weui-BG-2);
+            color: var(--weui-FG-0);
         }
-        [data-theme="dark"] .select-field {
-            background-color: var(--md-sys-color-surface-container-high);
-            color: var(--md-sys-color-on-surface);
-        }
-        [data-theme="dark"] .select-field option {
-            background-color: var(--md-sys-color-surface-container);
-        }
+        .custom-picker-item:active { background-color: var(--weui-BG-1); }
 
-        /* --- VIEW 3: Templates --- */
-        .template-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;
+        /* ========================================= */
+        /* 通用与弹窗样式 */
+        /* ========================================= */
+        .custom-dialog-wrapper .weui-dialog { border-radius: 12px; overflow: hidden; background-color: var(--weui-BG-2); }
+        .api-input-visual {
+            background-color: var(--api-card-bg); border-radius: 8px; padding: 4px 12px;
+            border: 1px solid transparent; transition: all 0.3s; display: flex; align-items: center; margin-top: 8px;
         }
-        .template-card {
-            background: var(--md-sys-color-surface);
-            padding: 20px; border-radius: 16px;
-            cursor: pointer; transition: 0.2s;
-            border: 1px solid transparent;
+        .api-input-visual.focused {
+            background-color: var(--weui-BG-2); border-color: var(--weui-BRAND); box-shadow: 0 0 0 2px rgba(7, 193, 96, 0.1);
         }
-        .template-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--md-sys-elevation-2);
-            border-color: var(--md-sys-color-primary);
+        .api-input-visual input {
+            width: 100%; border: none; background: transparent; font-size: 16px;
+            height: 40px; color: var(--weui-FG-0); outline: none; font-family: monospace;
         }
-        .t-title { font-weight: 600; font-size: 18px; margin-bottom: 8px; color: var(--md-sys-color-on-surface); }
-        .t-desc { font-size: 14px; color: var(--md-sys-color-on-surface-variant); line-height: 1.5; }
-
-        /* --- VIEW 4: Library --- */
-        .search-bar {
-            margin-bottom: 20px; position: relative;
-        }
-        .saved-list { display: flex; flex-direction: column; gap: 12px; }
-        .saved-item {
-            background: var(--md-sys-color-surface);
-            padding: 16px; border-radius: 12px;
+        .api-status-row {
             display: flex; justify-content: space-between; align-items: center;
+            margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--weui-FG-3);
         }
-        .saved-info h4 { margin-bottom: 4px; color: var(--md-sys-color-on-surface); }
-        .saved-info span { font-size: 12px; color: var(--md-sys-color-on-surface-variant); }
-
-        /* --- Right Sidebar (AI Assistant) --- */
-        .side-sheet {
-            width: 360px;
-            background: var(--md-sys-color-surface);
-            border-left: 1px solid var(--md-sys-color-outline-variant);
-            display: flex; flex-direction: column;
-            position: absolute; right: 0; top: 0; bottom: 0;
-            transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
-            z-index: 30; box-shadow: -2px 0 8px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-        }
-        .side-sheet.active { transform: translateX(0); }
-        .sheet-header { padding: 20px; border-bottom: 1px solid var(--md-sys-color-outline-variant); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-        .sheet-content { padding: 20px; overflow-y: auto; flex: 1; }
-
-        .ai-msg-card {
-            background: var(--md-sys-color-surface-container-high);
-            padding: 16px; border-radius: 12px; margin-bottom: 16px;
-        }
-        .ai-msg-card h4 { color: var(--md-sys-color-primary); margin-bottom: 8px; font-size: 14px; }
-        .ai-msg-card p { font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: var(--md-sys-color-on-surface); }
-
-        /* --- Modals --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 100;
-            display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(4px);
-        }
-        .modal-overlay.open { display: flex; }
-        .modal-card {
-            background: var(--md-sys-color-surface);
-            width: 90%; max-width: 420px; padding: 24px;
-            border-radius: 28px;
-            box-shadow: var(--md-sys-elevation-2);
-        }
-
-        /* --- Loading & Toast --- */
-        .loading-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.3); z-index: 200;
-            display: none; justify-content: center; align-items: center; color: white; flex-direction: column;
-        }
-        .spinner {
-            width: 48px; height: 48px; border: 5px solid #FFF;
-            border-bottom-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .toast {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: #322F35; color: #F4EFF4; padding: 12px 24px; border-radius: 24px;
-            opacity: 0; transition: 0.3s; z-index: 300; pointer-events: none;
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            
-            /* Bottom Navigation Bar */
-            .nav-rail { 
-                width: 100%; height: 60px; flex-direction: row; padding: 0; 
-                border-right: none; 
-                border-top: 1px solid var(--md-sys-color-outline-variant); 
-                order: 2; /* Put navigation at the bottom */
-                justify-content: space-around; 
-                position: fixed; 
-                bottom: 0; 
-                left: 0; 
-                background-color: var(--md-sys-color-surface);
-            }
-            .nav-item { margin-bottom: 0; width: auto; flex: 1; border-radius: 0; height: 100%; }
-            .theme-toggle { display: none; } /* Move theme toggle to top bar on mobile */
-            
-            .app-content { order: 1; padding-bottom: 60px; /* Space for fixed bottom nav */ }
-            .side-sheet { width: 100%; }
-            .top-app-bar { padding: 0 16px; }
-            .app-title span { display: none; }
-            
-            /* Show theme toggle in top bar on mobile */
-            .mobile-theme-toggle { display: flex !important; }
-
-            /* Editor Layout adjustments for mobile */
-            .editor-layout {
-                min-height: auto;
-                height: 100%;
-            }
-        }
+        .weui-search-bar { background-color: var(--weui-BG-2); }
+        .weui-half-screen-dialog { max-height: 70%; }
+        .weui-cells__group_form .weui-cells { margin-top: 0; }
     </style>
 </head>
-<body>
 
-    <nav class="nav-rail">
-        <div class="nav-item active" onclick="switchView('editor')" title="写作">
-            <i class="fas fa-pen-nib"></i>
-            <span>写作</span>
+<body data-weui-theme="light">
+
+    <header class="app-header">
+        <div class="action-btn" style="width: 24px;"></div> 
+        <div class="title">
+            <i class="fas fa-feather-alt" style="color:var(--weui-BRAND)"></i> 妙笔生花
         </div>
-        <div class="nav-item" onclick="switchView('generator')" title="灵感生成">
-            <i class="fas fa-magic"></i>
-            <span>生成</span>
+        <div class="action-btn" onclick="openApiModal()">
+            <i class="fas fa-cog"></i>
         </div>
-        <div class="nav-item" onclick="switchView('templates')" title="模板库">
-            <i class="fas fa-th-large"></i>
-            <span>模板</span>
-        </div>
-        <div class="nav-item" onclick="switchView('library')" title="我的文库">
-            <i class="fas fa-book"></i>
-            <span>文库</span>
-        </div>
+    </header>
+
+    <div class="page-container" id="mainContainer">
         
-        <div class="nav-item theme-toggle" onclick="toggleTheme()" title="切换主题">
-            <i class="fas fa-moon" id="theme-icon"></i>
-        </div>
-    </nav>
-
-    <div class="app-content">
-        
-        <header class="top-app-bar">
-            <div class="app-title">
-                <i class="fas fa-feather-alt"></i>
-                <span>妙笔生花</span>
-            </div>
-            <div class="app-actions">
-                <div style="font-size: 12px; color: var(--md-sys-color-success); margin-right: 8px; opacity: 0; transition: opacity 0.5s;" id="autosave-indicator">
-                    <i class="fas fa-check-circle"></i> 已自动保存
-                </div>
-
-                <button class="btn-icon mobile-theme-toggle" onclick="toggleTheme()" title="切换主题" style="display: none;">
-                    <i class="fas fa-moon" id="mobile-theme-icon"></i>
-                </button>
-                
-                <button class="btn-icon" onclick="openApiModal()" title="设置 API Key">
-                    <i class="fas fa-key"></i>
-                </button>
-                <button class="btn-icon" onclick="saveToLibrary(true)" title="保存到文库">
-                    <i class="fas fa-save"></i>
-                </button>
-                <button class="btn-icon" onclick="exportFile()" title="导出文件">
-                    <i class="fas fa-file-export"></i>
-                </button>
-                <button class="btn-icon" onclick="toggleSidebar()" id="robot-btn" title="AI 助手">
-                    <i class="fas fa-robot"></i>
-                </button>
-            </div>
-        </header>
-
-        <div class="view-container">
+        <div id="view-workspace" class="view-section active">
             
-            <div id="view-editor" class="view active h-100">
+            <div id="step-config" class="step-container active-step">
+                <div class="weui-form">
+                    <div class="weui-form__text-area">
+                        <h2 class="weui-form__title">开始创作</h2>
+                        <div class="weui-form__desc">第一步：配置参数，AI 生成初稿</div>
+                    </div>
+                    <div class="weui-form__control-area">
+                        <div class="weui-cells__group weui-cells__group_form">
+                            <div class="weui-cells">
+                                <div class="weui-cell weui-cell_active">
+                                    <div class="weui-cell__hd"><label class="weui-label">主题</label></div>
+                                    <div class="weui-cell__bd">
+                                        <input id="gen-topic" class="weui-input" placeholder="例如：我的校园生活" type="text"/>
+                                    </div>
+                                </div>
+                                <div class="weui-cell weui-cell_active">
+                                    <div class="weui-cell__hd"><label class="weui-label">关键词</label></div>
+                                    <div class="weui-cell__bd">
+                                        <input id="gen-keywords" class="weui-input" placeholder="选填，用逗号分隔" type="text"/>
+                                    </div>
+                                </div>
+                                
+                                <div class="weui-cell weui-cell_active weui-cell_access" onclick="openPicker('type')">
+                                    <div class="weui-cell__hd"><label class="weui-label">体裁</label></div>
+                                    <div class="weui-cell__bd"></div>
+                                    <div class="weui-cell__ft">
+                                        <span class="picker-value" id="display-type">议论文</span>
+                                        <input type="hidden" id="val-type" value="议论文">
+                                    </div>
+                                </div>
+
+                                <div class="weui-cell weui-cell_active weui-cell_access" onclick="openPicker('length')">
+                                    <div class="weui-cell__hd"><label class="weui-label">字数</label></div>
+                                    <div class="weui-cell__bd"></div>
+                                    <div class="weui-cell__ft">
+                                        <span class="picker-value" id="display-length">500字 (标准)</span>
+                                        <input type="hidden" id="val-length" value="500">
+                                    </div>
+                                </div>
+
+                                <div class="weui-cell weui-cell_active weui-cell_access" onclick="openPicker('style')">
+                                    <div class="weui-cell__hd"><label class="weui-label">风格</label></div>
+                                    <div class="weui-cell__bd"></div>
+                                    <div class="weui-cell__ft">
+                                        <span class="picker-value" id="display-style">简洁明了</span>
+                                        <input type="hidden" id="val-style" value="简洁明了">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="weui-form__opr-area">
+                        <a class="weui-btn weui-btn_primary" href="javascript:" onclick="generateEssay()">AI 生成初稿</a>
+                        <a class="weui-btn weui-btn_default" href="javascript:" onclick="startManualWrite()">跳过，直接写作</a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step-editor-ui" class="step-container">
                 <div class="editor-layout">
-                    <div class="toolbar-card">
-                        <button class="btn btn-filled" onclick="callAI('polish')"><i class="fas fa-magic"></i> 润色文采</button>
-                        <button class="btn btn-tonal" onclick="callAI('expand')"><i class="fas fa-expand-alt"></i> 细节扩写</button>
-                        <button class="btn btn-tonal" onclick="callAI('check')"><i class="fas fa-spell-check"></i> 逻辑纠错</button>
-                        <button class="btn btn-tonal" onclick="callAI('summarize')"><i class="fas fa-compress-alt"></i> 精简摘要</button>
-                        <div style="flex:1"></div>
-                        <button class="btn-icon" onclick="clearEditor()" title="清空"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-
-                    <div class="editor-card">
-                        <div style="padding: 12px 16px; border-bottom: 1px solid var(--md-sys-color-surface-container-high); flex-shrink: 0;">
-                            <input type="text" id="doc-title" placeholder="在此输入文章标题..." style="width: 100%; border:none; background:transparent; font-size: 18px; font-weight: bold; outline:none; color: var(--md-sys-color-on-surface);">
-                        </div>
-                        <div id="editor" style="padding: 0 16px;"></div>
-                        
-                         <div class="stats-bar">
-                            <span><i class="fas fa-font"></i> 字数：<span id="word-count">0</span></span>
-                            <span><i class="far fa-clock"></i> 预估阅读：<span id="read-time">0</span> 分钟</span>
+                    <div class="weui-cells" style="margin-top:0; border-bottom:1px solid var(--weui-FG-3);">
+                        <div class="weui-cell">
+                            <div class="weui-cell__bd">
+                                <input class="weui-input" id="doc-title" type="text" placeholder="文章标题" style="font-weight:bold; font-size:18px;">
+                            </div>
+                            <div class="weui-cell__ft" id="autosave-indicator" style="font-size:12px; opacity:0; transition:opacity 0.5s; color:var(--weui-BRAND)">
+                                <i class="weui-icon-success-no-circle"></i> 已保存
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div id="view-generator" class="view">
-                <div class="generator-card">
-                    <h2 style="margin-bottom: 24px; color: var(--md-sys-color-on-surface);"><i class="fas fa-lightbulb" style="color:var(--md-sys-color-primary)"></i> 智能创作生成</h2>
-                    
-                    <div class="form-group">
-                        <label class="form-label">作文主题</label>
-                        <input type="text" id="gen-topic" class="input-field" placeholder="例如：我的校园生活、科技发展带来的变化...">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">关键词 (选填)</label>
-                        <input type="text" id="gen-keywords" class="input-field" placeholder="用逗号分隔，例如：友情, 努力, 成功">
+                    <div class="editor-toolbar-scroll">
+                        <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_default toolbar-btn" onclick="backToConfig()" style="color:var(--weui-FG-0); border-color:var(--weui-FG-3)"><i class="fas fa-undo"></i> 重写/新建</a>
+                        <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_primary toolbar-btn" onclick="callAI('polish')"><i class="fas fa-magic"></i> 润色</a>
+                        <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_default toolbar-btn" onclick="callAI('expand')"><i class="fas fa-expand-alt"></i> 扩写</a>
+                        <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_default toolbar-btn" onclick="callAI('check')"><i class="fas fa-spell-check"></i> 纠错</a>
+                        <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_default toolbar-btn" onclick="callAI('summarize')"><i class="fas fa-compress-alt"></i> 摘要</a>
+                        <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_warn toolbar-btn" onclick="clearEditor()"><i class="fas fa-trash"></i> 清空</a>
+                        <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_default toolbar-btn" onclick="saveToLibrary(true)"><i class="fas fa-save"></i> 存文库</a>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div class="form-group">
-                            <label class="form-label">体裁</label>
-                            <select id="gen-type" class="select-field">
-                                <option value="议论文">议论文</option>
-                                <option value="记叙文">记叙文</option>
-                                <option value="说明文">说明文</option>
-                                <option value="散文">散文</option>
-                                <option value="读后感">读后感</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">字数要求</label>
-                            <select id="gen-length" class="select-field">
-                                <option value="300">300字 (小作文)</option>
-                                <option value="500" selected>500字 (标准)</option>
-                                <option value="800">800字 (中长文)</option>
-                                <option value="1200">1000+字 (长篇)</option>
-                            </select>
-                        </div>
+                    <div id="editor"></div>
+
+                    <div class="stats-bar">
+                        <span>字数: <span id="word-count">0</span></span>
+                        <span>预计阅读: <span id="read-time">0</span> 分钟</span>
                     </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">写作风格</label>
-                        <select id="gen-style" class="select-field">
-                            <option value="简洁明了">简洁明了</option>
-                            <option value="正式严谨">正式严谨</option>
-                            <option value="文学优美">文学优美</option>
-                            <option value="情感丰富">情感丰富</option>
-                        </select>
-                    </div>
-
-                    <button class="btn btn-filled" onclick="generateEssay()" style="width: 100%; height: 50px; justify-content: center; font-size: 16px;">
-                        <i class="fas fa-pen-fancy"></i> 开始生成
-                    </button>
-                </div>
-            </div>
-
-            <div id="view-templates" class="view">
-                <h2 style="margin-bottom: 24px; color: var(--md-sys-color-on-surface);">常用写作模板库</h2>
-                <div class="template-grid" id="template-container">
-                    </div>
-            </div>
-
-            <div id="view-library" class="view">
-                <h2 style="margin-bottom: 24px; color: var(--md-sys-color-on-surface);">我的文库 (本地保存)</h2>
-                <div class="search-bar">
-                    <input type="text" id="search-input" class="input-field" placeholder="搜索已保存的作文..." oninput="searchLibrary(this.value)">
-                    <i class="fas fa-search" style="position: absolute; right: 16px; top: 12px; color: var(--md-sys-color-outline);"></i>
-                </div>
-                <div id="library-list" class="saved-list">
-                    </div>
-            </div>
-
-        </div>
-
-        <div class="side-sheet" id="side-sheet">
-            <div class="sheet-header">
-                <h3>AI 写作助手</h3>
-                <button class="btn-icon" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="sheet-content" id="ai-response-box">
-                <div class="ai-msg-card" style="text-align: center; background: transparent; border: 1px dashed var(--md-sys-color-outline);">
-                    <i class="fas fa-robot" style="font-size: 32px; color: var(--md-sys-color-secondary); margin-bottom: 12px; display: block;"></i>
-                    <p>选中编辑器中的文字，然后点击上方工具栏按钮，AI 将在此提供修改建议或润色结果。</p>
                 </div>
             </div>
         </div>
 
-    </div>
-
-    <div class="modal-overlay" id="api-modal">
-        <div class="modal-card">
-            <h3 style="margin-bottom: 16px;">配置API</h3>
-            <p style="font-size: 14px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 16px;">
-                请访问各大AI开发者平台以获取您的API KEY，或在网络上搜索免费的API KEY。密钥仅保存在本地浏览器中。
-            </p>
-            <div class="form-group">
-                <input type="password" id="api-key-input" class="input-field" placeholder="sk-..." autocomplete="off">
+        <div id="view-library" class="view-section">
+            <div class="weui-search-bar" id="searchBar">
+                <form class="weui-search-bar__form">
+                    <div class="weui-search-bar__box">
+                        <i class="weui-icon-search"></i>
+                        <input type="search" class="weui-search-bar__input" id="searchInput" placeholder="搜索本地草稿" required oninput="handleSearch(this.value)">
+                        <a href="javascript:" class="weui-icon-clear" id="searchClear"></a>
+                    </div>
+                    <label class="weui-search-bar__label" id="searchText">
+                        <i class="weui-icon-search"></i>
+                        <span>搜索</span>
+                    </label>
+                </form>
+                <a href="javascript:" class="weui-search-bar__cancel-btn" id="searchCancel">取消</a>
             </div>
             
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div id="api-status" style="font-size: 13px; display: flex; align-items: center; gap: 4px;"></div>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-text" onclick="closeApiModal()">取消</button>
-                    <button class="btn btn-tonal" onclick="testConnection()">测试连接</button>
-                    <button class="btn btn-filled" onclick="saveApiKey()">保存</button>
+            <div class="library-toolbar">
+                <span id="lib-total-count">共 0 篇</span>
+                <div class="mode-switch-btn" onclick="toggleEditMode()" id="edit-mode-btn">
+                    管理
+                </div>
+            </div>
+            
+            <div class="weui-panel weui-panel_access" style="flex:1; overflow-y:auto; background-color: var(--weui-BG-0);">
+                <div class="library-list-container" id="library-list">
+                    </div>
+            </div>
+
+            <div class="batch-bottom-bar" id="batchBottomBar">
+                <div class="batch-actions-left" style="display:flex; align-items:center;" onclick="toggleSelectAllManual()">
+                     <div class="custom-checkbox" id="selectAllBtn" style="margin-right:8px; width:20px; height:20px; border-color:var(--weui-FG-1)"></div>
+                     <span class="batch-info" id="batch-select-count">已选 0</span>
+                </div>
+                <div class="batch-btns">
+                    <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_default" onclick="batchExport()">导出</a>
+                    <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_warn" onclick="batchDelete()">删除</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="weui-tabbar" id="mainTabbar">
+        <div class="weui-tabbar__item weui-bar__item_on" onclick="switchMainView('workspace', this)">
+            <div class="weui-tabbar__icon">
+                <i class="fas fa-pen-nib"></i>
+            </div>
+            <p class="weui-tabbar__label">创作</p>
+        </div>
+        <div class="weui-tabbar__item" onclick="switchMainView('library', this)">
+            <div class="weui-tabbar__icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <p class="weui-tabbar__label">文库</p>
+        </div>
+    </div>
+
+    <div class="js_dialog" id="aiDialog" style="display: none;">
+        <div class="weui-mask" onclick="closeAiDialog()"></div>
+        <div class="weui-half-screen-dialog">
+            <div class="weui-half-screen-dialog__hd">
+                <div class="weui-half-screen-dialog__hd__side" onclick="closeAiDialog()">
+                    <a class="weui-icon-btn">关闭<i class="weui-icon-close-thin"></i></a>
+                </div>
+                <div class="weui-half-screen-dialog__hd__main">
+                    <strong class="weui-half-screen-dialog__title" id="ai-dialog-title">AI 助手</strong>
+                </div>
+            </div>
+            <div class="weui-half-screen-dialog__bd">
+                <div class="weui-article" id="ai-response-content" style="padding:0; white-space: pre-wrap;"></div>
+            </div>
+            <div class="weui-half-screen-dialog__ft">
+                <div class="weui-half-screen-dialog__btn-area">
+                    <a href="javascript:;" class="weui-btn weui-btn_primary" onclick="applyAiText('replace')">替换选中</a>
+                    <a href="javascript:;" class="weui-btn weui-btn_default" onclick="applyAiText('append')">追加到末尾</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="spinner"></div>
-        <p style="margin-top: 16px;">AI 正在创作中，请稍候...</p>
+    <div class="js_dialog" id="apiDialog" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog custom-dialog-wrapper">
+            <div class="weui-dialog__hd">
+                <strong class="weui-dialog__title">配置 AI 模型</strong>
+            </div>
+            <div class="weui-dialog__bd" style="padding-top:0;">
+                <p style="font-size:13px; color:var(--weui-FG-1); text-align:left; margin-bottom:8px;">请输入 DeepSeek API Key：</p>
+                <div class="api-input-visual" id="api-input-box">
+                    <i class="fas fa-key" style="color:var(--weui-FG-2); margin-right:8px; font-size:14px;"></i>
+                    <input type="password" id="api-key-input" placeholder="sk-...">
+                </div>
+                <div class="api-status-row">
+                    <div id="api-status" class="api-status-text">
+                        <i class="fas fa-circle" style="font-size:8px; color:#ccc"></i> 未配置
+                    </div>
+                    <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_primary" 
+                       style="margin:0; padding: 4px 12px; font-size:12px; line-height:1.6;" 
+                       onclick="testConnection()">测试</a>
+                </div>
+            </div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default" onclick="closeApiModal()">取消</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" onclick="saveApiKey()">保存</a>
+            </div>
+        </div>
     </div>
 
-    <div id="toast" class="toast">消息提醒</div>
+    <div id="custom-picker-mask" class="weui-mask" style="display: none; z-index: 6000;" onclick="closePicker()"></div>
+    <div id="custom-picker-sheet" class="weui-actionsheet" style="z-index: 6001;">
+        <div class="weui-actionsheet__title">
+            <p class="weui-actionsheet__title-text" id="picker-title">请选择</p>
+        </div>
+        <div class="weui-actionsheet__menu custom-picker-menu" id="picker-menu">
+            </div>
+        <div class="weui-actionsheet__action">
+            <div class="weui-actionsheet__cell" onclick="closePicker()">取消</div>
+        </div>
+    </div>
+
+    <div class="js_dialog" id="globalConfirmDialog" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog custom-dialog-wrapper">
+            <div class="weui-dialog__hd"><strong class="weui-dialog__title" id="confirm-title">标题</strong></div>
+            <div class="weui-dialog__bd" id="confirm-content">内容</div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default" id="confirm-btn-cancel">取消</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" id="confirm-btn-ok">确定</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingToast" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-loading weui-icon_toast"></i>
+            <p class="weui-toast__content">思考中...</p>
+        </div>
+    </div>
+
+    <div id="textToast" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast weui-toast_text">
+            <p class="weui-toast__content" id="toastMsg">操作成功</p>
+        </div>
+    </div>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
-        // --- 1. Core Initialization ---
+        // --- 全局变量 ---
+        let currentAiText = null;
+        let saveTimeout;
+        let currentStep = 'config'; 
+        let selectedItems = new Set();
+        let isEditMode = false;
+        let currentDraftsCache = []; 
+        let currentPickerKey = null; // 当前正在操作哪个 Picker (type/length/style)
+
+        // --- Picker 数据配置 ---
+        const pickerData = {
+            type: ['议论文', '记叙文', '说明文', '散文', '读（观）后感'],
+            length: [
+                { label: '300字 (短篇)', value: '300' },
+                { label: '500字 (标准)', value: '500' },
+                { label: '800字 (中长文)', value: '800' },
+                { label: '1500字 (长文)', value: '1500' }
+            ],
+            style: ['简洁明了', '正式严谨', '文学优美', '幽默风趣', '情感丰富']
+        };
+
+        // --- 1. 初始化 ---
+        function detectTheme() {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.body.setAttribute('data-weui-theme', isDark ? 'dark' : 'light');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', detectTheme);
+        detectTheme();
+
         const quill = new Quill('#editor', {
             theme: 'snow',
-            placeholder: '开始创作...',
+            placeholder: '在此输入内容...',
             modules: {
                 toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
+                    [{ 'header': [2, 3, false] }],
                     ['bold', 'italic', 'underline', 'blockquote'],
                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'color': [] }, { 'background': [] }],
                     ['clean']
                 ]
             }
         });
 
-        // 状态管理
-        let currentAiText = null;
-        let isDarkMode = false;
-        let saveTimeout;
-
-        // 加载时执行
         window.addEventListener('load', () => {
-            // 检查主题设置
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const savedTheme = localStorage.getItem('theme');
+            loadApiKey(false); 
+            loadLibrary(true); // 初始加载文库数据
+            bindSearchBar();
 
-            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                isDarkMode = true;
-                setTheme('dark');
-            } else {
-                setTheme('light');
-            }
-
-            loadApiKey();
-            loadLibrary();
-            renderTemplates();
-            
             // 恢复上次未保存的草稿
             const draft = localStorage.getItem('current_draft');
             if (draft) {
                 try {
                     const data = JSON.parse(draft);
-                    quill.root.innerHTML = data.content; 
-                    document.getElementById('doc-title').value = data.title || '';
-                } catch (e) {
-                    console.error("Failed to parse draft:", e);
-                    localStorage.removeItem('current_draft');
-                }
+                    if (data.content && data.content.trim().length > 0) {
+                        quill.root.innerHTML = data.content; 
+                        document.getElementById('doc-title').value = data.title || '';
+                        switchStep('editor'); 
+                    } else {
+                        switchStep('config');
+                    }
+                } catch (e) { switchStep('config'); }
+            } else {
+                switchStep('config');
             }
             updateStats();
         });
 
-        function setTheme(mode) {
-            isDarkMode = (mode === 'dark');
-            document.body.setAttribute('data-theme', mode);
-            localStorage.setItem('theme', mode);
-            
-            const iconClass = mode === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-            document.getElementById('theme-icon').className = iconClass;
-            const mobileIcon = document.getElementById('mobile-theme-icon');
-            if(mobileIcon) mobileIcon.className = iconClass;
-        }
+        // 自动保存草稿（非文库）
+        quill.on('text-change', () => triggerAutoSave());
+        document.getElementById('doc-title').addEventListener('input', () => triggerAutoSave());
 
-        // 自动保存草稿
-        quill.on('text-change', () => {
-            // 清除之前的定时器
+        function triggerAutoSave() {
             if (saveTimeout) clearTimeout(saveTimeout);
-            
-            // 延迟 2 秒执行保存
             saveTimeout = setTimeout(() => {
                 const content = quill.root.innerHTML;
                 const title = document.getElementById('doc-title').value;
-                localStorage.setItem('current_draft', JSON.stringify({ title, content }));
-                updateStats();
-                
-                const indicator = document.getElementById('autosave-indicator');
-                indicator.style.opacity = 1;
-                setTimeout(() => indicator.style.opacity = 0, 1500);
+                if (currentStep === 'editor') {
+                    localStorage.setItem('current_draft', JSON.stringify({ title, content }));
+                    updateStats();
+                    const indicator = document.getElementById('autosave-indicator');
+                    indicator.style.opacity = 1;
+                    setTimeout(() => indicator.style.opacity = 0, 1500);
+                }
+            }, 2000);
+        }
 
-            }, 2000); 
-        });
+        // --- 2. 视图与导航 ---
+        function switchMainView(viewId, tabItem) {
+            document.querySelectorAll('.weui-tabbar__item').forEach(el => el.classList.remove('weui-bar__item_on'));
+            tabItem.classList.add('weui-bar__item_on');
 
-        document.getElementById('doc-title').addEventListener('input', () => {
-            if (saveTimeout) clearTimeout(saveTimeout);
-             saveTimeout = setTimeout(() => {
-                const content = quill.root.innerHTML;
-                const title = document.getElementById('doc-title').value;
-                localStorage.setItem('current_draft', JSON.stringify({ title, content }));
-                updateStats();
-            }, 500);
-        });
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
 
-        // --- 2. Navigation Logic ---
-        function switchView(viewName) {
-            // UI Update
-            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${viewName}`).classList.add('active');
-            
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            // 简单匹配
-            const navMap = { 'editor': 0, 'generator': 1, 'templates': 2, 'library': 3 };
-            const navItems = document.querySelectorAll('.nav-rail .nav-item');
-            if(navMap[viewName] !== undefined && navItems[navMap[viewName]]) {
-                navItems[navMap[viewName]].classList.add('active');
+            if(viewId === 'library') {
+                toggleEditMode(false); // 重置为普通模式
+                loadLibrary(true);
             }
-
-            // 如果切换到文库，刷新列表
-            if (viewName === 'library') loadLibrary();
         }
 
-        function toggleTheme() {
-            setTheme(isDarkMode ? 'light' : 'dark');
+        function switchStep(stepName) {
+            currentStep = stepName;
+            document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active-step'));
+            
+            if (stepName === 'config') {
+                document.getElementById('step-config').classList.add('active-step');
+            } else if (stepName === 'editor') {
+                document.getElementById('step-editor-ui').classList.add('active-step');
+                setTimeout(() => quill.update(), 100); 
+            }
         }
 
-        function toggleSidebar() {
-            const sheet = document.getElementById('side-sheet');
-            const btn = document.getElementById('robot-btn');
-            sheet.classList.toggle('active');
-            btn.classList.toggle('active');
+        async function backToConfig() {
+            if (quill.getText().trim().length > 1) {
+                const confirmed = await showConfirm("确认重写？", "当前内容若未保存到文库将会丢失。\n建议先点击工具栏的\"存文库\"。");
+                if (!confirmed) return;
+            }
+            localStorage.removeItem('current_draft');
+            document.getElementById('doc-title').value = '';
+            quill.setText('');
+            switchStep('config');
         }
 
-        // --- 3. Generator & AI Logic ---
-        
-        async function callDeepSeek(prompt, systemMsg = "你是一个专业的作文写作助手，专注于提供有针对性的修改意见和润色服务。请使用中文回复。") {
+        function startManualWrite() {
+            document.getElementById('doc-title').value = '';
+            quill.setText('');
+            switchStep('editor');
+        }
+
+        // --- 3. Picker 逻辑 ---
+        function openPicker(key) {
+            currentPickerKey = key;
+            const menu = document.getElementById('picker-menu');
+            const data = pickerData[key];
+            let html = '';
+            
+            let title = '';
+            if(key === 'type') title = '选择体裁';
+            if(key === 'length') title = '选择字数';
+            if(key === 'style') title = '选择风格';
+            document.getElementById('picker-title').innerText = title;
+
+            data.forEach(item => {
+                let label, value;
+                if (typeof item === 'object') {
+                    label = item.label;
+                    value = item.value;
+                } else {
+                    label = item;
+                    value = item;
+                }
+                html += `<div class="custom-picker-item" onclick="selectPickerItem('${label}', '${value}')">${label}</div>`;
+            });
+            
+            menu.innerHTML = html;
+            
+            const mask = document.getElementById('custom-picker-mask');
+            const sheet = document.getElementById('custom-picker-sheet');
+            
+            mask.style.display = 'block';
+            sheet.classList.add('weui-actionsheet_toggle');
+        }
+
+        function closePicker() {
+            const mask = document.getElementById('custom-picker-mask');
+            const sheet = document.getElementById('custom-picker-sheet');
+            
+            sheet.classList.remove('weui-actionsheet_toggle');
+            setTimeout(() => {
+                mask.style.display = 'none';
+            }, 200);
+            currentPickerKey = null;
+        }
+
+        function selectPickerItem(label, value) {
+            if (currentPickerKey) {
+                // 更新显示文本
+                document.getElementById(`display-${currentPickerKey}`).innerText = label;
+                // 更新隐藏值
+                document.getElementById(`val-${currentPickerKey}`).value = value;
+            }
+            closePicker();
+        }
+
+        // --- 4. AI 调用逻辑 ---
+        async function callDeepSeek(prompt, systemMsg) {
             const apiKey = localStorage.getItem('deepseek_api_key');
             if (!apiKey) {
                 openApiModal();
                 throw new Error("请先设置 API Key");
             }
-
             const response = await fetch('https://api.deepseek.com/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -714,372 +768,471 @@
                 body: JSON.stringify({
                     model: "deepseek-chat",
                     messages: [
-                        { role: "system", content: systemMsg },
+                        { role: "system", content: systemMsg || "你是中文写作助手。" },
                         { role: "user", content: prompt }
                     ],
                     stream: false
                 })
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error.message || "API 请求失败");
-            }
+            if (!response.ok) throw new Error("API 请求失败，请检查 Key");
             const data = await response.json();
             return data.choices[0].message.content;
         }
 
-        // 工具栏功能 (润色/扩写等)
-        async function callAI(mode) {
-            const selection = quill.getSelection();
-            if (!selection) return showToast("请先在编辑器中选中要处理的文本");
+        async function generateEssay() {
+            const topic = document.getElementById('gen-topic').value;
+            if (!topic) return showToast("请输入主题");
+            
+            // 使用隐藏 Input 的值
+            const type = document.getElementById('val-type').value;
+            const len = document.getElementById('val-length').value;
+            const style = document.getElementById('val-style').value;
+            const kws = document.getElementById('gen-keywords').value;
 
-            const text = quill.getText(selection.index, selection.length).trim();
-            if (text.length < 5) return showToast("选中的文本太短，请选择一段完整的文字");
+            const prompt = `写一篇关于"${topic}"的${type}。要求：1.字数约${len}字。2.风格：${style}。3.${kws ? '关键词：'+kws : ''}。请直接输出正文HTML格式（分段用<p>，标题用<h3>），不包含markdown标记。`;
             
             showLoading(true);
-            toggleSidebar(); // 打开侧边栏展示结果
-            document.getElementById('ai-response-box').innerHTML = '<div style="text-align:center; padding: 20px;"><div class="spinner" style="width: 20px; height: 20px; border-width: 3px; border-color: var(--md-sys-color-primary-container); border-top-color: var(--md-sys-color-primary);"></div><p style="margin-top: 10px; color: var(--md-sys-color-on-surface);">AI 正在处理...</p></div>';
-
-            const prompts = {
-                polish: `请将我选中的这段文本进行润色，主要目的是提升修辞手法和文采，使表达更加生动优美。请直接给出润色后的版本：\n${text}`,
-                expand: `请将我选中的这段文本进行扩写，增加细节描写、环境渲染或人物内心活动，使内容更饱满。请直接给出扩写后的版本：\n${text}`,
-                check: `请检查我选中的这段文本是否存在语法、用词不当或逻辑错误。如果存在，请先指出问题，然后给出修改后的建议版本：\n${text}`,
-                summarize: `请将我选中的这段文本精简为一段 50 字以内的摘要，保留核心观点。请直接给出摘要：\n${text}`
-            };
-
-            const titles = {
-                polish: "润色结果", expand: "扩写结果", check: "纠错与建议", summarize: "精简摘要"
-            };
-
             try {
-                const res = await callDeepSeek(prompts[mode]);
-                renderAiResponse(res, titles[mode], selection);
+                const content = await callDeepSeek(prompt, "你是一个专业的中文写作AI。请直接返回HTML格式。");
+                let cleanContent = content.replace(/```html/g, '').replace(/```/g, '');
+                document.getElementById('doc-title').value = topic;
+                quill.clipboard.dangerouslyPasteHTML(cleanContent);
+                switchStep('editor');
+                showToast("生成完毕");
             } catch (e) {
-                showToast("AI 助手失败: " + e.message);
-                document.getElementById('ai-response-box').innerHTML = `<div class="ai-msg-card" style="color: var(--md-sys-color-error);"><h4>处理失败</h4><p>${e.message}</p></div>`;
+                showToast(e.message);
             } finally {
                 showLoading(false);
             }
         }
 
-        // 完整生成器功能 (来自 V2)
-        async function generateEssay() {
-            const topic = document.getElementById('gen-topic').value;
-            if (!topic) return showToast("请输入作文主题");
-
-            const type = document.getElementById('gen-type').value;
-            const len = document.getElementById('gen-length').value;
-            const style = document.getElementById('gen-style').value;
-            const keywords = document.getElementById('gen-keywords').value;
-
-            const prompt = `请写一篇关于"${topic}"的${type}。
-要求：
-1. 字数约 ${len} 字。
-2. 风格：${style}，确保语言贴合学生特点。
-3. ${keywords ? '包含关键词：' + keywords : ''}
-请直接输出文章内容，不需要标题。`;
+        async function callAI(mode) {
+            const selection = quill.getSelection();
+            let text = "";
+            if (selection && selection.length > 0) {
+                text = quill.getText(selection.index, selection.length).trim();
+            } else {
+                text = quill.getText().trim();
+                if (text.length === 0) return showToast("内容为空");
+            }
+            
+            const prompts = {
+                polish: `请润色以下文字，使其文笔更优美：\n${text}`,
+                expand: `请扩写以下文字，丰富细节：\n${text}`,
+                check: `请纠正以下文字的逻辑错误和语病：\n${text}`,
+                summarize: `请总结核心内容（200字以内）：\n${text}`
+            };
+            const titles = { polish: "润色建议", expand: "扩写建议", check: "诊断建议", summarize: "内容摘要" };
 
             showLoading(true);
             try {
-                const content = await callDeepSeek(prompt, "你是一个专业的作文写作助手，专门为学生创作高质量、符合要求的作文。请使用中文回复。");
-                
-                // 询问用户是否清空编辑器
-                if (quill.getText().trim().length > 0 && !confirm("生成的新内容将覆盖编辑器现有内容，确定吗？")) {
-                    showToast("已取消覆盖");
-                    return;
-                }
-
-                // 生成成功后，跳转到编辑器
-                document.getElementById('doc-title').value = topic;
-                quill.setText(content);
-                switchView('editor');
-                showToast("作文生成成功！请注意检查和修改");
+                const res = await callDeepSeek(prompts[mode]);
+                renderAiResponse(res, titles[mode], selection);
             } catch (e) {
-                showToast("生成失败: " + e.message);
+                showToast(e.message);
             } finally {
                 showLoading(false);
             }
         }
 
         function renderAiResponse(text, title, selection) {
-            const box = document.getElementById('ai-response-box');
             currentAiText = text;
-            
-            // 存储 selection 信息，用于替换操作
             window.lastSelection = selection;
-
-            box.innerHTML = `
-                <div class="ai-msg-card">
-                    <h4>${title}</h4>
-                    <p style="white-space: pre-wrap;">${text}</p>
-                    <button class="btn btn-filled" onclick="applyAiText('replace')" style="margin-top:12px; width:100%; justify-content:center;">
-                        替换选中的文本
-                    </button>
-                    <button class="btn btn-tonal" onclick="applyAiText('append')" style="margin-top:8px; width:100%; justify-content:center;">
-                        追加到光标位置
-                    </button>
-                </div>
-            `;
-            document.getElementById('side-sheet').classList.add('active');
+            document.getElementById('ai-dialog-title').innerText = title;
+            document.getElementById('ai-response-content').innerText = text;
+            const dialog = document.getElementById('aiDialog');
+            dialog.style.display = 'block';
+            dialog.classList.add('weui-animate-fade-in');
+            dialog.querySelector('.weui-half-screen-dialog').classList.add('weui-animate-slide-up');
         }
+
+        function closeAiDialog() { document.getElementById('aiDialog').style.display = 'none'; }
 
         function applyAiText(mode) {
             if(!currentAiText) return;
-
-            if (mode === 'replace' && window.lastSelection) {
-                // 替换选中的文本
-                const { index, length } = window.lastSelection;
-                // 删除选中的内容
-                quill.deleteText(index, length);
-                // 在删除的位置插入新内容
-                quill.insertText(index, currentAiText);
-                quill.setSelection(index, currentAiText.length); // 选中插入的内容
-                showToast("已替换选中内容");
-            } else if (mode === 'append') {
-                // 追加到当前光标位置
-                const cursorIndex = quill.getSelection() ? quill.getSelection().index : quill.getLength();
-                quill.insertText(cursorIndex, "\n" + currentAiText);
-                showToast("已追加到光标位置");
+            if (mode === 'replace' && window.lastSelection && window.lastSelection.length > 0) {
+                quill.deleteText(window.lastSelection.index, window.lastSelection.length);
+                quill.insertText(window.lastSelection.index, currentAiText);
             } else {
-                 // 如果没有选中，则直接替换整个内容
-                 quill.setText(currentAiText);
-                 showToast("已替换全部内容");
+                quill.insertText(quill.getLength(), "\n\n--- AI 生成内容 ---\n" + currentAiText);
             }
+            closeAiDialog();
+            showToast("已应用");
         }
 
-        // --- 4. Library & Templates ---
+        // --- 5. 文库逻辑 (核心优化部分) ---
 
-        function saveToLibrary(showMsg = false) {
-            const title = document.getElementById('doc-title').value || "未命名作文";
-            const content = quill.root.innerHTML; // 保存 HTML 格式
-            const rawText = quill.getText();
+        // 保存到文库
+        function saveToLibrary(showMsg) {
+            const title = document.getElementById('doc-title').value || "未命名";
+            const content = quill.root.innerHTML;
+            const plainText = quill.getText().trim(); 
+            const wordCount = plainText.length;
             
-            if (rawText.trim().length < 1) {
-                if(showMsg) showToast("内容为空，无法保存");
-                return;
-            }
+            if (plainText.length < 1) return showToast("内容为空");
 
             const drafts = JSON.parse(localStorage.getItem('saved_library') || '[]');
-            const newDraft = {
-                id: Date.now(),
-                title: title,
-                content: content,
-                date: new Date().toLocaleString()
-            };
+            drafts.unshift({ 
+                id: Date.now(), 
+                title, 
+                content, 
+                preview: plainText.substring(0, 60), 
+                wordCount: wordCount,
+                date: new Date().toLocaleString() 
+            });
             
-            drafts.unshift(newDraft); // 加到开头
             localStorage.setItem('saved_library', JSON.stringify(drafts));
             if(showMsg) showToast("已保存到文库");
-        }
-
-        function loadLibrary() {
-            const list = document.getElementById('library-list');
-            const drafts = JSON.parse(localStorage.getItem('saved_library') || '[]');
             
-            if (drafts.length === 0) {
-                list.innerHTML = '<div style="text-align:center; color:var(--md-sys-color-outline); padding:20px;">暂无保存的作文</div>';
-                return;
-            }
-
-            list.innerHTML = drafts.map(d => `
-                <div class="saved-item">
-                    <div class="saved-info">
-                        <h4>${d.title}</h4>
-                        <span>${d.date}</span>
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn-icon" onclick="loadDraft(${d.id})" title="编辑"><i class="fas fa-edit"></i></button>
-                        <button class="btn-icon" onclick="deleteDraft(${d.id})" title="删除" style="color:var(--md-sys-color-error)"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function loadDraft(id) {
-            const drafts = JSON.parse(localStorage.getItem('saved_library') || '[]');
-            const draft = drafts.find(d => d.id === id);
-            if (draft) {
-                if(confirm(`加载【${draft.title}】将覆盖当前编辑器内容，确定吗？`)) {
-                    document.getElementById('doc-title').value = draft.title;
-                    quill.root.innerHTML = draft.content;
-                    switchView('editor');
-                    showToast("草稿已加载到编辑器");
-                }
+            if(document.getElementById('view-library').classList.contains('active')) {
+                loadLibrary(true);
             }
         }
 
-        function deleteDraft(id) {
-            if(!confirm("确定删除吗？")) return;
-            let drafts = JSON.parse(localStorage.getItem('saved_library') || '[]');
-            drafts = drafts.filter(d => d.id !== id);
-            localStorage.setItem('saved_library', JSON.stringify(drafts));
-            loadLibrary();
-            showToast("已删除");
-        }
-
-        function searchLibrary(query) {
-             const list = document.getElementById('library-list');
-            const drafts = JSON.parse(localStorage.getItem('saved_library') || '[]');
-            const filteredDrafts = drafts.filter(d => 
-                d.title.toLowerCase().includes(query.toLowerCase()) || 
-                d.content.toLowerCase().includes(query.toLowerCase())
-            );
-
-            if (filteredDrafts.length === 0) {
-                list.innerHTML = `<div style="text-align:center; color:var(--md-sys-color-outline); padding:20px;">未找到与 "${query}" 相关的作文</div>`;
-                return;
-            }
-
-            list.innerHTML = filteredDrafts.map(d => `
-                <div class="saved-item">
-                    <div class="saved-info">
-                        <h4>${d.title}</h4>
-                        <span>${d.date}</span>
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn-icon" onclick="loadDraft(${d.id})" title="编辑"><i class="fas fa-edit"></i></button>
-                        <button class="btn-icon" onclick="deleteDraft(${d.id})" title="删除" style="color:var(--md-sys-color-error)"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // 模板逻辑
-        function renderTemplates() {
-            const templates = [
-                { title: "议论文三段论", desc: "经典结构：引论（提出论点）- 本论（论据与分析）- 结论（总结升华）。", content: "<h2>题目：[在此输入你的中心论点]</h2><p><strong>第一段（引论）：</strong>开门见山，提出你的核心观点（中心论点）。...</p><p><strong>第二段（本论）：</strong>这是文章主体。至少写两个分论点，并用具体事例、名人名言或数据来支撑。分论点一：[论点] + 论据；分论点二：[论点] + 论据。</p><p><strong>第三段（结论）：</strong>总结全文，重申中心论点，并进行展望或号召，使文章更有深度。</p>" },
-                { title: "记叙文写作提纲", desc: "时间、地点、人物、起因、经过、结果（六要素）。", content: "<h2>题目：[写一个能抓住眼球的标题]</h2><p><strong>开头：</strong>渲染气氛，交代故事发生的时间、地点和主要人物。...</p><p><strong>发展：</strong>描述事件的起因。故事冲突或悬念如何产生。...</p><p><strong>高潮：</strong>最精彩、最激动人心的部分。详细描写人物的动作、语言和心理活动。...</p><p><strong>结尾：</strong>事件的结果。通过这件事，你获得了什么感悟或成长？（点题、深化主题）</p>" },
-                { title: "说明文（事物类）", desc: "介绍一个具体的事物（如手机、电脑、某种自然现象）。", content: "<h2>题目：[事物的名称]</h2><p><strong>引出事物：</strong>简要介绍事物的名称、外观或历史背景。...</p><p><strong>分类与结构：</strong>详细介绍事物的组成部分（结构）或种类（分类）。使用清晰的说明方法（如举例、打比方）。...</p><p><strong>功能与应用：</strong>说明事物的作用、用途或工作原理。...</p><p><strong>总结：</strong>总结事物的意义，或展望未来的发展趋势。</p>" }
-            ];
-            
-            const container = document.getElementById('template-container');
-            container.innerHTML = templates.map((t, idx) => `
-                <div class="template-card" onclick="useTemplate(${idx})">
-                    <div class="t-title">${t.title}</div>
-                    <div class="t-desc">${t.desc}</div>
-                </div>
-            `).join('');
-            
-            // 将模板数据存入 window 对象以便调用
-            window.templatesData = templates;
-        }
-
-        function useTemplate(idx) {
-            if(quill.getText().trim().length > 0 && !confirm("使用模板将覆盖当前编辑器内容，确定吗？")) {
-                return;
-            }
-            const t = window.templatesData[idx];
-            // 使用 HTML 格式加载模板，保留样式
-            quill.root.innerHTML = t.content;
-            document.getElementById('doc-title').value = t.title;
-            switchView('editor');
-            showToast(`已加载模板：${t.title}`);
-        }
-
-        // --- 5. Utilities & API Modal ---
-        
-        function loadApiKey() {
-            const key = localStorage.getItem('deepseek_api_key');
-            if (key) {
-                document.getElementById('api-key-input').value = key;
-                document.getElementById('api-status').innerHTML = '<span style="color:var(--md-sys-color-success)"><i class="fas fa-check-circle"></i> API 已配置</span>';
+        // 加载/刷新文库列表
+        function loadLibrary(refreshData = true) {
+            let drafts;
+            if(refreshData) {
+                drafts = JSON.parse(localStorage.getItem('saved_library') || '[]');
+                currentDraftsCache = drafts; 
             } else {
-                 document.getElementById('api-status').innerHTML = '<span style="color:var(--md-sys-color-error)"><i class="fas fa-times-circle"></i> 未配置 API</span>';
+                drafts = currentDraftsCache;
             }
-        }
-        function openApiModal() {
-            document.getElementById('api-key-input').value = localStorage.getItem('deepseek_api_key') || '';
-            document.getElementById('api-modal').classList.add('open');
-            // 重新显示当前状态
-            loadApiKey();
-        }
-        function closeApiModal() {
-            document.getElementById('api-modal').classList.remove('open');
-        }
-        function saveApiKey() {
-            const key = document.getElementById('api-key-input').value.trim();
-            if(key) {
-                localStorage.setItem('deepseek_api_key', key);
-                showToast("Key 已保存");
-                loadApiKey();
-                closeApiModal();
+            
+            const searchVal = document.getElementById('searchInput').value;
+            if (searchVal) {
+                drafts = drafts.filter(d => d.title.includes(searchVal) || d.content.includes(searchVal));
             }
+            
+            renderDraftList(drafts);
         }
-        
-        async function testConnection() {
-            const key = document.getElementById('api-key-input').value.trim();
-            const statusEl = document.getElementById('api-status');
-            if (!key) {
-                statusEl.innerHTML = '<span style="color:var(--md-sys-color-error)"><i class="fas fa-exclamation-triangle"></i> 请输入密钥</span>';
+
+        function handleSearch(val) { loadLibrary(true); }
+
+        // 渲染列表 (卡片视图 - 按钮在右侧)
+        function renderDraftList(drafts) {
+            const list = document.getElementById('library-list');
+            document.getElementById('lib-total-count').innerText = `共 ${drafts.length} 篇`;
+            const editBtn = document.getElementById('edit-mode-btn');
+
+            if (drafts.length === 0) {
+                list.innerHTML = '<div class="weui-loadmore weui-loadmore_line"><span class="weui-loadmore__tips">暂无内容</span></div>';
+                toggleEditMode(false); 
+                editBtn.style.display = 'none';
                 return;
             }
-            statusEl.innerHTML = '<span class="fas fa-spinner fa-spin"></span> 测试中...';
             
-            try {
-                const response = await fetch('https://api.deepseek.com/chat/completions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                    body: JSON.stringify({
-                        model: "deepseek-chat",
-                        messages: [{ role: "user", content: "Hi" }],
-                        stream: false
-                    })
-                });
-                if(response.ok) {
-                    statusEl.innerHTML = '<span style="color:var(--md-sys-color-success)"><i class="fas fa-check-circle"></i> 连接成功！</span>';
-                } else {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error.message || "未知错误");
+            editBtn.style.display = 'block';
+
+            list.innerHTML = drafts.map(d => {
+                const isSelected = selectedItems.has(d.id);
+                // 兼容旧数据
+                const previewText = d.preview || stripHtmlTags(d.content).substring(0, 60); 
+                const count = d.wordCount || stripHtmlTags(d.content).length; 
+
+                return `
+                <div class="lib-card ${isEditMode ? 'edit-mode' : ''} ${isSelected ? 'selected' : ''}" 
+                     onclick="handleCardClick(${d.id})">
+                    
+                    <div class="lib-check-visual">
+                        <div class="custom-checkbox"></div>
+                    </div>
+
+                    <div class="lib-content">
+                        <div class="lib-title">${d.title}</div>
+                        <div class="lib-preview">${previewText}</div>
+                        <div class="lib-meta">
+                            <span>${d.date.split(' ')[0]} · ${count} 字</span>
+                        </div>
+                    </div>
+
+                    <div class="lib-right-actions">
+                        <div class="lib-act-btn" onclick="event.stopPropagation(); loadDraft(${d.id})">
+                            <i class="fas fa-pen"></i>
+                        </div>
+                        <div class="lib-act-btn export-btn" onclick="event.stopPropagation(); exportSingle(${d.id})">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="lib-act-btn delete-btn" onclick="event.stopPropagation(); deleteDraft(${d.id})">
+                            <i class="fas fa-trash"></i>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            
+            updateBatchUI();
+        }
+
+        // 切换编辑模式
+        function toggleEditMode(forceState) {
+            if (typeof forceState !== 'undefined') {
+                isEditMode = forceState;
+            } else {
+                isEditMode = !isEditMode;
+            }
+
+            const btn = document.getElementById('edit-mode-btn');
+            const bar = document.getElementById('batchBottomBar');
+            const tabbar = document.getElementById('mainTabbar');
+            const container = document.getElementById('mainContainer');
+            
+            if (isEditMode) {
+                btn.innerText = '完成';
+                btn.style.color = 'var(--weui-BRAND)';
+                bar.classList.add('active');
+                tabbar.classList.add('hidden'); // 隐藏Tabbar
+                container.classList.add('full-height');
+            } else {
+                btn.innerText = '管理';
+                btn.style.color = 'var(--weui-BLUE)';
+                bar.classList.remove('active');
+                tabbar.classList.remove('hidden');
+                container.classList.remove('full-height');
+                selectedItems.clear(); // 退出清空
+            }
+
+            // 更新 DOM 类名
+            const cards = document.querySelectorAll('.lib-card');
+            cards.forEach(card => {
+                if(isEditMode) card.classList.add('edit-mode');
+                else {
+                    card.classList.remove('edit-mode');
+                    card.classList.remove('selected');
                 }
-            } catch(e) {
-                statusEl.innerHTML = `<span style="color:var(--md-sys-color-error)"><i class="fas fa-times-circle"></i> 连接失败: ${e.message.substring(0, 20)}...</span>`;
+            });
+            updateBatchUI();
+        }
+
+        function handleCardClick(id) {
+            if (isEditMode) {
+                if (selectedItems.has(id)) selectedItems.delete(id);
+                else selectedItems.add(id);
+                loadLibrary(false); // 仅重新渲染 UI
+            } else {
+                loadDraft(id);
             }
         }
 
-        function clearEditor() {
-            if(confirm("确定清空编辑器所有内容吗？")) {
-                quill.setText('');
-                document.getElementById('doc-title').value = '';
-                localStorage.removeItem('current_draft');
-                showToast("已清空编辑器");
+        function toggleSelectAllManual() {
+            const allDrafts = currentDraftsCache || [];
+            const isAllSelected = selectedItems.size === allDrafts.length && allDrafts.length > 0;
+            
+            if (isAllSelected) selectedItems.clear();
+            else allDrafts.forEach(d => selectedItems.add(d.id));
+            loadLibrary(false);
+        }
+
+        function updateBatchUI() {
+            const count = selectedItems.size;
+            document.getElementById('batch-select-count').innerText = count > 0 ? `已选 ${count} 项` : '未选择';
+            
+            // 全选按钮样式
+            const allBtn = document.getElementById('selectAllBtn');
+            const allDrafts = currentDraftsCache || [];
+            
+            if (count > 0 && count === allDrafts.length) {
+                allBtn.style.backgroundColor = 'var(--weui-BRAND)';
+                allBtn.style.borderColor = 'var(--weui-BRAND)';
+                allBtn.innerHTML = ''; 
+            } else {
+                allBtn.style.backgroundColor = 'transparent';
+                allBtn.style.borderColor = 'var(--weui-FG-2)';
+            }
+            
+            // 按钮启用状态
+            const actionBtns = document.querySelectorAll('.batch-btns .weui-btn');
+            actionBtns.forEach(btn => {
+                if(count === 0) btn.classList.add('weui-btn_disabled');
+                else btn.classList.remove('weui-btn_disabled');
+            });
+        }
+
+        // --- 6. 文库操作 ---
+        async function loadDraft(id) {
+            const d = currentDraftsCache.find(x => x.id === id);
+            if(d) {
+                if (quill.getText().trim().length > 0) {
+                    if (!await showConfirm("覆盖提醒", "当前编辑器内容将被覆盖，确定吗？")) return;
+                }
+                document.getElementById('doc-title').value = d.title;
+                quill.root.innerHTML = d.content;
+                switchMainView('workspace', document.querySelectorAll('.weui-tabbar__item')[0]);
+                switchStep('editor');
             }
         }
 
-        function exportFile() {
-            const text = quill.getText();
-            const title = document.getElementById('doc-title').value || "作文";
-            const blob = new Blob(["\ufeff"+text], { type: "text/plain;charset=utf-8" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `${title}.txt`;
+        async function deleteDraft(id) {
+            if (await showConfirm("确认删除", "删除后无法恢复，确定吗？")) {
+                let drafts = JSON.parse(localStorage.getItem('saved_library') || '[]');
+                drafts = drafts.filter(x => x.id !== id);
+                localStorage.setItem('saved_library', JSON.stringify(drafts));
+                loadLibrary(true);
+                showToast("已删除");
+            }
+        }
+
+        function exportSingle(id) {
+            const doc = currentDraftsCache.find(x => x.id === id);
+            if (!doc) return;
+            downloadTxt(doc.title, doc.content);
+        }
+
+        function downloadTxt(title, contentHtml) {
+            const blob = new Blob([`标题：${title}\n\n${stripHtmlTags(contentHtml)}\n\n导出时间：${new Date().toLocaleString()}`], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title.replace(/[^\w\u4e00-\u9fa5]/g, '_')}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
+        async function batchDelete() {
+            if (selectedItems.size === 0) return;
+            if (!await showConfirm("批量删除", `确定删除选中的 ${selectedItems.size} 篇文档吗？`)) return;
+            
+            let drafts = JSON.parse(localStorage.getItem('saved_library') || '[]');
+            drafts = drafts.filter(x => !selectedItems.has(x.id));
+            localStorage.setItem('saved_library', JSON.stringify(drafts));
+            selectedItems.clear();
+            loadLibrary(true);
+            showToast("删除成功");
+        }
+
+        async function batchExport() {
+            if (selectedItems.size === 0) return;
+            const selectedDocs = currentDraftsCache.filter(d => selectedItems.has(d.id));
+            
+            if (selectedDocs.length === 1) {
+                exportSingle(selectedDocs[0].id);
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const zip = new JSZip();
+                selectedDocs.forEach(doc => {
+                    const content = `标题：${doc.title}\n\n${stripHtmlTags(doc.content)}`;
+                    zip.file(`${doc.title.replace(/[^\w\u4e00-\u9fa5]/g, '_')}.txt`, content);
+                });
+                const content = await zip.generateAsync({ type: "blob" });
+                const url = URL.createObjectURL(content);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `批量导出_${new Date().toISOString().slice(0,10)}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast("导出成功");
+            } catch (e) {
+                showToast("导出失败");
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // --- 7. 工具函数 ---
+        function stripHtmlTags(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+
+        function showLoading(show) { document.getElementById('loadingToast').style.display = show ? 'block' : 'none'; }
+        function showToast(msg) {
+            const el = document.getElementById('textToast');
+            document.getElementById('toastMsg').innerText = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 2000);
+        }
+        async function clearEditor() {
+            if(await showConfirm("清空", "确定清空内容？")) {
+                quill.setText('');
+                document.getElementById('doc-title').value = '';
+            }
+        }
         function updateStats() {
             const text = quill.getText().trim();
-            // 使用正则去除所有空白符（包括换行、空格、制表符）
-            const count = text.length > 0 ? text.replace(/\s/g, '').length : 0; 
-            const readTime = Math.ceil(count / 300); // 假设每分钟 300 字阅读速度
-            
-            document.getElementById('word-count').innerText = `${count} 字`;
-            document.getElementById('read-time').innerText = `${readTime}`;
+            const count = text.length > 0 ? text.replace(/\s/g, '').length : 0;
+            document.getElementById('word-count').innerText = count;
+            document.getElementById('read-time').innerText = Math.ceil(count / 400); 
         }
 
-        function showLoading(show) {
-            document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+        // Promise化的 Confirm
+        function showConfirm(title, content) {
+            return new Promise((resolve) => {
+                const dialog = document.getElementById('globalConfirmDialog');
+                document.getElementById('confirm-title').innerText = title;
+                document.getElementById('confirm-content').innerText = content;
+                const cancelBtn = document.getElementById('confirm-btn-cancel');
+                const okBtn = document.getElementById('confirm-btn-ok');
+
+                const newCancel = cancelBtn.cloneNode(true);
+                const newOk = okBtn.cloneNode(true);
+                cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+                okBtn.parentNode.replaceChild(newOk, okBtn);
+
+                newCancel.addEventListener('click', () => { dialog.style.display = 'none'; resolve(false); });
+                newOk.addEventListener('click', () => { dialog.style.display = 'none'; resolve(true); });
+                dialog.style.display = 'block';
+            });
         }
 
-        function showToast(msg) {
-            const el = document.getElementById('toast');
-            el.innerText = msg;
-            el.classList.add('show');
-            setTimeout(() => el.classList.remove('show'), 3000);
+        // API 弹窗相关
+        function openApiModal() { document.getElementById('apiDialog').style.display = 'block'; loadApiKey(true); }
+        function closeApiModal() { document.getElementById('apiDialog').style.display = 'none'; }
+        function loadApiKey(updateUi = false) {
+            const key = localStorage.getItem('deepseek_api_key');
+            if (updateUi) {
+                document.getElementById('api-key-input').value = key || '';
+                updateApiStatus(!!key);
+            }
         }
-
+        function saveApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            if(!key) return showToast("不能为空");
+            localStorage.setItem('deepseek_api_key', key);
+            closeApiModal();
+            showToast("已保存");
+        }
+        function updateApiStatus(hasKey, isVerified = false) {
+            const el = document.getElementById('api-status');
+            if (isVerified) el.innerHTML = '<i class="fas fa-check-circle" style="color:#07c160"></i> 已验证';
+            else if (hasKey) el.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#fa9d3b"></i> 待验证';
+            else el.innerHTML = '<i class="fas fa-circle" style="font-size:8px; color:#ccc"></i> 未配置';
+        }
+        async function testConnection() {
+            const key = document.getElementById('api-key-input').value.trim();
+            const statusEl = document.getElementById('api-status');
+            statusEl.innerHTML = '<i class="weui-loading"></i> 测试中...';
+            try {
+                const res = await fetch('https://api.deepseek.com/chat/completions', {
+                    method: 'POST',
+                    headers: {'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json'},
+                    body: JSON.stringify({model:"deepseek-chat", messages:[{role:"user",content:"hi"}]})
+                });
+                if(res.ok) { updateApiStatus(true, true); showToast("连接成功"); } 
+                else throw new Error();
+            } catch(e) { statusEl.innerHTML = '<i class="fas fa-times-circle" style="color:#fa5151"></i> 连接失败'; }
+        }
+        function bindSearchBar() {
+            const bar = document.getElementById('searchBar');
+            const input = document.getElementById('searchInput');
+            document.getElementById('searchText').addEventListener('click', () => { bar.classList.add('weui-search-bar_focusing'); input.focus(); });
+            document.getElementById('searchCancel').addEventListener('click', () => { 
+                bar.classList.remove('weui-search-bar_focusing'); 
+                input.value = ''; 
+                handleSearch(''); 
+            });
+            document.getElementById('searchClear').addEventListener('click', () => { 
+                input.value = ''; 
+                input.focus(); 
+                handleSearch(''); 
+            });
+        }
     </script>
 </body>
 </html>
-
