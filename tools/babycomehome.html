@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+    <title>宝贝回家 - 寻找走失儿童</title>
+    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.25/weui.min.css"/>
+    
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <style>
+        /* 全局重置 */
+        body {
+            background-color: #f3f3f3;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 120px; 
+            box-sizing: border-box;
+        }
+
+        /* =========== 修改：毛玻璃风格分享按钮 =========== */
+        .share-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            /* 核心重点：降低背景不透明度，增加模糊度，添加微妙边框 */
+            background: rgba(255, 255, 255, 0.65); /* 半透明白色背景 */
+            -webkit-backdrop-filter: blur(12px);   /* 兼容 iOS 的背景模糊 */
+            backdrop-filter: blur(12px);           /* 标准背景模糊 */
+            border: 1px solid rgba(255, 255, 255, 0.4); /* 微妙的半透明边框增强立体感 */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* 更柔和的投影 */
+            z-index: 101;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .share-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.8); /* 点击时稍微变亮 */
+        }
+        .share-svg {
+            width: 22px;
+            height: 22px;
+            fill: #333;
+            opacity: 0.85; /* 图标稍微透明一点点，更融合 */
+        }
+        /* ============================================ */
+
+        /* 1. 照片区域 */
+        .photo-wrapper {
+            width: 100%;
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+            min-height: 250px;
+        }
+        .photo-wrapper img {
+            max-width: 95%;
+            max-height: 350px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* 2. 信息卡片布局 */
+        .info-card {
+            background: #fff;
+            margin: -15px 15px 0 15px;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 头部：姓名与基础标签 */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .name-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .tags-group span {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 5px;
+            font-weight: 500;
+        }
+        .tag-sex { background: #e6f2ff; color: #0066cc; }
+        .tag-age { background: #fff7e6; color: #fa8c16; }
+
+        /* 列表项优化 */
+        .info-item {
+            margin-bottom: 12px;
+        }
+        .info-label {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .info-value {
+            color: #333;
+            font-size: 16px;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+        .info-value.address {
+            color: #333;
+        }
+
+        /* 描述文本 */
+        .desc-box {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .desc-text {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        /* 3. 底部固定按钮栏 */
+        .fixed-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: #fff;
+            padding: 12px 16px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+            display: flex;
+            gap: 12px;
+            box-sizing: border-box;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            background-color: #f2f2f2;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            height: 48px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+        .btn-primary {
+            flex: 1.5;
+            background-color: #07c160;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            height: 48px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(7, 193, 96, 0.3);
+            cursor: pointer;
+        }
+        .btn-primary:active { opacity: 0.9; }
+
+        /* 联系电话区域 */
+        .contact-area {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .contact-label { font-size: 14px; color: #666; }
+        .contact-number { font-size: 20px; font-weight: bold; color: #fa5151; }
+
+        /* 拨号图标样式 */
+        .call-icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background-color: #f0fdf4;
+            border-radius: 50%;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .call-icon-btn:active {
+            transform: scale(0.95);
+            background-color: #dcfce7;
+        }
+        .call-svg {
+            width: 24px;
+            height: 24px;
+            fill: #07c160;
+        }
+
+        /* 加载动画 */
+        #loadingToast { display: none; }
+        .weui-toast { min-height: auto; padding: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="share-btn" id="share-btn" onclick="handleShare()" aria-label="分享海报">
+        <svg class="share-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
+        </svg>
+    </div>
+
+    <div id="capture-target">
+        <div class="photo-wrapper">
+            <img id="baby-img" src="" alt="请等待图片加载..." crossorigin="anonymous" />
+        </div>
+
+        <div class="info-card" id="info-content" style="opacity: 0; transition: opacity 0.5s;">
+            <div class="header-row">
+                <div class="name-title" id="baby-name">加载中</div>
+                <div class="tags-group">
+                    <span class="tag-sex" id="baby-sex">--</span>
+                    <span class="tag-age" id="baby-age">--岁</span>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">失踪时间</span>
+                <div class="info-value" id="baby-time">--</div>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">失踪地点</span>
+                <div class="info-value address" id="baby-address">--</div>
+            </div>
+
+            <div class="desc-box">
+                <span class="info-label">特征描述：</span>
+                <div class="desc-text" id="baby-feature">--</div>
+            </div>
+
+            <div class="contact-area">
+                <div>
+                    <div class="contact-label">线索联系电话</div>
+                    <div class="contact-number" id="baby-contact">--</div>
+                </div>
+                
+                <a href="javascript:;" id="call-btn" class="call-icon-btn" aria-label="拨打电话">
+                    <svg class="call-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-2.2 2.2a15.057 15.057 0 0 1-6.59-6.59l2.2-2.21c.28-.26.36-.65.25-1.01A11.36 11.36 0 0 1 8.5 3.99c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed-footer">
+        <a id="detail-link" href="javascript:;" target="_blank" class="btn-secondary">查看原帖</a>
+        <button onclick="fetchBabyInfo()" class="btn-primary">寻找下一位</button>
+    </div>
+
+    <div id="loadingToast">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-loading weui-icon_toast"></i>
+            <p class="weui-toast__content" id="loading-text">数据加载中</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', fetchBabyInfo);
+
+        function fetchBabyInfo() {
+            const loading = document.getElementById('loadingToast');
+            const content = document.getElementById('info-content');
+            const loadingText = document.getElementById('loading-text');
+            
+            loadingText.innerText = '数据加载中';
+            loading.style.display = 'block';
+            content.style.opacity = '0.5';
+
+            const apiUrl = 'https://api.lolimi.cn/API/baby/gohome?type=json&t=' + new Date().getTime();
+
+            fetch(apiUrl)
+                .then(res => res.json())
+                .then(res => {
+                    loading.style.display = 'none';
+                    content.style.opacity = '1';
+
+                    if (res.code === 200 && res.data) {
+                        const d = res.data;
+
+                        document.getElementById('baby-name').innerText = d.name || '未知';
+                        document.getElementById('baby-sex').innerText = d.sex || '未知';
+                        
+                        const age = d.missing_age || d.now_age || '?';
+                        document.getElementById('baby-age').innerText = age + '岁';
+
+                        document.getElementById('baby-time').innerText = d.missing_date || d.born_date || '未知';
+                        document.getElementById('baby-address').innerText = d.missing_address || '未知地点';
+
+                        const imgEl = document.getElementById('baby-img');
+                        const imgUrl = d.photo || d.md_photo;
+                        imgEl.src = ''; 
+                        
+                        if (imgUrl) {
+                            imgEl.src = imgUrl;
+                            imgEl.onerror = function() {
+                                this.src = 'https://via.placeholder.com/300x400?text=暂无图片';
+                            }
+                        } else {
+                            imgEl.src = 'https://via.placeholder.com/300x400?text=暂无图片';
+                        }
+
+                        document.getElementById('baby-feature').innerText = d.missing_feature || '暂无详细描述';
+
+                        const phone = d.contact || '暂无';
+                        document.getElementById('baby-contact').innerText = phone;
+                        
+                        const callBtn = document.getElementById('call-btn');
+                        if(/\d/.test(phone)) {
+                            callBtn.href = 'tel:' + phone;
+                        } else {
+                            callBtn.href = 'javascript:alert("暂无有效电话");';
+                        }
+
+                        const linkBtn = document.getElementById('detail-link');
+                        if (d.url) {
+                            linkBtn.href = d.url;
+                            linkBtn.style.visibility = 'visible';
+                        } else {
+                            linkBtn.href = 'javascript:;';
+                            linkBtn.style.visibility = 'hidden';
+                        }
+
+                    } else {
+                        alert('未获取到有效数据，请重试');
+                    }
+                })
+                .catch(err => {
+                    loading.style.display = 'none';
+                    console.error(err);
+                    alert('网络请求失败');
+                });
+        }
+
+        // ==========================================
+        // 处理截图和分享逻辑
+        // ==========================================
+        async function handleShare() {
+            const shareBtn = document.getElementById('share-btn');
+            const loading = document.getElementById('loadingToast');
+            const loadingText = document.getElementById('loading-text');
+            const captureTarget = document.getElementById('capture-target');
+
+            loadingText.innerText = '正在生成海报...';
+            loading.style.display = 'block';
+            // 截图前临时隐藏分享按钮
+            shareBtn.style.visibility = 'hidden';
+
+            try {
+                const canvas = await html2canvas(captureTarget, {
+                    useCORS: true,           
+                    scale: 2,                
+                    backgroundColor: '#f3f3f3' 
+                });
+
+                canvas.toBlob(async (blob) => {
+                    if (!blob) throw new Error('生成图片失败');
+                    const file = new File([blob], 'baobei_share.png', { type: 'image/png' });
+                    
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            title: '宝贝回家 - 寻找走失儿童',
+                            text: '请帮忙扩散，让宝贝早日回家！',
+                            files: [file]
+                        });
+                    } else {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'baobei_share_poster.png'; 
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        alert('当前环境不支持直接唤起分享面板，已为您生成海报并尝试保存到相册。您可以手动发送给朋友！');
+                    }
+                }, 'image/png');
+
+            } catch (err) {
+                console.error('分享出错:', err);
+                alert('生成分享海报失败，请稍后重试');
+            } finally {
+                // 恢复分享按钮显示
+                shareBtn.style.visibility = 'visible';
+                loading.style.display = 'none';
+                loadingText.innerText = '数据加载中'; 
+            }
+        }
+    </script>
+</body>
+</html>
