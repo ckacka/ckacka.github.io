@@ -19,38 +19,36 @@
             box-sizing: border-box;
         }
 
-        /* =========== 修改：毛玻璃风格分享按钮 =========== */
+        /* 毛玻璃风格分享按钮 */
         .share-btn {
             position: fixed;
             top: 20px;
             right: 20px;
             width: 44px;
             height: 44px;
-            /* 核心重点：降低背景不透明度，增加模糊度，添加微妙边框 */
-            background: rgba(255, 255, 255, 0.65); /* 半透明白色背景 */
-            -webkit-backdrop-filter: blur(12px);   /* 兼容 iOS 的背景模糊 */
-            backdrop-filter: blur(12px);           /* 标准背景模糊 */
-            border: 1px solid rgba(255, 255, 255, 0.4); /* 微妙的半透明边框增强立体感 */
+            background: rgba(255, 255, 255, 0.65); 
+            -webkit-backdrop-filter: blur(12px);   
+            backdrop-filter: blur(12px);           
+            border: 1px solid rgba(255, 255, 255, 0.4); 
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* 更柔和的投影 */
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); 
             z-index: 101;
             cursor: pointer;
             transition: transform 0.1s, background-color 0.2s;
         }
         .share-btn:active {
             transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.8); /* 点击时稍微变亮 */
+            background: rgba(255, 255, 255, 0.8); 
         }
         .share-svg {
             width: 22px;
             height: 22px;
             fill: #333;
-            opacity: 0.85; /* 图标稍微透明一点点，更融合 */
+            opacity: 0.85; 
         }
-        /* ============================================ */
 
         /* 1. 照片区域 */
         .photo-wrapper {
@@ -226,6 +224,9 @@
         /* 加载动画 */
         #loadingToast { display: none; }
         .weui-toast { min-height: auto; padding: 15px; }
+        
+        /* 隐藏自定义对话框初始状态 */
+        #custom-dialog { display: none; }
     </style>
 </head>
 <body>
@@ -293,7 +294,27 @@
         </div>
     </div>
 
+    <div id="custom-dialog">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__bd" id="dialog-content">提示内容</div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:closeDialog();" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // --- 弹窗控制函数 ---
+        function showDialog(message) {
+            document.getElementById('dialog-content').innerText = message;
+            document.getElementById('custom-dialog').style.display = 'block';
+        }
+
+        function closeDialog() {
+            document.getElementById('custom-dialog').style.display = 'none';
+        }
+
         document.addEventListener('DOMContentLoaded', fetchBabyInfo);
 
         function fetchBabyInfo() {
@@ -347,7 +368,8 @@
                         if(/\d/.test(phone)) {
                             callBtn.href = 'tel:' + phone;
                         } else {
-                            callBtn.href = 'javascript:alert("暂无有效电话");';
+                            // 替换原生的 alert
+                            callBtn.href = 'javascript:showDialog("该寻亲信息暂无有效联系电话");';
                         }
 
                         const linkBtn = document.getElementById('detail-link');
@@ -360,19 +382,19 @@
                         }
 
                     } else {
-                        alert('未获取到有效数据，请重试');
+                        // 替换原生的 alert
+                        showDialog('未获取到有效数据，请重试');
                     }
                 })
                 .catch(err => {
                     loading.style.display = 'none';
                     console.error(err);
-                    alert('网络请求失败');
+                    // 替换原生的 alert
+                    showDialog('网络请求失败，请检查网络设置');
                 });
         }
 
-        // ==========================================
-        // 处理截图和分享逻辑
-        // ==========================================
+        // --- 处理截图和分享逻辑 ---
         async function handleShare() {
             const shareBtn = document.getElementById('share-btn');
             const loading = document.getElementById('loadingToast');
@@ -381,7 +403,6 @@
 
             loadingText.innerText = '正在生成海报...';
             loading.style.display = 'block';
-            // 截图前临时隐藏分享按钮
             shareBtn.style.visibility = 'hidden';
 
             try {
@@ -410,15 +431,16 @@
                         a.click();
                         document.body.removeChild(a);
                         URL.revokeObjectURL(url);
-                        alert('当前环境不支持直接唤起分享面板，已为您生成海报并尝试保存到相册。您可以手动发送给朋友！');
+                        // 替换原生的 alert
+                        showDialog('当前环境不支持直接唤起分享，已为您生成海报并尝试保存到相册。您可以手动发送给朋友！');
                     }
                 }, 'image/png');
 
             } catch (err) {
                 console.error('分享出错:', err);
-                alert('生成分享海报失败，请稍后重试');
+                // 替换原生的 alert
+                showDialog('生成分享海报失败，请稍后重试');
             } finally {
-                // 恢复分享按钮显示
                 shareBtn.style.visibility = 'visible';
                 loading.style.display = 'none';
                 loadingText.innerText = '数据加载中'; 
