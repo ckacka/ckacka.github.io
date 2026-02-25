@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-CN" theme-mode="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>开发者工具箱 · 修复侧边栏文字</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --surface-color: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --bottom-nav-bg: rgba(255, 255, 255, 0.9);
+            --brand-color: #0052d9;
+            --danger-color: #e34d59;
+        }
+        
+        [theme-mode="dark"] {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --bottom-nav-bg: rgba(30, 30, 30, 0.9);
+        }
+
+        [v-cloak] { display: none !important; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            transition: background-color 0.3s ease;
+        }
+
+        /* 顶部导航与内容区 */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background-color: var(--surface-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .main-content {
+            padding: 20px;
+            padding-bottom: 100px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 首页组件 */
+        .search-area { margin-bottom: 16px; }
+        
+        .category-chips {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            scrollbar-width: none;
+        }
+        .category-chips::-webkit-scrollbar { display: none; }
+
+        /* 首页默认工具网格 */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .tool-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative;
+        }
+        .tool-card:hover { transform: translateY(-4px); }
+        .tool-icon { color: var(--text-primary); margin-bottom: 8px; }
+        .tool-fav-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 2;
+        }
+
+        /* ================= 收藏弹窗专属样式 ================= */
+        .fav-scroll-container {
+            max-height: 55vh; 
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 4px; 
+        }
+        .fav-scroll-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .fav-scroll-container::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 4px;
+        }
+
+        .fav-tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 移动端：双列 */
+            gap: 12px;
+        }
+        /* ======================================================== */
+
+        /* 发现页 */
+        .discover-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .t-collapse-panel__content {
+            padding: 0 !important;
+        }
+        .t-collapse-panel__wrapper .t-collapse-panel__body {
+            background: var(--bg-color);
+        }
+
+        .webview-container {
+            width: 100%;
+            height: 70vh;
+            border: none;
+            display: block;
+            background: var(--bg-color);
+        }
+        
+        .panel-title-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        /* 侧边栏 (个人中心) */
+        .drawer-header {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .avatar {
+            color: var(--brand-color);
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            transition: transform 0.1s;
+        }
+        .avatar:active { transform: scale(0.9); }
+        .drawer-section-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 20px 0 10px;
+            padding: 0 16px;
+        }
+
+        /* 侧边栏列表项内容对齐 ———— 修复文字不显示问题 */
+        .list-item-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 8px;                /* 统一间距，取代单独的 margin-right */
+        }
+        .list-item-icon { 
+            font-size: 20px; 
+            flex-shrink: 0;
+        }
+        /* 确保侧边栏文字始终可见 */
+        .list-item-content span {
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.5;
+            word-break: break-word;
+            flex: 1;                  /* 让文字占满剩余宽度，避免被挤压 */
+            transition: color 0.2s;
+        }
+        /* 如果列表项处于 active 或 hover 状态，保持文字颜色 */
+        .t-list-item:hover .list-item-content span {
+            color: var(--brand-color);
+        }
+
+        /* 底部导航栏 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--bottom-nav-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -1px 10px rgba(0,0,0,0.05);
+            z-index: 50;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+            gap: 4px;
+        }
+        .nav-item.active { color: var(--brand-color); }
+        .nav-icon { font-size: 24px; }
+
+        /* 响应式适配：平板和大屏 */
+        @media (min-width: 768px) {
+            .bottom-nav {
+                width: 400px;
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 20px;
+                border-radius: 30px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            }
+            .tool-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px; }
+            
+            /* 大屏下，收藏弹窗一排五个 */
+            .fav-tool-grid { 
+                grid-template-columns: repeat(5, 1fr); 
+                gap: 16px; 
+            }
+        }
+
+        /* 额外安全措施：防止任何第三方样式把侧边栏文字颜色覆盖掉 */
+        .t-list .t-list-item .list-item-content span {
+            color: var(--text-primary) !important;  /* 保证文字不丢失，必要时覆盖组件库 */
+            opacity: 1;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" v-cloak>
+    
+    <header class="app-header">
+        <t-button shape="square" variant="text" @click="drawerVisible = true">
+            <t-icon name="menu" size="24px"></t-icon>
+        </t-button>
+        <h2 style="margin: 0; font-size: 18px;">{{ activeTab === 'home' ? '工具箱首页' : '发现生态' }}</h2>
+        <div style="width: 32px;"></div> 
+    </header>
+
+    <main class="main-content">
+        
+        <div v-show="activeTab === 'home'">
+            <div class="search-area">
+                <t-input v-model="searchQuery" placeholder="搜索工具名称或描述..." clearable>
+                    <template #prefixIcon>
+                        <t-icon name="search"></t-icon>
+                    </template>
+                </t-input>
+            </div>
+
+            <div class="category-chips">
+                <t-check-tag 
+                    v-for="cat in categories" 
+                    :key="cat" 
+                    :checked="activeCategory === cat"
+                    @click="activeCategory = cat"
+                    variant="outline"
+                    size="large"
+                >
+                    {{ cat }}
+                </t-check-tag>
+            </div>
+
+            <div class="tool-grid">
+                <t-card v-for="tool in filteredTools" :key="tool.id" class="tool-card" bordered hover-shadow @click="openTool(tool.url)">
+                    <t-button 
+                        class="tool-fav-btn" 
+                        shape="circle" 
+                        variant="text" 
+                        @click.stop="toggleFavorite(tool)"
+                    >
+                        <t-icon 
+                            :name="tool.isFavorite ? 'heart-filled' : 'heart'" 
+                            size="20px" 
+                            :style="{ color: tool.isFavorite ? 'var(--danger-color)' : 'var(--text-secondary)' }" 
+                        />
+                    </t-button>
+                    
+                    <div class="tool-icon">
+                        <span class="material-symbols-outlined" style="font-size: 32px;">{{ tool.icon }}</span>
+                    </div>
+                    <div style="font-weight: bold; margin-bottom: 4px;">{{ tool.name }}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+                        {{ tool.desc }}
+                    </div>
+                </t-card>
+                
+                <div v-if="filteredTools.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-secondary);">
+                    没有找到符合条件的工具
+                </div>
+            </div>
+        </div>
+
+        <div v-show="activeTab === 'discover'">
+            <div class="discover-header">
+                <span style="color: var(--text-secondary);">探索外部精选资源</span>
+                <t-button theme="primary" variant="outline" size="small" @click="manageVisible = true">
+                    <template #icon><t-icon name="setting" /></template>
+                    管理卡片
+                </t-button>
+            </div>
+
+            <t-collapse v-model="activeExpanded">
+                <t-collapse-panel v-for="card in discoverCards" :key="card.id" :value="card.id">
+                    <template #header>
+                        <div class="panel-title-area">
+                            <span class="material-symbols-outlined" style="font-size: 24px; color: var(--brand-color);">{{ card.icon }}</span>
+                            <span style="font-weight: bold; flex: 1;">{{ card.title }}</span>
+                            <t-button 
+                                size="small" 
+                                variant="text" 
+                                theme="primary" 
+                                @click.stop="openTool(card.url)"
+                            >
+                                <template #icon><t-icon name="jump" /></template>
+                                外部打开
+                            </t-button>
+                        </div>
+                    </template>
+                    <iframe :src="card.url" class="webview-container" loading="lazy"></iframe>
+                </t-collapse-panel>
+            </t-collapse>
+            
+            <div v-if="discoverCards.length === 0" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                暂无发现卡片，请点击右上角管理添加。
+            </div>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <div class="nav-item" :class="{ active: activeTab === 'home' }" @click="activeTab = 'home'">
+            <t-icon name="home" class="nav-icon"></t-icon>
+            <span>首页</span>
+        </div>
+        <div class="nav-item" :class="{ active: activeTab === 'discover' }" @click="activeTab = 'discover'">
+            <t-icon name="compass" class="nav-icon"></t-icon>
+            <span>发现</span>
+        </div>
+    </nav>
+
+    <!-- 侧边栏个人中心 - 文字已修复 -->
+    <t-drawer v-model:visible="drawerVisible" header="个人中心" size="300px" placement="left">
+        <div class="drawer-header">
+            <div class="avatar" @click="handleAvatarClick">
+                <t-icon name="user-circle" size="64px"></t-icon>
+            </div>
+            <div style="font-weight: bold; margin-top: 10px;">Hi, 探索者</div>
+            <div style="font-size: 12px; color: var(--text-secondary);">欢迎来到你的超级工具箱</div>
+        </div>
+
+        <div class="drawer-section-title">我的功能</div>
+        <t-list split style="background: transparent;">
+            <t-list-item @click="openFavoritesModal" style="cursor: pointer;">
+                <div class="list-item-content">
+                    <t-icon name="star" class="list-item-icon" /> 
+                    <span>我的收藏</span>   <!-- 文字现在会正常显示 -->
+                </div>
+            </t-list-item>
+        </t-list>
+
+        <div class="drawer-section-title">设置项</div>
+        <t-list split style="background: transparent;">
+            <t-list-item @click="clearDataVisible = true" style="cursor: pointer;">
+                <div class="list-item-content">
+                    <t-icon name="clear" class="list-item-icon" /> 
+                    <span>重置应用数据</span>
+                </div>
+            </t-list-item>
+            <t-list-item @click="aboutVisible = true" style="cursor: pointer;">
+                <div class="list-item-content">
+                    <t-icon name="info-circle" class="list-item-icon" /> 
+                    <span>关于工具箱</span>
+                </div>
+            </t-list-item>
+        </t-list>
+
+        <template #footer>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <span style="font-size: 14px; display: flex; align-items: center;">
+                    <t-icon name="moon" style="margin-right: 6px;" /> 深色模式
+                </span>
+                <t-switch v-model="isDarkMode" @change="toggleDarkMode"></t-switch>
+            </div>
+        </template>
+    </t-drawer>
+
+    <t-dialog v-model:visible="easterEggVisible" placement="center" header="🎉 恭喜触发彩蛋！" width="90%" style="max-width: 600px;" :footer="false">
+        <p style="margin-bottom: 16px;">你连续点击了头像 10 次！休息一下，玩局游戏吧：</p>
+        <iframe src="https://chromedino.com/" style="width: 100%; height: 300px; border: none; border-radius: 8px;"></iframe>
+    </t-dialog>
+
+    <t-dialog v-model:visible="favoritesVisible" placement="center" header="我的收藏" :footer="false" width="90%" style="max-width: 800px;">
+        <div style="margin-bottom: 20px;">
+            <t-input v-model="favSearchQuery" placeholder="在收藏中搜索工具名称或描述..." clearable>
+                <template #prefixIcon>
+                    <t-icon name="search"></t-icon>
+                </template>
+            </t-input>
+        </div>
+        
+        <div class="fav-scroll-container">
+            <div class="fav-tool-grid">
+                <t-card v-for="tool in filteredFavorites" :key="'fav-'+tool.id" class="tool-card" bordered hover-shadow @click="openTool(tool.url)">
+                    <t-button 
+                        class="tool-fav-btn" 
+                        shape="circle" 
+                        variant="text" 
+                        @click.stop="toggleFavorite(tool)"
+                    >
+                        <t-icon name="heart-filled" size="20px" style="color: var(--danger-color)" />
+                    </t-button>
+                    
+                    <div class="tool-icon">
+                        <span class="material-symbols-outlined" style="font-size: 32px;">{{ tool.icon }}</span>
+                    </div>
+                    <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">{{ tool.name }}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        {{ tool.desc }}
+                    </div>
+                </t-card>
+                
+                <div v-if="filteredFavorites.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-secondary);">
+                    {{ favoriteTools.length === 0 ? '暂无收藏的工具，快去首页添加吧！' : '没有找到匹配的收藏记录' }}
+                </div>
+            </div>
+        </div>
+    </t-dialog>
+
+    <t-dialog v-model:visible="manageVisible" placement="center" header="管理发现卡片" :footer="false" width="90%" style="max-width: 500px;">
+        <t-tabs v-model="manageTab">
+            <t-tab-panel value="list" label="卡片列表">
+                <div style="margin-top: 16px; max-height: 300px; overflow-y: auto;">
+                    <t-list split>
+                        <t-list-item v-for="(card, index) in discoverCards" :key="card.id">
+                            <div class="list-item-content" style="gap: 8px;">
+                                <span class="material-symbols-outlined">{{ card.icon }}</span> <span>{{ card.title }}</span>
+                            </div>
+                            <template #action>
+                                <t-button variant="text" shape="square" @click="moveCard(index, -1)" :disabled="index === 0">
+                                    <t-icon name="arrow-up" />
+                                </t-button>
+                                <t-button variant="text" shape="square" @click="moveCard(index, 1)" :disabled="index === discoverCards.length - 1">
+                                    <t-icon name="arrow-down" />
+                                </t-button>
+                                <t-button variant="text" theme="danger" @click="deleteCard(card.id)">
+                                    <t-icon name="delete" />
+                                </t-button>
+                            </template>
+                        </t-list-item>
+                        <div v-if="discoverCards.length === 0" style="text-align: center; padding: 20px;">暂无卡片数据</div>
+                    </t-list>
+                </div>
+            </t-tab-panel>
+            <t-tab-panel value="add" label="新增卡片">
+                <t-form ref="form" :data="newCardForm" @submit="addNewCard" style="margin-top: 16px;">
+                    <t-form-item label="标题" name="title">
+                        <t-input v-model="newCardForm.title" placeholder="如：Vue 官方文档"></t-input>
+                    </t-form-item>
+                    <t-form-item label="链接 URL" name="url">
+                        <t-input v-model="newCardForm.url" placeholder="需包含 https://"></t-input>
+                    </t-form-item>
+                    <t-form-item label="图标名称" name="icon" help="请填入 Material Icons 名称">
+                        <t-input v-model="newCardForm.icon" placeholder="如：public"></t-input>
+                    </t-form-item>
+                    <t-form-item>
+                        <t-button theme="primary" type="submit" block>添加并保存</t-button>
+                    </t-form-item>
+                </t-form>
+            </t-tab-panel>
+        </t-tabs>
+    </t-dialog>
+
+    <t-dialog v-model:visible="clearDataVisible" placement="center" header="警告：重置应用数据" @confirm="confirmClearData">
+        <p>您确定要清除所有本地数据吗？</p>
+        <div style="background: var(--bg-color); padding: 12px; border-radius: 6px; margin-top: 12px;">
+            <strong>数据统计：</strong><br>
+            • 收藏的工具：{{ favoriteTools.length }} 个<br>
+            • 自定义发现卡片：{{ discoverCards.length }} 个
+        </div>
+        <p style="color: var(--danger-color); font-size: 12px; margin-top: 12px;">操作不可逆转，执行后将恢复默认出厂状态。</p>
+    </t-dialog>
+
+    <t-dialog v-model:visible="aboutVisible" placement="center" header="关于工具箱" :footer="false">
+        <div style="text-align: center; padding: 20px 0;">
+            <div style="margin-bottom: 10px; color: var(--brand-color);">
+                <t-icon name="tools" size="64px"></t-icon>
+            </div>
+            <h3>超级开发者工具箱 v1.1.0</h3>
+            <p style="color: var(--text-secondary); margin-top: 10px;">
+                内置丰富实用工具。<br>
+                采用响应式设计，支持全平台设备完美展示。
+            </p>
+            <t-button theme="primary" variant="outline" style="margin-top: 20px;" @click="aboutVisible = false">关闭</t-button>
+        </div>
+    </t-dialog>
+
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.js"></script>
+<script src="https://unpkg.com/tdesign-icons-vue-next/dist/index.js"></script>
+
+<script>
+const { createApp, ref, reactive, computed } = Vue;
+
+const app = createApp({
+    setup() {
+        const activeTab = ref('home');
+        const isDarkMode = ref(false);
+        const drawerVisible = ref(false);
+        const favoritesVisible = ref(false);
+        const easterEggVisible = ref(false); // 彩蛋弹窗状态
+        
+        const searchQuery = ref('');
+        const activeCategory = ref('全部');
+        const categories = ref(['全部', 'AI', '应用市场', '二维码', '铁路', '文字', '音视频', '小说', '翻译', '天气', '相机', '游戏', '查询', '公益']);
+        const favSearchQuery = ref('');
+        
+        const tools = ref([
+            { "id": 1, "name": "妙笔生花", "desc": "AI 辅助的文本创作工具", "icon": "edit_note", "category": "AI", "url": "https://ckacka.github.io/tools/mbsh.html", isFavorite: false },
+            { "id": 2, "name": "菜谱助手", "desc": "智能菜谱生成与查询", "icon": "restaurant_menu", "category": "AI", "url": "https://ckacka.github.io/tools/aifood.html", isFavorite: false },
+            { "id": 3, "name": "树洞应用市场", "desc": "一个万能口袋", "icon": "shopping_bag", "category": "应用市场", "url": "https://ckacka.github.io/appmarket.html", isFavorite: false },
+            { "id": 4, "name": "二维码生成器", "desc": "快速生成二维码", "icon": "qr_code", "category": "二维码", "url": "https://ckacka.github.io/tools/qrcode.html", isFavorite: false },
+            { "id": 5, "name": "商务候车区查询", "desc": "查询铁路商务候车区", "icon": "train", "category": "铁路", "url": "https://ckacka.github.io/tools/railwayswz.html", isFavorite: false },
+            { "id": 6, "name": "铁路温馨服务", "desc": "铁路相关服务查询", "icon": "luggage", "category": "铁路", "url": "https://ckacka.github.io/tools/railwaywxfw.html", isFavorite: false },
+            { "id": 7, "name": "树洞便签", "desc": "清爽的记事便签", "icon": "note", "category": "文字", "url": "https://ckacka.github.io/tools/sdnote.html", isFavorite: false },
+            { "id": 8, "name": "随机生词", "desc": "随机生成词汇", "icon": "sort_by_alpha", "category": "文字", "url": "https://ckacka.github.io/tools/sjsc.html", isFavorite: false },
+            { "id": 9, "name": "南苑台配", "desc": "音视频播放与服务", "icon": "live_tv", "category": "音视频", "url": "https://ckacka.github.io/tools/southparktw.html", isFavorite: false },
+            { "id": 10, "name": "数字电视", "desc": "在线数字电视与广播", "icon": "tv", "category": "音视频", "url": "https://ckacka.github.io/tools/tvradio.html", isFavorite: false },
+            { "id": 11, "name": "视频播放器", "desc": "在线视频播放", "icon": "movie", "category": "音视频", "url": "https://ckacka.github.io/tools/videoplayer.html", isFavorite: false },
+            { "id": 12, "name": "免费小说王", "desc": "免费小说王", "icon": "book", "category": "小说", "url": "https://ckacka.github.io/tools/freebooks.html", isFavorite: false },
+            { "id": 13, "name": "树洞翻译", "desc": "让语言不再是沟通的壁垒", "icon": "translate", "category": "翻译", "url": "https://ckacka.github.io/tools/translate.html", isFavorite: false },
+            { "id": 14, "name": "树洞翻译急救包", "desc": "出国翻译急救包", "icon": "sos", "category": "翻译", "url": "https://ckacka.github.io/tools/tsos.html", isFavorite: false },
+            { "id": 15, "name": "树洞短视频", "desc": "这里有一些好「康」的～", "icon": "auto_awesome_motion", "category": "音视频", "url": "https://ckacka.github.io/tools/shortvideo.html", isFavorite: false },
+            { "id": 16, "name": "树洞天气助手", "desc": "冷暖先知", "icon": "thunderstorm", "category": "天气", "url": "https://ckacka.github.io/tools/weather.html", isFavorite: false },
+            { "id": 17, "name": "复古相机", "desc": "复古3GS相机", "icon": "photo_camera", "category": "相机", "url": "https://ckacka.github.io/tools/oldcamera.html", isFavorite: false },
+            { "id": 18, "name": "是女人就扇他一百耳光", "desc": "休闲小游戏", "icon": "sports_esports", "category": "游戏", "url": "https://ckacka.github.io/games/guaiwu.html", isFavorite: false },
+            { "id": 19, "name": "宇宙生日映像", "desc": "查看你出生那晚的星空", "icon": "stars", "category": "查询", "url": "https://ckacka.github.io/tools/universebirthday.html", isFavorite: false },
+            { "id": 20, "name": "宝贝回家", "desc": "寻找走失儿童", "icon": "volunteer_activism", "category": "公益", "url": "https://ckacka.github.io/tools/babycomehome.html", isFavorite: false }
+        ]);
+
+        const filteredTools = computed(() => {
+            return tools.value.filter(tool => {
+                const matchCategory = activeCategory.value === '全部' || tool.category === activeCategory.value;
+                const matchSearch = tool.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+                                    tool.desc.toLowerCase().includes(searchQuery.value.toLowerCase());
+                return matchCategory && matchSearch;
+            });
+        });
+
+        const favoriteTools = computed(() => tools.value.filter(t => t.isFavorite));
+        
+        const filteredFavorites = computed(() => {
+            const query = favSearchQuery.value.toLowerCase();
+            return favoriteTools.value.filter(tool => 
+                tool.name.toLowerCase().includes(query) || tool.desc.toLowerCase().includes(query)
+            );
+        });
+
+        const discoverCards = ref([
+            { "id": "101", "title": "计算器", "url": "https://tool.browser.qq.com/calculator?addressbar=hide&callfrom=gongjuxiang", "icon": "calculate" },
+            { "id": "102", "title": "新闻资讯", "url": "https://hot.browser.miui.com/v7/#status=open&cate=%E6%8E%A8%E8%8D%90", "icon": "newspaper" },
+            { "id": "103", "title": "每天认识一种文物", "url": "https://ysxwyzl.4dage.com/4dwall/index.html", "icon": "museum" }
+        ]);
+        const activeExpanded = ref(['101']); 
+
+        const manageVisible = ref(false);
+        const clearDataVisible = ref(false);
+        const aboutVisible = ref(false);
+
+        const manageTab = ref('list');
+        const newCardForm = reactive({ title: '', url: '', icon: '' });
+
+        // 彩蛋逻辑状态
+        let avatarClicks = 0;
+        let avatarClickTimer = null;
+
+        const toggleFavorite = (tool) => {
+            tool.isFavorite = !tool.isFavorite;
+            TDesign.MessagePlugin.success(tool.isFavorite ? '已加入收藏' : '已取消收藏');
+        };
+
+        const openTool = (url) => {
+            if (!url) return;
+            window.open(url, '_blank');
+        };
+        
+        const openFavoritesModal = () => {
+            drawerVisible.value = false;
+            favSearchQuery.value = ''; 
+            favoritesVisible.value = true;
+        };
+
+        // 处理头像点击，召唤彩蛋
+        const handleAvatarClick = () => {
+            avatarClicks++;
+            if (avatarClicks >= 10) {
+                drawerVisible.value = false; // 关掉侧边栏
+                setTimeout(() => { easterEggVisible.value = true; }, 300); // 呼出彩蛋弹窗
+                avatarClicks = 0;
+            }
+            clearTimeout(avatarClickTimer);
+            avatarClickTimer = setTimeout(() => { avatarClicks = 0; }, 2000);
+        };
+
+        const toggleDarkMode = (val) => {
+            document.documentElement.setAttribute('theme-mode', val ? 'dark' : 'light');
+        };
+
+        const addNewCard = () => {
+            if (!newCardForm.title || !newCardForm.url) {
+                TDesign.MessagePlugin.warning('请填写完整的标题和链接');
+                return;
+            }
+            discoverCards.value.push({
+                id: Date.now().toString(),
+                title: newCardForm.title,
+                url: newCardForm.url,
+                icon: newCardForm.icon || 'link'
+            });
+            TDesign.MessagePlugin.success('卡片添加成功');
+            newCardForm.title = ''; newCardForm.url = ''; newCardForm.icon = '';
+            manageTab.value = 'list';
+        };
+
+        const deleteCard = (id) => {
+            discoverCards.value = discoverCards.value.filter(c => c.id !== id);
+            TDesign.MessagePlugin.success('卡片已删除');
+        };
+
+        const moveCard = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= discoverCards.value.length) return;
+            const temp = discoverCards.value[index];
+            discoverCards.value[index] = discoverCards.value[newIndex];
+            discoverCards.value[newIndex] = temp;
+        };
+
+        const confirmClearData = () => {
+            tools.value.forEach(t => t.isFavorite = false);
+            clearDataVisible.value = false;
+            drawerVisible.value = false;
+            TDesign.MessagePlugin.success('应用数据已重置到初始状态');
+        };
+
+        return {
+            activeTab, isDarkMode, drawerVisible, favoritesVisible, easterEggVisible,
+            searchQuery, favSearchQuery, activeCategory, categories, 
+            tools, filteredTools, favoriteTools, filteredFavorites,
+            discoverCards, activeExpanded,
+            manageVisible, clearDataVisible, aboutVisible,
+            manageTab, newCardForm,
+            toggleFavorite, openTool, openFavoritesModal, handleAvatarClick, toggleDarkMode,
+            addNewCard, deleteCard, moveCard, confirmClearData
+        };
+    }
+});
+
+app.use(TDesign);
+app.mount('#app');
+</script>
+</body>
+</html>
