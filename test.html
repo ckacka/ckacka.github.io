@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>开发者工具箱 · 修复侧边栏文字</title>
+    <title>开发者工具箱 · 侧边栏纯文字版</title>
     
     <link rel="stylesheet" href="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
+        /* ----- 主题变量 ----- */
         :root {
             --bg-color: #f3f4f6;
             --surface-color: #ffffff;
@@ -38,7 +39,6 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 顶部导航与内容区 */
         .app-header {
             display: flex;
             align-items: center;
@@ -71,7 +71,6 @@
         }
         .category-chips::-webkit-scrollbar { display: none; }
 
-        /* 首页默认工具网格 */
         .tool-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -92,7 +91,7 @@
             z-index: 2;
         }
 
-        /* ================= 收藏弹窗专属样式 ================= */
+        /* 收藏弹窗样式 */
         .fav-scroll-container {
             max-height: 55vh; 
             overflow-y: auto;
@@ -109,10 +108,9 @@
 
         .fav-tool-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 移动端：双列 */
+            grid-template-columns: repeat(2, 1fr);
             gap: 12px;
         }
-        /* ======================================================== */
 
         /* 发现页 */
         .discover-header {
@@ -144,7 +142,7 @@
             width: 100%;
         }
 
-        /* 侧边栏 (个人中心) */
+        /* ========= 侧边栏 (个人中心) 纯文字样式 ========= */
         .drawer-header {
             text-align: center;
             padding: 20px 0;
@@ -164,29 +162,30 @@
             padding: 0 16px;
         }
 
-        /* 侧边栏列表项内容对齐 ———— 修复文字不显示问题 */
-        .list-item-content {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            gap: 8px;                /* 统一间距，取代单独的 margin-right */
+        /* 侧边栏列表项容器 —— 纯文字，移除图标间距 */
+        .sidebar-text-item .list-item-content {
+            gap: 0 !important;          /* 图标已删除，不需要间距 */
+            padding-left: 4px;           /* 轻微左内边距，避免文字贴边，可选 */
         }
-        .list-item-icon { 
-            font-size: 20px; 
-            flex-shrink: 0;
-        }
-        /* 确保侧边栏文字始终可见 */
-        .list-item-content span {
-            color: var(--text-primary);
-            font-size: 16px;
-            line-height: 1.5;
+
+        /* 保证文字在任何情况下都可见 (保留之前强覆盖) */
+        .list-item-content span,
+        .t-list .t-list-item .list-item-content span,
+        .t-list-item .list-item-content span {
+            color: var(--text-primary) !important;
+            font-size: 16px !important;
+            line-height: 1.5 !important;
+            font-weight: normal !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: inline-block !important;
+            flex: 1 1 auto !important;
+            min-width: 24px;
             word-break: break-word;
-            flex: 1;                  /* 让文字占满剩余宽度，避免被挤压 */
             transition: color 0.2s;
         }
-        /* 如果列表项处于 active 或 hover 状态，保持文字颜色 */
         .t-list-item:hover .list-item-content span {
-            color: var(--brand-color);
+            color: var(--brand-color) !important;
         }
 
         /* 底部导航栏 */
@@ -219,7 +218,7 @@
         .nav-item.active { color: var(--brand-color); }
         .nav-icon { font-size: 24px; }
 
-        /* 响应式适配：平板和大屏 */
+        /* 响应式适配 */
         @media (min-width: 768px) {
             .bottom-nav {
                 width: 400px;
@@ -231,18 +230,10 @@
             }
             .tool-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px; }
             
-            /* 大屏下，收藏弹窗一排五个 */
             .fav-tool-grid { 
                 grid-template-columns: repeat(5, 1fr); 
                 gap: 16px; 
             }
-        }
-
-        /* 额外安全措施：防止任何第三方样式把侧边栏文字颜色覆盖掉 */
-        .t-list .t-list-item .list-item-content span {
-            color: var(--text-primary) !important;  /* 保证文字不丢失，必要时覆盖组件库 */
-            opacity: 1;
-            font-size: 16px;
         }
     </style>
 </head>
@@ -359,8 +350,8 @@
         </div>
     </nav>
 
-    <!-- 侧边栏个人中心 - 文字已修复 -->
-    <t-drawer v-model:visible="drawerVisible" header="个人中心" size="300px" placement="left">
+    <!-- ========= 侧边栏个人中心 - 纯文字版本（无图标） ========= -->
+    <t-drawer v-model:visible="drawerVisible" header="个人中心" size="300px" placement="left" :show-overlay="true">
         <div class="drawer-header">
             <div class="avatar" @click="handleAvatarClick">
                 <t-icon name="user-circle" size="64px"></t-icon>
@@ -371,25 +362,26 @@
 
         <div class="drawer-section-title">我的功能</div>
         <t-list split style="background: transparent;">
-            <t-list-item @click="openFavoritesModal" style="cursor: pointer;">
-                <div class="list-item-content">
-                    <t-icon name="star" class="list-item-icon" /> 
-                    <span>我的收藏</span>   <!-- 文字现在会正常显示 -->
+            <!-- 我的收藏 - 纯文字，无图标 -->
+            <t-list-item @click="openFavoritesModal" style="cursor: pointer;" class="sidebar-text-item">
+                <div class="list-item-content" style="gap: 0;">   <!-- 内联移除间距，确保无多余空白 -->
+                    <!-- 图标已删除，只留文字 -->
+                    <span>我的收藏</span>
                 </div>
             </t-list-item>
         </t-list>
 
         <div class="drawer-section-title">设置项</div>
         <t-list split style="background: transparent;">
-            <t-list-item @click="clearDataVisible = true" style="cursor: pointer;">
-                <div class="list-item-content">
-                    <t-icon name="clear" class="list-item-icon" /> 
+            <!-- 重置应用数据 - 纯文字 -->
+            <t-list-item @click="clearDataVisible = true" style="cursor: pointer;" class="sidebar-text-item">
+                <div class="list-item-content" style="gap: 0;">
                     <span>重置应用数据</span>
                 </div>
             </t-list-item>
-            <t-list-item @click="aboutVisible = true" style="cursor: pointer;">
-                <div class="list-item-content">
-                    <t-icon name="info-circle" class="list-item-icon" /> 
+            <!-- 关于工具箱 - 纯文字 -->
+            <t-list-item @click="aboutVisible = true" style="cursor: pointer;" class="sidebar-text-item">
+                <div class="list-item-content" style="gap: 0;">
                     <span>关于工具箱</span>
                 </div>
             </t-list-item>
@@ -405,11 +397,13 @@
         </template>
     </t-drawer>
 
+    <!-- 彩蛋弹窗 -->
     <t-dialog v-model:visible="easterEggVisible" placement="center" header="🎉 恭喜触发彩蛋！" width="90%" style="max-width: 600px;" :footer="false">
         <p style="margin-bottom: 16px;">你连续点击了头像 10 次！休息一下，玩局游戏吧：</p>
         <iframe src="https://chromedino.com/" style="width: 100%; height: 300px; border: none; border-radius: 8px;"></iframe>
     </t-dialog>
 
+    <!-- 收藏弹窗 -->
     <t-dialog v-model:visible="favoritesVisible" placement="center" header="我的收藏" :footer="false" width="90%" style="max-width: 800px;">
         <div style="margin-bottom: 20px;">
             <t-input v-model="favSearchQuery" placeholder="在收藏中搜索工具名称或描述..." clearable>
@@ -447,6 +441,7 @@
         </div>
     </t-dialog>
 
+    <!-- 管理卡片弹窗 -->
     <t-dialog v-model:visible="manageVisible" placement="center" header="管理发现卡片" :footer="false" width="90%" style="max-width: 500px;">
         <t-tabs v-model="manageTab">
             <t-tab-panel value="list" label="卡片列表">
@@ -491,6 +486,7 @@
         </t-tabs>
     </t-dialog>
 
+    <!-- 重置确认弹窗 -->
     <t-dialog v-model:visible="clearDataVisible" placement="center" header="警告：重置应用数据" @confirm="confirmClearData">
         <p>您确定要清除所有本地数据吗？</p>
         <div style="background: var(--bg-color); padding: 12px; border-radius: 6px; margin-top: 12px;">
@@ -501,6 +497,7 @@
         <p style="color: var(--danger-color); font-size: 12px; margin-top: 12px;">操作不可逆转，执行后将恢复默认出厂状态。</p>
     </t-dialog>
 
+    <!-- 关于弹窗 -->
     <t-dialog v-model:visible="aboutVisible" placement="center" header="关于工具箱" :footer="false">
         <div style="text-align: center; padding: 20px 0;">
             <div style="margin-bottom: 10px; color: var(--brand-color);">
@@ -522,7 +519,7 @@
 <script src="https://unpkg.com/tdesign-icons-vue-next/dist/index.js"></script>
 
 <script>
-const { createApp, ref, reactive, computed } = Vue;
+const { createApp, ref, reactive, computed, onMounted } = Vue;
 
 const app = createApp({
     setup() {
@@ -530,7 +527,7 @@ const app = createApp({
         const isDarkMode = ref(false);
         const drawerVisible = ref(false);
         const favoritesVisible = ref(false);
-        const easterEggVisible = ref(false); // 彩蛋弹窗状态
+        const easterEggVisible = ref(false);
         
         const searchQuery = ref('');
         const activeCategory = ref('全部');
@@ -592,7 +589,7 @@ const app = createApp({
         const manageTab = ref('list');
         const newCardForm = reactive({ title: '', url: '', icon: '' });
 
-        // 彩蛋逻辑状态
+        // 彩蛋逻辑
         let avatarClicks = 0;
         let avatarClickTimer = null;
 
@@ -612,12 +609,11 @@ const app = createApp({
             favoritesVisible.value = true;
         };
 
-        // 处理头像点击，召唤彩蛋
         const handleAvatarClick = () => {
             avatarClicks++;
             if (avatarClicks >= 10) {
-                drawerVisible.value = false; // 关掉侧边栏
-                setTimeout(() => { easterEggVisible.value = true; }, 300); // 呼出彩蛋弹窗
+                drawerVisible.value = false;
+                setTimeout(() => { easterEggVisible.value = true; }, 300);
                 avatarClicks = 0;
             }
             clearTimeout(avatarClickTimer);
@@ -663,6 +659,13 @@ const app = createApp({
             drawerVisible.value = false;
             TDesign.MessagePlugin.success('应用数据已重置到初始状态');
         };
+
+        // 大屏默认展开侧边栏
+        onMounted(() => {
+            if (window.innerWidth >= 768) {
+                drawerVisible.value = true;
+            }
+        });
 
         return {
             activeTab, isDarkMode, drawerVisible, favoritesVisible, easterEggVisible,
