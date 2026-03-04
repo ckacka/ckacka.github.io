@@ -3,56 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Vue 3 App with TDesign</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tdesign-vue-next/dist/tdesign-vue-next.css">
+    <title>My Vue 3 TDesign App</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tdesign-vue-next/dist/tdesign.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tdesign-vue-next/dist/tdesign.umd.js"></script>
 </head>
 <body>
     <div id="app">
-        <t-button @click="toggleDarkMode">Toggle Dark Mode</t-button>
-        <t-divider></t-divider>
-        <t-card v-for="item in cards" :key="item.id" class="card">
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.description }}</p>
-            <t-button @click="markAsFavorite(item.id)">Favorite</t-button>
-        </t-card>
+        <t-layout>
+            <t-layout-header>
+                <h1>My App</h1>
+                <t-button @click="toggleSidebar">Toggle Sidebar</t-button>
+            </t-layout-header>
+            <t-layout-sider v-if="isSidebarOpen">
+                <t-menu>
+                    <t-menu-item v-for="category in categories" :key="category.id">
+                        {{ category.name }}
+                    </t-menu-item>
+                </t-menu>
+            </t-layout-sider>
+            <t-layout-content>
+                <t-tabs>
+                    <t-tab v-for="tab in tabs" :key="tab.name" :label="tab.label" 
+                           @click="selectTab(tab)">
+                        <template v-slot:content>
+                            <div>
+                                <h2>{{ tab.title }}</h2>
+                                <t-input v-model="searchQuery" placeholder="Search..." />
+                                <t-button @click="discoverContent">Discover</t-button>
+                                <div v-if="favorites.length > 0">
+                                    <h3>Favorites</h3>
+                                    <div v-for="item in favorites" :key="item.id">
+                                        {{ item.name }}
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </t-tab>
+                </t-tabs>
+            </t-layout-content>
+        </t-layout>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/vue@3.0.0/dist/vue.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tdesign-vue-next/dist/tdesign-vue-next.umd.min.js"></script>
     <script>
-    const { createApp } = Vue;
-    const { TDesign } = TDesignVue;
-
-    createApp({
-        data() {
-            return {
-                cards: [
-                    { id: 1, title: 'Discover 1', description: 'Description 1' },
-                    { id: 2, title: 'Discover 2', description: 'Description 2' },
-                ],
-                darkMode: false,
-            };
-        },
-        methods: {
-            toggleDarkMode() {
-                this.darkMode = !this.darkMode;
-                document.body.classList.toggle('dark', this.darkMode);
+        const app = Vue.createApp({
+            data() {
+                return {
+                    isSidebarOpen: false,
+                    categories: [],
+                    tabs: [
+                        { name: 'home', label: 'Home', title: 'Welcome to Home' },
+                        { name: 'about', label: 'About', title: 'About Us' }
+                    ],
+                    searchQuery: '',
+                    favorites: []
+                };
             },
-            markAsFavorite(id) {
-                // Logic for marking a card as favorite
-                console.log('Favorite:', id);
+            methods: {
+                toggleSidebar() {
+                    this.isSidebarOpen = !this.isSidebarOpen;
+                },
+                discoverContent() {
+                    // Logic to discover content based on searchQuery
+                },
+                selectTab(tab) {
+                    // Logic for selecting a tab
+                },
             },
-        },
-    }).use(TDesign).mount('#app');
+            mounted() {
+                // PWA Service Worker registration
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('service-worker.js');
+                }
+                // Load categories from external source if necessary
+                this.categories = [
+                    { id: 1, name: 'Category 1' },
+                    { id: 2, name: 'Category 2' }
+                ];
+                // Easter egg functionality
+                this.checkEasterEgg();
+            },
+            checkEasterEgg() {
+                // Logic for easter egg
+            }
+        });
+        app.mount('#app');
     </script>
     <style>
-        body.dark {
-            background-color: black;
-            color: white;
+        /* Responsive design styles here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
-        .card {
-            margin: 10px;
-        }
+        /* Add your styles for dark mode and mobile adaptation */
     </style>
 </body>
 </html>
