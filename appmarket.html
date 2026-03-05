@@ -143,7 +143,7 @@
 
         /* --- 搜索与筛选 --- */
         .filters-section {
-            padding: 8px 0 16px;
+            padding: 8px 0 8px;  /* 减少底部内边距，缩小与网格的间距 */
             position: sticky;
             top: 64px;
             z-index: 900;
@@ -161,7 +161,7 @@
             border-radius: var(--radius-full);
             padding: 0 16px;
             height: 56px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;  /* 略微减少搜索框和标签间距 */
         }
 
         .search-input {
@@ -196,23 +196,19 @@
             border-color: transparent;
         }
 
-        /* --- 工具卡片网格 --- */
-        .section-title {
-            font-size: 20px; font-weight: 500;
-            margin: 24px 0 16px; padding: 0 4px;
-            color: var(--md-sys-color-on-surface);
-        }
-
+        /* --- 工具卡片网格 (已移除标题，调整顶部间距) --- */
         .tools-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 16px;
+            margin-top: 16px;  /* 保持适当间距，替代之前标题占位 */
         }
 
         @media (min-width: 600px) {
             .tools-grid {
                 grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
                 gap: 24px;
+                margin-top: 20px;
             }
         }
 
@@ -243,6 +239,42 @@
 
         .tool-name { font-size: 16px; font-weight: 500; margin-bottom: 4px; color: var(--md-sys-color-on-surface); }
         .tool-desc { font-size: 12px; color: var(--md-sys-color-on-surface-variant); opacity: 0.8; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* --- 返回顶部按钮 --- */
+        .back-to-top {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s, background-color 0.2s;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1100;
+            font-size: 24px;
+        }
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .back-to-top:active {
+            transform: scale(0.92);
+        }
+        @media (hover: hover) {
+            .back-to-top:hover {
+                background-color: var(--md-sys-color-secondary-container);
+                color: var(--md-sys-color-on-secondary-container);
+            }
+        }
 
         /* --- 模态框 --- */
         .modal {
@@ -300,20 +332,25 @@
         </div>
 
         <div class="container">
-            <h2 class="section-title" id="homeTitle">所有应用</h2>
+            <!-- 已移除原“所有应用”标题，调整了上方间距 -->
             <div class="tools-grid" id="toolsGrid"></div>
         </div>
     </div>
 
+    <!-- 返回顶部按钮 -->
+    <button class="back-to-top" id="backToTop" aria-label="返回顶部">
+        <span class="material-symbols-rounded">arrow_upward</span>
+    </button>
+
     <!-- 关于模态框 -->
     <div class="modal about-modal" id="aboutModal">
-        <div class="modal-content" style="max-width: 320px;">
+        <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">关于</h3>
             </div>
             <div class="modal-body">
                 <p>树洞应用市场 v3.0</p>
-                <p style="margin-top: 10px; opacity: 0.7; font-size: 14px;">基于 Material Design 3 设计规范构建。</p>
+                <p style="margin-top: 10px; opacity: 0.7; font-size: 14px;">基于 Material Design 3 设计规范构建。自动跟随系统深色模式，支持手动切换。</p>
             </div>
             <div style="padding: 16px 24px; text-align: right;">
                 <button class="btn btn-text" id="closeAbout">关闭</button>
@@ -322,7 +359,7 @@
     </div>
 
     <script>
-        // --- 数据源 ---
+        // --- 数据源 (保持不变) ---
         const toolsData = [
             { id: 1, name: "百度百科", desc: "百度百科", icon: "edit_note", category: "百科", url: "https://vhsagj.smartapps.baidu.com/" },
             { id: 2, name: "芒果TV", desc: "芒果TV", icon: "live_tv", category: "视频", url: "https://gbmqsu.smartapps.cn/" },
@@ -364,19 +401,44 @@
 
         const dom = {
             appBar: document.getElementById('appBar'),
-            homeTitle: document.getElementById('homeTitle'),
             toolsGrid: document.getElementById('toolsGrid'),
             catFilters: document.getElementById('categoryFilters')
         };
 
-        // --- 核心逻辑 ---
+        // --- 主题管理 (自适应系统深色模式) ---
+        function applyTheme(theme) {
+            // theme: 'light' 或 'dark'
+            document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+            const icon = document.getElementById('themeIcon');
+            icon.innerText = theme === 'dark' ? 'light_mode' : 'dark_mode'; // 图标表示可切换到的模式
+            // 保存用户偏好，但注意：系统变化时如果无存储则不覆盖，因此存储代表手动设置
+            localStorage.setItem('theme', theme);
+        }
 
-        // 首页渲染
+        // 初始化主题：优先使用localStorage，否则跟随系统
+        function initTheme() {
+            const stored = localStorage.getItem('theme');
+            if (stored) {
+                applyTheme(stored);
+            } else {
+                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                applyTheme(systemDark ? 'dark' : 'light');
+            }
+        }
+
+        // 监听系统主题变化 (仅当用户没有手动存储时才自动切换)
+        const systemMedia = window.matchMedia('(prefers-color-scheme: dark)');
+        function handleSystemThemeChange(e) {
+            if (!localStorage.getItem('theme')) {
+                // 无手动设置时跟随系统
+                applyTheme(e.matches ? 'dark' : 'light');
+            }
+        }
+        systemMedia.addEventListener('change', handleSystemThemeChange);
+
+        // --- 渲染首页 (移除了标题h2，只渲染分类和卡片) ---
         function renderHome() {
-            dom.homeTitle.textContent = state.filterCategory === '全部' 
-                ? '所有应用' 
-                : `${state.filterCategory} 应用`;
-
+            // 分类筛选器
             const cats = ['全部', ...new Set(toolsData.map(t => t.category))];
             dom.catFilters.innerHTML = cats.map(c => 
                 `<button class="chip ${state.filterCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`
@@ -417,32 +479,45 @@
             });
         }
 
+        // 全局设置分类
         window.setCategory = (cat) => {
             state.filterCategory = cat;
             renderHome();
         };
 
+        // --- 返回顶部逻辑 ---
+        const backTopBtn = document.getElementById('backToTop');
+        function toggleBackToTop() {
+            if (window.scrollY > 300) {
+                backTopBtn.classList.add('visible');
+            } else {
+                backTopBtn.classList.remove('visible');
+            }
+        }
+        window.addEventListener('scroll', toggleBackToTop);
+        backTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // --- 初始化 ---
         function init() {
+            // Service Worker (可选)
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                     navigator.serviceWorker.register('/service-worker.js').catch(() => {});
                 });
             }
             
-            // 主题切换功能
-            const themeToggle = () => {
-                const isDark = document.body.getAttribute('data-theme') === 'dark';
-                document.body.setAttribute('data-theme', isDark ? '' : 'dark');
-                document.getElementById('themeIcon').innerText = isDark ? 'dark_mode' : 'light_mode';
-                localStorage.setItem('theme', isDark ? 'light' : 'dark');
-            };
-            
-            if(localStorage.getItem('theme') === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                document.getElementById('themeIcon').innerText = 'light_mode';
-            }
+            // 主题初始化
+            initTheme();
 
-            document.getElementById('themeToggle').onclick = themeToggle;
+            // 主题切换按钮 (单击手动切换并保存)
+            document.getElementById('themeToggle').onclick = () => {
+                const currentTheme = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                applyTheme(newTheme);
+                // 手动设置后localStorage已保存，系统监听不会覆盖
+            };
 
             // 搜索功能
             document.getElementById('searchInput').oninput = (e) => {
@@ -450,23 +525,28 @@
                 renderHome();
             };
 
-            // 滚动效果
+            // 滚动效果 (appBar阴影)
             window.addEventListener('scroll', () => {
                 dom.appBar.classList.toggle('scrolled', window.scrollY > 10);
             });
 
-            // 关于模态框
+            // 关于模态框 (双击主题按钮打开)
             const toggleModal = (id, show) => document.getElementById(id).classList.toggle('show', show);
-            
-            // 显示关于信息
-            document.getElementById('themeToggle').ondblclick = () => toggleModal('aboutModal', true);
+            document.getElementById('themeToggle').ondblclick = (e) => {
+                e.stopPropagation(); // 避免冒泡干扰
+                toggleModal('aboutModal', true);
+            };
             document.getElementById('closeAbout').onclick = () => toggleModal('aboutModal', false);
             
             window.onclick = (e) => {
                 if(e.target.classList.contains('modal')) e.target.classList.remove('show');
             };
 
+            // 初次渲染
             renderHome();
+
+            // 确保返回顶部按钮初始状态
+            toggleBackToTop();
         }
 
         document.addEventListener('DOMContentLoaded', init);
