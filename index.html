@@ -81,49 +81,113 @@
 
         .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; width: 100%; }
 
-        /* --- 顶部栏 --- */
+        /* --- 顶部栏 (融合搜索框) --- */
         .app-bar {
             position: sticky; top: 0; z-index: 1000;
             background-color: rgba(var(--md-sys-color-surface), 0.8);
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             height: 64px;
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
             padding: 0 16px;
             transition: box-shadow var(--transition-standard), background-color var(--transition-standard);
+            gap: 8px;
         }
         .app-bar.scrolled { background-color: var(--md-sys-color-surface-container); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .app-bar-title { font-size: 22px; font-weight: 400; color: var(--md-sys-color-on-surface); }
+        
+        .app-bar-middle {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-width: 0;
+        }
+        .app-bar-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        }
+        .app-bar-right:empty { display: none; }
+        .app-bar-title {
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--md-sys-color-on-surface);
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        /* 全宽搜索框（与顶栏融为一体） */
+        .full-search {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            padding: 0;
+            gap: 0;
+        }
+        .full-search .search-input {
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: var(--md-sys-color-on-surface);
+            height: 100%;
+            outline: none;
+            min-width: 0;
+            padding-left: 16px;
+            padding-right: 0;
+        }
+        .full-search .search-input::placeholder {
+            color: var(--md-sys-color-on-surface-variant);
+            opacity: 0.7;
+        }
+        .full-search .search-icon-btn {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface-variant);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+            background: transparent;
+        }
+        @media (hover: hover) {
+            .full-search .search-icon-btn:hover { background-color: rgba(128, 128, 128, 0.08); }
+            .chip:hover { background-color: rgba(128,128,128, 0.08); }
+            .tool-card:hover { transform: translateY(-4px); background-color: var(--md-sys-color-surface-container); }
+        }
 
         .icon-btn {
             background: none; border: none; color: var(--md-sys-color-on-surface-variant);
             width: 40px; height: 40px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: background-color 0.2s;
+            flex-shrink: 0;
         }
         @media (hover: hover) {
             .icon-btn:hover { background-color: rgba(128, 128, 128, 0.1); color: var(--md-sys-color-on-surface); }
-            .chip:hover { background-color: rgba(128,128,128, 0.08); }
-            .tool-card:hover { transform: translateY(-4px); background-color: var(--md-sys-color-surface-container); }
         }
 
-        /* --- 搜索与筛选 (首页) --- */
+        /* --- 搜索与筛选 (首页) 间距已压缩，且无标题 --- */
         .filters-section {
-            padding: 8px 0 16px; position: sticky; top: 64px; z-index: 900;
+            padding: 4px 0 0;
+            position: sticky; 
+            top: 64px; 
+            z-index: 900;
             background-color: var(--md-sys-color-surface);
             transition: background-color var(--transition-standard);
         }
         .app-bar.scrolled ~ .page-content .filters-section { background-color: var(--md-sys-color-surface-container); }
-        .search-bar {
-            display: flex; align-items: center;
-            background-color: var(--md-sys-color-surface-container-high);
-            border-radius: var(--radius-full); padding: 0 16px; height: 56px; margin-bottom: 16px;
-        }
-        .search-input {
-            flex: 1; border: none; background: none; font-size: 16px;
-            color: var(--md-sys-color-on-surface); height: 100%; outline: none; margin-left: 12px;
-        }
-        .search-icon { color: var(--md-sys-color-on-surface-variant); }
-
+        
         .category-scroll {
             display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;
         }
@@ -141,13 +205,10 @@
             border-color: transparent;
         }
 
-        /* --- 工具卡片网格 --- */
-        .section-title {
-            font-size: 20px; font-weight: 500; margin: 24px 0 16px; padding: 0 4px;
-            color: var(--md-sys-color-on-surface);
-        }
+        /* --- 工具卡片网格 (无标题) --- */
         .tools-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px;
+            margin-top: 12px;
         }
         @media (min-width: 600px) {
             .tools-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 24px; }
@@ -235,7 +296,24 @@
         .page-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- 模态框 (不变) --- */
+        /* --- 返回顶部按钮 --- */
+        .back-to-top {
+            position: fixed; bottom: 100px; right: 20px; z-index: 1500;
+            width: 48px; height: 48px; border-radius: 50%;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: opacity 0.3s, transform 0.2s, background-color 0.2s;
+            opacity: 0; pointer-events: none;
+        }
+        .back-to-top.visible { opacity: 1; pointer-events: auto; }
+        .back-to-top:active { transform: scale(0.9); }
+        @media (min-width: 800px) {
+            .back-to-top { bottom: 120px; right: 30px; }
+        }
+
+        /* --- 模态框 (统一z-index管理) --- */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.5); z-index: 2000;
@@ -244,6 +322,27 @@
         }
         .modal.show { display: flex; animation: fadeModal 0.2s; }
         @keyframes fadeModal { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 彩蛋模态框需要更高的层级，避免被侧边栏遮挡 (侧边栏z-index:2200) */
+        .easter-egg-modal { z-index: 3000 !important; }
+        .easter-egg-modal .modal-content {
+            max-width: 520px; max-height: 320px; background-color: transparent; box-shadow: none;
+        }
+        .easter-egg-modal .modal-body {
+            padding: 0; position: relative; border-radius: 16px; overflow: hidden; background-color: var(--md-sys-color-surface);
+        }
+        .easter-egg-iframe {
+            width: 100%; height: 250px; border: none; background-color: #fff; display: block;
+        }
+        .easter-egg-close-btn {
+            position: absolute; top: 12px; right: 12px; width: 36px; height: 36px;
+            background-color: rgba(0, 0, 0, 0.6); color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            z-index: 10; border: none; transition: background-color 0.2s, transform 0.2s;
+        }
+        .easter-egg-close-btn:hover { background-color: rgba(0, 0, 0, 0.8); }
+        .easter-egg-close-btn:active { transform: scale(0.9); }
+
         .modal-content {
             background-color: var(--md-sys-color-surface-container); border-radius: 28px;
             width: 100%; max-width: 400px; max-height: 85vh; display: flex; flex-direction: column;
@@ -278,7 +377,7 @@
         .order-actions { display: flex; flex-direction: column; }
         .mini-btn { background: none; border: none; color: var(--md-sys-color-on-surface-variant); padding: 2px; }
 
-        /* --- PWA 安装提示样式 --- */
+        /* --- PWA 安装提示样式 (模拟对话框，图标无背景) --- */
         .pwa-install-prompt {
             position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
             background-color: var(--md-sys-color-surface-container); border-radius: var(--radius-md);
@@ -290,9 +389,16 @@
         .pwa-install-prompt .prompt-content { display: flex; flex-direction: column; gap: 12px; }
         .pwa-install-prompt .prompt-header { display: flex; align-items: center; gap: 12px; }
         .pwa-install-prompt .prompt-icon {
-            color: var(--md-sys-color-primary); background-color: var(--md-sys-color-primary-container);
-            border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            color: var(--md-sys-color-primary);
+            background-color: transparent;
+            border-radius: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        .pwa-install-prompt .prompt-icon span { font-size: 24px; }
         .pwa-install-prompt .prompt-actions { display: flex; gap: 8px; justify-content: flex-end; }
         .pwa-install-prompt .btn { flex: 1; }
 
@@ -318,19 +424,6 @@
             margin-bottom: 16px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* --- 彩蛋模态框样式 --- */
-        .easter-egg-modal .modal-content { max-width: 520px; max-height: 320px; background-color: transparent; box-shadow: none; }
-        .easter-egg-modal .modal-body { padding: 0; position: relative; border-radius: 16px; overflow: hidden; background-color: var(--md-sys-color-surface); }
-        .easter-egg-iframe { width: 100%; height: 250px; border: none; background-color: #fff; display: block; }
-        .easter-egg-close-btn {
-            position: absolute; top: 12px; right: 12px; width: 36px; height: 36px;
-            background-color: rgba(0, 0, 0, 0.6); color: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            z-index: 10; border: none; transition: background-color 0.2s, transform 0.2s;
-        }
-        .easter-egg-close-btn:hover { background-color: rgba(0, 0, 0, 0.8); }
-        .easter-egg-close-btn:active { transform: scale(0.9); }
 
         /* 侧边栏计数器 */
         .click-counter {
@@ -383,16 +476,9 @@
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; flex-shrink: 0;
         }
-        .drawer-profile-info {
-            flex: 1;
-        }
-        .drawer-profile-name {
-            font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface);
-        }
-        .drawer-profile-version {
-            font-size: 12px; color: var(--md-sys-color-on-surface-variant);
-            margin-top: 4px;
-        }
+        .drawer-profile-info { flex: 1; }
+        .drawer-profile-name { font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); }
+        .drawer-profile-version { font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 4px; }
 
         .drawer-content { flex: 1; overflow-y: auto; padding: 8px 0; }
 
@@ -406,7 +492,7 @@
         .drawer-menu-item .switch { margin-left: auto; }
         .drawer-menu-item > div:first-of-type { flex: 1; }
 
-        /* 开关样式 (与之前相同) */
+        /* 开关样式 */
         .switch { position: relative; display: inline-block; width: 52px; height: 32px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
@@ -443,7 +529,6 @@
                 <span class="material-symbols-rounded">close</span>
             </button>
         </div>
-        <!-- 新增个人资料区：头像和版本号 -->
         <div class="drawer-profile">
             <div class="drawer-profile-avatar" id="drawerAvatar">
                 <span class="material-symbols-rounded" style="font-size: 32px;">person</span>
@@ -454,9 +539,7 @@
                 <div class="drawer-profile-version">版本号：v3.0</div>
             </div>
         </div>
-
         <div class="drawer-content">
-            <!-- 深色模式开关 (已使用滑块) -->
             <div class="drawer-menu-item" id="drawerThemeItem">
                 <span class="material-symbols-rounded">palette</span>
                 <div>深色模式</div>
@@ -465,19 +548,16 @@
                     <span class="slider"></span>
                 </label>
             </div>
-            <!-- 重置应用 -->
             <div class="drawer-menu-item" id="drawerClearCache">
                 <span class="material-symbols-rounded">delete</span>
                 <div>重置应用</div>
                 <span class="material-symbols-rounded" style="color: var(--md-sys-color-outline); margin-left: auto;">chevron_right</span>
             </div>
-            <!-- 安装应用 -->
             <div class="drawer-menu-item" id="drawerInstall">
                 <span class="material-symbols-rounded">install_desktop</span>
                 <div>安装应用</div>
                 <span class="material-symbols-rounded" style="color: var(--md-sys-color-outline); margin-left: auto;">chevron_right</span>
             </div>
-            <!-- 关于应用 -->
             <div class="drawer-menu-item" id="drawerAbout">
                 <span class="material-symbols-rounded">info</span>
                 <div>关于应用</div>
@@ -486,54 +566,43 @@
         </div>
     </div>
 
-    <!-- 顶部栏 (菜单按钮) -->
+    <!-- 顶部栏 -->
     <header class="app-bar" id="appBar">
         <button class="icon-btn" id="menuButton" aria-label="菜单">
             <span class="material-symbols-rounded">menu</span>
         </button>
-        <h1 class="app-bar-title">树洞工具箱</h1>
-        <div style="width:40px;"></div> <!-- 占位 -->
+        <div class="app-bar-middle" id="appBarMiddle"></div>
+        <div class="app-bar-right" id="appBarRight"></div>
     </header>
 
+    <!-- 返回顶部按钮（全局） -->
+    <button class="back-to-top" id="backToTopBtn" aria-label="返回顶部">
+        <span class="material-symbols-rounded">arrow_upward</span>
+    </button>
+
+    <!-- 首页：分类筛选（无标题） -->
     <div class="page-content active" id="homePage">
         <div class="filters-section">
             <div class="container">
-                <div class="search-bar">
-                    <span class="material-symbols-rounded search-icon">search</span>
-                    <input type="text" class="search-input" id="searchInput" placeholder="搜索工具...">
-                </div>
                 <div class="category-scroll" id="categoryFilters"></div>
             </div>
         </div>
-
         <div class="container">
-            <h2 class="section-title" id="homeTitle">常用工具</h2>
             <div class="tools-grid" id="toolsGrid"></div>
         </div>
     </div>
 
+    <!-- 发现页 -->
     <div class="page-content" id="discoverPage">
-        <div class="container" style="padding-top: 16px;">
-            <div class="discover-header">
-                <h2 class="section-title" style="margin: 0;">发现</h2>
-                <button class="btn btn-outline" id="discoverSettingsBtn">
-                    <span class="material-symbols-rounded">tune</span>
-                    管理
-                </button>
-            </div>
+        <div class="container" style="padding-top: 8px;">
             <div id="discoverCards"></div>
         </div>
     </div>
 
-    <!-- 个人页面：仅保留收藏，并添加搜索框 -->
+    <!-- 个人页面：我的收藏（顶部间距压缩） -->
     <div class="page-content" id="profilePage">
-        <div class="container" style="padding-top: 16px;">
-            <!-- 收藏搜索框 -->
-            <div class="search-bar" style="margin-bottom: 16px;">
-                <span class="material-symbols-rounded search-icon">search</span>
-                <input type="text" class="search-input" id="favoriteSearchInput" placeholder="搜索收藏...">
-            </div>
-            <h2 class="section-title">我的收藏</h2>
+        <div class="container" style="padding-top: 8px;">
+            <h2 class="section-title" style="margin-top: 0; margin-bottom: 12px;">我的收藏</h2>
             <div class="tools-grid" id="favoritesGrid"></div>
         </div>
     </div>
@@ -553,7 +622,7 @@
         </a>
     </nav>
 
-    <!-- 清除数据模态框 (内容不变) -->
+    <!-- 清除数据模态框 -->
     <div class="modal clear-cache-modal" id="clearCacheModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -586,13 +655,13 @@
         </div>
     </div>
 
-    <!-- 加载遮罩层 -->
+    <!-- 加载遮罩 -->
     <div class="loading-overlay" id="loadingOverlay" style="display: none;">
         <div class="loading-spinner-large"></div>
         <div>正在清除数据并重新加载...</div>
     </div>
 
-    <!-- PWA 安装提示 -->
+    <!-- PWA 安装模拟对话框（图标无背景） -->
     <div class="pwa-install-prompt" id="pwaInstallPrompt">
         <div class="prompt-content">
             <div class="prompt-header">
@@ -623,7 +692,7 @@
         </div>
     </div>
 
-    <!-- 卡片管理模态框 (不变) -->
+    <!-- 卡片管理模态框 -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -635,22 +704,17 @@
                     <button class="btn btn-text" id="tabAdd" style="flex:1; border-bottom: 2px solid var(--md-sys-color-primary); border-radius: 0;">新增</button>
                     <button class="btn btn-text" id="tabManage" style="flex:1; color: var(--md-sys-color-on-surface-variant); border-radius: 0;">列表</button>
                 </div>
-
                 <div id="viewAdd">
                     <input type="hidden" id="editCardId">
                     <label style="display:block; margin-bottom:8px; font-weight:500">标题</label>
                     <input type="text" class="form-input" id="cardTitle" placeholder="例如：每日新闻">
-                    
                     <label style="display:block; margin-bottom:8px; font-weight:500">链接 URL</label>
                     <input type="url" class="form-input" id="cardUrl" placeholder="https://...">
-                    
                     <label style="display:block; margin-bottom:8px; font-weight:500">图标 (Material Symbol)</label>
                     <input type="text" class="form-input" id="cardIcon" placeholder="选填，默认显示地球图标 (public)">
-                    
                     <button class="btn btn-primary" id="saveCardBtn" style="width:100%">保存卡片</button>
                     <button class="btn btn-text" id="cancelEditBtn" style="width:100%; display:none; margin-top:8px;">取消编辑</button>
                 </div>
-
                 <div id="viewManage" style="display:none;">
                     <div id="cardsManagerList"></div>
                 </div>
@@ -674,8 +738,25 @@
         </div>
     </div>
 
+    <!-- 删除确认模态框 (新增) -->
+    <div class="modal" id="deleteConfirmModal">
+        <div class="modal-content" style="max-width: 320px;">
+            <div class="modal-header">
+                <h3 class="modal-title">确认删除</h3>
+                <button class="icon-btn" id="closeDeleteConfirm"><span class="material-symbols-rounded">close</span></button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 20px;">确定要删除此卡片吗？此操作不可撤销。</p>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-text" id="cancelDelete" style="flex: 1;">取消</button>
+                    <button class="btn btn-primary" id="confirmDelete" style="flex: 1; background-color: var(--md-sys-color-error);">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- 数据源 (保持不变) ---
+        // --- 数据源 ---
         const toolsData = [
             { id: 1, name: "妙笔生花", desc: "AI 辅助的文本创作工具", icon: "edit_note", category: "AI", url: "https://ckacka.github.io/tools/mbsh.html" },
             { id: 2, name: "菜谱助手", desc: "智能菜谱生成与查询", icon: "restaurant_menu", category: "AI", url: "https://ckacka.github.io/tools/aifood.html" },
@@ -697,7 +778,7 @@
             { id: 18, name: "隐秘的档案", desc: "休闲小游戏", icon: "sports_esports", category: "游戏", url: "https://ckacka.github.io/games/ymdda.html" },
             { id: 19, name: "宇宙生日映像", desc: "查看你出生那晚的星空", icon: "stars", category: "查询", url: "https://ckacka.github.io/tools/universebirthday.html" },
             { id: 20, name: "宝贝回家", desc: "寻找走失儿童", icon: "volunteer_activism", category: "公益", url: "https://ckacka.github.io/tools/babycomehome.html" }
-         ];
+        ];
 
         const defaultCards = [
             { id: 101, title: "计算器", url: "https://tool.browser.qq.com/calculator?addressbar=hide&callfrom=gongjuxiang", icon: "calculate", expanded: false },
@@ -711,8 +792,7 @@
             discoverCards: JSON.parse(localStorage.getItem('cards') || JSON.stringify(defaultCards)),
             filterCategory: '全部',
             searchText: '',
-            favoriteSearchText: '', // 新增：收藏搜索词
-            pwaInstallPromptShown: false,
+            favoriteSearchText: '',
             deferredPrompt: null,
             isPwaInstalled: false,
             isIos: false,
@@ -723,7 +803,6 @@
 
         const dom = {
             appBar: document.getElementById('appBar'),
-            homeTitle: document.getElementById('homeTitle'),
             toolsGrid: document.getElementById('toolsGrid'),
             catFilters: document.getElementById('categoryFilters'),
             discoverCards: document.getElementById('discoverCards'),
@@ -737,12 +816,10 @@
             pwaPromptTitle: document.getElementById('pwaPromptTitle'),
             pwaPromptDesc: document.getElementById('pwaPromptDesc'),
             pwaPromptIcon: document.getElementById('pwaPromptIcon'),
-            // 彩蛋相关DOM (侧边栏)
             drawerAvatar: document.getElementById('drawerAvatar'),
             drawerClickCounter: document.getElementById('drawerClickCounter'),
             easterEggModal: document.getElementById('easterEggModal'),
             closeEasterEgg: document.getElementById('closeEasterEgg'),
-            // 侧边栏
             drawer: document.getElementById('drawer'),
             drawerOverlay: document.getElementById('drawerOverlay'),
             menuButton: document.getElementById('menuButton'),
@@ -751,8 +828,7 @@
             drawerClearCache: document.getElementById('drawerClearCache'),
             drawerInstall: document.getElementById('drawerInstall'),
             drawerAbout: document.getElementById('drawerAbout'),
-            // 收藏搜索输入框
-            favoriteSearchInput: document.getElementById('favoriteSearchInput'),
+            backToTopBtn: document.getElementById('backToTopBtn'),
             inputs: {
                 title: document.getElementById('cardTitle'),
                 url: document.getElementById('cardUrl'),
@@ -761,7 +837,7 @@
             }
         };
 
-        // --- 主题管理 ---
+        // --- 主题管理 (含系统暗色自适应) ---
         function applyTheme(theme) {
             if (theme === 'dark') {
                 document.body.setAttribute('data-theme', 'dark');
@@ -780,7 +856,15 @@
             localStorage.setItem('theme', newTheme);
         }
 
-        // --- 彩蛋功能 (绑定到侧边栏头像) ---
+        // 监听系统主题变化
+        const darkModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+        darkModeMedia.addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                applyTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+
+        // --- 彩蛋功能 ---
         function initEasterEgg() {
             const savedCount = localStorage.getItem('easterEggClickCount');
             if (savedCount) {
@@ -840,67 +924,69 @@
             iframe.src = iframe.src;
         }
 
-        // --- PWA 功能 (同前) ---
+        // --- PWA 安装功能 (统一使用模拟对话框) ---
         function initPwa() {
             state.isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
             if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
                 state.isPwaInstalled = true;
-                updatePwaStatus();
-                return;
-            }
-            if (state.isIos) {
-                updatePwaStatus();
                 return;
             }
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 state.deferredPrompt = e;
-                updatePwaStatus();
             });
             window.addEventListener('appinstalled', () => {
                 state.isPwaInstalled = true;
                 state.deferredPrompt = null;
-                updatePwaStatus();
             });
-            dom.pwaPromptInstall.addEventListener('click', handlePwaInstall);
+            dom.pwaPromptInstall.addEventListener('click', handleInstallFromDialog);
             dom.pwaPromptCancel.addEventListener('click', () => {
                 dom.pwaInstallPrompt.classList.remove('show');
             });
-            updatePwaStatus();
         }
 
-        function showIosInstallPrompt() {
-            dom.pwaPromptTitle.textContent = "安装到主屏幕";
-            dom.pwaPromptIcon.innerHTML = "ios_share";
-            dom.pwaPromptDesc.innerHTML = `
-                <div style="margin-top:8px; line-height:1.6;">
-                    1. 点击浏览器底部或顶部的 <span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom; color:var(--md-sys-color-primary)">ios_share</span> 分享按钮<br>
-                    2. 在弹出菜单中选择 <strong>"添加到主屏幕"</strong>
-                </div>
-            `;
-            dom.pwaPromptInstall.style.display = 'none';
-            dom.pwaPromptCancel.textContent = '知道了';
-            dom.pwaPromptCancel.style.width = '100%';
-            dom.pwaPromptCancel.onclick = () => dom.pwaInstallPrompt.classList.remove('show');
+        function showInstallDialog() {
+            if (state.isIos) {
+                dom.pwaPromptTitle.textContent = "安装到主屏幕";
+                dom.pwaPromptIcon.innerHTML = "ios_share";
+                dom.pwaPromptDesc.innerHTML = `
+                    <div style="margin-top:8px; line-height:1.6;">
+                        1. 点击浏览器底部或顶部的 <span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom; color:var(--md-sys-color-primary)">ios_share</span> 分享按钮<br>
+                        2. 在弹出菜单中选择 <strong>"添加到主屏幕"</strong>
+                    </div>
+                `;
+                dom.pwaPromptInstall.style.display = 'none';
+                dom.pwaPromptCancel.textContent = '知道了';
+            } else if (state.deferredPrompt) {
+                dom.pwaPromptTitle.textContent = "安装应用";
+                dom.pwaPromptIcon.innerHTML = "install_desktop";
+                dom.pwaPromptDesc.innerHTML = "将树洞工具箱安装到您的设备，获得更快捷的访问体验。";
+                dom.pwaPromptInstall.style.display = 'inline-flex';
+                dom.pwaPromptInstall.textContent = '安装';
+                dom.pwaPromptCancel.textContent = '取消';
+                dom.pwaPromptCancel.onclick = () => dom.pwaInstallPrompt.classList.remove('show');
+            } else {
+                dom.pwaPromptTitle.textContent = "提示";
+                dom.pwaPromptIcon.innerHTML = "info";
+                dom.pwaPromptDesc.innerHTML = "您的浏览器不支持快速安装，您可以尝试使用浏览器菜单中的“添加到主屏幕”功能。";
+                dom.pwaPromptInstall.style.display = 'none';
+                dom.pwaPromptCancel.textContent = '知道了';
+            }
             dom.pwaInstallPrompt.classList.add('show');
         }
-        
-        function updatePwaStatus() { /* 不需要更新文字 */ }
 
-        function handlePwaInstall() {
-            if (state.isIos) {
-                showIosInstallPrompt();
-            } else if (state.deferredPrompt) {
+        function handleInstallFromDialog() {
+            if (state.deferredPrompt) {
                 state.deferredPrompt.prompt();
                 state.deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
                         state.isPwaInstalled = true;
                     }
                     state.deferredPrompt = null;
-                    updatePwaStatus();
+                    dom.pwaInstallPrompt.classList.remove('show');
                 });
             } else {
-                alert('您的浏览器不支持快速安装，或应用已安装。');
+                dom.pwaInstallPrompt.classList.remove('show');
             }
         }
 
@@ -938,7 +1024,6 @@
                 dom.loadingOverlay.style.display = 'flex';
                 localStorage.clear();
                 sessionStorage.clear();
-                // 简化清除函数（保持与之前一致）
                 if (window.indexedDB) {
                     try {
                         const databases = await indexedDB.databases ? indexedDB.databases() : [];
@@ -992,7 +1077,6 @@
         }
 
         function renderHome() {
-            dom.homeTitle.textContent = state.filterCategory === '全部' ? '所有工具' : `${state.filterCategory} 工具`;
             const cats = ['全部', ...new Set(toolsData.map(t => t.category))];
             dom.catFilters.innerHTML = cats.map(c => 
                 `<button class="chip ${state.filterCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`
@@ -1000,18 +1084,16 @@
             renderTools(dom.toolsGrid, toolsData, false);
         }
 
-        function renderTools(targetGrid, sourceData, isFavMode = false, searchText = '') {
+        function renderTools(targetGrid, sourceData, isFavMode = false) {
             targetGrid.innerHTML = '';
             let filtered = sourceData;
             if (isFavMode) {
-                // 收藏模式：根据收藏ID过滤，并应用搜索
                 const favTools = toolsData.filter(t => state.favorites.includes(t.id));
                 filtered = favTools.filter(t => {
-                    if (!searchText) return true;
-                    return t.name.toLowerCase().includes(searchText) || t.desc.toLowerCase().includes(searchText);
+                    if (!state.favoriteSearchText) return true;
+                    return t.name.toLowerCase().includes(state.favoriteSearchText) || t.desc.toLowerCase().includes(state.favoriteSearchText);
                 });
             } else {
-                // 首页模式：按分类和搜索过滤
                 filtered = sourceData.filter(t => {
                     const matchCat = state.filterCategory === '全部' || t.category === state.filterCategory;
                     const matchText = t.name.toLowerCase().includes(state.searchText) || t.desc.toLowerCase().includes(state.searchText);
@@ -1107,7 +1189,7 @@
             }
             saveState();
             renderHome();
-            renderFavorites(); // 更新收藏页
+            renderFavorites();
         };
 
         window.openExternal = (e, url) => {
@@ -1116,7 +1198,7 @@
         };
 
         function renderFavorites() {
-            renderTools(dom.favoritesGrid, toolsData, true, state.favoriteSearchText);
+            renderTools(dom.favoritesGrid, toolsData, true);
         }
 
         function renderManagerList() {
@@ -1153,11 +1235,40 @@
             saveState(); renderManagerList(); renderDiscover();
         };
 
-        window.deleteCard = (id) => {
-            if(confirm('确定删除此卡片吗？')) {
-                state.discoverCards = state.discoverCards.filter(c => c.id !== id);
-                saveState(); renderManagerList(); renderDiscover();
+        // --- 删除卡片相关 (自定义模态框) ---
+        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+        const closeDeleteConfirm = document.getElementById('closeDeleteConfirm');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+        let pendingDeleteId = null;
+
+        function performDelete(id) {
+            state.discoverCards = state.discoverCards.filter(c => c.id !== id);
+            saveState();
+            renderManagerList();
+            renderDiscover();
+        }
+
+        closeDeleteConfirm.addEventListener('click', () => {
+            deleteConfirmModal.classList.remove('show');
+            pendingDeleteId = null;
+        });
+        cancelDelete.addEventListener('click', () => {
+            deleteConfirmModal.classList.remove('show');
+            pendingDeleteId = null;
+        });
+        confirmDelete.addEventListener('click', () => {
+            if (pendingDeleteId) {
+                performDelete(pendingDeleteId);
+                pendingDeleteId = null;
+                deleteConfirmModal.classList.remove('show');
             }
+        });
+        // 点击遮罩关闭由 window.onclick 统一处理
+
+        window.deleteCard = (id) => {
+            pendingDeleteId = id;
+            deleteConfirmModal.classList.add('show');
         };
 
         window.editCard = (id) => {
@@ -1185,6 +1296,76 @@
             document.body.classList.remove('drawer-open');
         }
 
+        // --- 返回顶部功能 ---
+        function initBackToTop() {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    dom.backToTopBtn.classList.add('visible');
+                } else {
+                    dom.backToTopBtn.classList.remove('visible');
+                }
+            });
+            dom.backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // --- 动态更新顶栏内容（根据当前页面）---
+        function updateAppBarForPage(pageId) {
+            const middle = document.getElementById('appBarMiddle');
+            const right = document.getElementById('appBarRight');
+            middle.innerHTML = '';
+            right.innerHTML = '';
+
+            if (pageId === 'homePage') {
+                const searchDiv = document.createElement('div');
+                searchDiv.className = 'full-search';
+                searchDiv.innerHTML = `
+                    <input type="text" class="search-input" placeholder="搜索工具..." value="${state.searchText.replace(/"/g, '&quot;')}">
+                    <button class="search-icon-btn" aria-label="搜索"><span class="material-symbols-rounded">search</span></button>
+                `;
+                const input = searchDiv.querySelector('input');
+                input.addEventListener('input', (e) => {
+                    state.searchText = e.target.value.toLowerCase().trim();
+                    renderHome();
+                });
+                searchDiv.querySelector('.search-icon-btn').addEventListener('click', () => {
+                    input.focus();
+                });
+                middle.appendChild(searchDiv);
+            } else if (pageId === 'profilePage') {
+                const searchDiv = document.createElement('div');
+                searchDiv.className = 'full-search';
+                searchDiv.innerHTML = `
+                    <input type="text" class="search-input" placeholder="搜索收藏..." value="${state.favoriteSearchText.replace(/"/g, '&quot;')}">
+                    <button class="search-icon-btn" aria-label="搜索"><span class="material-symbols-rounded">search</span></button>
+                `;
+                const input = searchDiv.querySelector('input');
+                input.addEventListener('input', (e) => {
+                    state.favoriteSearchText = e.target.value.toLowerCase().trim();
+                    renderFavorites();
+                });
+                searchDiv.querySelector('.search-icon-btn').addEventListener('click', () => {
+                    input.focus();
+                });
+                middle.appendChild(searchDiv);
+            } else if (pageId === 'discoverPage') {
+                const title = document.createElement('h1');
+                title.className = 'app-bar-title';
+                title.textContent = '发现';
+                middle.appendChild(title);
+                const manageBtn = document.createElement('button');
+                manageBtn.className = 'icon-btn';
+                manageBtn.innerHTML = '<span class="material-symbols-rounded">tune</span>';
+                manageBtn.addEventListener('click', () => {
+                    document.getElementById('settingsModal').classList.add('show');
+                    switchTab('add');
+                    resetForm();
+                });
+                right.appendChild(manageBtn);
+            }
+        }
+
         // --- 初始化 ---
         function init() {
             // 主题初始化
@@ -1192,41 +1373,32 @@
             if (savedTheme) {
                 applyTheme(savedTheme);
             } else {
-                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                applyTheme(systemDark ? 'dark' : 'light');
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                    if (!localStorage.getItem('theme')) {
-                        applyTheme(e.matches ? 'dark' : 'light');
-                    }
-                });
+                applyTheme(darkModeMedia.matches ? 'dark' : 'light');
             }
 
-            // 绑定主题切换
             dom.drawerThemeSwitch.addEventListener('change', themeToggle);
 
-            // 侧边栏菜单点击
             dom.drawerClearCache.addEventListener('click', () => {
                 showClearCacheModal();
                 closeDrawer();
             });
             dom.drawerInstall.addEventListener('click', () => {
-                handlePwaInstall();
                 closeDrawer();
+                showInstallDialog();
             });
             dom.drawerAbout.addEventListener('click', () => {
                 document.getElementById('aboutModal').classList.add('show');
                 closeDrawer();
             });
 
-            // 打开/关闭侧边栏
             dom.menuButton.addEventListener('click', openDrawer);
             dom.closeDrawerBtn.addEventListener('click', closeDrawer);
             dom.drawerOverlay.addEventListener('click', closeDrawer);
 
-            // 其他初始化
             initPwa();
             initClearCache();
             initEasterEgg();
+            initBackToTop();
 
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
@@ -1234,19 +1406,6 @@
                 });
             }
 
-            // 首页搜索
-            document.getElementById('searchInput').oninput = (e) => {
-                state.searchText = e.target.value.toLowerCase().trim();
-                renderHome();
-            };
-
-            // 收藏页搜索
-            dom.favoriteSearchInput.oninput = (e) => {
-                state.favoriteSearchText = e.target.value.toLowerCase().trim();
-                renderFavorites();
-            };
-
-            // 底部导航
             document.querySelectorAll('.nav-item').forEach(nav => {
                 nav.onclick = (e) => {
                     e.preventDefault();
@@ -1255,6 +1414,7 @@
                     document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
                     document.getElementById(nav.dataset.page).classList.add('active');
                     window.scrollTo(0,0);
+                    updateAppBarForPage(nav.dataset.page);
                     if(nav.dataset.page === 'profilePage') renderFavorites();
                 };
             });
@@ -1265,15 +1425,17 @@
 
             const toggleModal = (id, show) => document.getElementById(id).classList.toggle('show', show);
             
-            document.getElementById('discoverSettingsBtn').onclick = () => {
-                toggleModal('settingsModal', true);
-                switchTab('add'); resetForm();
-            };
             document.getElementById('closeSettings').onclick = () => toggleModal('settingsModal', false);
             document.getElementById('closeAbout').onclick = () => toggleModal('aboutModal', false);
             
             window.onclick = (e) => {
-                if(e.target.classList.contains('modal')) e.target.classList.remove('show');
+                if(e.target.classList.contains('modal')) {
+                    e.target.classList.remove('show');
+                    // 如果关闭的是删除确认框，同时清空 pendingDeleteId
+                    if (e.target.id === 'deleteConfirmModal') {
+                        pendingDeleteId = null;
+                    }
+                }
             };
 
             document.getElementById('tabAdd').onclick = () => switchTab('add');
@@ -1302,6 +1464,7 @@
 
             renderHome();
             renderDiscover();
+            updateAppBarForPage('homePage');
         }
 
         function switchTab(tab) {
