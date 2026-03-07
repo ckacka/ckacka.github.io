@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>每日壁纸</title>
+    <!-- WeUI 核心样式 (保持不变) -->
+    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.25/weui.min.css">
+    <style>
+        /* 增强响应式：大屏幕居中，最大宽度舒适 */
+        body {
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .page {
+            width: 100%;
+            max-width: 600px;  /* 移动端友好，大屏幕不拉伸 */
+            background-color: #ffffff;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding: 0 0 30px;
+            margin: 0 auto;
+        }
+        .page__hd {
+            padding: 20px 15px 10px;
+            text-align: center;
+        }
+        .page__title {
+            font-size: 24px;
+            font-weight: 500;
+            color: #1A1A1A;
+            margin-bottom: 4px;
+        }
+        .page__desc {
+            color: #808080;
+            font-size: 15px;
+        }
+        /* 预览卡片头部：左侧标题，右侧时间 */
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .live-time {
+            font-size: 14px;
+            color: #07c160;
+            background: #f0f9f0;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-weight: 400;
+            white-space: nowrap;
+            margin-left: 8px;
+            transition: all 0.2s;
+        }
+        /* 预览区域 */
+        .preview-wrapper {
+            padding: 16px;
+            background-color: #ffffff;
+            text-align: center;
+            border-radius: 0;
+            position: relative;
+        }
+        #preview-img {
+            max-width: 100%;
+            max-height: 55vh;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            background-color: #f0f0f0;
+            transition: opacity 0.2s;
+            display: block;
+            margin: 0 auto;
+        }
+        .img-loading {
+            opacity: 0.5;
+        }
+        .error-overlay {
+            margin-top: 12px;
+            color: #f56c6c;
+            font-size: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+        .weui-panel__ft {
+            padding: 8px 16px 16px;
+            color: #999;
+            font-size: 13px;
+            text-align: center;
+            border-top: 1px solid #f0f0f0;
+            background-color: #fff;
+        }
+        .btn-area {
+            padding: 25px 18px 10px;
+        }
+        /* 重试按钮微调 */
+        .retry-link {
+            color: #f56c6c;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        .weui-cell__bd p {
+            font-size: 16px;
+        }
+        .weui-cells_radio .weui-check__label {
+            padding: 14px 15px;
+        }
+        /* 导航栏自定义 */
+        .weui-navbar {
+            background-color: #ffffff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .weui-navbar__item {
+            padding: 14px 0;
+            font-size: 16px;
+        }
+        .weui-navbar__item.weui-bar__item_on {
+            color: #07c160;
+            border-bottom: 3px solid #07c160;
+            font-weight: 500;
+        }
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+        /* 下载/刷新按钮统一 */
+        .weui-btn_primary {
+            background-color: #07c160;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <!-- 导航栏：每日 / 随机 (无表情) -->
+        <div class="weui-navbar">
+            <div class="weui-navbar__item weui-bar__item_on" id="tab-daily">
+                每日壁纸
+            </div>
+            <div class="weui-navbar__item" id="tab-random">
+                随机壁纸
+            </div>
+        </div>
+
+        <!-- 页面头部 (标题动态) -->
+        <div class="page__hd" id="page-header">
+            <h1 class="page__title" id="header-title">每日壁纸</h1>
+            <p class="page__desc" id="header-desc">Bing 官方摄影 · 每日更新</p>
+        </div>
+
+        <!-- 主体内容 -->
+        <div class="tab-content">
+            <!-- 预览卡片 -->
+            <div class="weui-panel weui-panel_access" style="margin-top: 0;">
+                <div class="weui-panel__hd">
+                    <!-- 左侧标题 + 右侧时间 -->
+                    <div class="panel-header">
+                        <span>实时预览</span>  <!-- 已去表情 -->
+                        <span id="panel-time" class="live-time"></span>
+                    </div>
+                </div>
+                <div class="weui-panel__bd">
+                    <div class="preview-wrapper">
+                        <img id="preview-img" 
+                             src="https://bing.img.run/uhd.php" 
+                             alt="壁纸预览"
+                             onload="onImageLoadSuccess()"
+                             onerror="onImageLoadError()">
+                        <!-- 错误提示区域 (去掉表情) -->
+                        <div id="error-tip" class="error-overlay" style="display: none;">
+                            <span style="color: #f56c6c;">加载失败</span>
+                            <a href="javascript:void(0);" id="retryBtn" style="color:#f56c6c; font-weight:500; text-decoration:underline;">重试</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="weui-panel__ft" id="panel-footer">
+                    Bing 官方摄影 · 每日更新
+                </div>
+            </div>
+
+            <!-- 清晰度选择区域 (带id，便于隐藏/显示) 已去掉表情符号 -->
+            <div id="res-title" class="weui-cells__title" style="margin-top: 12px;">选择清晰度</div>
+            <div id="res-group" class="weui-cells weui-cells_radio">
+                <label class="weui-cell weui-check__label" for="uhd">
+                    <div class="weui-cell__bd">
+                        <p>超高清原图 (UHD) <span style="font-size: 13px; color: #999;">最高质量</span></p>
+                    </div>
+                    <div class="weui-cell__ft">
+                        <input type="radio" class="weui-check" name="resolution" id="uhd" value="uhd" checked>
+                        <span class="weui-icon-checked"></span>
+                    </div>
+                </label>
+                <label class="weui-cell weui-check__label" for="fhd">
+                    <div class="weui-cell__bd">
+                        <p>1080P 高清 <span style="font-size: 13px; color: #999;">1920x1080</span></p>
+                    </div>
+                    <div class="weui-cell__ft">
+                        <input type="radio" class="weui-check" name="resolution" id="fhd" value="fhd">
+                        <span class="weui-icon-checked"></span>
+                    </div>
+                </label>
+                <label class="weui-cell weui-check__label" for="hd">
+                    <div class="weui-cell__bd">
+                        <p>普清 <span style="font-size: 13px; color: #999;">1366x768</span></p>
+                    </div>
+                    <div class="weui-cell__ft">
+                        <input type="radio" class="weui-check" name="resolution" id="hd" value="hd">
+                        <span class="weui-icon-checked"></span>
+                    </div>
+                </label>
+                <label class="weui-cell weui-check__label" for="mobile">
+                    <div class="weui-cell__bd">
+                        <p>手机版 1080P <span style="font-size: 13px; color: #999;">竖屏适配</span></p>
+                    </div>
+                    <div class="weui-cell__ft">
+                        <input type="radio" class="weui-check" name="resolution" id="mobile" value="mobile">
+                        <span class="weui-icon-checked"></span>
+                    </div>
+                </label>
+            </div>
+
+            <!-- 按钮区域 (每日显示下载，随机显示刷新) -->
+            <div class="btn-area">
+                <a href="javascript:void(0);" class="weui-btn weui-btn_primary" id="actionBtn">一键下载当前壁纸</a>
+                <p style="font-size: 13px; color: #aaa; margin-top: 12px; text-align: center;">点击即保存原图 · 若弹出新标签请右键另存</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- 配置：两种模式的API映射 (无任何表情) ----------
+            const API = {
+                daily: {
+                    uhd: 'https://bing.img.run/uhd.php',
+                    fhd: 'https://bing.img.run/1920x1080.php',
+                    hd: 'https://bing.img.run/1366x768.php',
+                    mobile: 'https://bing.img.run/m.php',
+                    name: '每日壁纸',
+                    desc: 'Bing 官方摄影 · 每日更新'
+                },
+                random: {
+                    uhd: 'https://bing.img.run/rand_uhd.php',
+                    fhd: 'https://bing.img.run/rand.php',
+                    hd: 'https://bing.img.run/rand_1366x768.php',
+                    mobile: 'https://bing.img.run/rand_m.php',
+                    name: '随机壁纸',
+                    desc: 'Bing 历史精选 · 每次刷新不同'
+                }
+            };
+
+            // ---------- DOM 元素 ----------
+            const previewImg = document.getElementById('preview-img');
+            const radioInputs = document.querySelectorAll('input[name="resolution"]');
+            const actionBtn = document.getElementById('actionBtn');     // 下载/刷新按钮（二合一）
+            const errorTip = document.getElementById('error-tip');
+            const retryBtn = document.getElementById('retryBtn');
+            const headerTitle = document.getElementById('header-title');
+            const headerDesc = document.getElementById('header-desc');
+            const panelFooter = document.getElementById('panel-footer');
+            const tabDaily = document.getElementById('tab-daily');
+            const tabRandom = document.getElementById('tab-random');
+            const resTitle = document.getElementById('res-title');
+            const resGroup = document.getElementById('res-group');
+            const panelTime = document.getElementById('panel-time');    // 实时时间元素（位于预览头部）
+
+            // 当前模式: 'daily' 或 'random'
+            let currentMode = 'daily';
+            // 当前选中的清晰度 (用于每日模式，随机模式固定为uhd)
+            let currentRes = 'uhd';
+            // 记录每日模式下的清晰度偏好（用于切换回来时恢复）
+            let dailyRes = 'uhd';
+
+            // 实时时间更新句柄
+            let timeInterval = null;
+
+            // ---------- 辅助函数 ----------
+            // 获取图片基础URL (不带时间戳)
+            function getBaseImageUrl(mode, res) {
+                return API[mode][res];
+            }
+
+            // 加载图片 (添加时间戳防止缓存)
+            function loadImage() {
+                const baseUrl = getBaseImageUrl(currentMode, currentRes);
+                // 添加时间戳强制刷新，尤其对随机模式重要，每日也避免缓存
+                const separator = baseUrl.indexOf('?') === -1 ? '?' : '&';
+                const timestamp = Date.now();
+                const urlWithTs = baseUrl + separator + '_t=' + timestamp;
+                
+                previewImg.classList.add('img-loading');
+                errorTip.style.display = 'none';
+                previewImg.src = urlWithTs;  // 触发加载
+            }
+
+            // 更新页面头部和尾部文本（无表情）
+            function updateHeader() {
+                headerTitle.innerText = API[currentMode].name;      // 已无表情
+                headerDesc.innerText = API[currentMode].desc;
+                panelFooter.innerText = API[currentMode].desc;
+            }
+
+            // 更新按钮文字和下方小提示（根据模式）
+            function updateButton() {
+                if (currentMode === 'daily') {
+                    actionBtn.innerText = '一键下载当前壁纸';
+                    document.querySelector('.btn-area p').innerText = '点击即保存原图 · 若弹出新标签请右键另存';
+                } else {
+                    actionBtn.innerText = '刷新壁纸';
+                    document.querySelector('.btn-area p').innerText = '点击刷新按钮获取全新随机壁纸';
+                }
+            }
+
+            // 控制清晰度和实时时间的显示/隐藏
+            function toggleUIPanels() {
+                if (currentMode === 'daily') {
+                    // 显示清晰度选择
+                    resTitle.classList.remove('hidden');
+                    resGroup.classList.remove('hidden');
+                    // 显示实时时间 (通过移除hidden，并且内容由定时器填充)
+                    panelTime.classList.remove('hidden');
+                } else {
+                    // 随机模式：隐藏清晰度、隐藏实时时间
+                    resTitle.classList.add('hidden');
+                    resGroup.classList.add('hidden');
+                    panelTime.classList.add('hidden');
+                }
+            }
+
+            // 切换模式
+            function switchMode(mode) {
+                if (mode === currentMode) return;
+
+                // 保存每日清晰度偏好（离开每日时）
+                if (currentMode === 'daily') {
+                    dailyRes = currentRes;
+                }
+
+                currentMode = mode;
+
+                // 更新导航栏激活样式
+                if (mode === 'daily') {
+                    tabDaily.classList.add('weui-bar__item_on');
+                    tabRandom.classList.remove('weui-bar__item_on');
+                    // 恢复每日清晰度
+                    currentRes = dailyRes;
+                    // 同步radio勾选状态
+                    document.getElementById(currentRes).checked = true;
+                } else {
+                    tabRandom.classList.add('weui-bar__item_on');
+                    tabDaily.classList.remove('weui-bar__item_on');
+                    // 随机模式固定为uhd (最高质量)
+                    currentRes = 'uhd';
+                    // 虽然隐藏了，但保持内部一致性 (radio不用同步，不可见)
+                }
+
+                // 更新头部描述
+                updateHeader();
+                // 更新按钮文字
+                updateButton();
+                // 切换UI面板 (隐藏/显示清晰度、时间)
+                toggleUIPanels();
+
+                // 重新加载图片（使用当前模式和清晰度）
+                loadImage();
+            }
+
+            // ---------- 实时时间 (仅每日模式显示，每秒更新) ----------
+            function startLiveTime() {
+                if (timeInterval) clearInterval(timeInterval);
+                timeInterval = setInterval(() => {
+                    if (currentMode === 'daily') {
+                        const now = new Date();
+                        const year = now.getFullYear();
+                        const month = String(now.getMonth() + 1).padStart(2, '0');
+                        const day = String(now.getDate()).padStart(2, '0');
+                        const hours = String(now.getHours()).padStart(2, '0');
+                        const minutes = String(now.getMinutes()).padStart(2, '0');
+                        const seconds = String(now.getSeconds()).padStart(2, '0');
+                        panelTime.innerText = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                    } else {
+                        // 随机模式清空内容（隐藏时也可以留空）
+                        panelTime.innerText = '';
+                    }
+                }, 500); // 500ms 更新，足够平滑
+            }
+
+            // ---------- 事件绑定 ----------
+
+            // 1. 导航栏点击
+            tabDaily.addEventListener('click', () => switchMode('daily'));
+            tabRandom.addEventListener('click', () => switchMode('random'));
+
+            // 2. 清晰度切换 (只影响每日模式，但会更新dailyRes)
+            radioInputs.forEach(radio => {
+                radio.addEventListener('change', function(e) {
+                    if (this.checked) {
+                        currentRes = this.value;
+                        if (currentMode === 'daily') {
+                            dailyRes = currentRes;     // 保存每日偏好
+                        }
+                        loadImage();
+                    }
+                });
+            });
+
+            // 3. 重试按钮
+            retryBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                loadImage();
+            });
+
+            // 4. 图片加载成功/失败回调 (全局)
+            window.onImageLoadSuccess = function() {
+                previewImg.classList.remove('img-loading');
+                errorTip.style.display = 'none';
+            };
+            window.onImageLoadError = function() {
+                previewImg.classList.remove('img-loading');
+                errorTip.style.display = 'flex';  // 显示错误条
+            };
+
+            // 5. 统一按钮点击：每日下载，随机刷新
+            actionBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                if (currentMode === 'random') {
+                    // 随机模式：刷新壁纸
+                    loadImage();
+                } else {
+                    // 每日模式：下载功能 (使用当前预览图的src，确保所见即所得)
+                    const imageUrl = previewImg.src;
+                    if (!imageUrl || imageUrl === '' || previewImg.classList.contains('img-loading')) {
+                        alert('图片尚未加载完成，请稍后');
+                        return;
+                    }
+
+                    // 生成文件名
+                    let fileName = 'bing_daily';
+                    if (currentRes === 'uhd') fileName += '_uhd';
+                    else if (currentRes === 'fhd') fileName += '_1080p';
+                    else if (currentRes === 'hd') fileName += '_768p';
+                    else if (currentRes === 'mobile') fileName += '_mobile';
+                    fileName += '.jpg';
+
+                    const originalText = actionBtn.innerText;
+                    actionBtn.innerText = '准备下载...';
+                    actionBtn.classList.add('weui-btn_disabled');
+
+                    try {
+                        // 使用fetch获取blob，触发下载
+                        const response = await fetch(imageUrl, { cache: 'no-cache' });
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        const blob = await response.blob();
+                        if (!blob.type.startsWith('image/')) throw new Error('非图片内容');
+
+                        const blobUrl = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = blobUrl;
+                        link.download = fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(blobUrl);
+
+                        actionBtn.innerText = '下载已触发';
+                        setTimeout(() => {
+                            actionBtn.innerText = originalText;
+                            actionBtn.classList.remove('weui-btn_disabled');
+                        }, 1500);
+                    } catch (error) {
+                        console.warn('fetch下载失败，使用备选', error);
+                        // 备选：新窗口打开
+                        setTimeout(() => {
+                            const newWin = window.open('_blank');
+                            if (newWin) {
+                                newWin.location.href = imageUrl;
+                                actionBtn.innerText = '已打开图片';
+                            } else {
+                                alert('浏览器阻止了弹窗，您可以长按预览图保存，或手动复制链接：\n' + imageUrl);
+                                actionBtn.innerText = '请手动保存';
+                            }
+                            setTimeout(() => {
+                                actionBtn.innerText = originalText;
+                                actionBtn.classList.remove('weui-btn_disabled');
+                            }, 2500);
+                        }, 50);
+                    }
+                }
+            });
+
+            // ---------- 初始化 ----------
+            // 确保第一个radio (uhd) 是选中状态
+            document.getElementById('uhd').checked = true;
+            currentRes = 'uhd';
+            dailyRes = 'uhd';
+            // 设置初始UI可见性 (每日模式)
+            toggleUIPanels();
+            // 加载初始图片
+            loadImage();
+            updateHeader();
+            updateButton();
+            // 启动实时时间更新
+            startLiveTime();
+
+            // 清理定时器（可选，但页面关闭自动清理）
+            window.addEventListener('beforeunload', function() {
+                if (timeInterval) clearInterval(timeInterval);
+            });
+        })();
+    </script>
+</body>
+</html>
