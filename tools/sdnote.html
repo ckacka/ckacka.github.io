@@ -1,451 +1,419 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-weui-theme="light">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>树洞便签</title>
-    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.25/weui.min.css"/>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
+    <link rel="stylesheet" href="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
     <style>
-        /* --- 全局与基础 --- */
         :root {
-            --weui-BRAND: #07c160;
-            --card-gap: 12px;
+            --app-bg: var(--td-bg-color-page);
+            --card-bg: var(--td-bg-color-container);
+            --text-primary: var(--td-text-color-primary);
+            --text-secondary: var(--td-text-color-secondary);
+            --border-color: var(--td-border-level-1-color);
         }
 
         body {
-            background-color: var(--weui-BG-0);
-            color: var(--weui-FG-0);
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            padding-bottom: env(safe-area-inset-bottom);
-            margin: 0;
+            margin: 0; padding: 0;
+            background-color: var(--app-bg); color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        /* --- 顶部导航 --- */
-        .app-header {
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: var(--weui-BG-2);
-            position: sticky; top: 0; z-index: 500;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        #app { display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* --- 导航与列表 --- */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--app-bg);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
         }
 
-        .icon-btn {
-            width: 38px; height: 38px;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--weui-BRAND); border-radius: 50%;
-            background: rgba(7, 193, 96, 0.1); transition: 0.2s;
-        }
-        .icon-btn:active { transform: scale(0.9); background: rgba(7, 193, 96, 0.2); }
-
-        /* --- 搜索与过滤 --- */
-        .weui-search-bar { background-color: var(--weui-BG-0); padding: 8px 16px; }
-        .weui-search-bar:before, .weui-search-bar:after { display: none; }
-
-        .tag-filter-container {
-            padding: 10px 16px; overflow-x: auto; white-space: nowrap;
-            background-color: var(--weui-BG-0); position: sticky; top: 62px;
-            z-index: 400; border-bottom: 1px solid var(--weui-FG-3);
-            scrollbar-width: none;
-        }
-        .tag-filter-container::-webkit-scrollbar { display: none; }
-        
-        .filter-tag {
-            display: inline-block; padding: 6px 14px; border-radius: 20px;
-            background-color: var(--weui-BG-2); color: var(--weui-FG-1);
-            font-size: 13px; margin-right: 8px; border: 1px solid transparent;
-        }
-        .filter-tag.active {
-            background-color: rgba(7, 193, 96, 0.1); color: var(--weui-BRAND);
-            border-color: var(--weui-BRAND); font-weight: 600;
-        }
-
-        /* --- 瀑布流布局 --- */
-        .memo-grid {
-            column-count: 2; column-gap: var(--card-gap); padding: 16px; min-height: 200px;
-        }
-        @media (min-width: 600px) { .memo-grid { column-count: 3; } }
-
-        .memo-card {
-            break-inside: avoid; margin-bottom: var(--card-gap);
-            background-color: var(--weui-BG-2); border-radius: 12px;
-            padding: 14px; position: relative;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid transparent;
-        }
-        [data-weui-theme='dark'] .memo-card { border: 1px solid rgba(255,255,255,0.08); box-shadow: none; }
-        .memo-card.pinned { border: 1.5px solid var(--weui-BRAND); }
-
-        .memo-content {
-            font-size: 15px; line-height: 1.6; margin-bottom: 10px;
-            word-break: break-all; white-space: pre-wrap;
-        }
-        .memo-content.done { text-decoration: line-through; color: var(--weui-FG-2); opacity: 0.6; }
-
-        .tag-mini {
-            display: inline-block; font-size: 10px; padding: 1px 6px;
-            border-radius: 4px; margin-right: 4px; margin-bottom: 4px; font-weight: 500;
-        }
-        .tag-work { color: #6750A4; background-color: rgba(103, 80, 164, 0.12); }
-        .tag-study { color: #2196F3; background-color: rgba(33, 150, 243, 0.12); }
-        .tag-life { color: #FF9800; background-color: rgba(255, 152, 0, 0.12); }
-        .tag-inspire { color: #E91E63; background-color: rgba(233, 30, 99, 0.12); }
-
-        .memo-footer {
+        .nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            padding-top: 10px; border-top: 1px solid var(--weui-FG-3); margin-top: 6px;
+            padding: 16px 20px; background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
         }
-        .memo-time { font-size: 10px; color: var(--weui-FG-2); }
-        .memo-actions { display: flex; gap: 10px; }
-        .action-icon { font-size: 18px; color: var(--weui-FG-1); cursor: pointer; }
+        .nav-brand { font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        
+        .filter-section { padding: 12px 20px; background-color: var(--app-bg); }
+        
+        .main-content { padding: 12px 20px 24px 20px; flex: 1; }
+        
+        .notes-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px;
+        }
+        .note-card {
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 16px; cursor: pointer;
+            display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .note-card:active { transform: scale(0.98); }
+        .card-title { font-size: 16px; font-weight: 600; margin: 0 0 8px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .card-preview { font-size: 14px; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 12px; flex: 1; line-height: 1.5; word-break: break-all; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--td-text-color-placeholder); border-top: 1px dashed var(--border-color); padding-top: 12px; }
 
-        /* --- 空状态修复 --- */
-        .empty-state {
-            column-span: all; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            padding: 80px 0; color: var(--weui-FG-2); text-align: center; width: 100%;
+        /* --- 返回顶部按钮 --- */
+        .back-top-btn {
+            position: fixed;
+            bottom: 32px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            background-color: var(--td-brand-color);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 82, 217, 0.3);
+            cursor: pointer;
+            z-index: 99;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
         }
-        .empty-state .material-icons { font-size: 56px; opacity: 0.2; margin-bottom: 12px; }
+        .back-top-btn.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .back-top-btn:active { transform: scale(0.9); }
 
-        /* --- 对话框 --- */
-        .dialog-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.5); z-index: 1000;
-            display: none; opacity: 0; transition: opacity 0.3s;
-            backdrop-filter: blur(4px);
+        /* --- 富文本编辑器适配 --- */
+        .editor-wrapper {
+            border: 1px solid var(--border-color); border-radius: 4px;
+            background-color: var(--card-bg); overflow: hidden;
+            display: flex; flex-direction: column;
+            transition: all 0.2s ease;
         }
-        .dialog-overlay.show { display: flex; opacity: 1; }
+        .editor-wrapper.is-fullscreen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 99999; border-radius: 0; border: none;
+        }
+        
+        #quill-editor { min-height: 200px; max-height: 40vh; overflow-y: auto; }
+        .editor-wrapper.is-fullscreen #quill-editor { max-height: none; flex: 1; }
+        
+        .ql-toolbar.ql-snow {
+            border: none !important; border-bottom: 1px solid var(--border-color) !important;
+            background-color: var(--td-bg-color-secondarycontainer);
+            padding: 10px 12px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .toolbar-group-left { display: flex; flex-wrap: wrap; gap: 16px; }
+        .ql-formats { display: flex !important; gap: 8px !important; margin: 0 !important; align-items: center; }
+        
+        .ql-container.ql-snow { border: none !important; }
+        .ql-editor { color: var(--text-primary); font-size: 15px; line-height: 1.6; padding: 12px; }
+        
+        html[theme-mode="dark"] .ql-snow .ql-stroke { stroke: var(--text-secondary); }
+        html[theme-mode="dark"] .ql-snow .ql-fill { fill: var(--text-secondary); }
+        html[theme-mode="dark"] .ql-snow .ql-picker { color: var(--text-secondary); }
 
-        .half-screen-dialog {
-            position: absolute; bottom: 0; width: 100%; max-height: 85vh;
-            background: var(--weui-BG-2); border-radius: 20px 20px 0 0;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
-            display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom);
+        .custom-fullscreen-btn {
+            background: transparent; border: none; padding: 4px;
+            color: var(--text-secondary); cursor: pointer;
+            display: flex; align-items: center; transition: color 0.2s;
         }
-        .dialog-overlay.show .half-screen-dialog { transform: translateY(0); }
-
-        .dialog-textarea {
-            width: 100%; min-height: 150px; padding: 14px; box-sizing: border-box;
-            border: none; background: var(--weui-BG-1); color: var(--weui-FG-0);
-            font-size: 16px; resize: none; border-radius: 12px; font-family: inherit;
-        }
-
-        .custom-toast {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8); color: white; padding: 10px 20px;
-            border-radius: 24px; font-size: 14px; display: none; align-items: center; gap: 8px; z-index: 2000;
-        }
+        .custom-fullscreen-btn:hover { color: var(--td-brand-color); }
     </style>
 </head>
 <body>
 
-    <header class="app-header">
-        <div style="font-size: 20px; font-weight: 700;">树洞便签</div>
-        <div class="icon-btn" onclick="openCreateDialog()">
-            <span class="material-icons">add</span>
+<div id="app">
+    <div class="sticky-header">
+        <header class="nav-bar">
+            <div class="nav-brand">
+                <i class="ri-sticky-note-line" style="color: var(--td-brand-color);"></i> 树洞便签
+            </div>
+            <t-button theme="primary" @click="openDialog()">
+                <template #icon><i class="ri-add-line"></i></template>
+                新建
+            </t-button>
+        </header>
+
+        <div class="filter-section">
+            <t-input v-model="searchQuery" placeholder="搜索便签内容或标题" clearable>
+                <template #prefix-icon><i class="ri-search-line"></i></template>
+            </t-input>
         </div>
-    </header>
-
-    <div class="weui-search-bar" id="searchBar">
-        <form class="weui-search-bar__form">
-            <div class="weui-search-bar__box">
-                <i class="weui-icon-search"></i>
-                <input type="search" class="weui-search-bar__input" id="searchInput" placeholder="搜索内容..."/>
-                <a href="javascript:" class="weui-icon-clear" id="searchClear"></a>
-            </div>
-            <label class="weui-search-bar__label" id="searchText"><i class="weui-icon-search"></i><span>搜索</span></label>
-        </form>
-        <a href="javascript:" class="weui-search-bar__cancel-btn" id="searchCancel">取消</a>
     </div>
 
-    <div class="tag-filter-container" id="tagFilterBar">
-        <div class="filter-tag active" data-tag="all" onclick="filterByTag('all')">全部</div>
-        <div class="filter-tag" data-tag="工作" onclick="filterByTag('工作')">工作</div>
-        <div class="filter-tag" data-tag="学习" onclick="filterByTag('学习')">学习</div>
-        <div class="filter-tag" data-tag="生活" onclick="filterByTag('生活')">生活</div>
-        <div class="filter-tag" data-tag="灵感" onclick="filterByTag('灵感')">灵感</div>
-    </div>
-
-    <div class="memo-grid" id="postList"></div>
-
-    <div id="createDialog" class="dialog-overlay" onclick="closeDialogOnOverlay(event, 'createDialog')">
-        <div class="half-screen-dialog" onclick="event.stopPropagation()">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid var(--weui-FG-3)">
-                <span class="material-icons" onclick="closeDialog('createDialog')" style="color:var(--weui-FG-1); cursor:pointer">close</span>
-                <div id="dialogTitle" style="font-weight:700">新便签</div>
-                <div onclick="postMessage()" style="color:var(--weui-BRAND); font-weight:700; cursor:pointer">保存</div>
-            </div>
-            
-            <div style="padding:16px; overflow-y:auto">
-                <textarea id="content" class="dialog-textarea" placeholder="记录这一刻的想法..." maxlength="200"></textarea>
-                <div style="text-align:right; font-size:11px; color:var(--weui-FG-2); margin: 8px 0;">
-                    <span id="wordCount">0</span>/200
-                </div>
-
-                <div style="font-size:13px; color:var(--weui-FG-1); margin-bottom:12px; font-weight:500">选择分类</div>
-                <div id="dialogTagSelect" style="display:flex; flex-wrap:wrap; gap:8px">
-                    <div class="filter-tag" onclick="toggleDialogTag(this, '工作')">工作</div>
-                    <div class="filter-tag" onclick="toggleDialogTag(this, '学习')">学习</div>
-                    <div class="filter-tag" onclick="toggleDialogTag(this, '生活')">生活</div>
-                    <div class="filter-tag" onclick="toggleDialogTag(this, '灵感')">灵感</div>
+    <main class="main-content">
+        <div v-if="filteredNotes.length === 0" style="margin-top: 60px;">
+            <t-empty icon="ri-file-search-line" :description="searchQuery ? '未找到相关便签' : '暂无便签，点击右上角新建'" />
+        </div>
+        <div class="notes-grid" v-else>
+            <div v-for="note in filteredNotes" :key="note.id" class="note-card" @click="openDialog(note)">
+                <h3 class="card-title">{{ note.title || '无标题' }}</h3>
+                <div class="card-preview">{{ note.plainText || '无内容' }}</div>
+                <div class="card-footer">
+                    <span>{{ note.plainText.length }} 字</span>
+                    <span>{{ formatDate(note.updatedAt) }}</span>
                 </div>
             </div>
         </div>
+    </main>
+
+    <div class="back-top-btn" :class="{ 'is-visible': showBackTop }" @click="scrollToTop">
+        <i class="ri-arrow-up-line" style="font-size: 24px;"></i>
     </div>
 
-    <div id="confirmDialog" class="dialog-overlay" onclick="closeDialogOnOverlay(event, 'confirmDialog')">
-        <div style="margin:auto; width:280px; background:var(--weui-BG-2); border-radius:16px; overflow:hidden;">
-            <div style="padding:32px 20px; text-align:center; font-size:16px;">确定删除这条便签吗？</div>
-            <div style="display:flex; border-top:1px solid var(--weui-FG-3)">
-                <div style="flex:1; padding:14px; text-align:center; color:var(--weui-FG-1); cursor:pointer" onclick="closeDialog('confirmDialog')">取消</div>
-                <div style="flex:1; padding:14px; text-align:center; color:#FA5151; font-weight:700; border-left:1px solid var(--weui-FG-3); cursor:pointer" onclick="handleDeleteConfirm()">删除</div>
-            </div>
+    <t-dialog 
+        v-model:visible="dialogVisible" 
+        :header="isEditing ? '编辑便签' : '新建便签'" 
+        placement="center"
+        width="90%"
+        :style="{ maxWidth: '600px' }"
+        destroy-on-close
+        @opened="onDialogOpened"
+        @closed="onDialogClosed">
+        
+        <div style="margin-bottom: 16px;">
+            <t-input v-model="currentNote.title" placeholder="请输入便签标题（选填）" clearable />
         </div>
-    </div>
 
-    <div id="customToast" class="custom-toast">
-        <span class="material-icons" id="toastIcon" style="font-size:18px">check_circle</span>
-        <span id="toastText">已保存</span>
-    </div>
+        <div class="editor-wrapper" :class="{ 'is-fullscreen': isEditorFullscreen }">
+            <div id="quill-toolbar">
+                <div class="toolbar-group-left">
+                    <span class="ql-formats">
+                        <button class="ql-bold"></button>
+                        <button class="ql-italic"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-list" value="ordered"></button>
+                        <button class="ql-list" value="bullet"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <select class="ql-color"></select>
+                        <select class="ql-background"></select>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-clean"></button>
+                    </span>
+                </div>
+                <div>
+                    <span class="ql-formats">
+                        <button type="button" class="custom-fullscreen-btn" @click="toggleFullscreen" :title="isEditorFullscreen ? '退出全屏' : '全屏模式'">
+                            <i :class="isEditorFullscreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line'" style="font-size: 18px;"></i>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div id="quill-editor"></div>
+        </div>
 
-    <script>
-        let posts = JSON.parse(localStorage.getItem('memoPosts')) || [];
-        let selectedTags = new Set();
-        let currentSearch = '';
-        let activeTagFilter = 'all';
-        let deleteTargetId = null;
-        let editingId = null;
+        <template #footer>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 13px; color: var(--td-text-color-placeholder);">
+                        共 {{ currentNote.plainText.length }} 字
+                    </span>
+                    <t-popconfirm v-if="isEditing" content="确定要删除这条便签吗？" theme="danger" @confirm="deleteNote(currentNote.id)">
+                        <t-button theme="danger" variant="text" size="small">删除</t-button>
+                    </t-popconfirm>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <t-button theme="default" variant="outline" @click="closeDialog">取消</t-button>
+                    <t-button theme="primary" @click="saveNote">保存</t-button>
+                </div>
+            </div>
+        </template>
+    </t-dialog>
+</div>
 
-        window.addEventListener('DOMContentLoaded', () => {
-            initTheme();
-            renderPosts();
-            setupSearch();
-            setupTextarea();
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.js"></script>
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+<script>
+const { createApp, ref, computed, onMounted, onUnmounted, watch } = Vue;
+
+const setupDarkMode = () => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const updateTheme = (e) => {
+        document.documentElement.setAttribute('theme-mode', e.matches ? 'dark' : 'light');
+    };
+    updateTheme(mediaQuery); 
+    mediaQuery.addEventListener('change', updateTheme);
+};
+
+const app = createApp({
+    setup() {
+        const notes = ref([]);
+        const searchQuery = ref('');
+        const dialogVisible = ref(false);
+        const isEditing = ref(false);
+        const isEditorFullscreen = ref(false);
+        const showBackTop = ref(false); 
+        
+        let quillInstance = null;
+
+        const currentNote = ref({
+            id: null,
+            title: '',
+            content: '',
+            plainText: ''
         });
 
-        function initTheme() {
-            const setTheme = () => {
-                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.setAttribute('data-weui-theme', isDark ? 'dark' : 'light');
-            };
-            setTheme();
-            window.matchMedia('(prefers-color-scheme: dark)').addListener(setTheme);
-        }
+        const handleScroll = () => {
+            showBackTop.value = window.scrollY > 200;
+        };
 
-        function setupSearch() {
-            const $bar = document.getElementById('searchBar');
-            const $input = document.getElementById('searchInput');
-            document.getElementById('searchText').onclick = () => $bar.classList.add('weui-search-bar_focusing');
-            document.getElementById('searchCancel').onclick = () => {
-                $bar.classList.remove('weui-search-bar_focusing');
-                $input.value = ''; currentSearch = ''; renderPosts();
-            };
-            document.getElementById('searchClear').onclick = () => {
-                $input.value = ''; currentSearch = ''; renderPosts();
-            };
-            $input.oninput = (e) => { currentSearch = e.target.value.toLowerCase(); renderPosts(); };
-        }
-
-        // --- 核心修复：文字限制逻辑 ---
-        function setupTextarea() {
-            const el = document.getElementById('content');
-            const counter = document.getElementById('wordCount');
-            
-            el.addEventListener('input', function() {
-                // 1. 强制截断：如果因为粘贴或 IME 导致超标，立即截断
-                if (this.value.length > 200) {
-                    this.value = this.value.substring(0, 200);
-                }
-                
-                // 2. 更新计数器
-                counter.innerText = this.value.length;
-                
-                // 3. 高度自适应
-                this.style.height = 'auto'; 
-                this.style.height = this.scrollHeight + 'px';
+        const scrollToTop = () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
             });
-        }
+        };
 
-        function openCreateDialog(isEdit = false, postData = null) {
-            const dialog = document.getElementById('createDialog');
-            const textarea = document.getElementById('content');
-            const title = document.getElementById('dialogTitle');
-            
-            editingId = isEdit ? postData.id : null;
-            title.innerText = isEdit ? '编辑便签' : '新便签';
-            
-            // 脚本赋值时也进行截断处理
-            let rawContent = isEdit ? postData.content : '';
-            textarea.value = rawContent.substring(0, 200);
-            
-            textarea.style.height = '150px';
-            document.getElementById('wordCount').innerText = textarea.value.length;
-            
-            selectedTags.clear();
-            const tagEls = document.querySelectorAll('#dialogTagSelect .filter-tag');
-            tagEls.forEach(el => {
-                const tag = el.innerText;
-                if (isEdit && postData.tags.includes(tag)) {
-                    el.classList.add('active');
-                    selectedTags.add(tag);
-                } else {
-                    el.classList.remove('active');
-                }
-            });
+        onMounted(() => {
+            setupDarkMode();
+            window.addEventListener('scroll', handleScroll);
 
-            dialog.style.display = 'flex';
-            dialog.offsetHeight;
-            dialog.classList.add('show');
-            setTimeout(() => textarea.focus(), 300);
-        }
-
-        function closeDialog(id) {
-            document.getElementById(id).classList.remove('show');
-            setTimeout(() => { document.getElementById(id).style.display = 'none'; }, 300);
-        }
-
-        function closeDialogOnOverlay(e, id) { if (e.target.id === id) closeDialog(id); }
-
-        function toggleDialogTag(el, tag) {
-            el.classList.toggle('active');
-            selectedTags.has(tag) ? selectedTags.delete(tag) : selectedTags.add(tag);
-        }
-
-        function postMessage() {
-            let content = document.getElementById('content').value.trim();
-            if (!content) return showToast('内容不能为空哦', 'info');
-
-            // 最后关卡：确保存入的内容绝对不超标
-            content = content.substring(0, 200);
-
-            if (editingId) {
-                const index = posts.findIndex(p => p.id === editingId);
-                posts[index] = { ...posts[index], content, tags: Array.from(selectedTags) };
-                showToast('修改成功');
-            } else {
-                const newPost = {
-                    id: Date.now(),
-                    content,
-                    tags: Array.from(selectedTags),
-                    timestamp: Date.now(),
-                    done: false,
-                    pinned: false
-                };
-                posts.unshift(newPost);
-                showToast('已保存');
+            // 修改了本地存储的键名为 treehole_notes，如果你想保留之前测试的数据，可以改回 tdesign_native_notes
+            const saved = localStorage.getItem('treehole_notes');
+            if (saved) {
+                try { notes.value = JSON.parse(saved); } catch (e) { console.error(e); }
             }
-            
-            saveAndRender();
-            closeDialog('createDialog');
-        }
+        });
 
-        function editPost(id) {
-            const post = posts.find(p => p.id === id);
-            openCreateDialog(true, post);
-        }
+        onUnmounted(() => {
+            window.removeEventListener('scroll', handleScroll);
+        });
 
-        function togglePin(id) {
-            const post = posts.find(p => p.id === id);
-            post.pinned = !post.pinned;
-            saveAndRender();
-        }
+        watch(notes, (newNotes) => {
+            localStorage.setItem('treehole_notes', JSON.stringify(newNotes));
+        }, { deep: true });
 
-        function toggleDone(id) {
-            const post = posts.find(p => p.id === id);
-            post.done = !post.done;
-            saveAndRender();
-        }
+        const filteredNotes = computed(() => {
+            if (!searchQuery.value.trim()) return notes.value.sort((a, b) => b.updatedAt - a.updatedAt);
+            const keyword = searchQuery.value.toLowerCase();
+            return notes.value.filter(note => 
+                (note.title && note.title.toLowerCase().includes(keyword)) ||
+                (note.plainText && note.plainText.toLowerCase().includes(keyword))
+            ).sort((a, b) => b.updatedAt - a.updatedAt);
+        });
 
-        function confirmDelete(id) {
-            deleteTargetId = id;
-            const d = document.getElementById('confirmDialog');
-            d.style.display = 'flex'; d.offsetHeight; d.classList.add('show');
-        }
+        const toggleFullscreen = () => {
+            isEditorFullscreen.value = !isEditorFullscreen.value;
+        };
 
-        function handleDeleteConfirm() {
-            posts = posts.filter(p => p.id !== deleteTargetId);
-            saveAndRender();
-            closeDialog('confirmDialog');
-            showToast('已删除', 'info');
-        }
+        const openDialog = (note = null) => {
+            if (note) {
+                isEditing.value = true;
+                currentNote.value = { ...note };
+            } else {
+                isEditing.value = false;
+                currentNote.value = { id: null, title: '', content: '', plainText: '' };
+            }
+            isEditorFullscreen.value = false;
+            dialogVisible.value = true;
+        };
 
-        function filterByTag(tag) {
-            activeTagFilter = tag;
-            document.querySelectorAll('#tagFilterBar .filter-tag').forEach(el => {
-                el.classList.toggle('active', el.dataset.tag === tag);
+        const onDialogOpened = () => {
+            quillInstance = new Quill('#quill-editor', {
+                theme: 'snow',
+                placeholder: '把想说的话留在这里...',
+                modules: { toolbar: '#quill-toolbar' }
             });
-            renderPosts();
-        }
 
-        function saveAndRender() {
-            localStorage.setItem('memoPosts', JSON.stringify(posts));
-            renderPosts();
-        }
+            if (currentNote.value.content) {
+                quillInstance.root.innerHTML = currentNote.value.content;
+            }
 
-        function renderPosts() {
-            const container = document.getElementById('postList');
-            const filtered = posts.filter(post => {
-                const matchTag = activeTagFilter === 'all' || (post.tags && post.tags.includes(activeTagFilter));
-                const matchSearch = !currentSearch || post.content.toLowerCase().includes(currentSearch);
-                return matchTag && matchSearch;
-            }).sort((a, b) => (b.pinned - a.pinned) || (b.timestamp - a.timestamp));
+            quillInstance.on('text-change', () => {
+                currentNote.value.content = quillInstance.root.innerHTML;
+                let text = quillInstance.getText();
+                if (text.endsWith('\n')) {
+                    text = text.slice(0, -1);
+                }
+                currentNote.value.plainText = text;
+            });
 
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                <div class="empty-state">
-                    <span class="material-icons">inventory_2</span>
-                    <p>${currentSearch ? '没找到相关内容' : '空空如也，记点什么吧'}</p>
-                </div>`;
+            if (!isEditing.value) {
+                setTimeout(() => quillInstance.focus(), 50);
+            }
+        };
+
+        const onDialogClosed = () => {
+            quillInstance = null;
+            isEditorFullscreen.value = false;
+        };
+
+        const closeDialog = () => {
+            dialogVisible.value = false;
+        };
+
+        const saveNote = () => {
+            const hasTitle = !!currentNote.value.title.trim();
+            const hasContent = !!currentNote.value.plainText.trim();
+
+            if (!hasTitle && !hasContent) {
+                TDesign.MessagePlugin.warning('内容和标题不能同时为空');
                 return;
             }
 
-            container.innerHTML = filtered.map(post => {
-                const tagsHtml = (post.tags || []).map(tag => {
-                    const cls = tag === '工作' ? 'tag-work' : tag === '学习' ? 'tag-study' : tag === '生活' ? 'tag-life' : 'tag-inspire';
-                    return `<span class="tag-mini ${cls}">${tag}</span>`;
-                }).join('');
+            const timestamp = Date.now();
+            if (isEditing.value) {
+                const index = notes.value.findIndex(n => n.id === currentNote.value.id);
+                if (index !== -1) {
+                    notes.value[index] = { ...currentNote.value, updatedAt: timestamp };
+                    TDesign.MessagePlugin.success('已保存修改');
+                }
+            } else {
+                notes.value.unshift({
+                    ...currentNote.value,
+                    id: 'note_' + timestamp,
+                    createdAt: timestamp,
+                    updatedAt: timestamp
+                });
+                TDesign.MessagePlugin.success('已存入树洞');
+            }
+            
+            closeDialog();
+            scrollToTop();
+        };
 
-                return `
-                <div class="memo-card ${post.pinned ? 'pinned' : ''}">
-                    <div class="memo-content ${post.done ? 'done' : ''}">${escapeHtml(post.content)}</div>
-                    <div>${tagsHtml}</div>
-                    <div class="memo-footer">
-                        <div class="memo-time">${formatTime(post.timestamp)}</div>
-                        <div class="memo-actions">
-                            <span class="material-icons action-icon" onclick="togglePin(${post.id})" style="color:${post.pinned ? 'var(--weui-BRAND)' : ''}">push_pin</span>
-                            <span class="material-icons action-icon" onclick="editPost(${post.id})">edit_note</span>
-                            <span class="material-icons action-icon" onclick="toggleDone(${post.id})" style="color:${post.done ? 'var(--weui-BRAND)' : ''}">${post.done ? 'check_circle' : 'radio_button_unchecked'}</span>
-                            <span class="material-icons action-icon" onclick="confirmDelete(${post.id})" style="color:#FA5151; font-size:17px">delete_outline</span>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-        }
+        const deleteNote = (id) => {
+            notes.value = notes.value.filter(n => n.id !== id);
+            TDesign.MessagePlugin.success('便签已删除');
+            closeDialog();
+        };
 
-        function showToast(msg, type = 'success') {
-            const t = document.getElementById('customToast');
-            const text = document.getElementById('toastText');
-            const icon = document.getElementById('toastIcon');
-            text.innerText = msg;
-            icon.innerText = type === 'success' ? 'check_circle' : 'info';
-            t.style.display = 'flex';
-            setTimeout(() => { t.style.display = 'none'; }, 1800);
-        }
+        const formatDate = (timestamp) => {
+            const d = new Date(timestamp);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const h = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            
+            if (y === new Date().getFullYear()) {
+                return `${m}-${day} ${h}:${min}`;
+            }
+            return `${y}-${m}-${day} ${h}:${min}`;
+        };
 
-        function formatTime(ts) {
-            const d = new Date(ts);
-            const now = new Date();
-            const time = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-            return d.toDateString() === now.toDateString() ? time : `${d.getMonth()+1}/${d.getDate()} ${time}`;
-        }
+        return {
+            searchQuery, filteredNotes, dialogVisible, isEditing, currentNote, isEditorFullscreen, showBackTop,
+            openDialog, closeDialog, onDialogOpened, onDialogClosed, saveNote, deleteNote, formatDate, toggleFullscreen, scrollToTop
+        };
+    }
+});
 
-        function escapeHtml(str) {
-            const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
-            return str.replace(/[&<>"']/g, m => map[m]);
-        }
-    </script>
+app.use(TDesign);
+app.mount('#app');
+</script>
+
 </body>
 </html>
