@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI助手 · 接入DeepSeek (可配置密钥)</title>
+    <title>AI 助手 · DeepSeek</title>
+    <!-- TDesign 样式 -->
     <link rel="stylesheet" href="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.css" />
+    <!-- 代码高亮样式 (Atom One Dark) 专为深色背景设计 -->
+    <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/atom-one-dark.min.css">
+    <!-- 安全过滤 DOMPurify (防止XSS) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
     <style>
-        /* 基础重置 & 全局背景 */
+        /* 全局重置与字体 */
         body {
             margin: 0;
             padding: 0;
@@ -18,7 +23,6 @@
             min-height: 100vh;
         }
 
-        /* 主容器：自适应大屏 */
         #app {
             width: 100%;
             max-width: 1200px;
@@ -52,17 +56,20 @@
             overflow: hidden;
         }
 
+        /* 聊天滚动区域 */
         .chat-scroll-area {
             height: 100%;
             overflow-y: auto;
-            padding: 20px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
             background-color: var(--td-bg-color-container);
             box-sizing: border-box;
+            scroll-behavior: smooth;
         }
 
+        /* 消息行 */
         .message-row {
             display: flex;
             align-items: flex-start;
@@ -73,9 +80,11 @@
             flex-direction: row-reverse;
         }
 
+        /* 消息气泡 - 增加右侧内边距为复制按钮留出空间 */
         .message-bubble {
-            max-width: min(70%, 800px);
-            padding: 12px 18px;
+            position: relative;
+            max-width: min(80%, 850px);
+            padding: 12px 40px 12px 18px;   /* 右内边距变大，防止按钮遮挡文字 */
             border-radius: var(--td-radius-default);
             font-size: 15px;
             line-height: 1.6;
@@ -88,24 +97,92 @@
             background-color: var(--td-brand-color);
             color: var(--td-text-color-anti);
             border-top-right-radius: 0;
+            white-space: pre-wrap;
+            /* 用户消息不需要复制按钮，因此可以还原内边距（可选） */
+            padding-right: 18px;
         }
 
         .assistant .message-bubble {
             background-color: var(--td-bg-color-secondarycontainer);
             color: var(--td-text-color-primary);
             border-top-left-radius: 0;
+            overflow-x: auto;
         }
 
-        .input-area {
+        /* 复制按钮样式 (仅 assistant 消息内使用) */
+        .copy-msg-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: var(--td-bg-color-container-hover);
+            border-radius: 50%;
+            opacity: 0.65;
+            transition: opacity 0.2s, background-color 0.2s;
+            z-index: 2;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 20px 24px;
-            background-color: var(--td-bg-color-container);
-            border-top: 1px solid var(--td-component-border);
-            flex-wrap: nowrap;
+            justify-content: center;
         }
 
+        .copy-msg-btn:hover {
+            opacity: 1;
+            background-color: var(--td-bg-color-container-active);
+        }
+
+        /* ===== Markdown 内容样式 (修复亮色模式下代码块可读性) ===== */
+        .markdown-body p {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .markdown-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .markdown-body pre {
+            background-color: #282c34;
+            color: #f8f8f2;
+            border-radius: 6px;
+            padding: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .markdown-body pre code {
+            color: inherit;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+        }
+
+        .markdown-body p > code {
+            background-color: var(--td-bg-color-component);
+            color: var(--td-brand-color);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        .markdown-body th,
+        .markdown-body td {
+            border: 1px solid var(--td-component-border);
+            padding: 6px 12px;
+        }
+
+        /* 头部区域 */
         .header-container {
             display: flex;
             align-items: center;
@@ -120,371 +197,595 @@
 
         .header-title {
             margin: 0;
-            color: var(--td-text-color-primary);
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .header-icons {
             display: flex;
-            gap: 16px;
+            gap: 8px;
             align-items: center;
         }
 
-        .header-icons .t-button {
-            padding: 8px;
-            font-size: 22px;
-            transition: none;
-        }
-
-        @keyframes icon-pop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        .animate-pop {
-            animation: icon-pop 0.2s ease-in-out;
-        }
-
-        @keyframes icon-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .animate-spin {
-            animation: icon-spin 0.25s ease-in-out;
-        }
-
-        .t-button--variant-text {
-            display: inline-flex;
-            align-items: center;
+        /* 输入区域 */
+        .chat-sender-container {
+            padding: 16px 24px 24px;
+            background-color: var(--td-bg-color-container);
+            display: flex;
             justify-content: center;
         }
 
-        /* 设置对话框中的提示文本 */
-        .api-tip {
+        .chat-sender-wrapper {
+            width: 100%;
+            max-width: 850px;
+            position: relative;
+            background-color: var(--td-bg-color-secondarycontainer);
+            border-radius: var(--td-radius-extraLarge);
+            padding: 12px 16px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-sender-wrapper:focus-within {
+            border-color: var(--td-brand-color);
+            background-color: var(--td-bg-color-container);
+            box-shadow: var(--td-shadow-2);
+        }
+
+        .chat-sender-wrapper .t-textarea__inner {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 0 40px 0 !important;
+            font-size: 15px;
+            resize: none;
+        }
+
+        .sender-actions {
+            position: absolute;
+            right: 16px;
+            bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sender-tip {
             font-size: 12px;
             color: var(--td-text-color-placeholder);
-            margin-top: 4px;
+            margin-right: 8px;
+            user-select: none;
+        }
+
+        /* 历史会话列表 */
+        .session-item {
+            padding: 12px;
+            border-radius: var(--td-radius-default);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            transition: background-color 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .session-item:hover {
+            background-color: var(--td-bg-color-page);
+        }
+
+        .session-item.active {
+            background-color: var(--td-brand-color-light);
+            border-color: var(--td-brand-color);
+        }
+
+        .t-theme-dark .session-item.active {
+            background-color: var(--td-brand-color-dark);
+        }
+
+        .session-title {
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        /* 空状态 */
+        .empty-chat-placeholder {
+            text-align: center;
+            color: var(--td-text-color-placeholder);
+            margin-top: 10vh;
         }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <t-layout class="flex-column-layout" style="height: 100%;">
-        <t-header height="64px" style="padding: 0; background-color: var(--td-bg-color-container);">
+    <t-layout class="flex-column-layout">
+        <!-- 头部 -->
+        <t-header height="64px" style="padding: 0;">
             <div class="header-container">
-                <h3 class="header-title">AI 助手 · DeepSeek 驱动</h3>
+                <h3 class="header-title">
+                    AI 助手
+                    <t-tag theme="primary" variant="light" size="small">DeepSeek</t-tag>
+                </h3>
                 <div class="header-icons">
-                    <t-button 
-                        shape="circle" 
-                        variant="text" 
-                        size="large"
-                        @click="toggleDark"
-                        :class="{ 'animate-pop': darkAnimate }"
-                    >
-                        <t-icon :name="isDark ? 'brightness' : 'moon'" />
+                    <t-tooltip content="新对话">
+                        <t-button shape="circle" variant="text" @click="createNewSession">
+                            <t-icon name="add" />
+                        </t-button>
+                    </t-tooltip>
+                    <t-tooltip content="历史对话">
+                        <t-button shape="circle" variant="text" @click="drawerVisible = true">
+                            <t-icon name="history" />
+                        </t-button>
+                    </t-tooltip>
+                    <t-tooltip content="分享当前对话">
+                        <t-button shape="circle" variant="text" @click="shareChat">
+                            <t-icon name="share" />
+                        </t-button>
+                    </t-tooltip>
+                    <t-divider layout="vertical" style="margin: 0 4px;"></t-divider>
+                    <t-button shape="circle" variant="text" @click="toggleDark">
+                        <t-icon :name="isDark ? 'sun' : 'moon'" />
                     </t-button>
-
-                    <t-button 
-                        shape="circle" 
-                        variant="text" 
-                        size="large"
-                        @click="openSettings"
-                        :class="{ 'animate-spin': settingsAnimate }"
-                    >
+                    <t-button shape="circle" variant="text" @click="openSettings">
                         <t-icon name="setting" />
                     </t-button>
                 </div>
             </div>
         </t-header>
 
+        <!-- 聊天主体 -->
         <t-content class="grow-content">
             <div class="chat-scroll-area" ref="chatArea">
+                <!-- 空状态提示 -->
+                <div v-if="currentMessages.length === 0" class="empty-chat-placeholder">
+                    <t-icon name="chat" size="48px" style="margin-bottom: 16px; opacity: 0.5;" /><br>
+                    你好！我是你的 AI 助手。<br>请在下方输入框提问，或者点击右上角设置密钥。
+                </div>
+
+                <!-- 消息列表 -->
                 <div 
-                    v-for="(msg, index) in messages" 
+                    v-for="(msg, index) in currentMessages" 
                     :key="index" 
                     :class="['message-row', msg.role]"
                 >
-                    <t-avatar :theme="msg.role === 'user' ? 'primary' : 'default'" size="medium">
+                    <t-avatar :theme="msg.role === 'user' ? 'primary' : 'default'" size="medium" style="flex-shrink: 0;">
                         {{ msg.role === 'user' ? '我' : 'AI' }}
                     </t-avatar>
                     
                     <div class="message-bubble">
-                        {{ msg.content }}
+                        <!-- 用户消息纯文本 -->
+                        <div v-if="msg.role === 'user'">{{ msg.content }}</div>
+                        <!-- AI 消息渲染 Markdown + 安全过滤 + 复制按钮 -->
+                        <template v-else>
+                            <div class="markdown-body" v-html="sanitizedMarkdown(msg.content)"></div>
+                            <!-- 复制按钮：复制原始 Markdown 内容 -->
+                            <t-tooltip content="复制内容" placement="top">
+                                <t-button 
+                                    class="copy-msg-btn" 
+                                    shape="circle" 
+                                    size="small" 
+                                    variant="text" 
+                                    @click="copyMessageContent(msg.content)"
+                                >
+                                    <t-icon name="copy" />
+                                </t-button>
+                            </t-tooltip>
+                        </template>
                     </div>
                 </div>
             </div>
         </t-content>
 
+        <!-- 底部输入区 -->
         <t-footer height="auto" style="padding: 0;">
-            <div class="input-area">
-                <t-input 
-                    v-model="inputText" 
-                    size="large"
-                    placeholder="请输入你的问题..." 
-                    @enter="sendMessage"
-                    clearable
-                    style="flex: 1;"
-                ></t-input>
-                <t-button 
-                    theme="primary" 
-                    size="large" 
-                    @click="sendMessage" 
-                    :loading="isWaiting"
-                >发送</t-button>
+            <div class="chat-sender-container">
+                <div class="chat-sender-wrapper">
+                    <t-textarea 
+                        v-model="inputText" 
+                        placeholder="给 AI 发送消息... (Shift+Enter 换行，Enter 发送)" 
+                        :autosize="{ minRows: 1, maxRows: 5 }"
+                        @keydown="handleKeydown"
+                        :disabled="isWaiting"
+                    ></t-textarea>
+                    
+                    <div class="sender-actions">
+                        <span class="sender-tip" v-show="inputText.trim() && !isWaiting">Enter 发送</span>
+                        <t-button 
+                            shape="circle" 
+                            theme="primary" 
+                            size="medium"
+                            :disabled="!inputText.trim() || isWaiting" 
+                            :loading="isWaiting"
+                            @click="sendMessage"
+                        >
+                            <template #icon><t-icon name="send" /></template>
+                        </t-button>
+                    </div>
+                </div>
             </div>
         </t-footer>
     </t-layout>
 
-    <!-- 设置弹窗：API 密钥配置 -->
-    <t-dialog
-        v-model:visible="settingsVisible"
-        header="设置"
-        :close-on-overlay-click="false"
-        :on-confirm="saveApiKey"
-        :on-cancel="closeSettings"
-        confirm-btn="保存"
+    <!-- 历史会话抽屉 -->
+    <t-drawer v-model:visible="drawerVisible" header="历史对话" placement="left" size="300px">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <t-button block variant="outline" @click="createNewSession">
+                <template #icon><t-icon name="add" /></template>
+                发起新对话
+            </t-button>
+            <t-divider style="margin: 8px 0;"></t-divider>
+            
+            <div v-if="sessions.length === 0" style="text-align: center; color: #999; margin-top: 20px; font-size: 13px;">
+                暂无历史记录
+            </div>
+
+            <div 
+                v-for="session in sessions" 
+                :key="session.id"
+                :class="['session-item', { active: session.id === currentSessionId }]"
+                @click="switchSession(session.id)"
+            >
+                <span class="session-title" :title="session.title">{{ session.title }}</span>
+                <t-button 
+                    shape="square" variant="text" size="small"
+                    @click.stop="deleteSession(session.id)"
+                >
+                    <t-icon name="delete" style="color: var(--td-error-color);" />
+                </t-button>
+            </div>
+        </div>
+    </t-drawer>
+
+    <!-- 设置弹窗 (API Key) -->
+    <t-dialog 
+        v-model:visible="settingsVisible" 
+        header="设置" 
+        :on-confirm="saveSettings" 
+        confirm-btn="保存" 
         cancel-btn="取消"
+        @closed="onSettingsClosed"
     >
         <div style="padding: 8px 0;">
-            <t-input
-                v-model="apiKey"
-                type="password"
-                placeholder="输入你的 DeepSeek API 密钥"
-                clearable
-                show-password
-                size="large"
+            <t-input 
+                v-model="tempApiKey" 
+                type="password" 
+                placeholder="输入你的 DeepSeek API 密钥" 
+                clearable 
+                show-password 
+                size="large" 
             />
-            <div class="api-tip">密钥仅保存在浏览器本地，不会上传至任何服务器。</div>
+            <div style="font-size: 12px; color: var(--td-text-color-placeholder); margin-top: 8px;">
+                密钥保存在本地浏览器中。推荐使用 DeepSeek 官方 API。
+            </div>
         </div>
     </t-dialog>
 </div>
 
+<!-- 依赖库 -->
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.js"></script>
+<script src="https://unpkg.com/marked@12.0.1/marked.min.js"></script>
+<script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
 
 <script>
-    const { createApp, ref, nextTick, onMounted, onUnmounted } = Vue;
+    (function() {
+        const { createApp, ref, computed, nextTick, onMounted, watch } = Vue;
 
-    const app = createApp({
-        setup() {
-            const inputText = ref('');
-            const isWaiting = ref(false);
-            const chatArea = ref(null);
-            const messages = ref([
-                { role: 'assistant', content: '你好！我是你的 AI 助手（已接入 DeepSeek）。请先点击右上角设置按钮填入你的 API 密钥，然后开始聊天。' }
-            ]);
+        // 配置 marked 使用 highlight.js (同步渲染)
+        marked.setOptions({
+            highlight: function(code, lang) {
+                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                return hljs.highlight(code, { language }).value;
+            },
+            langPrefix: 'hljs language-',
+            breaks: true,
+            gfm: true
+        });
 
-            // ----- 暗色模式相关 (保持不变) -----
-            const darkAnimate = ref(false);
-            const settingsAnimate = ref(false);
-            const isDark = ref(false);
-            const STORAGE_KEY = 'theme-preference';
-            const userPreference = ref(null);
-            let mediaQueryList = null;
-            let darkAnimationTimer = null;
-
-            // ----- DeepSeek API 密钥 (从 localStorage 初始化) -----
-            const API_KEY_STORAGE = 'deepseek_api_key';
-            const apiKey = ref(localStorage.getItem(API_KEY_STORAGE) || '');
-            
-            // ----- 设置弹窗可见性 -----
-            const settingsVisible = ref(false);
-
-            // 应用主题函数
-            const applyTheme = () => {
-                let shouldBeDark;
-                if (userPreference.value !== null) {
-                    shouldBeDark = userPreference.value;
-                } else {
-                    shouldBeDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                }
-
-                if (shouldBeDark) {
-                    document.documentElement.classList.add('t-theme-dark');
-                    document.documentElement.setAttribute('theme-mode', 'dark');
-                } else {
-                    document.documentElement.classList.remove('t-theme-dark');
-                    document.documentElement.removeAttribute('theme-mode');
-                }
-                
-                isDark.value = shouldBeDark;
-            };
-
-            const handleSystemChange = () => {
-                if (userPreference.value === null) {
-                    applyTheme();
-                }
-            };
-
-            onMounted(() => {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved === 'dark') userPreference.value = true;
-                else if (saved === 'light') userPreference.value = false;
-                else userPreference.value = null;
-
-                applyTheme();
-
-                mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
-                if (mediaQueryList.addEventListener) {
-                    mediaQueryList.addEventListener('change', handleSystemChange);
-                } else {
-                    mediaQueryList.addListener(handleSystemChange);
-                }
-            });
-
-            onUnmounted(() => {
-                if (mediaQueryList) {
-                    if (mediaQueryList.removeEventListener) {
-                        mediaQueryList.removeEventListener('change', handleSystemChange);
-                    } else {
-                        mediaQueryList.removeListener(handleSystemChange);
-                    }
-                }
-                if (darkAnimationTimer) {
-                    clearTimeout(darkAnimationTimer);
-                }
-            });
-
-            const toggleDark = () => {
-                if (darkAnimationTimer) clearTimeout(darkAnimationTimer);
-
-                const newPref = !isDark.value;
-                userPreference.value = newPref;
-                
-                localStorage.setItem(STORAGE_KEY, newPref ? 'dark' : 'light');
-                applyTheme();
-
-                darkAnimate.value = true;
-                darkAnimationTimer = setTimeout(() => {
-                    darkAnimate.value = false;
-                    darkAnimationTimer = null;
-                }, 200);
-            };
-
-            // 打开设置弹窗 (替代原来的alert)
-            const openSettings = () => {
-                settingsAnimate.value = true;
-                setTimeout(() => {
-                    settingsAnimate.value = false;
-                }, 250);
-                settingsVisible.value = true;
-            };
-
-            const closeSettings = () => {
-                settingsVisible.value = false;
-            };
-
-            // 保存 API 密钥
-            const saveApiKey = () => {
-                localStorage.setItem(API_KEY_STORAGE, apiKey.value);
-                settingsVisible.value = false;
-                TDesign.MessagePlugin.success('API 密钥已保存');
-            };
-
-            // 滚动到底部
-            const scrollToBottom = async () => {
-                await nextTick();
-                if (chatArea.value) {
-                    chatArea.value.scrollTo({
-                        top: chatArea.value.scrollHeight,
-                        behavior: 'smooth'
-                    });
-                }
-            };
-
-            // 发送消息 (调用 DeepSeek API)
-            const sendMessage = async () => {
-                const text = inputText.value.trim();
-                
-                if (!text) {
-                    TDesign.MessagePlugin.warning('消息内容不能为空哦');
-                    return;
-                }
-
-                // 检查 API 密钥
-                if (!apiKey.value) {
-                    TDesign.MessagePlugin.warning('请先在设置中配置 DeepSeek API 密钥');
-                    openSettings();  // 自动打开设置弹窗
-                    return;
-                }
-
-                if (isWaiting.value) return;
-
-                // 添加用户消息
-                messages.value.push({ role: 'user', content: text });
-                inputText.value = '';
-                await scrollToBottom();
-
-                isWaiting.value = true;
-
-                try {
-                    const response = await fetch('https://api.deepseek.com/chat/completions', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiKey.value}`
-                        },
-                        body: JSON.stringify({
-                            model: 'deepseek-chat',
-                            messages: [
-                                { role: 'system', content: 'You are a helpful assistant.' },
-                                { role: 'user', content: text }
-                            ],
-                            stream: false
-                        })
-                    });
-
-                    if (!response.ok) {
-                        let errorMsg = `API 请求失败 (${response.status})`;
-                        try {
-                            const errData = await response.json();
-                            errorMsg = errData.error?.message || errorMsg;
-                        } catch (e) {}
-                        throw new Error(errorMsg);
-                    }
-
-                    const data = await response.json();
-                    const assistantReply = data.choices?.[0]?.message?.content || '抱歉，我没有得到有效回复。';
-
-                    messages.value.push({ role: 'assistant', content: assistantReply });
-                } catch (error) {
-                    console.error('DeepSeek API 调用失败:', error);
-                    TDesign.MessagePlugin.error(`调用失败: ${error.message}`);
-                    // 可选：添加一个错误提示消息到对话中
-                    messages.value.push({ 
-                        role: 'assistant', 
-                        content: `😓 调用 DeepSeek API 时出现问题：${error.message}。请检查密钥或网络。` 
-                    });
-                } finally {
-                    isWaiting.value = false;
-                    await scrollToBottom();
-                }
-            };
-
-            return {
-                inputText,
-                messages,
-                isWaiting,
-                chatArea,
-                sendMessage,
-                isDark,
-                darkAnimate,
-                settingsAnimate,
-                toggleDark,
-                openSettings,      // 替换 handleSettings
-                settingsVisible,
-                apiKey,
-                saveApiKey,
-                closeSettings
-            };
+        // 安全渲染：markdown + DOMPurify 过滤
+        function renderSafeMarkdown(text) {
+            if (!text) return '';
+            const rawHtml = marked.parse(text); // 同步解析
+            // 使用 DOMPurify 清洗，防止 XSS
+            return DOMPurify.sanitize(rawHtml, { USE_PROFILES: { html: true } });
         }
-    });
 
-    app.use(TDesign);
-    app.mount('#app');
+        const app = createApp({
+            setup() {
+                // ---------- 状态定义 ----------
+                const inputText = ref('');
+                const isWaiting = ref(false);
+                const chatArea = ref(null);
+                const drawerVisible = ref(false);
+                const settingsVisible = ref(false);
+
+                // API 密钥
+                const API_KEY_STORAGE = 'deepseek_api_key';
+                const apiKey = ref(localStorage.getItem(API_KEY_STORAGE) || '');
+                const tempApiKey = ref(apiKey.value);  // 临时存储，用于弹窗编辑
+
+                // 多会话管理
+                const STORAGE_SESSIONS = 'chat_sessions';
+                const STORAGE_CURRENT_ID = 'chat_current_id';
+                
+                const sessions = ref(JSON.parse(localStorage.getItem(STORAGE_SESSIONS) || '[]'));
+                const currentSessionId = ref(localStorage.getItem(STORAGE_CURRENT_ID) || '');
+
+                // 初始化：确保至少有一个会话
+                if (sessions.value.length === 0) {
+                    initNewSession();
+                } else if (!sessions.value.find(s => s.id === currentSessionId.value)) {
+                    currentSessionId.value = sessions.value[0].id;
+                }
+
+                // 自动持久化
+                watch(sessions, (newVal) => {
+                    localStorage.setItem(STORAGE_SESSIONS, JSON.stringify(newVal));
+                }, { deep: true });
+                watch(currentSessionId, (newVal) => {
+                    localStorage.setItem(STORAGE_CURRENT_ID, newVal);
+                });
+
+                // 当前会话对象 (计算属性)
+                const currentSession = computed(() => {
+                    return sessions.value.find(s => s.id === currentSessionId.value) || sessions.value[0];
+                });
+                const currentMessages = computed(() => currentSession.value?.messages || []);
+
+                // ---------- 辅助函数 ----------
+                function initNewSession() {
+                    const newId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                    sessions.value.unshift({
+                        id: newId,
+                        title: '新对话',
+                        messages: [],
+                        updateTime: Date.now()
+                    });
+                    currentSessionId.value = newId;
+                }
+
+                // 滚动到底部
+                const scrollToBottom = async () => {
+                    await nextTick();
+                    if (chatArea.value) {
+                        chatArea.value.scrollTo({ top: chatArea.value.scrollHeight, behavior: 'smooth' });
+                    }
+                };
+
+                // ---------- 事件处理 ----------
+                const createNewSession = () => {
+                    initNewSession();
+                    drawerVisible.value = false;
+                    scrollToBottom();
+                };
+
+                const switchSession = (id) => {
+                    currentSessionId.value = id;
+                    drawerVisible.value = false;
+                    scrollToBottom();
+                };
+
+                const deleteSession = (id) => {
+                    sessions.value = sessions.value.filter(s => s.id !== id);
+                    if (sessions.value.length === 0) {
+                        initNewSession();
+                    } else if (currentSessionId.value === id) {
+                        currentSessionId.value = sessions.value[0].id;
+                    }
+                };
+
+                // 分享当前对话
+                const shareChat = async () => {
+                    if (currentMessages.value.length === 0) {
+                        TDesign.MessagePlugin.warning('当前对话为空');
+                        return;
+                    }
+                    let textToCopy = `【${currentSession.value.title}】\n\n`;
+                    currentMessages.value.forEach(msg => {
+                        textToCopy += `${msg.role === 'user' ? '🧑 我' : '🤖 AI'}:\n${msg.content}\n\n`;
+                    });
+
+                    try {
+                        await navigator.clipboard.writeText(textToCopy);
+                        TDesign.MessagePlugin.success('对话已复制，可直接分享');
+                    } catch (err) {
+                        TDesign.MessagePlugin.error('复制失败，请检查浏览器权限');
+                    }
+                };
+
+                // 复制单条消息内容 (Markdown 原文)
+                const copyMessageContent = async (text) => {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        TDesign.MessagePlugin.success('复制成功');
+                    } catch (err) {
+                        TDesign.MessagePlugin.error('复制失败');
+                    }
+                };
+
+                // 打开设置 (重置临时key)
+                const openSettings = () => {
+                    tempApiKey.value = apiKey.value;
+                    settingsVisible.value = true;
+                };
+
+                // 设置弹窗关闭时
+                const onSettingsClosed = () => {};
+
+                const saveSettings = () => {
+                    apiKey.value = tempApiKey.value;
+                    localStorage.setItem(API_KEY_STORAGE, apiKey.value);
+                    settingsVisible.value = false;
+                    TDesign.MessagePlugin.success('设置已保存');
+                };
+
+                // 暗色主题切换
+                const isDark = ref(document.documentElement.classList.contains('t-theme-dark'));
+                const toggleDark = () => {
+                    isDark.value = !isDark.value;
+                    if (isDark.value) {
+                        document.documentElement.classList.add('t-theme-dark');
+                        document.documentElement.setAttribute('theme-mode', 'dark');
+                    } else {
+                        document.documentElement.classList.remove('t-theme-dark');
+                        document.documentElement.removeAttribute('theme-mode');
+                    }
+                };
+
+                // 键盘发送 (Shift+Enter 换行)
+                const handleKeydown = (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (inputText.value.trim() && !isWaiting.value) {
+                            sendMessage();
+                        }
+                    }
+                };
+
+                // 渲染安全的 Markdown
+                const sanitizedMarkdown = (text) => {
+                    return renderSafeMarkdown(text);
+                };
+
+                // ---------- 核心：发送消息 ----------
+                const sendMessage = async () => {
+                    const text = inputText.value.trim();
+                    if (!text) return;
+
+                    if (!apiKey.value) {
+                        TDesign.MessagePlugin.warning('请先配置 API 密钥');
+                        tempApiKey.value = '';
+                        settingsVisible.value = true;
+                        return;
+                    }
+
+                    if (isWaiting.value) return;
+
+                    const sessionIdAtSend = currentSessionId.value;
+                    
+                    const session = sessions.value.find(s => s.id === sessionIdAtSend);
+                    if (!session) {
+                        TDesign.MessagePlugin.error('会话不存在，请重试');
+                        return;
+                    }
+
+                    // 首次发言自动生成标题
+                    if (session.messages.length === 0) {
+                        session.title = text.length > 18 ? text.slice(0, 18) + '...' : text;
+                    }
+
+                    session.messages.push({ role: 'user', content: text });
+                    session.updateTime = Date.now();
+                    inputText.value = '';
+                    await scrollToBottom();
+
+                    isWaiting.value = true;
+
+                    const historyContext = session.messages.slice(-20);
+
+                    try {
+                        const response = await fetch('https://api.deepseek.com/chat/completions', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${apiKey.value}`
+                            },
+                            body: JSON.stringify({
+                                model: 'deepseek-chat',
+                                messages: [
+                                    { role: 'system', content: 'You are a helpful assistant.' },
+                                    ...historyContext
+                                ],
+                                stream: false
+                            })
+                        });
+
+                        const currentSessionNow = sessions.value.find(s => s.id === sessionIdAtSend);
+                        if (!currentSessionNow) {
+                            TDesign.MessagePlugin.info('原会话已不存在，响应已忽略');
+                            return;
+                        }
+
+                        if (!response.ok) {
+                            let errorMsg = `HTTP Error ${response.status}`;
+                            try {
+                                const errData = await response.json();
+                                errorMsg = errData.error?.message || errorMsg;
+                            } catch (e) {}
+                            throw new Error(errorMsg);
+                        }
+
+                        const data = await response.json();
+                        const assistantReply = data.choices?.[0]?.message?.content || '未获取到内容。';
+
+                        currentSessionNow.messages.push({ role: 'assistant', content: assistantReply });
+
+                    } catch (error) {
+                        TDesign.MessagePlugin.error(`调用失败: ${error.message}`);
+                        const failedSession = sessions.value.find(s => s.id === sessionIdAtSend);
+                        if (failedSession) {
+                            failedSession.messages.push({ role: 'assistant', content: `**请求失败**：${error.message}` });
+                        }
+                    } finally {
+                        isWaiting.value = false;
+                        if (currentSessionId.value === sessionIdAtSend) {
+                            await scrollToBottom();
+                        }
+                    }
+                };
+
+                onMounted(() => {
+                    if (window.matchMedia('(prefers-color-scheme: dark)').matches && !isDark.value) {
+                        toggleDark();
+                    }
+                    scrollToBottom();
+                });
+
+                watch(currentSessionId, () => {
+                    scrollToBottom();
+                });
+
+                return {
+                    inputText,
+                    isWaiting,
+                    chatArea,
+                    drawerVisible,
+                    settingsVisible,
+                    sessions,
+                    currentSessionId,
+                    currentSession,
+                    currentMessages,
+                    apiKey,
+                    tempApiKey,
+                    isDark,
+                    sanitizedMarkdown,
+                    handleKeydown,
+                    sendMessage,
+                    createNewSession,
+                    switchSession,
+                    deleteSession,
+                    shareChat,
+                    copyMessageContent,      // 暴露复制函数
+                    openSettings,
+                    onSettingsClosed,
+                    saveSettings,
+                    toggleDark
+                };
+            }
+        });
+
+        app.use(TDesign);
+        app.mount('#app');
+    })();
 </script>
-
 </body>
 </html>
