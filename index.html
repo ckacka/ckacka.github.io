@@ -82,18 +82,20 @@
 
         .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; width: 100%; }
 
-        /* 顶部栏、导航、卡片等样式完全保留原始设计，不做任何功能删减 */
+        /* 顶部栏 - 修复全屏模式遮挡：增加安全区内边距，高度由子项撑开 */
         .app-bar {
             position: sticky; top: 0; z-index: 1000;
-            background-color: rgba(var(--md-sys-color-surface), 0.8);
+            background-color: rgba(255, 255, 255, 0.8); /* 回退 */
+            background-color: var(--md-sys-color-surface);
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            height: 64px;
+            /* 移除固定高度，改用 padding-top 适应安全区 */
+            padding: env(safe-area-inset-top) 16px 0 16px;
             display: flex;
-            align-items: center;
-            padding: 0 16px;
+            align-items: center;      /* 子项在交叉轴居中（垂直方向） */
             transition: box-shadow var(--transition-standard), background-color var(--transition-standard);
             gap: 8px;
         }
+        /* 暗色下背景略微调整 */
         .app-bar.scrolled { background-color: var(--md-sys-color-surface-container); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
         .app-bar-middle {
@@ -101,7 +103,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100%;
+            height: 64px;              /* 固定高度，保证内部内容垂直居中 */
             min-width: 0;
         }
         .app-bar-right {
@@ -109,6 +111,7 @@
             align-items: center;
             justify-content: flex-end;
             flex-shrink: 0;
+            height: 64px;              /* 固定高度，与左侧按钮组对齐 */
         }
         .app-bar-right:empty { display: none; }
         .app-bar-title {
@@ -177,10 +180,11 @@
             .icon-btn:hover { background-color: rgba(128, 128, 128, 0.1); color: var(--md-sys-color-on-surface); }
         }
 
+        /* 筛选栏：top 值需要加上 app-bar 的安全区高度，保证不被遮挡 */
         .filters-section {
             padding: 4px 0 0;
             position: sticky; 
-            top: 64px; 
+            top: calc(64px + env(safe-area-inset-top)); 
             z-index: 900;
             background-color: var(--md-sys-color-surface);
             transition: background-color var(--transition-standard);
