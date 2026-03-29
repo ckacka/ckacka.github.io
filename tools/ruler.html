@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+    <title>屏幕尺子 - ckacka工具箱</title>
+    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.25/weui.min.css"/>
+    <style>
+        :root { --ruler-size: 44px; --brand-color: #07C160; }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+            background-color: var(--weui-BG-0); color: var(--weui-FG-0);
+            font-family: -apple-system-font, sans-serif; 
+            touch-action: none; user-select: none; -webkit-user-select: none;
+        }
+
+        /* 布局切换逻辑 */
+        .pos-tl .ruler-corner { top: 0; left: 0; border-right: 0.5px solid var(--weui-FG-3); border-bottom: 0.5px solid var(--weui-FG-3); }
+        .pos-tl #ruler-h { top: 0; left: var(--ruler-size); border-bottom: 0.5px solid var(--weui-FG-3); }
+        .pos-tl #ruler-v { top: var(--ruler-size); left: 0; border-right: 0.5px solid var(--weui-FG-3); }
+        .pos-tl .main-content { top: 75px; left: 65px; right: 25px; bottom: 25px; }
+
+        .pos-br .ruler-corner { bottom: 0; right: 0; border-left: 0.5px solid var(--weui-FG-3); border-top: 0.5px solid var(--weui-FG-3); }
+        .pos-br #ruler-h { bottom: 0; right: var(--ruler-size); border-top: 0.5px solid var(--weui-FG-3); }
+        .pos-br #ruler-v { bottom: var(--ruler-size); right: 0; border-left: 0.5px solid var(--weui-FG-3); }
+        .pos-br .main-content { top: 25px; left: 25px; right: 75px; bottom: 75px; }
+
+        .ruler-corner {
+            position: absolute; width: var(--ruler-size); height: var(--ruler-size);
+            background-color: var(--weui-BG-1); display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: bold; z-index: 110; color: var(--brand-color);
+        }
+        canvas { position: absolute; z-index: 90; }
+        #ruler-h { width: calc(100vw - var(--ruler-size)); height: var(--ruler-size); }
+        #ruler-v { width: var(--ruler-size); height: calc(100vh - var(--ruler-size)); }
+
+        /* 内容区容器 */
+        .main-content { position: absolute; z-index: 10; pointer-events: auto; touch-action: pan-y; overflow-y: auto; }
+        
+        /* 辅助线 */
+        .guide-line { position: absolute; background-color: var(--brand-color); z-index: 80; pointer-events: none; opacity: 0.5; display: none; }
+        #guide-h { width: 100vw; height: 1px; }
+        #guide-v { width: 1px; height: 100vh; }
+        #measure-badge { position: absolute; z-index: 85; display: none; pointer-events: none; }
+
+        /* 银行卡预览 */
+        .card-preview-area {
+            background: rgba(0,0,0,0.85); position: fixed; top:0; left:0; width:100%; height:100%;
+            z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .v-card {
+            background: linear-gradient(135deg, #3a3a3a, #1a1a1a);
+            border: 1px solid #eee; border-radius: 10px; width: 300px; height: 189px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); position: relative;
+        }
+    </style>
+</head>
+<body class="pos-tl" data-weui-theme="light">
+
+    <div id="ruler-group">
+        <div class="ruler-corner">CM</div>
+        <canvas id="ruler-h"></canvas>
+        <canvas id="ruler-v"></canvas>
+    </div>
+
+    <div id="guide-h" class="guide-line"></div>
+    <div id="guide-v" class="guide-line"></div>
+    <span id="measure-badge" class="weui-badge" style="background-color: var(--brand-color);">0 mm</span>
+
+    <div class="main-content" id="control-panel">
+        
+        <div class="weui-cells__title">手动校准</div>
+        <div class="weui-cells weui-cells_form" style="border-radius: 12px;">
+            <div class="weui-cell weui-cell_active">
+                <div class="weui-cell__hd"><label class="weui-label" style="width: 100px;">屏幕英寸</label></div>
+                <div class="weui-cell__bd">
+                    <input id="screen-size-input" class="weui-input" type="number" step="0.01" placeholder="例如 6.1"/>
+                </div>
+                <div class="weui-cell__ft">
+                    <button class="weui-btn weui-btn_mini weui-btn_primary" id="calibrate-btn">确定</button>
+                </div>
+            </div>
+            <a class="weui-cell weui-cell_access" href="javascript:;" id="btn-search-mode">
+                <div class="weui-cell__bd" style="font-size: 14px;">不清楚？搜索机型参数</div>
+                <div class="weui-cell__ft"></div>
+            </a>
+            <a class="weui-cell weui-cell_access" href="javascript:;" id="btn-card-mode">
+                <div class="weui-cell__bd" style="font-size: 14px;">不清楚机型？使用银行卡对齐</div>
+                <div class="weui-cell__ft"></div>
+            </a>
+        </div>
+
+        <div class="weui-cells__title">显示设置</div>
+        <div class="weui-cells weui-cells_form" style="border-radius: 12px;">
+            <div class="weui-cell weui-cell_switch">
+                <div class="weui-cell__bd">显示十字测量线</div>
+                <div class="weui-cell__ft">
+                    <input class="weui-switch" type="checkbox" id="guide-switch" checked/>
+                </div>
+            </div>
+        </div>
+
+        <div class="weui-btn-area">
+            <a href="javascript:;" class="weui-btn weui-btn_default" id="flip-btn">翻转尺子位置</a>
+            <a href="javascript:;" class="weui-btn weui-btn_primary" id="fullscreen-btn" style="margin-top: 12px;">进入全屏模式</a>
+        </div>
+    </div>
+
+    <div id="card-cali-overlay" class="card-preview-area">
+        <div class="v-card" id="v-card-box"></div>
+        <div style="color: white; margin-top: 30px; text-align: center; width: 80%;">
+            <p style="font-size: 14px; margin-bottom: 20px;">请贴紧物理银行卡，调整滑块至等大</p>
+            <div class="weui-slider-box">
+                <div class="weui-slider">
+                    <div id="sliderInner" class="weui-slider__inner">
+                        <div id="sliderTrack" style="width: 50%;" class="weui-slider__track"></div>
+                        <div id="sliderHandler" style="left: 50%;" class="weui-slider__handler"></div>
+                    </div>
+                </div>
+                <div id="sliderValue" class="weui-slider-box__value">300</div>
+            </div>
+        </div>
+        <div style="width: 80%; margin-top: 40px;">
+            <button class="weui-btn weui-btn_primary" id="card-confirm">完成校准</button>
+            <button class="weui-btn weui-btn_default" id="card-cancel" style="margin-top: 10px;">取消</button>
+        </div>
+    </div>
+
+    <div id="search-dialog" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__hd"><strong class="weui-dialog__title">机型查询</strong></div>
+            <div class="weui-dialog__bd">
+                <input id="phone-model-input" class="weui-input" type="text" placeholder="输入手机型号" style="border-bottom: 1px solid #eee; padding: 8px 0;"/>
+            </div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default" id="close-search">取消</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" id="confirm-search">去搜索</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" style="display: none;"><div class="weui-mask_transparent"></div><div class="weui-toast"><i class="weui-icon-success-no-circle weui-icon_toast"></i><p class="weui-toast__content">校准成功</p></div></div>
+
+    <script>
+        let PX_PER_MM = 96 / 25.4;
+        let isFlipped = false;
+        const CARD_WIDTH_MM = 85.6;
+
+        const canvasH = document.getElementById('ruler-h');
+        const canvasV = document.getElementById('ruler-v');
+        const fsBtn = document.getElementById('fullscreen-btn');
+
+        // 通用绘图逻辑
+        function drawRulers() {
+            const dpr = window.devicePixelRatio || 1;
+            const isDark = document.body.getAttribute('data-weui-theme') === 'dark';
+            const color = isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
+            
+            [canvasH, canvasV].forEach(c => {
+                const r = c.getBoundingClientRect();
+                c.width = r.width * dpr; c.height = r.height * dpr;
+                const ctx = c.getContext('2d');
+                ctx.scale(dpr, dpr);
+                ctx.strokeStyle = ctx.fillStyle = color;
+                ctx.font = "10px sans-serif";
+                
+                const isHoriz = (c === canvasH);
+                const max = isHoriz ? r.width : r.height;
+
+                ctx.beginPath();
+                for (let mm = 0; mm * PX_PER_MM <= max; mm++) {
+                    const rawPos = isFlipped ? (max - mm * PX_PER_MM) : (mm * PX_PER_MM);
+                    const pos = Math.floor(rawPos) + 0.5;
+                    let len = (mm % 10 === 0) ? 18 : (mm % 5 === 0 ? 12 : 7);
+                    
+                    if (isHoriz) {
+                        const y = isFlipped ? 0 : 44;
+                        ctx.moveTo(pos, y); ctx.lineTo(pos, isFlipped ? len : y - len);
+                        if (mm % 10 === 0 && mm > 0) ctx.fillText(mm/10, pos - 4, isFlipped ? 30 : 15);
+                    } else {
+                        const x = isFlipped ? 0 : 44;
+                        ctx.moveTo(x, pos); ctx.lineTo(isFlipped ? len : x - len, pos);
+                        if (mm % 10 === 0 && mm > 0) ctx.fillText(mm/10, isFlipped ? 22 : 10, pos + 4);
+                    }
+                }
+                ctx.lineWidth = 1; ctx.stroke();
+            });
+        }
+
+        // 测量交互逻辑
+        function handlePointer(x, y, show) {
+            const showGuide = document.getElementById('guide-switch').checked;
+            const gH = document.getElementById('guide-h'), gV = document.getElementById('guide-v'), badge = document.getElementById('measure-badge');
+            
+            if (!show || !showGuide) { gH.style.display = gV.style.display = badge.style.display = 'none'; return; }
+            
+            gH.style.display = gV.style.display = badge.style.display = 'block';
+            gH.style.top = y + 'px'; gV.style.left = x + 'px';
+            
+            let mmX = isFlipped ? (window.innerWidth - x - 44) : (x - 44);
+            let mmY = isFlipped ? (window.innerHeight - y - 44) : (y - 44);
+            
+            badge.innerText = `${Math.max(0, mmX/PX_PER_MM).toFixed(1)} x ${Math.max(0, mmY/PX_PER_MM).toFixed(1)} mm`;
+            badge.style.left = Math.min(x + 15, window.innerWidth - 85) + 'px';
+            badge.style.top = (y - 35) + 'px';
+        }
+
+        // 银行卡校准 Slider 逻辑
+        const sliderInner = document.getElementById('sliderInner');
+        const sliderHandler = document.getElementById('sliderHandler');
+        const sliderTrack = document.getElementById('sliderTrack');
+        const vCardBox = document.getElementById('v-card-box');
+        const sliderValueText = document.getElementById('sliderValue');
+
+        function updateCardSize(percent) {
+            const minW = 200, maxW = 450;
+            const width = minW + (maxW - minW) * percent;
+            vCardBox.style.width = width + 'px';
+            vCardBox.style.height = (width * 0.63) + 'px';
+            sliderValueText.innerText = Math.round(width);
+            sliderHandler.style.left = (percent * 100) + '%';
+            sliderTrack.style.width = (percent * 100) + '%';
+        }
+
+        sliderInner.addEventListener('touchstart', e => {
+            const rect = sliderInner.getBoundingClientRect();
+            const moveHandler = (me) => {
+                let p = (me.touches[0].clientX - rect.left) / rect.width;
+                updateCardSize(Math.max(0, Math.min(1, p)));
+            };
+            document.addEventListener('touchmove', moveHandler);
+            document.addEventListener('touchend', () => document.removeEventListener('touchmove', moveHandler), {once:true});
+        });
+
+        // 状态同步
+        function updateFullscreenUI() {
+            const isFS = !!document.fullscreenElement;
+            fsBtn.innerText = isFS ? "退出全屏模式" : "进入全屏模式";
+            fsBtn.className = isFS ? "weui-btn weui-btn_default" : "weui-btn weui-btn_primary";
+        }
+
+        // 事件绑定
+        document.getElementById('flip-btn').onclick = () => {
+            isFlipped = !isFlipped;
+            document.body.className = isFlipped ? 'pos-br' : 'pos-tl';
+            setTimeout(drawRulers, 400);
+        };
+
+        document.getElementById('calibrate-btn').onclick = () => {
+            const val = parseFloat(document.getElementById('screen-size-input').value);
+            if (val > 0) {
+                const diag = Math.sqrt(window.screen.width**2 + window.screen.height**2);
+                PX_PER_MM = (diag / val) / 25.4;
+                localStorage.setItem('ruler_pxmm', PX_PER_MM);
+                drawRulers();
+                showToast();
+            }
+        };
+
+        document.getElementById('btn-card-mode').onclick = () => document.getElementById('card-cali-overlay').style.display = 'flex';
+        document.getElementById('card-cancel').onclick = () => document.getElementById('card-cali-overlay').style.display = 'none';
+        document.getElementById('card-confirm').onclick = () => {
+            PX_PER_MM = parseFloat(sliderValueText.innerText) / CARD_WIDTH_MM;
+            localStorage.setItem('ruler_pxmm', PX_PER_MM);
+            drawRulers();
+            document.getElementById('card-cali-overlay').style.display = 'none';
+            showToast();
+        };
+
+        document.getElementById('btn-search-mode').onclick = () => document.getElementById('search-dialog').style.display = 'block';
+        document.getElementById('close-search').onclick = () => document.getElementById('search-dialog').style.display = 'none';
+        document.getElementById('confirm-search').onclick = () => {
+            const m = document.getElementById('phone-model-input').value || "手机";
+            window.open(`https://www.bing.com/search?q=${encodeURIComponent(m + " 屏幕尺寸 英寸")}`, '_blank');
+        };
+
+        fsBtn.onclick = () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+            else document.exitFullscreen?.();
+        };
+
+        document.addEventListener('touchstart', e => {
+            if (e.target.closest('#control-panel, .weui-dialog, #card-cali-overlay')) return;
+            handlePointer(e.touches[0].clientX, e.touches[0].clientY, true);
+        });
+        document.addEventListener('touchmove', e => {
+            if (e.target.closest('#control-panel, #card-cali-overlay')) return;
+            handlePointer(e.touches[0].clientX, e.touches[0].clientY, true);
+        });
+        document.addEventListener('touchend', () => handlePointer(0,0,false));
+        document.onfullscreenchange = updateFullscreenUI;
+
+        function showToast() {
+            const t = document.getElementById('toast');
+            t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1500);
+        }
+
+        // 初始化
+        const saved = localStorage.getItem('ruler_pxmm');
+        if (saved) PX_PER_MM = parseFloat(saved);
+        const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
+        const setDark = (e) => { document.body.setAttribute('data-weui-theme', e.matches ? 'dark' : 'light'); drawRulers(); };
+        themeMedia.addListener(setDark); setDark(themeMedia);
+        window.onresize = drawRulers;
+        drawRulers();
+        updateCardSize(0.5);
+    </script>
+</body>
+</html>
