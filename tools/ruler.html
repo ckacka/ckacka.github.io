@@ -64,7 +64,7 @@
             height: 44px; background-color: var(--weui-BG-1);
             border-bottom: 0.5px solid var(--weui-FG-3); padding: 0 16px;
         }
-        .keyboard-header .done-btn { color: var(--brand-color); font-size: 16px; font-weight: bold; }
+        .keyboard-header .done-btn { color: var(--brand-color); font-size: 16px; font-weight: bold; cursor: pointer; }
         .keyboard-row { display: flex; border-bottom: 0.5px solid var(--weui-FG-3); }
         .keyboard-key {
             flex: 1; text-align: center; font-size: 26px; padding: 14px 0;
@@ -181,7 +181,7 @@
     </div>
 
     <div id="custom-keyboard" class="custom-keyboard">
-        <div class="keyboard-header"><span class="done-btn" id="kb-done-btn"></span></div>
+        <div class="keyboard-header"><span class="done-btn" id="kb-done-btn">完成</span></div>
         <div class="keyboard-row">
             <div class="keyboard-key num-key">1</div><div class="keyboard-key num-key">2</div><div class="keyboard-key num-key">3</div>
         </div>
@@ -259,9 +259,7 @@
                 let cur = screenSizeInput.value;
                 if(key.classList.contains('num-key')) {
                     const parts = cur.split('.');
-                    // 整数部分限制最多3位（为了支持100）
                     if (parts.length === 1 && parts[0].length >= 3) return;
-                    // 小数部分限制最多2位
                     if (parts.length === 2 && parts[1].length >= 2) return;
                     screenSizeInput.value += key.innerText;
                 }
@@ -340,10 +338,9 @@
             document.addEventListener('touchend', () => document.removeEventListener('touchmove', onSliderMove), {once:true});
         });
 
-        // --- 核心校验逻辑 ---
-        document.getElementById('calibrate-btn').onclick = () => {
+        // --- 核心校验逻辑封装 ---
+        function runCalibration() {
             const val = parseFloat(screenSizeInput.value);
-            // 校验范围：2.0 到 100.0 英寸
             if (isNaN(val) || val < 2.0 || val > 100.0) { 
                 showToast('warn', '请输入正确的屏幕尺寸<br/>支持范围：2.0 - 100.0 英寸');
                 return; 
@@ -354,9 +351,15 @@
             drawRulers(); 
             showToast('success'); 
             hideKeyboard();
-        };
+        }
 
         // --- 功能绑定 ---
+        document.getElementById('calibrate-btn').onclick = runCalibration;
+        document.getElementById('kb-done-btn').onclick = (e) => {
+            e.stopPropagation();
+            runCalibration();
+        };
+
         document.getElementById('btn-card-mode').onclick = () => document.getElementById('card-cali-overlay').style.display = 'flex';
         document.getElementById('card-cancel').onclick = () => document.getElementById('card-cali-overlay').style.display = 'none';
         document.getElementById('card-confirm').onclick = () => {
@@ -395,6 +398,15 @@
         if (saved) PX_PER_MM = parseFloat(saved);
         drawRulers();
         updateCardSize(0.5);
+
+        // --- 系统深色模式自适应 (修复位置：放到最后确保变量已定义) ---
+        const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        function handleThemeChange(e) {
+            document.body.setAttribute('data-weui-theme', e.matches ? 'dark' : 'light');
+            drawRulers(); 
+        }
+        darkModeQuery.addEventListener('change', handleThemeChange);
+        handleThemeChange(darkModeQuery); 
     </script>
 </body>
 </html>
