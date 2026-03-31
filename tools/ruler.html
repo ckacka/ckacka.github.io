@@ -41,44 +41,12 @@
         #guide-v { width: 1px; height: 100vh; }
         #measure-badge { position: absolute; z-index: 85; display: none; pointer-events: none; }
 
-        /* --- 下划线样式 --- */
-        .weui-cell {
-            display: flex !important;
-            align-items: center !important; 
-            padding: 12px 16px;
-        }
-
-        .input-wrap { 
-            position: relative; 
-            display: flex; 
-            align-items: center;
-            flex: 1;
-            height: 44px;
-        }
-
-        #screen-size-input { 
-            width: 100%;
-            border: none; 
-            background: transparent; 
-            color: var(--weui-FG-0); 
-            font-size: 17px; 
-            padding: 0;
-            margin: 0;
-            height: 44px;
-            line-height: 44px;
-            outline: none;
-        }
-
+        /* --- 输入框样式 --- */
+        .input-wrap { position: relative; display: flex; align-items: center; flex: 1; height: 44px; }
+        #screen-size-input { width: 100%; border: none; background: transparent; color: var(--weui-FG-0); font-size: 17px; outline: none; }
         .fake-input-focus::after {
-            content: "";
-            position: absolute;
-            bottom: 8px;
-            left: 0;
-            width: calc(100% - 12px); 
-            height: 2px; 
-            background-color: var(--brand-color);
-            border-radius: 2px;
-            z-index: 2;
+            content: ""; position: absolute; bottom: 8px; left: 0; width: calc(100% - 12px); 
+            height: 2px; background-color: var(--brand-color); border-radius: 2px; z-index: 2;
         }
 
         /* 键盘样式 */
@@ -108,15 +76,23 @@
         .keyboard-key:active { background-color: var(--weui-BG-1); }
         .keyboard-key.action-key { background-color: var(--weui-BG-1); }
 
+        /* 校准遮罩层 */
         .card-preview-area {
-            background: rgba(0,0,0,0.85); position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.9); position: fixed; top:0; left:0; width:100%; height:100%;
             z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center;
         }
         .v-card {
             background: linear-gradient(135deg, #3a3a3a, #1a1a1a);
-            border: 1px solid #eee; border-radius: 10px; width: 300px; height: 189px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5); position: relative;
+            border: 1.5px solid rgba(255,255,255,0.3); border-radius: 12px; width: 300px; height: 189px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); position: relative;
         }
+
+        /* 滑块样式修正 */
+        #sliderInner { background-color: #FFFFFF !important; }
+        #sliderValue { color: #FFFFFF !important; font-weight: bold; }
+        
+        /* 针对长文案Toast的微调 */
+        .weui-toast_text-wrap { width: 16em !important; min-height: 8em !important; }
     </style>
 </head>
 <body class="pos-tl" data-weui-theme="light">
@@ -135,8 +111,8 @@
         
         <div class="weui-cells__title">手动校准</div>
         <div class="weui-cells weui-cells_form" style="border-radius: 12px;">
-            <div class="weui-cell">
-                <div class="weui-cell__hd"><label class="weui-label" style="width: 80px; margin-bottom: 0;">屏幕英寸</label></div>
+            <div class="weui-cell weui-cell_active">
+                <div class="weui-cell__hd"><label class="weui-label" style="width: 80px;">屏幕英寸</label></div>
                 <div class="weui-cell__bd input-wrap" id="input-container">
                     <input id="screen-size-input" class="weui-input" placeholder="例如 6.1" readonly/>
                 </div>
@@ -172,8 +148,8 @@
 
     <div id="card-cali-overlay" class="card-preview-area">
         <div class="v-card" id="v-card-box"></div>
-        <div style="color: white; margin-top: 30px; text-align: center; width: 80%;">
-            <p style="font-size: 14px; margin-bottom: 20px;">请贴紧物理银行卡，调整滑块至等大</p>
+        <div style="color: white; margin-top: 40px; text-align: center; width: 85%;">
+            <p style="font-size: 15px; margin-bottom: 25px; opacity: 0.9;">请贴紧物理银行卡，调整滑块至等大</p>
             <div class="weui-slider-box">
                 <div class="weui-slider">
                     <div id="sliderInner" class="weui-slider__inner">
@@ -184,9 +160,9 @@
                 <div id="sliderValue" class="weui-slider-box__value">300</div>
             </div>
         </div>
-        <div style="width: 80%; margin-top: 40px;">
-            <button class="weui-btn weui-btn_primary" id="card-confirm">完成校准</button>
-            <button class="weui-btn weui-btn_default" id="card-cancel" style="margin-top: 10px;">取消</button>
+        <div style="width: 85%; margin-top: 40px;">
+            <button class="weui-btn weui-btn_primary" id="card-confirm">确认校准</button>
+            <button class="weui-btn weui-btn_default" id="card-cancel" style="margin-top: 15px; background: rgba(255,255,255,0.1); color: white; border: none;">取消</button>
         </div>
     </div>
 
@@ -223,7 +199,21 @@
         </div>
     </div>
 
-    <div id="toast" style="display: none;"><div class="weui-mask_transparent"></div><div class="weui-toast"><i class="weui-icon-success-no-circle weui-icon_toast"></i><p class="weui-toast__content">校准成功</p></div></div>
+    <div id="toast-success" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+            <p class="weui-toast__content">校准成功</p>
+        </div>
+    </div>
+
+    <div id="toast-warn" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast weui-toast_text-wrap">
+            <i class="weui-icon-warn weui-icon_toast"></i>
+            <p class="weui-toast__content" id="warn-content">请输入有效的屏幕尺寸<br/>范围：2.0 - 100.0 英寸</p>
+        </div>
+    </div>
 
     <script>
         let PX_PER_MM = 96 / 25.4;
@@ -238,62 +228,55 @@
         const customKeyboard = document.getElementById('custom-keyboard');
         const inputContainer = document.getElementById('input-container');
 
-        // --- 全屏按钮状态更新 ---
+        // --- 全屏按钮 ---
         function updateFSButton() {
             if (document.fullscreenElement) {
                 fsBtn.innerText = "退出全屏模式";
-                fsBtn.classList.remove('weui-btn_primary');
-                fsBtn.classList.add('weui-btn_default');
+                fsBtn.classList.replace('weui-btn_primary', 'weui-btn_default');
             } else {
                 fsBtn.innerText = "全屏模式";
-                fsBtn.classList.remove('weui-btn_default');
-                fsBtn.classList.add('weui-btn_primary');
+                fsBtn.classList.replace('weui-btn_default', 'weui-btn_primary');
             }
         }
         document.addEventListener('fullscreenchange', updateFSButton);
-        document.addEventListener('webkitfullscreenchange', updateFSButton);
-
         fsBtn.onclick = () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen?.() || document.documentElement.webkitRequestFullscreen?.();
-            } else {
-                document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-            }
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen?.() || document.documentElement.webkitRequestFullscreen?.();
+            else document.exitFullscreen?.() || document.webkitExitFullscreen?.();
         };
 
-        // --- 键盘 ---
-        const openKB = (e) => {
-            e.stopPropagation();
-            customKeyboard.classList.add('show');
-            inputContainer.classList.add('fake-input-focus');
-        };
-        if (isMobile) {
-            screenSizeInput.onclick = openKB;
-            inputContainer.onclick = openKB;
-        } else {
-            screenSizeInput.removeAttribute('readonly');
+        // --- 键盘逻辑：限制输入 ---
+        const openKB = (e) => { e.stopPropagation(); customKeyboard.classList.add('show'); inputContainer.classList.add('fake-input-focus'); };
+        if (isMobile) { screenSizeInput.onclick = openKB; inputContainer.onclick = openKB; }
+        else { 
+            screenSizeInput.removeAttribute('readonly'); 
             screenSizeInput.onfocus = () => inputContainer.classList.add('fake-input-focus');
             screenSizeInput.onblur = () => inputContainer.classList.remove('fake-input-focus');
         }
-        document.getElementById('kb-done-btn').onclick = hideKeyboard;
+
         document.querySelectorAll('.keyboard-key').forEach(key => {
             key.onclick = (e) => {
                 e.stopPropagation();
                 let cur = screenSizeInput.value;
-                if(key.classList.contains('num-key')) screenSizeInput.value += key.innerText;
-                else if(key.classList.contains('dot-key') && !cur.includes('.')) screenSizeInput.value += cur===''?'0.':'.';
-                else if(key.classList.contains('del-key')) screenSizeInput.value = cur.slice(0,-1);
+                if(key.classList.contains('num-key')) {
+                    const parts = cur.split('.');
+                    // 整数部分限制最多3位（为了支持100）
+                    if (parts.length === 1 && parts[0].length >= 3) return;
+                    // 小数部分限制最多2位
+                    if (parts.length === 2 && parts[1].length >= 2) return;
+                    screenSizeInput.value += key.innerText;
+                }
+                else if(key.classList.contains('dot-key') && !cur.includes('.')) {
+                    screenSizeInput.value += cur === '' ? '0.' : '.';
+                }
+                else if(key.classList.contains('del-key')) {
+                    screenSizeInput.value = cur.slice(0, -1);
+                }
             };
         });
-        function hideKeyboard() {
-            customKeyboard.classList.remove('show');
-            inputContainer.classList.remove('fake-input-focus');
-        }
-        document.addEventListener('click', (e) => { 
-            if(!customKeyboard.contains(e.target) && !inputContainer.contains(e.target)) hideKeyboard(); 
-        });
+        function hideKeyboard() { customKeyboard.classList.remove('show'); inputContainer.classList.remove('fake-input-focus'); }
+        document.addEventListener('click', (e) => { if(!customKeyboard.contains(e.target) && !inputContainer.contains(e.target)) hideKeyboard(); });
 
-        // --- 尺子 ---
+        // --- 绘制尺子 ---
         function drawRulers() {
             const dpr = window.devicePixelRatio || 1;
             const isDark = document.body.getAttribute('data-weui-theme') === 'dark';
@@ -321,7 +304,7 @@
             });
         }
 
-        // --- 交互 ---
+        // --- 交互测量 ---
         function handlePointer(x, y, show) {
             const showGuide = document.getElementById('guide-switch').checked;
             const gH = document.getElementById('guide-h'), gV = document.getElementById('guide-v'), badge = document.getElementById('measure-badge');
@@ -335,6 +318,7 @@
             badge.style.top = (y - 35) + 'px';
         }
 
+        // --- 滑块逻辑 ---
         const sliderInner = document.getElementById('sliderInner');
         function updateCardSize(percent) {
             const minW = 200, maxW = 450;
@@ -345,37 +329,43 @@
             document.getElementById('sliderHandler').style.left = (percent * 100) + '%';
             document.getElementById('sliderTrack').style.width = (percent * 100) + '%';
         }
-        sliderInner.addEventListener('touchstart', e => {
+        const onSliderMove = (e) => {
             const rect = sliderInner.getBoundingClientRect();
-            const moveHandler = (me) => {
-                let p = (me.touches[0].clientX - rect.left) / rect.width;
-                updateCardSize(Math.max(0, Math.min(1, p)));
-            };
-            document.addEventListener('touchmove', moveHandler);
-            document.addEventListener('touchend', () => document.removeEventListener('touchmove', moveHandler), {once:true});
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let p = (clientX - rect.left) / rect.width;
+            updateCardSize(Math.max(0, Math.min(1, p)));
+        };
+        sliderInner.addEventListener('touchstart', () => {
+            document.addEventListener('touchmove', onSliderMove);
+            document.addEventListener('touchend', () => document.removeEventListener('touchmove', onSliderMove), {once:true});
         });
 
-        document.getElementById('flip-btn').onclick = () => {
-            isFlipped = !isFlipped;
-            document.body.className = isFlipped ? 'pos-br' : 'pos-tl';
-            setTimeout(drawRulers, 400);
-        };
+        // --- 核心校验逻辑 ---
         document.getElementById('calibrate-btn').onclick = () => {
             const val = parseFloat(screenSizeInput.value);
-            if (val > 0) {
-                const diag = Math.sqrt(window.screen.width**2 + window.screen.height**2);
-                PX_PER_MM = (diag / val) / 25.4;
-                localStorage.setItem('ruler_pxmm', PX_PER_MM);
-                drawRulers(); showToast(); hideKeyboard();
+            // 校验范围：2.0 到 100.0 英寸
+            if (isNaN(val) || val < 2.0 || val > 100.0) { 
+                showToast('warn', '请输入正确的屏幕尺寸<br/>支持范围：2.0 - 100.0 英寸');
+                return; 
             }
+            const diag = Math.sqrt(window.screen.width**2 + window.screen.height**2);
+            PX_PER_MM = (diag / val) / 25.4;
+            localStorage.setItem('ruler_pxmm', PX_PER_MM);
+            drawRulers(); 
+            showToast('success'); 
+            hideKeyboard();
         };
+
+        // --- 功能绑定 ---
         document.getElementById('btn-card-mode').onclick = () => document.getElementById('card-cali-overlay').style.display = 'flex';
         document.getElementById('card-cancel').onclick = () => document.getElementById('card-cali-overlay').style.display = 'none';
         document.getElementById('card-confirm').onclick = () => {
             PX_PER_MM = parseFloat(document.getElementById('sliderValue').innerText) / CARD_WIDTH_MM;
             localStorage.setItem('ruler_pxmm', PX_PER_MM);
-            drawRulers(); document.getElementById('card-cali-overlay').style.display = 'none'; showToast();
+            drawRulers(); document.getElementById('card-cali-overlay').style.display = 'none'; showToast('success');
         };
+
+        document.getElementById('flip-btn').onclick = () => { isFlipped = !isFlipped; document.body.className = isFlipped ? 'pos-br' : 'pos-tl'; setTimeout(drawRulers, 400); };
         document.getElementById('btn-search-mode').onclick = () => document.getElementById('search-dialog').style.display = 'block';
         document.getElementById('close-search').onclick = () => document.getElementById('search-dialog').style.display = 'none';
         document.getElementById('confirm-search').onclick = () => {
@@ -392,17 +382,12 @@
         document.addEventListener('touchmove', interactArea);
         document.addEventListener('touchend', () => handlePointer(0,0,false));
 
-        const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
-        const applyTheme = (e) => {
-            document.body.setAttribute('data-weui-theme', e.matches ? 'dark' : 'light');
-            setTimeout(drawRulers, 50);
-        };
-        themeMedia.addEventListener('change', applyTheme);
-        applyTheme(themeMedia);
-
-        function showToast() {
-            const t = document.getElementById('toast');
-            t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1500);
+        // 通用 Toast 调用
+        function showToast(type, msg) {
+            const t = document.getElementById(type === 'success' ? 'toast-success' : 'toast-warn');
+            if (msg) document.getElementById('warn-content').innerHTML = msg;
+            t.style.display = 'block'; 
+            setTimeout(() => t.style.display = 'none', type === 'success' ? 1500 : 2500);
         }
 
         window.onresize = drawRulers;
