@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=1.0">
+    <title>Ckacka 工具箱管理</title>
+    <!-- Material Symbols & 拖拽库 SortableJS -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0,0" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        :root {
+            --md-sys-color-primary: #0061a4;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #d1e4ff;
+            --md-sys-color-on-primary-container: #001d36;
+            --md-sys-color-secondary: #535f70;
+            --md-sys-color-surface: #fdfcff;
+            --md-sys-color-on-surface: #1a1c1e;
+            --md-sys-color-surface-container: #f0f4f9;
+            --md-sys-color-surface-container-high: #e9eef6;
+            --md-sys-color-outline: #73777f;
+            --md-sys-color-outline-variant: #c3c7cf;
+            --md-sys-color-error: #ba1a1a;
+            --transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --md-sys-color-primary: #a0c9ff;
+                --md-sys-color-on-primary: #003258;
+                --md-sys-color-primary-container: #00497d;
+                --md-sys-color-on-primary-container: #d1e4ff;
+                --md-sys-color-secondary: #bbc7db;
+                --md-sys-color-surface: #1a1c1e;
+                --md-sys-color-on-surface: #e2e2e6;
+                --md-sys-color-surface-container: #232a31;
+                --md-sys-color-surface-container-high: #2d343c;
+                --md-sys-color-outline: #8d9199;
+                --md-sys-color-outline-variant: #43474e;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .app-container { max-width: 1000px; margin: 0 auto; }
+
+        header { margin-bottom: 24px; padding: 12px 0; }
+        header h1 { font-size: 24px; font-weight: 400; display: flex; align-items: center; gap: 12px; }
+
+        .steps-nav {
+            display: flex;
+            background: var(--md-sys-color-surface-container);
+            padding: 4px;
+            border-radius: 28px;
+            margin-bottom: 32px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+        .step-tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--md-sys-color-secondary);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .step-tab.active {
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
+        .step-num {
+            width: 20px; height: 20px; border-radius: 50%;
+            background: var(--md-sys-color-outline);
+            color: var(--md-sys-color-surface);
+            font-size: 12px; display: flex; align-items: center; justify-content: center;
+        }
+        .step-tab.active .step-num { background: var(--md-sys-color-primary); }
+
+        .step-panel { display: none; animation: slideUp 0.4s ease-out; }
+        .step-panel.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        #source-input {
+            width: 100%; height: 320px;
+            background: var(--md-sys-color-surface-container-high);
+            color: var(--md-sys-color-on-surface);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: 16px; padding: 16px;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 14px; outline: none;
+            margin-bottom: 20px;
+        }
+
+        .scope-group { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+        .scope-chip {
+            padding: 10px 20px; border-radius: 12px;
+            border: 1px solid var(--md-sys-color-outline);
+            cursor: pointer; font-size: 14px; font-weight: 500;
+            transition: var(--transition);
+        }
+        .scope-chip.active {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border-color: var(--md-sys-color-primary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+        }
+        @media (max-width: 480px) { .grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); } }
+
+        .card-wrapper { 
+            position: relative; 
+            cursor: default;
+            transition: var(--transition);
+        }
+        body.edit-mode .card-wrapper {
+            cursor: grab;
+        }
+        body.edit-mode .card-wrapper:active {
+            cursor: grabbing;
+        }
+        .sortable-ghost {
+            opacity: 0.4;
+            background: var(--md-sys-color-primary-container);
+            border: 2px dashed var(--md-sys-color-primary);
+            border-radius: 24px;
+        }
+        .sortable-drag {
+            opacity: 0.9;
+            transform: rotate(2deg);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+        }
+
+        .card {
+            background: var(--md-sys-color-surface-container-high);
+            border-radius: 24px; padding: 20px 12px;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            border: 1px solid transparent; height: 100%; transition: var(--transition);
+            pointer-events: auto;
+        }
+        .card:hover { background: var(--md-sys-color-primary-container); transform: scale(1.02); }
+        
+        .icon-box {
+            width: 56px; height: 56px; border-radius: 16px;
+            background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);
+            display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+        }
+        .icon-box .material-symbols-rounded {
+            font-size: 32px;
+            line-height: 1;
+            display: block;
+            width: auto;
+            height: auto;
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .card b { font-size: 15px; display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .card span { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+
+        .edit-badge {
+            position: absolute; top: -6px; right: -6px;
+            background: var(--md-sys-color-primary); color: white;
+            width: 32px; height: 32px; border-radius: 50%;
+            display: none; align-items: center; justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer; z-index: 10;
+        }
+        body.edit-mode .edit-badge { display: flex; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 24px; border-radius: 100px; border: none;
+            font-size: 14px; font-weight: 500; cursor: pointer; transition: var(--transition);
+            background: transparent;
+        }
+        .btn-filled { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+        .btn-tonal { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+        .btn-outline { border: 1px solid var(--md-sys-color-outline); background: transparent; color: var(--md-sys-color-primary); }
+        .btn-danger { color: var(--md-sys-color-error); }
+        .btn:active { transform: scale(0.95); opacity: 0.9; }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 100;
+            padding: 16px;
+        }
+        .modal {
+            background: var(--md-sys-color-surface-container-high);
+            width: 100%; max-width: 400px; border-radius: 28px; padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .field { margin-bottom: 20px; }
+        .field label { display: block; font-size: 12px; margin: 0 0 6px 12px; color: var(--md-sys-color-primary); }
+        .field input {
+            width: 100%; padding: 14px 18px; border-radius: 14px;
+            background: var(--md-sys-color-surface); border: 1px solid var(--md-sys-color-outline-variant);
+            color: var(--md-sys-color-on-surface); outline: none;
+        }
+
+        /* 图标搜索弹窗 —— 全屏iframe，关闭按钮悬浮 */
+        .icon-search-modal {
+            max-width: 90vw !important;
+            width: 90vw;
+            height: 85vh;
+            padding: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        .iframe-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+            display: block;
+        }
+        /* 悬浮关闭按钮 */
+        .close-icon-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 20;
+            background: var(--md-sys-color-surface-container-high);
+            color: var(--md-sys-color-on-surface);
+            border: none;
+            border-radius: 40px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(4px);
+            background: rgba(30, 30, 40, 0.7);
+            color: white;
+        }
+        .close-icon-btn:hover {
+            background: var(--md-sys-color-primary);
+            transform: scale(1.05);
+        }
+        .close-icon-btn .material-symbols-rounded {
+            font-size: 28px;
+        }
+
+        .action-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin: 0 0 16px 8px;
+        }
+        .badge-count {
+            background: var(--md-sys-color-secondary);
+            color: var(--md-sys-color-on-primary);
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 100px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1><span class="material-symbols-rounded">build_circle</span> Ckacka工具箱配置</h1>
+    </header>
+
+    <nav class="steps-nav">
+        <button class="step-tab active" data-step="1"><span class="step-num">1</span> 数据源</button>
+        <button class="step-tab" data-step="2"><span class="step-num">2</span> 视编</button>
+        <button class="step-tab" data-step="3"><span class="step-num">3</span> 导出</button>
+    </nav>
+
+    <!-- 步骤1 -->
+    <section id="step1" class="step-panel active">
+        <div style="background: var(--md-sys-color-surface-container); padding: 24px; border-radius: 24px;">
+            <h3 style="margin-bottom: 16px;">输入 JSON 数据</h3>
+            <textarea id="source-input" placeholder="// 在此粘贴配置代码..."></textarea>
+            <h3 style="margin-bottom: 16px;">编辑范围</h3>
+            <div class="scope-group">
+                <div class="scope-chip active" data-scope="all">全部内容</div>
+                <div class="scope-chip" data-scope="tools">仅工具库 (toolsData)</div>
+                <div class="scope-chip" data-scope="cards">仅卡片 (defaultCards)</div>
+            </div>
+            <button class="btn btn-filled" style="width: 100%; height: 56px;" onclick="loadData()">
+                解析并开始编辑 <span class="material-symbols-rounded">arrow_forward</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 步骤2 -->
+    <section id="step2" class="step-panel">
+        <div class="action-bar">
+            <div class="btn-group" style="display: flex; gap: 8px; background: var(--md-sys-color-surface-container); padding: 4px; border-radius: 100px;">
+                <button class="btn btn-tonal" id="btn-preview" onclick="setEditMode(false)">预览</button>
+                <button class="btn" id="btn-edit" onclick="setEditMode(true)">编辑</button>
+            </div>
+            <button class="btn btn-outline" onclick="addItem()">
+                <span class="material-symbols-rounded">add</span> 新增
+            </button>
+        </div>
+
+        <div id="edit-content">
+            <div id="sec-tools" style="margin-bottom: 32px;">
+                <div class="section-header">
+                    <h3 style="font-size: 14px; opacity: 0.6; text-transform: uppercase;">📦 工具库</h3>
+                    <span class="badge-count" id="tools-count">0</span>
+                </div>
+                <div class="grid" id="tools-grid"></div>
+            </div>
+            <div id="sec-cards">
+                <div class="section-header">
+                    <h3 style="font-size: 14px; opacity: 0.6; text-transform: uppercase;">✨ 全局卡片</h3>
+                    <span class="badge-count" id="cards-count">0</span>
+                </div>
+                <div class="grid" id="cards-grid"></div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; display: flex; justify-content: space-between;">
+            <button class="btn btn-outline" onclick="changeStep(1)">返回</button>
+            <button class="btn btn-filled" onclick="changeStep(3)">完成编辑</button>
+        </div>
+    </section>
+
+    <!-- 步骤3 -->
+    <section id="step3" class="step-panel">
+        <div style="background: var(--md-sys-color-surface-container); padding: 24px; border-radius: 24px; text-align: center;">
+            <span class="material-symbols-rounded" style="font-size: 48px; color: var(--md-sys-color-primary);">task_alt</span>
+            <h2 style="margin: 16px 0;">配置已生成</h2>
+            <div style="background: #1e1e2e; color: #cdd6f4; padding: 20px; border-radius: 16px; text-align: left; overflow: auto; max-height: 300px; margin-bottom: 24px;">
+                <pre id="final-code" style="font-size: 12px;"></pre>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <button class="btn btn-filled" onclick="copyCode()">复制全部代码</button>
+                <button class="btn btn-tonal" onclick="changeStep(2)">回退修改</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- 编辑模态框 -->
+<div class="modal-overlay" id="editor-modal">
+    <div class="modal">
+        <h3 id="modal-title" style="margin-bottom: 20px;">编辑项目</h3>
+        <input type="hidden" id="edit-id">
+        <input type="hidden" id="edit-type">
+        <div class="field"><label>名称</label><input type="text" id="field-name" placeholder="例如: 计算器"></div>
+        <div class="field" id="desc-wrap"><label>描述</label><input type="text" id="field-desc" placeholder="简要说明"></div>
+        <div class="field">
+            <label>图标 ID (Material Rounded)</label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="field-icon" placeholder="settings" style="flex:1;">
+                <button class="btn btn-outline" type="button" onclick="openIconSearch()" style="padding: 0 16px; height: 48px; border-radius: 14px;">
+                    <span class="material-symbols-rounded">search</span> 搜索
+                </button>
+            </div>
+        </div>
+        <div class="field"><label>链接 (URL)</label><input type="text" id="field-url" placeholder="https://..."></div>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 24px;">
+            <button class="btn btn-filled" onclick="saveData()">确认保存</button>
+            <div style="display: flex; justify-content: space-between;">
+                <button class="btn btn-danger" id="btn-delete" onclick="deleteData()">删除项</button>
+                <button class="btn btn-outline" onclick="closeModal()">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图标搜索弹窗 —— 全屏iframe，右上角悬浮关闭按钮 -->
+<div class="modal-overlay" id="icon-search-modal">
+    <div class="modal icon-search-modal">
+        <!-- 悬浮关闭按钮 -->
+        <button class="close-icon-btn" onclick="closeIconSearch()" title="关闭">
+            <span class="material-symbols-rounded">close</span>
+        </button>
+        <!-- iframe 充满整个模态框 -->
+        <div class="iframe-container">
+            <iframe src="https://icons.30blog.cc/" title="图标搜索引擎" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ---------- 全局状态 ----------
+        let toolsData = [];
+        let defaultCards = [];
+        let currentScope = 'all';
+        let sortableInstances = { tools: null, cards: null };
+        let isEditMode = false;
+
+        const DEFAULT_TOOLS = [{ id: 1, name: "示例工具", desc: "这是一个说明", icon: "settings", url: "#" }];
+        const DEFAULT_CARDS = [{ id: 101, title: "快捷入口", icon: "bolt", url: "#" }];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('source-input').value = 
+`const toolsData = [
+  { id: 1, name: "示例工具", desc: "这是一个说明", icon: "settings", url: "#" }
+];
+const defaultCards = [
+  { id: 101, title: "快捷入口", icon: "bolt", url: "#" }
+];`;
+        });
+
+        function safeIcon(iconValue) {
+            if (!iconValue || typeof iconValue !== 'string') return 'extension';
+            const trimmed = iconValue.trim();
+            return trimmed === '' ? 'extension' : trimmed;
+        }
+
+        function initSortable() {
+            if (sortableInstances.tools) sortableInstances.tools.destroy();
+            if (sortableInstances.cards) sortableInstances.cards.destroy();
+
+            const toolsGrid = document.getElementById('tools-grid');
+            const cardsGrid = document.getElementById('cards-grid');
+            
+            const toolsEnabled = isEditMode && toolsData.length > 0;
+            const cardsEnabled = isEditMode && defaultCards.length > 0;
+
+            if (toolsEnabled) {
+                sortableInstances.tools = new Sortable(toolsGrid, {
+                    animation: 200,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    handle: '.card-wrapper',
+                    disabled: false,
+                    onEnd: function(evt) {
+                        const wrappers = [...toolsGrid.querySelectorAll('.card-wrapper')];
+                        const newOrder = wrappers.map(w => {
+                            const id = w.getAttribute('data-id');
+                            return toolsData.find(t => t.id == id);
+                        }).filter(Boolean);
+                        toolsData = newOrder;
+                        updateCounts();
+                    }
+                });
+            }
+            if (cardsEnabled) {
+                sortableInstances.cards = new Sortable(cardsGrid, {
+                    animation: 200,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    handle: '.card-wrapper',
+                    disabled: false,
+                    onEnd: function(evt) {
+                        const wrappers = [...cardsGrid.querySelectorAll('.card-wrapper')];
+                        const newOrder = wrappers.map(w => {
+                            const id = w.getAttribute('data-id');
+                            return defaultCards.find(c => c.id == id);
+                        }).filter(Boolean);
+                        defaultCards = newOrder;
+                        updateCounts();
+                    }
+                });
+            }
+        }
+
+        function destroySortable() {
+            if (sortableInstances.tools) { sortableInstances.tools.destroy(); sortableInstances.tools = null; }
+            if (sortableInstances.cards) { sortableInstances.cards.destroy(); sortableInstances.cards = null; }
+        }
+
+        function updateCounts() {
+            document.getElementById('tools-count').textContent = toolsData.length;
+            document.getElementById('cards-count').textContent = defaultCards.length;
+        }
+
+        function renderGrids() {
+            const tGrid = document.getElementById('tools-grid');
+            const cGrid = document.getElementById('cards-grid');
+            
+            document.getElementById('sec-tools').style.display = (currentScope==='all'||currentScope==='tools') ? 'block' : 'none';
+            document.getElementById('sec-cards').style.display = (currentScope==='all'||currentScope==='cards') ? 'block' : 'none';
+
+            if (toolsData.length) {
+                tGrid.innerHTML = toolsData.map(item => {
+                    const iconName = safeIcon(item.icon);
+                    return `
+                    <div class="card-wrapper" data-id="${item.id}" data-type="tools">
+                        <div class="edit-badge" onclick="openModal('tools', ${item.id})"><span class="material-symbols-rounded" style="font-size:18px">edit</span></div>
+                        <div class="card">
+                            <div class="icon-box"><span class="material-symbols-rounded">${iconName}</span></div>
+                            <b>${escapeHtml(item.name) || '未命名'}</b><span>${escapeHtml(item.desc) || ''}</span>
+                        </div>
+                    </div>
+                `}).join('');
+            } else {
+                tGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:24px; opacity:0.6;">暂无工具，点击“新增”添加</div>';
+            }
+
+            if (defaultCards.length) {
+                cGrid.innerHTML = defaultCards.map(item => {
+                    const iconName = safeIcon(item.icon);
+                    return `
+                    <div class="card-wrapper" data-id="${item.id}" data-type="cards">
+                        <div class="edit-badge" onclick="openModal('cards', ${item.id})"><span class="material-symbols-rounded" style="font-size:18px">edit</span></div>
+                        <div class="card" style="background: var(--md-sys-color-surface-container)">
+                            <div class="icon-box" style="background: var(--md-sys-color-secondary)"><span class="material-symbols-rounded">${iconName}</span></div>
+                            <b>${escapeHtml(item.title) || '卡片'}</b><span>入口卡片</span>
+                        </div>
+                    </div>
+                `}).join('');
+            } else {
+                cGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:24px; opacity:0.6;">暂无卡片</div>';
+            }
+
+            updateCounts();
+            if (isEditMode) {
+                destroySortable();
+                initSortable();
+            } else {
+                destroySortable();
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return text;
+            return String(text).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+        }
+
+        window.loadData = function() {
+            const input = document.getElementById('source-input').value.trim();
+            if (input) {
+                try {
+                    const sandbox = new Function(input + `; return { t: typeof toolsData !== 'undefined' ? toolsData : [], c: typeof defaultCards !== 'undefined' ? defaultCards : [] };`);
+                    const res = sandbox();
+                    toolsData = Array.isArray(res.t) ? res.t : [];
+                    defaultCards = Array.isArray(res.c) ? res.c : [];
+                } catch (e) {
+                    alert("解析失败，请检查代码格式"); return;
+                }
+            } else {
+                toolsData = [...DEFAULT_TOOLS];
+                defaultCards = [...DEFAULT_CARDS];
+            }
+            toolsData = toolsData.map(item => ({ ...item, icon: safeIcon(item.icon) }));
+            defaultCards = defaultCards.map(item => ({ ...item, icon: safeIcon(item.icon) }));
+            currentScope = document.querySelector('.scope-chip.active')?.dataset.scope || 'all';
+            changeStep(2);
+        };
+
+        window.changeStep = function(n) {
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('step'+n).classList.add('active');
+            document.querySelectorAll('.step-tab').forEach((t,i) => t.classList.toggle('active', i+1===n));
+            if (n === 2) {
+                renderGrids();
+                setEditMode(isEditMode);
+            }
+            if (n === 3) showFinal();
+        };
+
+        document.querySelectorAll('.step-tab').forEach((tab, idx) => {
+            tab.addEventListener('click', () => changeStep(idx+1));
+        });
+
+        window.setEditMode = function(bool) {
+            isEditMode = bool;
+            document.body.classList.toggle('edit-mode', bool);
+            const previewBtn = document.getElementById('btn-preview');
+            const editBtn = document.getElementById('btn-edit');
+            previewBtn.className = bool ? 'btn' : 'btn btn-tonal';
+            editBtn.className = bool ? 'btn btn-tonal' : 'btn';
+            
+            if (bool) {
+                destroySortable();
+                initSortable();
+            } else {
+                destroySortable();
+            }
+        };
+
+        window.openModal = function(type, id = null) {
+            document.getElementById('edit-type').value = type;
+            document.getElementById('edit-id').value = id || '';
+            document.getElementById('desc-wrap').style.display = type==='tools' ? 'block' : 'none';
+            document.getElementById('btn-delete').style.display = id ? 'flex' : 'none';
+            document.getElementById('modal-title').textContent = id ? '编辑项目' : '新建项目';
+
+            if (id) {
+                const list = type==='tools' ? toolsData : defaultCards;
+                const item = list.find(x => x.id == id);
+                if (item) {
+                    document.getElementById('field-name').value = (type==='tools'? item.name : item.title) || '';
+                    document.getElementById('field-desc').value = item.desc || '';
+                    document.getElementById('field-icon').value = safeIcon(item.icon);
+                    document.getElementById('field-url').value = item.url || '#';
+                }
+            } else {
+                document.getElementById('field-name').value = '';
+                document.getElementById('field-desc').value = '';
+                document.getElementById('field-icon').value = 'extension';
+                document.getElementById('field-url').value = '#';
+            }
+            document.getElementById('editor-modal').style.display = 'flex';
+        };
+
+        window.closeModal = () => document.getElementById('editor-modal').style.display = 'none';
+
+        window.saveData = function() {
+            const type = document.getElementById('edit-type').value;
+            const id = document.getElementById('edit-id').value;
+            const list = type === 'tools' ? toolsData : defaultCards;
+            const nameInput = document.getElementById('field-name').value.trim();
+            const iconRaw = document.getElementById('field-icon').value.trim();
+            
+            const newItem = {
+                id: id ? parseInt(id) : Date.now(),
+                icon: safeIcon(iconRaw),
+                url: document.getElementById('field-url').value.trim() || '#'
+            };
+            if (type === 'tools') {
+                if (!nameInput) { alert('名称不能为空'); return; }
+                newItem.name = nameInput;
+                newItem.desc = document.getElementById('field-desc').value.trim();
+            } else {
+                if (!nameInput) { alert('标题不能为空'); return; }
+                newItem.title = nameInput;
+            }
+            if (id) {
+                const idx = list.findIndex(x => x.id == id);
+                if (idx !== -1) list[idx] = newItem;
+            } else {
+                list.push(newItem);
+            }
+            closeModal();
+            renderGrids();
+        };
+
+        window.deleteData = function() {
+            if (!confirm("确定删除吗？")) return;
+            const type = document.getElementById('edit-type').value;
+            const id = document.getElementById('edit-id').value;
+            if (type === 'tools') toolsData = toolsData.filter(x => x.id != id);
+            else defaultCards = defaultCards.filter(x => x.id != id);
+            closeModal();
+            renderGrids();
+        };
+
+        window.addItem = function() {
+            const type = currentScope === 'cards' ? 'cards' : 'tools';
+            openModal(type);
+        };
+
+        function showFinal() {
+            let code = "";
+            if (currentScope === 'all' || currentScope === 'tools') code += `const toolsData = ${JSON.stringify(toolsData, null, 2)};\n\n`;
+            if (currentScope === 'all' || currentScope === 'cards') code += `const defaultCards = ${JSON.stringify(defaultCards, null, 2)};`;
+            document.getElementById('final-code').textContent = code || '// 无数据';
+        }
+
+        window.copyCode = function() {
+            navigator.clipboard.writeText(document.getElementById('final-code').textContent).then(()=>alert("已复制")).catch(()=>alert("复制失败"));
+        };
+
+        document.querySelectorAll('.scope-chip').forEach(chip => chip.addEventListener('click', function(){
+            document.querySelectorAll('.scope-chip').forEach(c=>c.classList.remove('active'));
+            this.classList.add('active');
+        }));
+
+        window.openIconSearch = () => document.getElementById('icon-search-modal').style.display = 'flex';
+        window.closeIconSearch = () => document.getElementById('icon-search-modal').style.display = 'none';
+
+        document.getElementById('editor-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+        document.getElementById('icon-search-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeIconSearch(); });
+        document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click', e=>e.stopPropagation()));
+
+        const origChange = changeStep;
+        window.changeStep = function(n) {
+            if (n === 2 && toolsData.length===0 && defaultCards.length===0) {
+                toolsData = [...DEFAULT_TOOLS];
+                defaultCards = [...DEFAULT_CARDS];
+            }
+            origChange(n);
+        };
+    })();
+</script>
+</body>
+</html>
