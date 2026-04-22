@@ -137,9 +137,30 @@
         .qr-box img { width: 110px; height: 110px; border-radius: 8px; margin-bottom: 6px; display: block; }
         .qr-box span { font-size: 12px; color: var(--weui-FG-2); }
 
+        /* PC大屏适配 */
         @media (min-width: 768px) {
-            .page-content { max-width: 800px; margin: 0 auto; }
-            .player-box { height: 450px; aspect-ratio: auto; }
+            /* 1. 修复播放器过小：放宽容器，保持16:9比例自适应，并加入高度限制防止超出屏幕 */
+            .page-content { max-width: 1000px; margin: 0 auto; }
+            .player-box { height: auto; aspect-ratio: 16/9; max-height: 80vh; }
+
+            /* 2. 修复菜单样式：PC端呈现为居中弹窗 */
+            .weui-actionsheet {
+                width: 320px;
+                left: 50%;
+                bottom: 50%;
+                /* 覆盖移动端默认的从底滑出，改为居中缩放显示 */
+                transform: translate(-50%, 50%) scale(0.9);
+                border-radius: 12px;
+                overflow: hidden;
+                opacity: 0;
+                transition: transform 0.3s, opacity 0.3s;
+            }
+            .weui-actionsheet_toggle {
+                transform: translate(-50%, 50%) scale(1);
+                opacity: 1;
+            }
+            /* 隐藏取消按钮，更符合PC端弹窗逻辑 */
+            .weui-actionsheet__action { display: none; }
         }
     </style>
 </head>
@@ -209,7 +230,6 @@
         <div class="weui-dialog__hd"><strong class="weui-dialog__title">关于</strong></div>
         <div class="weui-dialog__bd">
             <p style="text-align: center;">本视频资源来源于互联网，仅用于非商业用途，如有侵权，请联系删除。</p>
-</ul>
             <p style="margin-top: 15px; font-size: 12px; color: var(--weui-FG-2); text-align: right;">版本号 3.6.0</p>
         </div>
         <div class="weui-dialog__ft">
@@ -241,7 +261,7 @@
 
         const state = { active: 0, players: {}, loaded: false, wasOffline: false };
         
-        // 元素缓存
+        // 缓存元素
         const els = {
             tabs: document.getElementById('tabsContainer'),
             content: document.getElementById('contentContainer'),
@@ -254,33 +274,32 @@
             asCancel: document.getElementById('asCancel')
         };
 
-        // 3. 封装通用的显示/隐藏动画逻辑
-        // 解决直接 display:block 导致无动画的问题
+        // 新增：播放历史管理器
+        const HistoryMgr = {
+            save: (vcode, time) => localStorage.setItem(`sp_history_${vcode}`, time),
+            get: (vcode) => parseFloat(localStorage.getItem(`sp_history_${vcode}`)) || 0
+        };
+
+        // 3. 通用显示/隐藏动画逻辑
         function toggleElement(el, show) {
             if (show) {
-                // 1. 先 display: block 占据布局
                 el.style.display = 'block';
-                // 2. 强制重绘 (Force Reflow)，让浏览器意识到 display 变了
                 el.offsetHeight; 
-                // 3. 添加动画 class (opacity: 1)
                 el.classList.add('weui-animate-fade-in');
             } else {
-                // 1. 移除 class (opacity: 0)
                 el.classList.remove('weui-animate-fade-in');
-                // 2. 等待过渡结束后再 display: none
                 setTimeout(() => {
-                    // 防止在动画过程中又被设为显示
                     if (!el.classList.contains('weui-animate-fade-in')) {
                         el.style.display = 'none';
                     }
-                }, 300); // 对应 CSS transition 时间
+                }, 300); 
             }
         }
 
         // 4. 网络状态管理器
         const NetManager = {
             showError: () => {
-                toggleElement(els.tipSucc, false); // 确保成功提示隐藏
+                toggleElement(els.tipSucc, false); 
                 toggleElement(els.tipErr, true);
                 state.wasOffline = true;
             },
@@ -289,7 +308,6 @@
                 toggleElement(els.tipErr, false);
                 toggleElement(els.tipSucc, true);
                 state.wasOffline = false;
-                // 2秒后自动隐藏成功提示
                 setTimeout(() => { toggleElement(els.tipSucc, false); }, 2000);
             }
         };
@@ -357,7 +375,7 @@
                 await loadSdk();
                 if (typeof DogePlayer === 'undefined') throw new Error('SDK Error');
 
-                state.players[divId] = new DogePlayer({
+                const player = new DogePlayer({
                     container: container,
                     userId: 14140,
                     vcode: conf.vcode,
@@ -365,8 +383,27 @@
                     autoPlay: false,
                     plsort: 'name'
                 });
+                
+                state.players[divId] = player;
 
-                state.players[divId].on('fullscreenchange', (f) => {
+                // 修复：监听准备就绪事件，从 localStorage 恢复播放进度
+                player.on('ready', () => {
+                    const savedTime = HistoryMgr.get(conf.vcode);
+                    if (savedTime > 2) { // 超过2秒才跳转，防止一秒以内的误差
+                        player.seek(savedTime);
+                    }
+                });
+
+                // 修复：监听播放进度并自动保存
+                player.on('timeupdate', () => {
+                    // 兼容抓取当前播放时间
+                    const cTime = player.currentTime || (player.video && player.video.currentTime) || 0;
+                    if (cTime > 0) {
+                        HistoryMgr.save(conf.vcode, cTime);
+                    }
+                });
+
+                player.on('fullscreenchange', (f) => {
                      try { f ? screen.orientation.lock('landscape') : screen.orientation.unlock(); } catch(e){}
                 });
 
@@ -414,17 +451,14 @@
 
         // 8. 事件监听
         function bindEvents() {
-            // Tab 切换
             els.tabs.addEventListener('click', e => {
                 if(e.target.classList.contains('nav-item')) switchTab(e.target.dataset.idx);
             });
 
-            // ActionSheet 触发与关闭
             document.getElementById('menuBtn').addEventListener('click', () => toggleActionSheet(true));
             els.asMask.addEventListener('click', () => toggleActionSheet(false));
             els.asCancel.addEventListener('click', () => toggleActionSheet(false));
 
-            // 菜单项处理
             els.asSheet.addEventListener('click', e => {
                 const item = e.target.closest('.weui-actionsheet__cell[data-action]');
                 if (!item) return;
@@ -444,14 +478,12 @@
                 else if (act === 'about') toggleDialog('about', true);
             });
 
-            // 弹窗关闭
             ['reward', 'about'].forEach(id => {
                 const CapId = id.charAt(0).toUpperCase() + id.slice(1);
                 document.getElementById('close' + CapId).addEventListener('click', () => toggleDialog(id, false));
                 document.getElementById(id + 'Mask').addEventListener('click', () => toggleDialog(id, false));
             });
 
-            // 网络事件监听
             window.addEventListener('offline', NetManager.showError);
             window.addEventListener('online', () => {
                 NetManager.showSuccess();
