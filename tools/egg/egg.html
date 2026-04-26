@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>I got lost.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #ad-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        #skip-btn {
+            position: absolute;
+            top: 40px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 10;
+            display: none; 
+            pointer-events: none; /* 倒计时期间禁止点击 */
+            user-select: none;
+            backdrop-filter: blur(4px);
+            transition: background 0.3s;
+        }
+
+        /* 倒计时结束，激活按钮的可点击状态 */
+        #skip-btn.clickable {
+            pointer-events: auto;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        #spinner-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ios-spinner {
+            width: 48px;
+            height: 48px;
+            animation: ios-spin 1s steps(12, end) infinite;
+        }
+
+        @keyframes ios-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="video-container">
+    <video id="ad-video" src="https://www.w3schools.com/html/mov_bbb.mp4" autoplay muted loop playsinline></video>
+    
+    <div id="skip-btn">15 s</div>
+
+    <div id="spinner-container">
+        <svg class="ios-spinner" viewBox="0 0 100 100">
+            <g stroke="#ffffff" stroke-width="8" stroke-linecap="round">
+                <line x1="50" y1="10" x2="50" y2="25" opacity="1" />
+                <line x1="50" y1="10" x2="50" y2="25" transform="rotate(30 50 50)" opacity="0.91" />
+                <line x1="50" y1="10" x2="50" y2="25" transform="rotate(60 50 50)" opacity="0.83" />
+                <line x1="50" y1="10" x2="50" y2="25" transform="rotate(90 50 50)" opacity="0.75" />
+                <line x1="50" y1="10" x2="50" y2="25" transform="rotate(120 50 50)" opacity="0.66" />
+                <line x1="50" y1="10" x2="50" y2="25" transform="rotate(150 50 50)" opacity="0.58" />
+                <line x1="50" y1="10" x2="50" y2="25" transform="rotate(180 50 50)" opacity="0.5" />
+                <line x1="50" y1="10" x2="50" y2="25" transform="rotate(210 50 50)" opacity="0.41" />
+                <line x1="50" y1="10" x2="50" y2="25" transform="rotate(240 50 50)" opacity="0.33" />
+                <line x1="50" y1="10" x2="50" y2="25" transform="rotate(270 50 50)" opacity="0.25" />
+                <line x1="50" y1="10" x2="50" y2="25" transform="rotate(300 50 50)" opacity="0.16" />
+                <line x1="50" y1="10" x2="50" y2="25" transform="rotate(330 50 50)" opacity="0.08" />
+            </g>
+        </svg>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const video = document.getElementById('ad-video');
+        const spinner = document.getElementById('spinner-container');
+        const skipBtn = document.getElementById('skip-btn');
+        
+        let timeLeft = 15;
+        let timerStarted = false;
+        let countdownInterval;
+
+        const targetUrl = 'https://ckacka.github.io/';
+
+        function redirect() {
+            window.location.href = targetUrl;
+        }
+
+        video.addEventListener('playing', () => {
+            if (!timerStarted) {
+                timerStarted = true;
+                
+                spinner.style.display = 'none';
+                
+                skipBtn.style.display = 'block';
+                skipBtn.innerText = `${timeLeft} s`;
+
+                countdownInterval = setInterval(() => {
+                    timeLeft--;
+                    
+                    if (timeLeft > 0) {
+                        skipBtn.innerText = `${timeLeft} s`;
+                    } else {
+                        // 倒计时结束，停止计时器
+                        clearInterval(countdownInterval);
+                        
+                        // 文字变更为“跳过”，并添加 .clickable 样式激活鼠标交互
+                        skipBtn.innerText = '跳过';
+                        skipBtn.classList.add('clickable');
+                        
+                        // 注：此处已移除自动跳转代码，完全等待用户手动点击
+                    }
+                }, 1000);
+            }
+        });
+
+        // 监听按钮点击事件。只有在倒计时结束、获得了 clickable 状态时，点击才会触发跳转
+        skipBtn.addEventListener('click', () => {
+            redirect();
+        });
+    });
+</script>
+
+</body>
+</html>
