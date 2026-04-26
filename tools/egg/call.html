@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aunt's call</title>
+    <style>
+        :root {
+            --m3-primary: #D0E4FF;
+            --m3-on-primary: #003258;
+            --m3-surface: #1C1B1F;
+            --m3-surface-variant: #49454F;
+            --wallpaper: radial-gradient(ellipse at 50% 25%, #1a0a0a 0%, #0d0303 35%, #050101 65%, #000000 100%);
+            --clock-color: #e8d5d5;
+            --clock-shadow: 0 0 40px rgba(180, 30, 30, 0.6), 0 2px 20px rgba(0, 0, 0, 0.7);
+            --hint-color: #bba5a5;
+        }
+
+        .normal-mode {
+            --wallpaper: radial-gradient(ellipse at 50% 18%, #1a3365 0%, #0d1b33 32%, #060d1a 65%, #020508 100%);
+            --clock-color: #ffffff;
+            --clock-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+            --hint-color: rgba(255, 255, 255, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: "Roboto", "Noto Sans SC", sans-serif;
+            background: #000;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        #home-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--wallpaper);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: transform 0.6s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        .clock {
+            font-size: 80px;
+            font-weight: 300;
+            margin-top: -100px;
+            text-shadow: var(--clock-shadow);
+            letter-spacing: 3px;
+            color: var(--clock-color);
+        }
+
+        .home-hint {
+            margin-top: 14px;
+            opacity: 0.55;
+            font-size: 15px;
+            letter-spacing: 2px;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+            color: var(--hint-color);
+        }
+
+        /* --- 恐怖来电通知容器 --- */
+        #notif-container {
+            position: absolute;
+            top: -120px;
+            left: 12px;
+            right: 12px;
+            z-index: 1000;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        #notif-container.show {
+            transform: translateY(140px);
+        }
+
+        .android-heads-up {
+            background: #1a1a1a;
+            border-radius: 28px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(200, 30, 30, 0.2);
+            cursor: pointer;
+            border: 1px solid rgba(160, 20, 20, 0.25);
+        }
+
+        .notif-app-icon {
+            width: 36px;
+            height: 36px;
+            background: #8B0000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+            box-shadow: 0 0 14px rgba(180, 20, 20, 0.5);
+        }
+
+        .notif-body {
+            flex: 1;
+        }
+
+        .notif-body b {
+            font-size: 14px;
+            display: block;
+            margin-bottom: 2px;
+            color: #e0d0d0;
+        }
+
+        .notif-body span {
+            font-size: 13px;
+            color: #9e8a8a;
+        }
+
+        /* --- 短信通知容器（正常时段） --- */
+        #sms-notif-container {
+            position: absolute;
+            top: -130px;
+            left: 12px;
+            right: 12px;
+            z-index: 1001;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        #sms-notif-container.show {
+            transform: translateY(150px);
+        }
+
+        .sms-heads-up {
+            background: #fefefe;
+            border-radius: 28px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .sms-notif-app-icon {
+            width: 38px;
+            height: 38px;
+            background: #4285F4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 10px rgba(66, 133, 244, 0.3);
+        }
+
+        .sms-notif-body {
+            flex: 1;
+        }
+
+        .sms-notif-body .sms-sender {
+            font-size: 14px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 3px;
+            color: #1a1a1a;
+            letter-spacing: 0.5px;
+        }
+
+        .sms-notif-body .sms-content {
+            font-size: 13px;
+            color: #5a5a5a;
+            letter-spacing: 0.3px;
+            line-height: 1.4;
+        }
+
+        .sms-notif-time {
+            font-size: 11px;
+            color: #999;
+            flex-shrink: 0;
+            margin-left: 8px;
+            align-self: flex-start;
+            margin-top: 2px;
+        }
+
+        /* --- 通话全屏容器 --- */
+        .full-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            z-index: 100;
+            flex-direction: column;
+        }
+
+        #incoming-screen {
+            background:
+                linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.9) 100%),
+                radial-gradient(ellipse at 50% 22%, #2a0808 0%, #0f0202 40%, #030000 70%, #000000 100%);
+            background-size: cover;
+            justify-content: space-around;
+            padding: 10vh 0;
+        }
+
+        .incoming-info {
+            text-align: center;
+        }
+
+        .m3-avatar-circle {
+            width: 100px;
+            height: 100px;
+            background: #2a0a0a;
+            border-radius: 30px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 40px rgba(200, 20, 20, 0.3), 0 8px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(180, 30, 30, 0.3);
+        }
+
+        .incoming-name {
+            font-size: 36px;
+            font-weight: 400;
+            text-shadow: 0 0 30px rgba(200, 30, 30, 0.5), 0 2px 12px rgba(0, 0, 0, 0.6);
+            letter-spacing: 2px;
+            color: #e8d0d0;
+        }
+
+        .incoming-number {
+            font-size: 20px;
+            color: #c0a0a0;
+            margin-top: 6px;
+            text-shadow: 0 0 20px rgba(180, 20, 20, 0.4), 0 1px 8px rgba(0, 0, 0, 0.5);
+            letter-spacing: 3px;
+        }
+
+        .incoming-subtitle {
+            color: #8a7070;
+            margin-top: 10px;
+            font-size: 14px;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .call-btn-row {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 0 15%;
+        }
+
+        .fab {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .fab:active {
+            transform: scale(0.92);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .fab.decline {
+            background: #FFB4AB;
+            color: #690005;
+        }
+
+        .fab.accept {
+            background: #B4FFB4;
+            color: #00390A;
+        }
+
+        #incall-screen {
+            background: #000;
+        }
+
+        #bg-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: brightness(0.5) saturate(0.6) hue-rotate(-20deg);
+        }
+
+        #camera-video {
+            position: absolute;
+            top: 30px;
+            right: 20px;
+            width: 110px;
+            height: 160px;
+            object-fit: cover;
+            z-index: 50;
+            display: none;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            filter: brightness(0.7) saturate(0.6) hue-rotate(-15deg);
+            transition: 0.3s;
+        }
+
+        .incall-ui {
+            position: relative;
+            z-index: 60;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 6vh 0 4vh;
+        }
+
+        .incall-top-info {
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .incall-contact-name {
+            font-size: 34px;
+            font-weight: 500;
+            text-shadow: 0 0 35px rgba(200, 30, 30, 0.55), 0 2px 12px rgba(0, 0, 0, 0.7);
+            letter-spacing: 2px;
+            color: #e6d0d0;
+        }
+
+        .incall-contact-number {
+            font-size: 22px;
+            opacity: 0.85;
+            margin-top: 6px;
+            text-shadow: 0 0 25px rgba(180, 20, 20, 0.4), 0 1px 8px rgba(0, 0, 0, 0.6);
+            font-weight: 300;
+            letter-spacing: 3px;
+            color: #c0a0a0;
+        }
+
+        .incall-timer {
+            font-size: 24px;
+            font-weight: 300;
+            margin-top: 10px;
+            opacity: 0.85;
+            text-shadow: 0 0 20px rgba(200, 40, 40, 0.4), 0 1px 8px rgba(0, 0, 0, 0.6);
+            letter-spacing: 2px;
+            color: #c8b0b0;
+        }
+
+        .bottom-controls {}
+
+        .m3-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px 10px;
+            padding: 0 20px;
+            margin-bottom: 30px;
+        }
+
+        .grid-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.08);
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon-btn:active {
+            background: rgba(255, 255, 255, 0.16);
+            transform: scale(0.93);
+        }
+
+        .icon-btn.active {
+            background: var(--m3-primary);
+            color: var(--m3-on-primary);
+        }
+
+        .btn-label {
+            font-size: 12px;
+            opacity: 0.8;
+            color: #bba5a5;
+        }
+
+        .hangup-fab {
+            width: 80px;
+            height: 80px;
+            border-radius: 28px;
+            background: #FFB4AB;
+            border: none;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: opacity 0.3s, filter 0.3s, transform 0.15s;
+        }
+
+        .hangup-fab:active {
+            transform: scale(0.9);
+        }
+
+        .hangup-fab.locked {
+            opacity: 0.4;
+            filter: grayscale(1);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        #hangup-status {
+            margin-top: 10px;
+            font-size: 13px;
+            opacity: 0.65;
+            color: #9e8a8a;
+        }
+
+        #dial-layer {
+            position: absolute;
+            bottom: -100%;
+            left: 0;
+            width: 100%;
+            height: 68vh;
+            background: #1a1515;
+            z-index: 200;
+            border-radius: 32px 32px 0 0;
+            transition: bottom 0.4s cubic-bezier(0, 0, 0.2, 1);
+            padding: 20px;
+        }
+
+        #dial-layer.open {
+            bottom: 0;
+        }
+
+        .dial-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #221c1c;
+            border-radius: 16px;
+            padding: 10px 20px;
+            border: 1px solid rgba(100, 10, 10, 0.25);
+        }
+
+        .dial-input-area {
+            flex: 1;
+            font-size: 32px;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+            font-weight: 300;
+            letter-spacing: 3px;
+            color: #d0c0c0;
+        }
+
+        .dial-input-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .del-btn {
+            padding: 10px;
+            color: #c08080;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .dial-keys {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .key {
+            height: 70px;
+            border-radius: 16px;
+            background: #221c1c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            cursor: pointer;
+            transition: background 0.1s;
+            color: #d0c0c0;
+        }
+
+        .key:active {
+            background: #382a2a;
+            transform: scale(0.95);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2a1f1f;
+            color: #d0c0c0;
+            padding: 10px 22px;
+            border-radius: 10px;
+            opacity: 0;
+            transition: 0.3s;
+            z-index: 1000;
+            pointer-events: none;
+            font-size: 14px;
+            border: 1px solid rgba(150, 20, 20, 0.3);
+            letter-spacing: 1px;
+        }
+
+        /* 正常时段toast样式覆盖 */
+        .normal-mode .toast {
+            background: #2a3040;
+            color: #d0d8e0;
+            border: 1px solid rgba(100, 130, 180, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 桌面 -->
+    <div id="home-screen">
+        <div class="clock" id="wall-clock">12:00</div>
+        <p class="home-hint">轻触屏幕以解锁</p>
+    </div>
+
+    <!-- 悬浮来电通知（恐怖时段） -->
+    <div id="notif-container">
+        <div class="android-heads-up" onclick="acceptFromNotif()">
+            <div class="notif-app-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="#ffcccc"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            </div>
+            <div class="notif-body">
+                <b>陆素冥</b>
+                <span>来电</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 短信通知容器（正常时段） -->
+    <div id="sms-notif-container">
+        <div class="sms-heads-up" onclick="dismissSmsNotif()">
+            <div class="sms-notif-app-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="#ffffff">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
+                    <path d="M7 9h10v2H7zm0-3h10v2H7zm0 6h7v2H7z" fill="#ffffff" opacity="0.8"/>
+                </svg>
+            </div>
+            <div class="sms-notif-body">
+                <span class="sms-sender">未知发送人</span>
+                <span class="sms-content">您有一个来电，来电时间为22:00-05:59</span>
+            </div>
+            <span class="sms-notif-time" id="sms-time">现在</span>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast"></div>
+
+    <!-- 来电界面 -->
+    <div id="incoming-screen" class="full-screen">
+        <div class="incoming-info">
+            <div class="m3-avatar-circle">
+                <svg viewBox="0 0 24 24" width="50" height="50" fill="#cc8888"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+            <h1 class="incoming-name">陆素冥</h1>
+            <p class="incoming-number">000-0000-0000</p>
+            <p class="incoming-subtitle">视频通话</p>
+        </div>
+        <div class="call-btn-row">
+            <button class="fab decline" onclick="exit()">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
+            </button>
+            <button class="fab accept" onclick="answer()">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 通话中界面 -->
+    <div id="incall-screen" class="full-screen">
+        <video id="bg-video" src="https://ckacka.github.io/tools/egg/egg.mp4" loop playsinline></video>
+        <video id="camera-video" autoplay playsinline muted></video>
+
+        <div class="incall-ui">
+            <div class="incall-top-info">
+                <h2 class="incall-contact-name">陆素冥</h2>
+                <p class="incall-contact-number">000-0000-0000</p>
+                <p class="incall-timer" id="timer">正在连接…</p>
+            </div>
+
+            <div class="bottom-controls">
+                <div class="m3-grid">
+                    <div class="grid-item">
+                        <button class="icon-btn" id="btn-mute" onclick="actionMute()">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+                        </button>
+                        <span class="btn-label">静音</span>
+                    </div>
+                    <div class="grid-item">
+                        <button class="icon-btn" onclick="toggleDial()">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M4 6h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zm-12 6h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zm-12 6h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/></svg>
+                        </button>
+                        <span class="btn-label">拨号盘</span>
+                    </div>
+                    <div class="grid-item">
+                        <button class="icon-btn" id="btn-speaker" onclick="actionSpeaker()">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        </button>
+                        <span class="btn-label">免提</span>
+                    </div>
+                    <div class="grid-item">
+                        <button class="icon-btn" onclick="AudioSys.tick();showToast('无法添加通话')">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                        </button>
+                        <span class="btn-label">添加</span>
+                    </div>
+                    <div class="grid-item">
+                        <button class="icon-btn" id="btn-video" onclick="actionVideo()">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                        </button>
+                        <span class="btn-label">摄像头</span>
+                    </div>
+                    <div class="grid-item">
+                        <button class="icon-btn" id="btn-record" onclick="actionRecord()">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg>
+                        </button>
+                        <span class="btn-label">录音</span>
+                    </div>
+                </div>
+
+                <div style="text-align: center;">
+                    <button id="hangup-btn" class="hangup-fab locked" onclick="hangup()">
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="#690005"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
+                    </button>
+                    <p id="hangup-status">15秒后可挂断</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 拨号盘浮层 -->
+    <div id="dial-layer">
+        <div style="text-align: right; margin-bottom: 10px; cursor: pointer;" onclick="toggleDial()">
+            <span style="color:#c08080; letter-spacing:1px;">收起</span>
+        </div>
+        <div class="dial-header">
+            <div class="dial-input-area" id="dial-text"></div>
+            <div class="del-btn" onclick="dialBack()">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z"/></svg>
+            </div>
+        </div>
+        <div class="dial-keys">
+            <div class="key" onclick="press('1')">1</div>
+            <div class="key" onclick="press('2')">2</div>
+            <div class="key" onclick="press('3')">3</div>
+            <div class="key" onclick="press('4')">4</div>
+            <div class="key" onclick="press('5')">5</div>
+            <div class="key" onclick="press('6')">6</div>
+            <div class="key" onclick="press('7')">7</div>
+            <div class="key" onclick="press('8')">8</div>
+            <div class="key" onclick="press('9')">9</div>
+            <div class="key" onclick="press('*')">*</div>
+            <div class="key" onclick="press('0')">0</div>
+            <div class="key" onclick="press('#')">#</div>
+        </div>
+    </div>
+
+    <script>
+        // --- 系统音频引擎 ---
+        const AudioSys = {
+            ctx: null,
+            init() {
+                if (!this.ctx) this.ctx = new AudioContext();
+            },
+            beep(f, duration = 0.1, vol = 0.15) {
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.value = f || 440;
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            },
+            ringTone() {
+                this.init();
+                const notes = [
+                    { freq: 800, dur: 0.15 },
+                    { freq: 1000, dur: 0.15 },
+                    { freq: 800, dur: 0.15 },
+                    { freq: 1000, dur: 0.15 },
+                ];
+                let time = this.ctx.currentTime;
+                notes.forEach((note) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.value = note.freq;
+                    gain.gain.setValueAtTime(0.15, time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, time + note.dur);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(time);
+                    osc.stop(time + note.dur);
+                    time += note.dur + 0.08;
+                });
+                setTimeout(() => {
+                    let t2 = this.ctx.currentTime;
+                    notes.forEach((note) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.frequency.value = note.freq;
+                        gain.gain.setValueAtTime(0.15, t2);
+                        gain.gain.exponentialRampToValueAtTime(0.01, t2 + note.dur);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(t2);
+                        osc.stop(t2 + note.dur);
+                        t2 += note.dur + 0.08;
+                    });
+                }, 900);
+            },
+            hangupBeep() {
+                this.init();
+                [350, 280, 200].forEach((f, i) => {
+                    setTimeout(() => this.beep(f, 0.15, 0.1), i * 250);
+                });
+            },
+            tick() {
+                this.init();
+                const noise = this.ctx.createOscillator();
+                const g = this.ctx.createGain();
+                noise.type = 'square';
+                noise.frequency.value = 130;
+                g.gain.setValueAtTime(0.05, this.ctx.currentTime);
+                g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.05);
+                noise.connect(g);
+                g.connect(this.ctx.destination);
+                noise.start();
+                noise.stop(this.ctx.currentTime + 0.05);
+            },
+            // 短信通知音效 —— 温和的"叮咚"声
+            smsNotifSound() {
+                this.init();
+                const ctx = this.ctx;
+                const now = ctx.currentTime;
+
+                // 第一个音符：温和的叮
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.value = 880;
+                gain1.gain.setValueAtTime(0.18, now);
+                gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.18);
+
+                // 第二个音符：稍低的咚
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.value = 660;
+                gain2.gain.setValueAtTime(0.16, now + 0.22);
+                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.start(now + 0.22);
+                osc2.stop(now + 0.45);
+            }
+        };
+
+        // --- 来电铃声循环控制 ---
+        let ringInterval = null;
+
+        function startRinging() {
+            if (ringInterval) return;
+            AudioSys.ringTone();
+            ringInterval = setInterval(() => {
+                AudioSys.ringTone();
+            }, 2200);
+        }
+
+        function stopRinging() {
+            if (ringInterval) {
+                clearInterval(ringInterval);
+                ringInterval = null;
+            }
+        }
+
+        // --- 逻辑控制 ---
+        const home = document.getElementById('home-screen');
+        const notif = document.getElementById('notif-container');
+        const smsNotif = document.getElementById('sms-notif-container');
+        const bgVideo = document.getElementById('bg-video');
+        const camVideo = document.getElementById('camera-video');
+
+        // 桌面时钟实时更新
+        function updateClock() {
+            const d = new Date();
+            document.getElementById('wall-clock').innerText =
+                d.getHours().toString().padStart(2, '0') + ":" + d.getMinutes().toString().padStart(2, '0');
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // ---- 时间段检测：仅晚上22:00 ~ 次日5:59 允许恐怖来电 ----
+        const currentHour = new Date().getHours();
+        const isHorrorTime = (currentHour >= 22 || currentHour < 6);
+
+        if (isHorrorTime) {
+            // 恐怖时段：保持默认交互 —— 显示红色来电通知 + 铃声
+            home.onclick = () => {
+                notif.classList.add('show');
+                startRinging();
+            };
+            document.querySelector('.home-hint').innerText = '轻触屏幕以解锁';
+        } else {
+            // 正常时段：切换为正常颜色，显示短信通知
+            document.body.classList.add('normal-mode');
+            document.querySelector('.home-hint').innerText = '轻触屏幕以解锁';
+            home.onclick = () => {
+                // 更新时间戳
+                const now = new Date();
+                const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2,
+                    '0');
+                document.getElementById('sms-time').innerText = timeStr;
+                // 显示短信通知
+                smsNotif.classList.add('show');
+                // 播放短信通知音效（温和的一声）
+                AudioSys.smsNotifSound();
+            };
+        }
+
+        // 关闭短信通知
+        function dismissSmsNotif() {
+            AudioSys.tick();
+            smsNotif.classList.remove('show');
+        }
+
+        // 点击通知 → 进入来电界面（铃声继续）
+        function acceptFromNotif() {
+            AudioSys.tick();
+            notif.classList.remove('show');
+            home.style.transform = "scale(0.9)";
+            home.style.opacity = "0";
+            setTimeout(() => {
+                home.style.display = 'none';
+                document.getElementById('incoming-screen').style.display = 'flex';
+            }, 400);
+        }
+
+        // 接听 → 进入通话界面，停止铃声
+        function answer() {
+            AudioSys.tick();
+            stopRinging();
+            document.getElementById('incoming-screen').style.display = 'none';
+            document.getElementById('incall-screen').style.display = 'flex';
+            bgVideo.play();
+            startCall();
+        }
+
+        // 通话计时 + 挂断按钮倒计时解锁
+        function startCall() {
+            let s = 0;
+            let h = 15;
+            const timer = document.getElementById('timer');
+            const hStatus = document.getElementById('hangup-status');
+            const hBtn = document.getElementById('hangup-btn');
+
+            setInterval(() => {
+                s++;
+                timer.innerText =
+                    Math.floor(s / 60).toString().padStart(2, '0') + ":" + (s % 60).toString().padStart(2, '0');
+                if (h > 0) {
+                    h--;
+                    hStatus.innerText = h + "秒后可挂断";
+                } else if (h === 0) {
+                    hStatus.innerText = "";
+                    hBtn.classList.remove('locked');
+                    h = -1;
+                }
+            }, 1000);
+        }
+
+        // --- 功能键逻辑 ---
+        function actionMute() {
+            AudioSys.tick();
+            const b = document.getElementById('btn-mute');
+            b.classList.toggle('active');
+            bgVideo.muted = b.classList.contains('active');
+        }
+
+        function actionSpeaker() {
+            AudioSys.tick();
+            const b = document.getElementById('btn-speaker');
+            b.classList.toggle('active');
+            bgVideo.volume = b.classList.contains('active') ? 1.0 : 0.3;
+        }
+
+        let isVideo = false;
+        async function actionVideo() {
+            AudioSys.tick();
+            const b = document.getElementById('btn-video');
+            isVideo = !isVideo;
+            if (isVideo) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    camVideo.srcObject = stream;
+                    camVideo.style.display = 'block';
+                    b.classList.add('active');
+                } catch (e) {
+                    showToast("无法开启摄像头");
+                    isVideo = false;
+                }
+            } else {
+                camVideo.style.display = 'none';
+                b.classList.remove('active');
+                if (camVideo.srcObject) {
+                    camVideo.srcObject.getTracks().forEach(t => t.stop());
+                    camVideo.srcObject = null;
+                }
+            }
+        }
+
+        function actionRecord() {
+            AudioSys.tick();
+            showToast("无法录音");
+        }
+
+        // --- 拨号盘逻辑 ---
+        function toggleDial() {
+            AudioSys.tick();
+            document.getElementById('dial-layer').classList.toggle('open');
+        }
+
+        function press(n) {
+            AudioSys.beep(800 + (n.charCodeAt(0) * 3), 0.1, 0.08);
+            const d = document.getElementById('dial-text');
+            d.innerText += n;
+            d.scrollLeft = d.scrollWidth;
+        }
+
+        function dialBack() {
+            AudioSys.tick();
+            const d = document.getElementById('dial-text');
+            d.innerText = d.innerText.slice(0, -1);
+        }
+
+        function hangup() {
+            if (document.getElementById('hangup-btn').classList.contains('locked')) return;
+            AudioSys.hangupBeep();
+            stopRinging();
+            showToast("通话已结束");
+            setTimeout(() => window.location.href = "https://ckacka.github.io/", 1000);
+        }
+
+        function exit() {
+            AudioSys.hangupBeep();
+            stopRinging();
+            showToast("已拒绝");
+            setTimeout(() => window.location.href = "https://ckacka.github.io/", 800);
+        }
+
+        function showToast(m) {
+            const t = document.getElementById('toast');
+            t.innerText = m;
+            t.style.opacity = 1;
+            clearTimeout(t._timeout);
+            t._timeout = setTimeout(() => { t.style.opacity = 0; }, 2000);
+        }
+    </script>
+</body>
+</html>
