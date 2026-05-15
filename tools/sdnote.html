@@ -1,419 +1,436 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>树洞便签</title>
-    
-    <link rel="stylesheet" href="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-
-    <style>
-        :root {
-            --app-bg: var(--td-bg-color-page);
-            --card-bg: var(--td-bg-color-container);
-            --text-primary: var(--td-text-color-primary);
-            --text-secondary: var(--td-text-color-secondary);
-            --border-color: var(--td-border-level-1-color);
-        }
-
-        body {
-            margin: 0; padding: 0;
-            background-color: var(--app-bg); color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        #app { display: flex; flex-direction: column; min-height: 100vh; }
-
-        /* --- 导航与列表 --- */
-        .sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background-color: var(--app-bg);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
-        }
-
-        .nav-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 20px; background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-        }
-        .nav-brand { font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        
-        .filter-section { padding: 12px 20px; background-color: var(--app-bg); }
-        
-        .main-content { padding: 12px 20px 24px 20px; flex: 1; }
-        
-        .notes-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px;
-        }
-        .note-card {
-            background-color: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 16px; padding: 16px; cursor: pointer;
-            display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .note-card:active { transform: scale(0.98); }
-        .card-title { font-size: 16px; font-weight: 600; margin: 0 0 8px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .card-preview { font-size: 14px; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 12px; flex: 1; line-height: 1.5; word-break: break-all; }
-        .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--td-text-color-placeholder); border-top: 1px dashed var(--border-color); padding-top: 12px; }
-
-        /* --- 返回顶部按钮 --- */
-        .back-top-btn {
-            position: fixed;
-            bottom: 32px;
-            right: 24px;
-            width: 44px;
-            height: 44px;
-            background-color: var(--td-brand-color);
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0, 82, 217, 0.3);
-            cursor: pointer;
-            z-index: 99;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            opacity: 0;
-            transform: translateY(20px);
-            pointer-events: none;
-        }
-        .back-top-btn.is-visible {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-        .back-top-btn:active { transform: scale(0.9); }
-
-        /* --- 富文本编辑器适配 --- */
-        .editor-wrapper {
-            border: 1px solid var(--border-color); border-radius: 4px;
-            background-color: var(--card-bg); overflow: hidden;
-            display: flex; flex-direction: column;
-            transition: all 0.2s ease;
-        }
-        .editor-wrapper.is-fullscreen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 99999; border-radius: 0; border: none;
-        }
-        
-        #quill-editor { min-height: 200px; max-height: 40vh; overflow-y: auto; }
-        .editor-wrapper.is-fullscreen #quill-editor { max-height: none; flex: 1; }
-        
-        .ql-toolbar.ql-snow {
-            border: none !important; border-bottom: 1px solid var(--border-color) !important;
-            background-color: var(--td-bg-color-secondarycontainer);
-            padding: 10px 12px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .toolbar-group-left { display: flex; flex-wrap: wrap; gap: 16px; }
-        .ql-formats { display: flex !important; gap: 8px !important; margin: 0 !important; align-items: center; }
-        
-        .ql-container.ql-snow { border: none !important; }
-        .ql-editor { color: var(--text-primary); font-size: 15px; line-height: 1.6; padding: 12px; }
-        
-        html[theme-mode="dark"] .ql-snow .ql-stroke { stroke: var(--text-secondary); }
-        html[theme-mode="dark"] .ql-snow .ql-fill { fill: var(--text-secondary); }
-        html[theme-mode="dark"] .ql-snow .ql-picker { color: var(--text-secondary); }
-
-        .custom-fullscreen-btn {
-            background: transparent; border: none; padding: 4px;
-            color: var(--text-secondary); cursor: pointer;
-            display: flex; align-items: center; transition: color 0.2s;
-        }
-        .custom-fullscreen-btn:hover { color: var(--td-brand-color); }
-    </style>
-</head>
-<body>
-
-<div id="app">
-    <div class="sticky-header">
-        <header class="nav-bar">
-            <div class="nav-brand">
-                <i class="ri-sticky-note-line" style="color: var(--td-brand-color);"></i> 树洞便签
-            </div>
-            <t-button theme="primary" @click="openDialog()">
-                <template #icon><i class="ri-add-line"></i></template>
-                新建
-            </t-button>
-        </header>
-
-        <div class="filter-section">
-            <t-input v-model="searchQuery" placeholder="搜索便签内容或标题" clearable>
-                <template #prefix-icon><i class="ri-search-line"></i></template>
-            </t-input>
-        </div>
-    </div>
-
-    <main class="main-content">
-        <div v-if="filteredNotes.length === 0" style="margin-top: 60px;">
-            <t-empty icon="ri-file-search-line" :description="searchQuery ? '未找到相关便签' : '暂无便签，点击右上角新建'" />
-        </div>
-        <div class="notes-grid" v-else>
-            <div v-for="note in filteredNotes" :key="note.id" class="note-card" @click="openDialog(note)">
-                <h3 class="card-title">{{ note.title || '无标题' }}</h3>
-                <div class="card-preview">{{ note.plainText || '无内容' }}</div>
-                <div class="card-footer">
-                    <span>{{ note.plainText.length }} 字</span>
-                    <span>{{ formatDate(note.updatedAt) }}</span>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <div class="back-top-btn" :class="{ 'is-visible': showBackTop }" @click="scrollToTop">
-        <i class="ri-arrow-up-line" style="font-size: 24px;"></i>
-    </div>
-
-    <t-dialog 
-        v-model:visible="dialogVisible" 
-        :header="isEditing ? '编辑便签' : '新建便签'" 
-        placement="center"
-        width="90%"
-        :style="{ maxWidth: '600px' }"
-        destroy-on-close
-        @opened="onDialogOpened"
-        @closed="onDialogClosed">
-        
-        <div style="margin-bottom: 16px;">
-            <t-input v-model="currentNote.title" placeholder="请输入便签标题（选填）" clearable />
-        </div>
-
-        <div class="editor-wrapper" :class="{ 'is-fullscreen': isEditorFullscreen }">
-            <div id="quill-toolbar">
-                <div class="toolbar-group-left">
-                    <span class="ql-formats">
-                        <button class="ql-bold"></button>
-                        <button class="ql-italic"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-list" value="ordered"></button>
-                        <button class="ql-list" value="bullet"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <select class="ql-color"></select>
-                        <select class="ql-background"></select>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-clean"></button>
-                    </span>
-                </div>
-                <div>
-                    <span class="ql-formats">
-                        <button type="button" class="custom-fullscreen-btn" @click="toggleFullscreen" :title="isEditorFullscreen ? '退出全屏' : '全屏模式'">
-                            <i :class="isEditorFullscreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line'" style="font-size: 18px;"></i>
-                        </button>
-                    </span>
-                </div>
-            </div>
-            <div id="quill-editor"></div>
-        </div>
-
-        <template #footer>
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 13px; color: var(--td-text-color-placeholder);">
-                        共 {{ currentNote.plainText.length }} 字
-                    </span>
-                    <t-popconfirm v-if="isEditing" content="确定要删除这条便签吗？" theme="danger" @confirm="deleteNote(currentNote.id)">
-                        <t-button theme="danger" variant="text" size="small">删除</t-button>
-                    </t-popconfirm>
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <t-button theme="default" variant="outline" @click="closeDialog">取消</t-button>
-                    <t-button theme="primary" @click="saveNote">保存</t-button>
-                </div>
-            </div>
-        </template>
-    </t-dialog>
-</div>
-
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-<script src="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.js"></script>
-<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-
-<script>
-const { createApp, ref, computed, onMounted, onUnmounted, watch } = Vue;
-
-const setupDarkMode = () => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const updateTheme = (e) => {
-        document.documentElement.setAttribute('theme-mode', e.matches ? 'dark' : 'light');
-    };
-    updateTheme(mediaQuery); 
-    mediaQuery.addEventListener('change', updateTheme);
-};
-
-const app = createApp({
-    setup() {
-        const notes = ref([]);
-        const searchQuery = ref('');
-        const dialogVisible = ref(false);
-        const isEditing = ref(false);
-        const isEditorFullscreen = ref(false);
-        const showBackTop = ref(false); 
-        
-        let quillInstance = null;
-
-        const currentNote = ref({
-            id: null,
-            title: '',
-            content: '',
-            plainText: ''
-        });
-
-        const handleScroll = () => {
-            showBackTop.value = window.scrollY > 200;
-        };
-
-        const scrollToTop = () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        };
-
-        onMounted(() => {
-            setupDarkMode();
-            window.addEventListener('scroll', handleScroll);
-
-            // 修改了本地存储的键名为 treehole_notes，如果你想保留之前测试的数据，可以改回 tdesign_native_notes
-            const saved = localStorage.getItem('treehole_notes');
-            if (saved) {
-                try { notes.value = JSON.parse(saved); } catch (e) { console.error(e); }
-            }
-        });
-
-        onUnmounted(() => {
-            window.removeEventListener('scroll', handleScroll);
-        });
-
-        watch(notes, (newNotes) => {
-            localStorage.setItem('treehole_notes', JSON.stringify(newNotes));
-        }, { deep: true });
-
-        const filteredNotes = computed(() => {
-            if (!searchQuery.value.trim()) return notes.value.sort((a, b) => b.updatedAt - a.updatedAt);
-            const keyword = searchQuery.value.toLowerCase();
-            return notes.value.filter(note => 
-                (note.title && note.title.toLowerCase().includes(keyword)) ||
-                (note.plainText && note.plainText.toLowerCase().includes(keyword))
-            ).sort((a, b) => b.updatedAt - a.updatedAt);
-        });
-
-        const toggleFullscreen = () => {
-            isEditorFullscreen.value = !isEditorFullscreen.value;
-        };
-
-        const openDialog = (note = null) => {
-            if (note) {
-                isEditing.value = true;
-                currentNote.value = { ...note };
-            } else {
-                isEditing.value = false;
-                currentNote.value = { id: null, title: '', content: '', plainText: '' };
-            }
-            isEditorFullscreen.value = false;
-            dialogVisible.value = true;
-        };
-
-        const onDialogOpened = () => {
-            quillInstance = new Quill('#quill-editor', {
-                theme: 'snow',
-                placeholder: '把想说的话留在这里...',
-                modules: { toolbar: '#quill-toolbar' }
-            });
-
-            if (currentNote.value.content) {
-                quillInstance.root.innerHTML = currentNote.value.content;
-            }
-
-            quillInstance.on('text-change', () => {
-                currentNote.value.content = quillInstance.root.innerHTML;
-                let text = quillInstance.getText();
-                if (text.endsWith('\n')) {
-                    text = text.slice(0, -1);
-                }
-                currentNote.value.plainText = text;
-            });
-
-            if (!isEditing.value) {
-                setTimeout(() => quillInstance.focus(), 50);
-            }
-        };
-
-        const onDialogClosed = () => {
-            quillInstance = null;
-            isEditorFullscreen.value = false;
-        };
-
-        const closeDialog = () => {
-            dialogVisible.value = false;
-        };
-
-        const saveNote = () => {
-            const hasTitle = !!currentNote.value.title.trim();
-            const hasContent = !!currentNote.value.plainText.trim();
-
-            if (!hasTitle && !hasContent) {
-                TDesign.MessagePlugin.warning('内容和标题不能同时为空');
-                return;
-            }
-
-            const timestamp = Date.now();
-            if (isEditing.value) {
-                const index = notes.value.findIndex(n => n.id === currentNote.value.id);
-                if (index !== -1) {
-                    notes.value[index] = { ...currentNote.value, updatedAt: timestamp };
-                    TDesign.MessagePlugin.success('已保存修改');
-                }
-            } else {
-                notes.value.unshift({
-                    ...currentNote.value,
-                    id: 'note_' + timestamp,
-                    createdAt: timestamp,
-                    updatedAt: timestamp
-                });
-                TDesign.MessagePlugin.success('已存入树洞');
-            }
-            
-            closeDialog();
-            scrollToTop();
-        };
-
-        const deleteNote = (id) => {
-            notes.value = notes.value.filter(n => n.id !== id);
-            TDesign.MessagePlugin.success('便签已删除');
-            closeDialog();
-        };
-
-        const formatDate = (timestamp) => {
-            const d = new Date(timestamp);
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            const h = String(d.getHours()).padStart(2, '0');
-            const min = String(d.getMinutes()).padStart(2, '0');
-            
-            if (y === new Date().getFullYear()) {
-                return `${m}-${day} ${h}:${min}`;
-            }
-            return `${y}-${m}-${day} ${h}:${min}`;
-        };
-
-        return {
-            searchQuery, filteredNotes, dialogVisible, isEditing, currentNote, isEditorFullscreen, showBackTop,
-            openDialog, closeDialog, onDialogOpened, onDialogClosed, saveNote, deleteNote, formatDate, toggleFullscreen, scrollToTop
-        };
-    }
-});
-
-app.use(TDesign);
-app.mount('#app');
-</script>
-
-</body>
-</html>
+<!DOCTYPE html>  
+<html lang="zh-CN">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">  
+    <meta name="color-scheme" content="light dark">  
+    <title>树洞便签</title>  
+    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.5.16/weui.min.css">  
+    <style>  
+        /* 基于 WeUI CSS 变量的自适应样式，完美支持暗色模式 */  
+        body, html {  
+            height: 100%;  
+            -webkit-tap-highlight-color: transparent;  
+            background-color: var(--weui-BG-0);  
+            color: var(--weui-FG-0);  
+            font-family: -apple-system-font, Helvetica Neue, Helvetica, sans-serif;  
+            overflow: hidden;  
+        }  
+  
+        .page {  
+            position: absolute;  
+            top: 0; right: 0; bottom: 0; left: 0;  
+            display: none;  
+            flex-direction: column;  
+            animation: fadeIn .2s forwards;  
+        }  
+        .page.show {  
+            display: flex;  
+        }  
+  
+        /* 标题栏布局 */  
+        .page__hd {  
+            padding: 30px 20px 20px;  
+            display: flex;  
+            justify-content: space-between;  
+            align-align: center;  
+        }  
+        .page__title {  
+            font-size: 24px;  
+            font-weight: 600;  
+            color: var(--weui-FG-0);  
+        }  
+        .header-action {  
+            font-size: 16px;  
+            color: var(--weui-LINK);  
+            line-height: 36px;  
+            cursor: pointer;  
+        }  
+  
+        /* 滚动区域 */  
+        .page__bd {  
+            flex: 1;  
+            overflow-y: auto;  
+            -webkit-overflow-scrolling: touch;  
+            padding-bottom: 100px; /* 为底部按钮组留出空间 */  
+        }  
+  
+        /* 搜索框适配 */  
+        .weui-search-bar {  
+            background-color: var(--weui-BG-0);  
+        }  
+  
+        /* 列表项定制 */  
+        .note-text {  
+            font-size: 16px;  
+            color: var(--weui-FG-0);  
+            white-space: nowrap;  
+            overflow: hidden;  
+            text-overflow: ellipsis;  
+            display: flex;  
+            align-items: center;  
+        }  
+        .note-date {  
+            font-size: 13px;  
+            color: var(--weui-FG-2);  
+            margin-top: 6px;  
+        }  
+        .tag-pinned {  
+            display: inline-block;  
+            font-size: 10px;  
+            color: var(--weui-RED);  
+            border: 1px solid var(--weui-RED);  
+            border-radius: 4px;  
+            padding: 0 4px;  
+            margin-right: 6px;  
+            line-height: 1.2;  
+        }  
+  
+        /* 底部固定操作栏 */  
+        .bottom-bar {  
+            position: absolute;  
+            bottom: 0; left: 0; right: 0;  
+            padding: 16px;  
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));  
+            background-color: var(--weui-BG-1);  
+            box-shadow: 0 -1px 10px rgba(0,0,0,0.05);  
+            display: flex;  
+            gap: 10px;  
+            z-index: 100;  
+        }  
+        .bottom-bar .weui-btn {  
+            margin: 0;  
+            flex: 1;  
+        }  
+  
+        @keyframes fadeIn {  
+            from { opacity: 0; transform: translateY(5px); }  
+            to { opacity: 1; transform: translateY(0); }  
+        }  
+  
+        /* 空状态 */  
+        .empty-state {  
+            padding: 60px 0;  
+            text-align: center;  
+            color: var(--weui-FG-2);  
+        }  
+    </style>  
+</head>  
+<body data-weui-theme="light">  
+  
+    <!-- 列表页面 -->  
+    <div class="page show" id="page-list">  
+        <div class="page__hd">  
+            <h1 class="page__title">树洞便签</h1>  
+            <span class="header-action" id="btn-toggle-manage" onclick="toggleManageMode()">管理</span>  
+        </div>  
+          
+        <!-- 搜索栏 -->  
+        <div class="weui-search-bar" id="search_bar">  
+            <form class="weui-search-bar__form">  
+                <div class="weui-search-bar__box">  
+                    <i class="weui-icon-search"></i>  
+                    <input type="search" class="weui-search-bar__input" id="search_input" placeholder="搜索便签内容" required/>  
+                    <a href="javascript:" class="weui-icon-clear" id="search_clear"></a>  
+                </div>  
+                <label class="weui-search-bar__label" id="search_text">  
+                    <i class="weui-icon-search"></i>  
+                    <span>搜索</span>  
+                </label>  
+            </form>  
+            <a href="javascript:" class="weui-search-bar__cancel-btn" id="search_cancel">取消</a>  
+        </div>  
+  
+        <div class="page__bd">  
+            <div id="note-list-container">  
+                <!-- 动态渲染列表 -->  
+            </div>  
+        </div>  
+  
+        <!-- 正常模式底部栏 -->  
+        <div class="bottom-bar" id="bar-normal">  
+            <a href="javascript:" class="weui-btn weui-btn_primary" onclick="openAdd()">新建便签</a>  
+        </div>  
+  
+        <!-- 管理模式底部栏 -->  
+        <div class="bottom-bar" id="bar-manage" style="display: none;">  
+            <a href="javascript:" class="weui-btn weui-btn_default" onclick="toggleManageMode()">取消</a>  
+            <a href="javascript:" class="weui-btn weui-btn_warn" id="btn-batch-delete" onclick="batchDelete()">删除(0)</a>  
+        </div>  
+    </div>  
+  
+    <!-- 编辑页面 -->  
+    <div class="page" id="page-edit">  
+        <div class="page__hd">  
+            <h1 class="page__title" id="edit-title">新建便签</h1>  
+        </div>  
+        <div class="page__bd">  
+            <div class="weui-cells weui-cells_form">  
+                <div class="weui-cell">  
+                    <div class="weui-cell__bd">  
+                        <textarea class="weui-textarea" id="note-content" placeholder="在这里输入你的便签内容..." rows="10"></textarea>  
+                        <div class="weui-textarea-counter"><span id="char-count">0</span>/200</div>  
+                    </div>  
+                </div>  
+            </div>  
+              
+            <div class="weui-cells">  
+                <div class="weui-cell weui-cell_active weui-cell_switch">  
+                    <div class="weui-cell__bd">设为置顶</div>  
+                    <div class="weui-cell__ft">  
+                        <input class="weui-switch" type="checkbox" id="note-pinned"/>  
+                    </div>  
+                </div>  
+            </div>  
+        </div>  
+  
+        <div class="bottom-bar">  
+            <a href="javascript:" class="weui-btn weui-btn_default" onclick="showPage('page-list')">返回</a>  
+            <a href="javascript:" class="weui-btn weui-btn_primary" onclick="saveNote()">保存</a>  
+        </div>  
+    </div>  
+  
+    <script type="text/javascript" src="https://res.wx.qq.com/t/wx_fed/weui.js/res/1.2.21/weui.min.js"></script>  
+    <script type="text/javascript">  
+        // 核心状态  
+        let notes = JSON.parse(localStorage.getItem('weui_notes_v2') || '[]');  
+        let currentEditId = null;  
+        let isManageMode = false;  
+        let selectedIds = new Set();  
+        let searchQuery = '';  
+  
+        // 暗色模式自动适配逻辑  
+        function updateTheme() {  
+            const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;  
+            document.body.setAttribute('data-weui-theme', isDark ? 'dark' : 'light');  
+        }  
+        updateTheme();  
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);  
+  
+        // 初始化  
+        window.onload = function() {  
+            initSearchBar();  
+            renderList();  
+        };  
+  
+        // 字数统计绑定  
+        const elContent = document.getElementById('note-content');  
+        elContent.addEventListener('input', function() {  
+            let len = this.value.length;  
+            if(len > 200) {  
+                this.value = this.value.substring(0, 200);  
+                len = 200;  
+            }  
+            document.getElementById('char-count').textContent = len;  
+        });  
+  
+        // 页面切换  
+        function showPage(pageId) {  
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('show'));  
+            document.getElementById(pageId).classList.add('show');  
+            if(pageId === 'page-list') renderList();  
+        }  
+  
+        // --- 搜索功能绑定 ---  
+        function initSearchBar() {  
+            const $searchBar = document.getElementById('search_bar'),  
+                  $searchText = document.getElementById('search_text'),  
+                  $searchInput = document.getElementById('search_input'),  
+                  $searchClear = document.getElementById('search_clear'),  
+                  $searchCancel = document.getElementById('search_cancel');  
+  
+            function hideSearchResult() {  
+                $searchBar.classList.remove('weui-search-bar_focusing');  
+                $searchInput.value = '';  
+                searchQuery = '';  
+                renderList();  
+            }  
+            function cancelSearch() {  
+                hideSearchResult();  
+                $searchInput.blur();  
+            }  
+  
+            $searchText.addEventListener('click', function() {  
+                $searchBar.classList.add('weui-search-bar_focusing');  
+                $searchInput.focus();  
+            });  
+            $searchInput.addEventListener('input', function() {  
+                searchQuery = this.value.trim();  
+                renderList();  
+            });  
+            $searchClear.addEventListener('click', hideSearchResult);  
+            $searchCancel.addEventListener('click', cancelSearch);  
+        }  
+  
+        // --- 核心渲染逻辑 ---  
+        function renderList() {  
+            const container = document.getElementById('note-list-container');  
+              
+            // 过滤与排序：优先置顶，其次按修改时间倒序  
+            let displayNotes = notes.filter(n => n.text.toLowerCase().includes(searchQuery.toLowerCase()));  
+            displayNotes.sort((a, b) => {  
+                if (a.isPinned && !b.isPinned) return -1;  
+                if (!a.isPinned && b.isPinned) return 1;  
+                return b.time - a.time;  
+            });  
+  
+            if (displayNotes.length === 0) {  
+                container.innerHTML = `  
+                    <div class="empty-state">  
+                        <i class="weui-icon-info weui-icon_msg" style="font-size: 60px; color: var(--weui-FG-2); margin-bottom: 15px;"></i>  
+                        <p>${searchQuery ? '没有找到相关便签' : '暂无便签数据'}</p>  
+                    </div>`;  
+                return;  
+            }  
+  
+            let html = isManageMode ? '<div class="weui-cells weui-cells_checkbox">' : '<div class="weui-cells">';  
+              
+            displayNotes.forEach(note => {  
+                let snippet = escapeHtml(note.text.replace(/\n/g, ' '));  
+                if (snippet.length > 30) snippet = snippet.substring(0, 30) + '...';  
+                  
+                const dateStr = new Date(note.time).toLocaleString('zh-CN', {  
+                    month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit'  
+                });  
+                  
+                const pinTag = note.isPinned ? `<span class="tag-pinned">置顶</span>` : '';  
+                const isChecked = selectedIds.has(note.id) ? 'checked' : '';  
+  
+                if (isManageMode) {  
+                    // 多选模式  
+                    html += `  
+                    <label class="weui-cell weui-cell_active weui-check__label" for="s${note.id}">  
+                        <div class="weui-cell__hd">  
+                            <input type="checkbox" class="weui-check" name="checkbox1" id="s${note.id}" onchange="toggleSelect(${note.id})" ${isChecked}>  
+                            <i class="weui-icon-checked"></i>  
+                        </div>  
+                        <div class="weui-cell__bd">  
+                            <p class="note-text">${pinTag}${snippet}</p>  
+                            <div class="note-date">${dateStr}</div>  
+                        </div>  
+                    </label>`;  
+                } else {  
+                    // 正常点击编辑模式  
+                    html += `  
+                    <a class="weui-cell weui-cell_active weui-cell_access" href="javascript:" onclick="openEdit(${note.id})">  
+                        <div class="weui-cell__bd" style="overflow: hidden;">  
+                            <p class="note-text">${pinTag}${snippet}</p>  
+                            <div class="note-date">${dateStr}</div>  
+                        </div>  
+                        <div class="weui-cell__ft"></div>  
+                    </a>`;  
+                }  
+            });  
+            html += '</div>';  
+            container.innerHTML = html;  
+        }  
+  
+        // --- 管理与多选逻辑 ---  
+        function toggleManageMode() {  
+            if (notes.length === 0 && !isManageMode) {  
+                weui.topTips('当前没有可管理的便签');  
+                return;  
+            }  
+            isManageMode = !isManageMode;  
+            selectedIds.clear();  
+              
+            document.getElementById('btn-toggle-manage').textContent = isManageMode ? '完成' : '管理';  
+            document.getElementById('bar-normal').style.display = isManageMode ? 'none' : 'flex';  
+            document.getElementById('bar-manage').style.display = isManageMode ? 'flex' : 'none';  
+            document.getElementById('search_bar').style.display = isManageMode ? 'none' : 'flex';  
+              
+            updateDeleteBtn();  
+            renderList();  
+        }  
+  
+        function toggleSelect(id) {  
+            if (selectedIds.has(id)) selectedIds.delete(id);  
+            else selectedIds.add(id);  
+            updateDeleteBtn();  
+        }  
+  
+        function updateDeleteBtn() {  
+            const btn = document.getElementById('btn-batch-delete');  
+            btn.textContent = `删除(${selectedIds.size})`;  
+            btn.classList.toggle('weui-btn_disabled', selectedIds.size === 0);  
+        }  
+  
+        function batchDelete() {  
+            if (selectedIds.size === 0) return;  
+            weui.confirm(`确认删除选中的 ${selectedIds.size} 项便签吗？`, function () {  
+                notes = notes.filter(n => !selectedIds.has(n.id));  
+                saveData();  
+                weui.toast('删除成功');  
+                toggleManageMode();  
+            }, function () {  
+                // 取消  
+            });  
+        }  
+  
+        // --- 增改查逻辑 ---  
+        function openAdd() {  
+            currentEditId = null;  
+            document.getElementById('edit-title').textContent = '新建便签';  
+            elContent.value = '';  
+            document.getElementById('char-count').textContent = '0';  
+            document.getElementById('note-pinned').checked = false;  
+            showPage('page-edit');  
+        }  
+  
+        function openEdit(id) {  
+            const note = notes.find(n => n.id === id);  
+            if (!note) return;  
+              
+            currentEditId = id;  
+            document.getElementById('edit-title').textContent = '编辑便签';  
+            elContent.value = note.text;  
+            document.getElementById('char-count').textContent = note.text.length;  
+            document.getElementById('note-pinned').checked = !!note.isPinned;  
+            showPage('page-edit');  
+        }  
+  
+        function saveNote() {  
+            const text = elContent.value.trim();  
+            const isPinned = document.getElementById('note-pinned').checked;  
+              
+            if (!text) {  
+                weui.topTips('便签内容不能为空');  
+                return;  
+            }  
+  
+            if (currentEditId) {  
+                const note = notes.find(n => n.id === currentEditId);  
+                if (note) {  
+                    note.text = text;  
+                    note.isPinned = isPinned;  
+                    note.time = Date.now();  
+                }  
+            } else {  
+                notes.push({  
+                    id: Date.now(),  
+                    text: text,  
+                    isPinned: isPinned,  
+                    time: Date.now()  
+                });  
+            }  
+  
+            saveData();  
+            weui.toast('已保存', { duration: 1000 });  
+            setTimeout(() => showPage('page-list'), 300);  
+        }  
+  
+        function saveData() {  
+            localStorage.setItem('weui_notes_v2', JSON.stringify(notes));  
+        }  
+  
+        function escapeHtml(unsafe) {  
+            return unsafe  
+                 .replace(/&/g, "&amp;")  
+                 .replace(/</g, "&lt;")  
+                 .replace(/>/g, "&gt;")  
+                 .replace(/"/g, "&quot;")  
+                 .replace(/'/g, "&#039;");  
+        }  
+    </script>  
+</body>  
+</html>  
