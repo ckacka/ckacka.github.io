@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <!-- 解决混合内容问题 -->
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>树洞短视频</title>
@@ -25,12 +25,8 @@
             height: 100%;
             overflow: hidden;
             font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
-        }
-        
-        body {
             background-color: #000;
             color: #fff;
-            line-height: 1.5;
         }
         
         /* 响应式视频播放器容器 */
@@ -39,8 +35,6 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh; /* 移动端兼容 */
-            max-width: 100%;
-            max-height: 100%;
             background-color: #000;
             display: flex;
             align-items: center;
@@ -57,7 +51,7 @@
             background-color: #000;
         }
         
-        /* 顶栏容器 - 优化对齐 */
+        /* --- 顶部导航栏 (横向滑动优化) --- */
         .top-bar {
             position: absolute;
             top: 0;
@@ -65,15 +59,10 @@
             right: 0;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: clamp(12px, 3vw, 20px) clamp(16px, 4vw, 24px);
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+            padding: max(20px, env(safe-area-inset-top)) 16px 15px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
             z-index: 20;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 1;
-            transform: translateY(0);
+            transition: all 0.3s ease;
         }
         
         .top-bar.hidden {
@@ -81,317 +70,121 @@
             transform: translateY(-20px);
             pointer-events: none;
         }
-        
-        /* 视频标题 - 响应式调整 */
-        .video-title {
-            font-size: clamp(16px, 4vw, 20px);
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+
+        .type-scroll-wrapper {
             flex: 1;
-            min-width: 0;
-            padding-right: 16px;
+            overflow: hidden;
         }
-        
-        /* 顶部按钮容器 */
-        .top-buttons-container {
+
+        .type-scroll-container {
             display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-        
-        /* 类型选择按钮 */
-        .type-select-button {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 24px;
-            padding: clamp(8px, 2vw, 12px) clamp(16px, 3vw, 20px);
-            font-size: clamp(12px, 3vw, 14px);
-            font-weight: 500;
-            display: flex;
+            overflow-x: auto;
+            gap: 15px;
             align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            white-space: nowrap;
+            /* 隐藏滚动条 */
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
         }
-        
-        .type-select-button:hover {
-            background: rgba(0, 0, 0, 0.6);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
-        }
-        
-        .type-select-button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* 设置按钮 */
-        .settings-button {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 24px;
-            padding: clamp(8px, 2vw, 12px);
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-        
-        .settings-button:hover {
-            background: rgba(0, 0, 0, 0.6);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px) rotate(30deg);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
-        }
-        
-        .settings-button:active {
-            transform: translateY(0) rotate(30deg);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .settings-button .material-icons {
-            font-size: 20px;
-        }
-        
-        /* 类型下拉菜单 - 响应式优化 */
-        .type-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-radius: 16px;
-            min-width: 180px;
-            max-width: 90vw;
-            max-height: 60vh;
-            overflow-y: auto;
+        .type-scroll-container::-webkit-scrollbar {
             display: none;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            z-index: 100;
         }
-        
-        .type-dropdown.show {
-            display: block;
-            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        /* 设置下拉菜单 - 优化布局 */
-        .settings-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-radius: 16px;
-            width: 220px; /* 固定宽度保持统一 */
-            max-width: 90vw;
-            max-height: 70vh;
-            overflow-y: auto;
-            display: none;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            z-index: 100;
-        }
-        
-        .settings-dropdown.show {
-            display: block;
-            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .settings-section {
-            padding: 16px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .settings-section:last-child {
-            border-bottom: none;
-        }
-        
-        .settings-section-title {
-            padding: 0 20px 12px;
-            font-size: 13px;
-            font-weight: 600;
+
+        .type-tab {
+            font-size: 16px;
             color: rgba(255, 255, 255, 0.7);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        
-        @keyframes slideIn {
-            from { 
-                opacity: 0; 
-                transform: translateY(-10px) scale(0.95);
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0) scale(1);
-            }
-        }
-        
-        .type-option, .settings-option {
-            padding: 12px 20px;
+            white-space: nowrap;
             cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.9);
+            padding: 5px 2px;
             position: relative;
+            transition: all 0.2s ease;
         }
-        
-        .type-option:hover, .settings-option:hover {
-            background: rgba(255, 255, 255, 0.08);
+
+        .type-tab.active {
+            font-size: 18px;
+            color: #fff;
+            font-weight: bold;
         }
-        
-        .type-option.active, .settings-option.active {
-            background: rgba(103, 80, 164, 0.15);
-            color: #A78BFA;
-        }
-        
-        .type-option.active::before, .settings-option.active::before {
+
+        .type-tab.active::after {
             content: '';
             position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 16px;
-            background: #A78BFA;
-            border-radius: 0 2px 2px 0;
-        }
-        
-        /* 移除勾图标样式 */
-        .type-option .material-icons,
-        .settings-option .material-icons {
-            font-size: 18px;
-            color: rgba(103, 80, 164, 0.7);
-            opacity: 0; /* 隐藏勾图标 */
-            width: 0;   /* 不占用空间 */
-            height: 0;
-        }
-        
-        .type-option.active .material-icons,
-        .settings-option.active .material-icons {
-            color: #A78BFA;
-            opacity: 0; /* 保持隐藏 */
-        }
-        
-        /* 刷新按钮容器 - 跟随控制栏位置 */
-        .refresh-button-container {
-            position: absolute;
-            bottom: 160px; /* 默认位置，跟随控制栏调整 */
-            right: 24px;
-            z-index: 20;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        /* 当顶栏和控制栏隐藏时，刷新按钮向下移动 */
-        .top-bar.hidden + .refresh-button-container {
-            bottom: 100px;
-        }
-        
-        /* 中间位置 */
-        .refresh-button-container.position-center {
+            bottom: -2px;
             left: 50%;
-            right: auto;
             transform: translateX(-50%);
+            width: 16px;
+            height: 3px;
+            background-color: #fff;
+            border-radius: 2px;
         }
-        
-        /* 左下角位置 */
-        .refresh-button-container.position-left {
-            left: 24px;
-            right: auto;
-        }
-        
-        /* 刷新按钮 - 改进的毛玻璃效果 */
-        .refresh-button {
-            background: rgba(103, 80, 164, 0.25);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 28px;
-            padding: clamp(12px, 3vw, 16px) clamp(24px, 4vw, 32px);
-            font-size: clamp(14px, 3.5vw, 16px);
-            font-weight: 500;
+
+        /* --- 右侧互动工具栏 --- */
+        .right-sidebar {
+            position: absolute;
+            right: 12px;
+            bottom: 140px;
             display: flex;
+            flex-direction: column;
+            gap: 24px;
+            z-index: 20;
             align-items: center;
-            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .right-sidebar.hidden {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: rgba(255, 255, 255, 0.95);
-            pointer-events: auto;
-            box-shadow: 
-                0 4px 20px rgba(0, 0, 0, 0.2),
-                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
         }
-        
-        .refresh-button:hover {
-            background: rgba(103, 80, 164, 0.35);
-            border-color: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 
-                0 8px 30px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+
+        .action-btn .icon-bg {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 5px;
+            transition: all 0.2s ease;
         }
-        
-        .refresh-button:active {
-            transform: translateY(0);
-            box-shadow: 
-                0 2px 10px rgba(0, 0, 0, 0.2),
-                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+
+        .action-btn:active .icon-bg {
+            transform: scale(0.9);
         }
-        
-        .refresh-button .refresh-icon {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .action-btn .material-icons {
+            font-size: 26px;
+            transition: color 0.3s;
         }
-        
-        .refresh-button.loading .refresh-icon {
-            animation: rotate 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+
+        .action-text {
+            font-size: 12px;
+            font-weight: 500;
         }
-        
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        /* 视频控制栏 - 响应式优化 */
+
+        /* 视频控制栏 */
         .video-controls {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
             background: linear-gradient(transparent, rgba(0, 0, 0, 0.8) 30%);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: clamp(12px, 3vw, 20px) clamp(12px, 3vw, 20px) clamp(12px, 4vw, 16px);
+            padding: 20px 16px max(20px, env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
-            gap: clamp(8px, 2vw, 12px);
+            gap: 12px;
             z-index: 15;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateY(0);
-            opacity: 1;
+            transition: all 0.3s ease;
         }
         
         .video-controls.hidden {
@@ -407,16 +200,14 @@
             border-radius: 2px;
             cursor: pointer;
             position: relative;
-            margin-bottom: 4px;
         }
         
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #FF375F, #FF6B9D);
+            background: linear-gradient(90deg, #fff, #ddd);
             border-radius: 2px;
             width: 0%;
             position: relative;
-            transition: width 0.1s linear;
         }
         
         .progress-handle {
@@ -426,24 +217,22 @@
             transform: translateY(-50%);
             width: 12px;
             height: 12px;
-            background: #FF375F;
+            background: #fff;
             border-radius: 50%;
             opacity: 0;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            box-shadow: 0 2px 8px rgba(255, 55, 95, 0.4);
+            transition: opacity 0.2s ease;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.5);
         }
         
         .progress-container:hover .progress-handle {
             opacity: 1;
-            transform: translateY(-50%) scale(1.2);
         }
         
         .time-display {
             display: flex;
             justify-content: space-between;
-            font-size: clamp(11px, 2.5vw, 12px);
+            font-size: 12px;
             color: rgba(255, 255, 255, 0.8);
-            padding: 0 4px;
         }
         
         .controls-row {
@@ -455,102 +244,23 @@
         .left-controls, .right-controls {
             display: flex;
             align-items: center;
-            gap: clamp(12px, 3vw, 16px);
+            gap: 16px;
         }
         
         .control-btn {
-            background: rgba(255, 255, 255, 0.1);
+            background: transparent;
             border: none;
             color: white;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: clamp(6px, 2vw, 8px);
-            border-radius: 50%;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
-        
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-        }
-        
-        .control-btn:active {
-            transform: scale(0.95);
+            padding: 4px;
         }
         
         .control-btn .material-icons {
-            font-size: clamp(20px, 5vw, 24px);
-        }
-        
-        .play-pause-btn {
-            background: rgba(255, 255, 255, 0.15);
-            width: clamp(40px, 10vw, 48px);
-            height: clamp(40px, 10vw, 48px);
-        }
-        
-        .play-pause-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
-        
-        .volume-container {
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
-        
-        .volume-slider-container {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 12px 8px;
-            border-radius: 20px;
-            margin-bottom: 8px;
-            display: none;
-            z-index: 20;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .volume-container:hover .volume-slider-container {
-            display: block;
-        }
-        
-        .volume-slider {
-            width: 80px;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
-            outline: none;
-        }
-        
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #fff;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        .volume-slider::-moz-range-thumb {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #fff;
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 28px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
         
         /* 大播放按钮 */
@@ -559,38 +269,28 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 50%;
-            width: clamp(60px, 20vw, 80px);
-            height: clamp(60px, 20vw, 80px);
-            color: white;
+            width: 64px;
+            height: 64px;
+            color: rgba(255,255,255,0.8);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0.9;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        }
-        
-        .big-play-btn:hover {
-            background: rgba(0, 0, 0, 0.7);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%) scale(1.1);
+            transition: all 0.2s ease;
+            border: 2px solid rgba(255,255,255,0.1);
         }
         
         .big-play-btn .material-icons {
-            font-size: clamp(36px, 12vw, 48px);
+            font-size: 40px;
         }
         
         .big-play-btn.hidden {
             opacity: 0;
             pointer-events: none;
-            transform: translate(-50%, -50%) scale(0.8);
+            transform: translate(-50%, -50%) scale(1.2);
         }
         
         /* 加载动画 */
@@ -599,10 +299,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: clamp(50px, 15vw, 60px);
-            height: clamp(50px, 15vw, 60px);
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #FF375F;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top: 3px solid #fff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             z-index: 10;
@@ -614,457 +314,96 @@
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
         
-        /* 全屏按钮 */
-        .fullscreen-btn {
-            margin-left: 8px;
-        }
-        
-        /* 触摸设备优化 */
-        @media (hover: none) and (pointer: coarse) {
-            .video-controls {
-                padding-bottom: max(20px, env(safe-area-inset-bottom));
-            }
-            
-            .control-btn {
-                min-width: 44px;
-                min-height: 44px;
-            }
-            
-            .play-pause-btn {
-                min-width: 50px;
-                min-height: 50px;
-            }
-            
-            .big-play-btn {
-                width: 70px;
-                height: 70px;
-            }
-            
-            .type-select-button,
-            .refresh-button,
-            .settings-button {
-                padding: 12px 20px;
-            }
-            
-            .settings-button {
-                width: 44px;
-                height: 44px;
-            }
-            
-            /* 隐藏悬停效果 */
-            .control-btn:hover,
-            .big-play-btn:hover,
-            .type-select-button:hover,
-            .refresh-button:hover,
-            .settings-button:hover {
-                transform: none;
-            }
-        }
-        
-        /* 横屏优化 */
-        @media (orientation: landscape) and (max-height: 500px) {
-            .top-bar {
-                padding: 8px 12px;
-            }
-            
-            .video-title {
-                font-size: 14px;
-            }
-            
-            .type-select-button {
-                padding: 6px 12px;
-                font-size: 11px;
-            }
-            
-            .settings-button {
-                width: 32px;
-                height: 32px;
-                padding: 4px;
-            }
-            
-            .refresh-button-container {
-                bottom: 100px;
-            }
-            
-            .top-bar.hidden + .refresh-button-container {
-                bottom: 60px;
-            }
-            
-            .refresh-button {
-                padding: 8px 16px;
-                font-size: 12px;
-            }
-            
-            .video-controls {
-                padding: 8px 10px 8px;
-            }
-            
-            .control-btn .material-icons {
-                font-size: 18px;
-            }
-            
-            .play-pause-btn {
-                width: 36px;
-                height: 36px;
-            }
-        }
-        
-        /* 小屏幕设备 */
-        @media (max-width: 480px) {
-            .type-dropdown,
-            .settings-dropdown {
-                min-width: 160px;
-                max-width: calc(100vw - 32px);
-            }
-            
-            .type-option,
-            .settings-option {
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-            
-            .refresh-button {
-                padding: 10px 20px;
-                border-radius: 24px;
-            }
-            
-            .refresh-button-container {
-                bottom: 140px;
-            }
-            
-            .top-bar.hidden + .refresh-button-container {
-                bottom: 80px;
-            }
-            
-            .big-play-btn {
-                width: 60px;
-                height: 60px;
-            }
-            
-            .big-play-btn .material-icons {
-                font-size: 36px;
-            }
-        }
-        
-        /* 超小屏幕设备 */
-        @media (max-width: 360px) {
-            .top-bar {
-                padding: 8px 12px;
-            }
-            
-            .video-title {
-                font-size: 14px;
-            }
-            
-            .top-buttons-container {
-                gap: 4px;
-            }
-            
-            .type-select-button {
-                padding: 6px 10px;
-                font-size: 11px;
-            }
-            
-            .settings-button {
-                width: 32px;
-                height: 32px;
-                padding: 4px;
-            }
-            
-            .refresh-button-container {
-                bottom: 120px;
-                right: 16px;
-            }
-            
-            .refresh-button-container.position-left {
-                left: 16px;
-            }
-            
-            .top-bar.hidden + .refresh-button-container {
-                bottom: 70px;
-            }
-            
-            .refresh-button {
-                padding: 8px 16px;
-                font-size: 12px;
-            }
-            
-            .control-btn {
-                padding: 4px;
-            }
-            
-            .play-pause-btn {
-                width: 36px;
-                height: 36px;
-            }
-            
-            .control-btn .material-icons {
-                font-size: 18px;
-            }
-        }
-        
-        /* 隐藏浏览器默认控件 */
-        video::-webkit-media-controls {
-            display: none !important;
-        }
-        
-        video::-webkit-media-controls-enclosure {
-            display: none !important;
-        }
-        
-        /* 遮罩层 */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: transparent;
-            z-index: 5;
-            display: none;
-        }
-        
-        .overlay.show {
-            display: block;
-        }
-        
         /* 提示消息 */
         .hint {
             position: absolute;
-            top: 50%;
+            top: 40%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             color: white;
-            padding: 12px 20px;
-            border-radius: 20px;
-            font-size: clamp(12px, 3vw, 14px);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
-            z-index: 10;
-            text-align: center;
-            max-width: 80%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+            white-space: nowrap;
         }
         
         .hint.show {
             opacity: 1;
         }
-        
-        /* 错误消息 */
-        .error-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            color: white;
-            padding: clamp(20px, 5vw, 24px);
-            border-radius: 16px;
-            text-align: center;
-            max-width: 80%;
-            z-index: 10;
-            display: none;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        /* 刷新按钮旋转动画 */
+        .refresh-icon {
+            transition: transform 0.3s;
+        }
+        .action-btn.loading .refresh-icon {
+            animation: rotate 1s linear infinite;
         }
         
-        .error-message.show {
-            display: block;
-            animation: fadeIn 0.3s ease;
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
-        
-        .error-message button {
-            margin-top: 12px;
-            padding: 10px 20px;
-            background: rgba(103, 80, 164, 0.3);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-        
-        .error-message button:hover {
-            background: rgba(103, 80, 164, 0.4);
-        }
-        
-        /* 视频占位符 */
-        .video-placeholder {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(255, 255, 255, 0.6);
-            font-size: clamp(14px, 4vw, 16px);
-            text-align: center;
-            padding: 0 20px;
-            z-index: 5;
-        }
-        
-        /* 响应式动画 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-        
-        /* 防止长按选择文本 */
-        * {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        
-        /* 防止图片拖动 */
-        img {
-            -webkit-user-drag: none;
-            -khtml-user-drag: none;
-            -moz-user-drag: none;
-            -o-user-drag: none;
-            user-drag: none;
-        }
-        
-        /* 移动端滚动优化 */
-        .type-dropdown,
-        .settings-dropdown {
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* 安全区域适配（iPhone X等有刘海屏的设备） */
-        @supports (padding: max(0px)) {
-            .video-player-container {
-                padding-top: max(0px, env(safe-area-inset-top));
-                padding-bottom: max(0px, env(safe-area-inset-bottom));
-                padding-left: max(0px, env(safe-area-inset-left));
-                padding-right: max(0px, env(safe-area-inset-right));
-            }
-        }
+
+        /* 隐藏浏览器默认控件 */
+        video::-webkit-media-controls { display: none !important; }
     </style>
 </head>
 <body>
     <div class="video-player-container" id="playerContainer">
-        <video class="video-element" id="videoElement" preload="metadata" playsinline webkit-playsinline>
+        <!-- 视频主元素 -->
+        <video class="video-element" id="videoElement" preload="metadata" playsinline webkit-playsinline loop>
             您的浏览器不支持视频播放
         </video>
         
-        <button class="big-play-btn hidden" id="bigPlayButton">
+        <!-- 大播放/暂停按钮 (屏幕中央) -->
+        <div class="big-play-btn hidden" id="bigPlayButton">
             <i class="material-icons">play_arrow</i>
-        </button>
+        </div>
         
+        <!-- 加载动画 -->
         <div class="loading-spinner" id="loadingSpinner"></div>
         
-        <div class="error-message" id="errorMessage">
-            <p id="errorText">无法加载视频，请检查网络连接或稍后重试</p>
-            <button id="retryButton">重试</button>
-        </div>
-        
-        <div class="video-placeholder" id="videoPlaceholder">
-            点击"换一个"按钮开始播放视频
-        </div>
-        
-        <!-- 整合顶栏 -->
+        <!-- 顶栏：类别横向滑动 -->
         <div class="top-bar" id="topBar">
-            <div class="video-title">树洞短视频</div>
-            
-            <div class="top-buttons-container">
-                <div class="type-selector-container">
-                    <button class="type-select-button" id="typeSelectButton">
-                        <span id="selectedTypeText">jk类型视频</span>
-                        <i class="material-icons">expand_more</i>
-                    </button>
-                    
-                    <div class="type-dropdown" id="typeDropdown">
-                        <div class="type-option active" data-type="jk" data-name="jk类型视频">
-                            <span>jk类型视频</span>
-                            <!-- 删除了勾图标 -->
-                        </div>
-                        <div class="type-option" data-type="YuMeng" data-name="欲梦视频">
-                            <span>欲梦视频</span>
-                        </div>
-                        <div class="type-option" data-type="NvDa" data-name="女大视频">
-                            <span>女大视频</span>
-                        </div>
-                        <div class="type-option" data-type="NvGao" data-name="女高视频">
-                            <span>女高视频</span>
-                        </div>
-                        <div class="type-option" data-type="ReWu" data-name="热舞类型视频">
-                            <span>热舞类型视频</span>
-                        </div>
-                        <div class="type-option" data-type="QingCun" data-name="清纯类型视频">
-                            <span>清纯类型视频</span>
-                        </div>
-                        <div class="type-option" data-type="YuZu" data-name="玉足类型视频">
-                            <span>玉足类型视频</span>
-                        </div>
-                        <div class="type-option" data-type="SheJie" data-name="蛇姐类型视频">
-                            <span>蛇姐类型视频</span>
-                        </div>
-                        <div class="type-option" data-type="ChuanDa" data-name="穿搭类型视频">
-                            <span>穿搭类型视频</span>
-                        </div>
-                        <div class="type-option" data-type="GaoZhiLiangXiaoJieJie" data-name="高质量小姐姐视频">
-                            <span>高质量小姐姐视频</span>
-                        </div>
-                        <div class="type-option" data-type="HanFu" data-name="汉服类型视频">
-                            <span>汉服类型视频</span>
-                        </div>
-                        <div class="type-option" data-type="HeiSi" data-name="黑丝类型视频">
-                            <span>黑丝类型视频</span>
-                        </div>
-                        <div class="type-option" data-type="BianZhuang" data-name="变装类型视频">
-                            <span>变装类型视频</span>
-                        </div>
-                        <div class="type-option" data-type="LuoLi" data-name="萝莉类型视频">
-                            <span>萝莉类型视频</span>
-                        </div>
-                        <div class="type-option" data-type="TianMei" data-name="甜妹类型视频">
-                            <span>甜妹类型视频</span>
-                        </div>
-                        <div class="type-option" data-type="BaiSi" data-name="白丝类型视频">
-                            <span>白丝类型视频</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="settings-container">
-                    <button class="settings-button" id="settingsButton" title="设置">
-                        <i class="material-icons">settings</i>
-                    </button>
-                    
-                    <div class="settings-dropdown" id="settingsDropdown">
-                        <div class="settings-section">
-                            <div class="settings-section-title">刷新按钮位置</div>
-                            <div class="settings-option active" data-position="right" data-name="右下角">
-                                <span>右下角</span>
-                                <!-- 删除了勾图标 -->
-                            </div>
-                            <div class="settings-option" data-position="center" data-name="中间">
-                                <span>中间</span>
-                            </div>
-                            <div class="settings-option" data-position="left" data-name="左下角">
-                                <span>左下角</span>
-                            </div>
-                        </div>
-                    </div>
+            <div class="type-scroll-wrapper">
+                <div class="type-scroll-container" id="typeScrollContainer">
+                    <div class="type-tab active" data-type="jk" data-name="JK视频">JK</div>
+                    <div class="type-tab" data-type="YuMeng" data-name="欲梦">欲梦</div>
+                    <div class="type-tab" data-type="NvDa" data-name="女大">女大</div>
+                    <div class="type-tab" data-type="NvGao" data-name="女高">女高</div>
+                    <div class="type-tab" data-type="ReWu" data-name="热舞">热舞</div>
+                    <div class="type-tab" data-type="QingCun" data-name="清纯">清纯</div>
+                    <div class="type-tab" data-type="YuZu" data-name="玉足">玉足</div>
+                    <div class="type-tab" data-type="SheJie" data-name="蛇姐">蛇姐</div>
+                    <div class="type-tab" data-type="ChuanDa" data-name="穿搭">穿搭</div>
+                    <div class="type-tab" data-type="GaoZhiLiangXiaoJieJie" data-name="高质量">高质量</div>
+                    <div class="type-tab" data-type="HanFu" data-name="汉服">汉服</div>
+                    <div class="type-tab" data-type="HeiSi" data-name="黑丝">黑丝</div>
+                    <div class="type-tab" data-type="BianZhuang" data-name="变装">变装</div>
+                    <div class="type-tab" data-type="LuoLi" data-name="萝莉">萝莉</div>
+                    <div class="type-tab" data-type="TianMei" data-name="甜妹">甜妹</div>
+                    <div class="type-tab" data-type="BaiSi" data-name="白丝">白丝</div>
                 </div>
             </div>
         </div>
         
-        <div class="refresh-button-container position-right" id="refreshButtonContainer">
-            <button class="refresh-button" id="refreshButton">
-                <i class="material-icons refresh-icon">refresh</i>
-                <span>换一个</span>
-            </button>
+        <!-- 右侧互动边栏 -->
+        <div class="right-sidebar" id="rightSidebar">
+            <!-- 换一个按钮 -->
+            <div class="action-btn" id="refreshBtn">
+                <div class="icon-bg">
+                    <i class="material-icons refresh-icon">refresh</i>
+                </div>
+                <span class="action-text">换一个</span>
+            </div>
         </div>
         
+        <!-- 底部视频控制栏 -->
         <div class="video-controls" id="videoControls">
             <div class="progress-container" id="progressContainer">
                 <div class="progress-bar" id="progressBar">
@@ -1079,21 +418,13 @@
             
             <div class="controls-row">
                 <div class="left-controls">
-                    <button class="control-btn play-pause-btn" id="playPauseBtn" title="播放/暂停">
-                        <i class="material-icons" id="playPauseIcon">play_arrow</i>
+                    <button class="control-btn" id="playPauseBtn" title="播放/暂停">
+                        <i class="material-icons" id="playPauseIcon">pause</i>
                     </button>
-                    
-                    <div class="volume-container">
-                        <button class="control-btn" id="muteBtn" title="静音">
-                            <i class="material-icons" id="volumeIcon">volume_up</i>
-                        </button>
-                        
-                        <div class="volume-slider-container">
-                            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="1">
-                        </div>
-                    </div>
+                    <button class="control-btn" id="muteBtn" title="静音">
+                        <i class="material-icons" id="volumeIcon">volume_up</i>
+                    </button>
                 </div>
-                
                 <div class="right-controls">
                     <button class="control-btn fullscreen-btn" id="fullscreenBtn" title="全屏">
                         <i class="material-icons" id="fullscreenIcon">fullscreen</i>
@@ -1102,8 +433,7 @@
             </div>
         </div>
         
-        <div class="overlay" id="overlay"></div>
-        
+        <!-- 提示弹窗 -->
         <div class="hint" id="hint"></div>
     </div>
     
@@ -1111,742 +441,307 @@
         // API配置
         const API_BASE_URL = 'http://api.mmp.cc/api/ksvideo';
         
-        // 获取DOM元素
+        // --- 核心DOM获取 ---
         const videoElement = document.getElementById('videoElement');
         const playerContainer = document.getElementById('playerContainer');
         const bigPlayButton = document.getElementById('bigPlayButton');
         const loadingSpinner = document.getElementById('loadingSpinner');
-        const videoControls = document.getElementById('videoControls');
         const topBar = document.getElementById('topBar');
+        const videoControls = document.getElementById('videoControls');
+        const rightSidebar = document.getElementById('rightSidebar');
+        const hint = document.getElementById('hint');
+
+        // 控制按钮
         const playPauseBtn = document.getElementById('playPauseBtn');
         const playPauseIcon = document.getElementById('playPauseIcon');
         const muteBtn = document.getElementById('muteBtn');
         const volumeIcon = document.getElementById('volumeIcon');
-        const volumeSlider = document.getElementById('volumeSlider');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fullscreenIcon = document.getElementById('fullscreenIcon');
+        
+        // 进度条
         const progressContainer = document.getElementById('progressContainer');
         const progressBar = document.getElementById('progressBar');
         const currentTimeElement = document.getElementById('currentTime');
         const durationElement = document.getElementById('duration');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const fullscreenIcon = document.getElementById('fullscreenIcon');
-        const hint = document.getElementById('hint');
-        const typeSelectButton = document.getElementById('typeSelectButton');
-        const selectedTypeText = document.getElementById('selectedTypeText');
-        const typeDropdown = document.getElementById('typeDropdown');
-        const refreshButton = document.getElementById('refreshButton');
-        const refreshButtonContainer = document.getElementById('refreshButtonContainer');
-        const refreshIcon = refreshButton.querySelector('.refresh-icon');
-        const overlay = document.getElementById('overlay');
-        const typeOptions = document.querySelectorAll('.type-option');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-        const retryButton = document.getElementById('retryButton');
-        const videoPlaceholder = document.getElementById('videoPlaceholder');
-        const settingsButton = document.getElementById('settingsButton');
-        const settingsDropdown = document.getElementById('settingsDropdown');
-        const settingsOptions = document.querySelectorAll('.settings-option');
+
+        // 顶栏分类与动作
+        const typeTabs = document.querySelectorAll('.type-tab');
+        const refreshBtn = document.getElementById('refreshBtn');
         
-        // 播放器状态
+        // --- 状态变量 ---
         let isPlaying = false;
         let isMuted = false;
-        let isFullscreen = false;
         let isDraggingProgress = false;
         let currentVideoType = 'jk';
-        let currentVideoName = 'jk类型视频';
-        let isRefreshing = false;
-        let currentVideoUrl = '';
+        let currentVideoName = 'JK视频';
         let requestCounter = 0;
-        let isTouchDevice = 'ontouchstart' in window;
-        let refreshButtonPosition = 'right';
+        let isRefreshing = false;
         
-        // UI控制状态
+        // UI自动隐藏逻辑
         let uiHideTimeout = null;
         let uiHidden = false;
-        const UI_HIDE_DELAY = 3000; // 3秒后隐藏UI
+        const UI_HIDE_DELAY = 3000;
         
-        // 初始化播放器
-        function initPlayer() {
-            // 设置初始音量
-            videoElement.volume = volumeSlider.value;
-            
-            // 尝试从本地存储加载刷新按钮位置设置
-            const savedPosition = localStorage.getItem('refreshButtonPosition');
-            if (savedPosition && ['left', 'center', 'right'].includes(savedPosition)) {
-                setRefreshButtonPosition(savedPosition);
-            } else {
-                // 默认使用右下角位置
-                setRefreshButtonPosition('right');
-            }
-            
-            // 设置事件监听器
+        // --- 初始化 ---
+        function init() {
             setupEventListeners();
-            
-            // 更新视频时长显示
-            videoElement.addEventListener('loadedmetadata', function() {
-                durationElement.textContent = formatTime(videoElement.duration);
-                videoPlaceholder.style.display = 'none';
-            });
-            
-            // 视频错误处理
-            videoElement.addEventListener('error', function(e) {
-                console.error('视频播放错误:', e);
-                showHint('视频加载失败，正在尝试重新获取...');
-                setTimeout(() => refreshVideo(), 1000);
-            });
-            
-            // 显示占位符
-            videoPlaceholder.style.display = 'block';
-            
-            // 重置UI隐藏计时器
-            resetUIHideTimer();
-            
-            // 初始加载一个视频
-            setTimeout(() => refreshVideo(), 500);
+            // 自动加载第一个视频
+            refreshVideo();
         }
         
-        // 设置事件监听器
+        // --- 事件监听 ---
         function setupEventListeners() {
-            // 播放/暂停按钮点击事件
+            // 视频点击播放/暂停
+            playerContainer.addEventListener('click', (e) => {
+                if(e.target.closest('.video-controls') || 
+                   e.target.closest('.top-bar') || 
+                   e.target.closest('.right-sidebar')) {
+                    return;
+                }
+                togglePlayPause();
+                showUI();
+            });
+
+            // 按钮事件
             playPauseBtn.addEventListener('click', togglePlayPause);
             bigPlayButton.addEventListener('click', togglePlayPause);
-            
-            // 视频元素点击事件
-            videoElement.addEventListener('click', togglePlayPause);
-            
-            // 视频元素双击事件 (切换全屏)
-            videoElement.addEventListener('dblclick', toggleFullscreen);
-            
-            // 静音按钮点击事件
             muteBtn.addEventListener('click', toggleMute);
-            
-            // 音量滑块变化事件
-            volumeSlider.addEventListener('input', function() {
-                videoElement.volume = this.value;
-                updateVolumeIcon();
-            });
-            
-            // 视频播放/暂停事件
-            videoElement.addEventListener('play', function() {
-                isPlaying = true;
-                updatePlayPauseIcon();
-                bigPlayButton.classList.add('hidden');
-                hideHint();
-                videoPlaceholder.style.display = 'none';
-                resetUIHideTimer();
-            });
-            
-            videoElement.addEventListener('pause', function() {
-                isPlaying = false;
-                updatePlayPauseIcon();
-                if (!videoElement.ended) {
-                    bigPlayButton.classList.remove('hidden');
-                }
-                resetUIHideTimer();
-            });
-            
-            // 视频加载事件
-            videoElement.addEventListener('waiting', function() {
-                loadingSpinner.style.display = 'block';
-            });
-            
-            videoElement.addEventListener('playing', function() {
-                loadingSpinner.style.display = 'none';
-            });
-            
-            // 视频时间更新事件
-            videoElement.addEventListener('timeupdate', updateProgress);
-            
-            // 进度条点击/拖动事件
-            progressContainer.addEventListener('mousedown', startSeek);
-            progressContainer.addEventListener('touchstart', handleTouchSeek);
-            
-            // 全屏按钮点击事件
             fullscreenBtn.addEventListener('click', toggleFullscreen);
-            
-            // UI控制显示/隐藏
-            playerContainer.addEventListener('mousemove', showUI);
-            playerContainer.addEventListener('touchstart', showUI);
-            playerContainer.addEventListener('click', showUI);
-            
-            // 键盘快捷键
-            document.addEventListener('keydown', handleKeyPress);
-            
-            // 视频结束事件
-            videoElement.addEventListener('ended', onVideoEnded);
-            
-            // 类型选择按钮事件
-            typeSelectButton.addEventListener('click', toggleTypeDropdown);
-            
-            // 类型选项点击事件
-            typeOptions.forEach(option => {
-                option.addEventListener('click', function() {
+            refreshBtn.addEventListener('click', refreshVideo);
+
+            // 分类滑动栏点击
+            typeTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
                     const type = this.dataset.type;
                     const name = this.dataset.name;
-                    selectVideoType(type, name);
+                    selectVideoType(this, type, name);
                 });
             });
-            
-            // 设置按钮事件
-            settingsButton.addEventListener('click', toggleSettingsDropdown);
-            
-            // 设置选项点击事件
-            settingsOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    const position = this.dataset.position;
-                    const name = this.dataset.name;
-                    selectRefreshButtonPosition(position, name);
-                });
+
+            // 进度条交互
+            progressContainer.addEventListener('mousedown', startSeek);
+            progressContainer.addEventListener('touchstart', handleTouchSeek, {passive: false});
+
+            // 视频事件
+            videoElement.addEventListener('play', () => {
+                isPlaying = true;
+                updatePlayState();
+                resetUIHideTimer();
             });
-            
-            // 遮罩层点击事件
-            overlay.addEventListener('click', closeAllDropdowns);
-            
-            // 刷新按钮点击事件
-            refreshButton.addEventListener('click', refreshVideo);
-            
-            // 重试按钮点击事件
-            retryButton.addEventListener('click', () => {
-                errorMessage.classList.remove('show');
-                refreshVideo();
+            videoElement.addEventListener('pause', () => {
+                isPlaying = false;
+                updatePlayState();
+                resetUIHideTimer();
             });
-            
-            // 窗口大小变化时重新计算布局
-            window.addEventListener('resize', handleResize);
+            videoElement.addEventListener('waiting', () => { loadingSpinner.style.display = 'block'; });
+            videoElement.addEventListener('playing', () => { loadingSpinner.style.display = 'none'; });
+            videoElement.addEventListener('timeupdate', updateProgress);
+            videoElement.addEventListener('loadedmetadata', () => {
+                durationElement.textContent = formatTime(videoElement.duration);
+            });
+
+            // 自动轮播下一个
+            videoElement.addEventListener('ended', () => {
+                showHint("正在自动播放下一个...");
+                setTimeout(refreshVideo, 1000);
+            });
+
+            // 鼠标移动/触摸显示UI
+            playerContainer.addEventListener('mousemove', showUI);
+            playerContainer.addEventListener('touchstart', showUI, {passive: true});
         }
         
-        // 显示UI（顶栏和控制栏）
+        // --- UI 交互控制 ---
         function showUI() {
-            if (!uiHidden) {
-                resetUIHideTimer();
-                return;
+            if(uiHidden) {
+                topBar.classList.remove('hidden');
+                videoControls.classList.remove('hidden');
+                rightSidebar.classList.remove('hidden');
+                uiHidden = false;
             }
-            
-            topBar.classList.remove('hidden');
-            videoControls.classList.remove('hidden');
-            uiHidden = false;
-            
-            // 重置隐藏计时器
             resetUIHideTimer();
         }
         
-        // 隐藏UI（顶栏和控制栏）
         function hideUI() {
-            if (uiHidden) return;
-            
-            // 不隐藏的情况：正在拖动进度条、下拉菜单打开、视频暂停
-            if (isDraggingProgress || 
-                typeDropdown.classList.contains('show') || 
-                settingsDropdown.classList.contains('show') ||
-                !isPlaying) {
+            if (isDraggingProgress || !isPlaying) {
                 resetUIHideTimer();
                 return;
             }
-            
             topBar.classList.add('hidden');
             videoControls.classList.add('hidden');
+            rightSidebar.classList.add('hidden');
             uiHidden = true;
         }
         
-        // 重置UI隐藏计时器
         function resetUIHideTimer() {
             clearTimeout(uiHideTimeout);
             uiHideTimeout = setTimeout(hideUI, UI_HIDE_DELAY);
         }
-        
-        // 窗口大小变化处理
-        function handleResize() {
-            videoElement.style.width = '100%';
-            videoElement.style.height = '100%';
-        }
-        
-        // 触摸设备进度条处理
-        function handleTouchSeek(e) {
-            e.preventDefault();
-            startSeek(e.touches[0]);
-            
-            const moveHandler = (moveEvent) => {
-                if (isDraggingProgress) {
-                    moveEvent.preventDefault();
-                    seekTo(moveEvent.touches[0]);
-                }
-            };
-            
-            const endHandler = () => {
-                isDraggingProgress = false;
-                document.removeEventListener('touchmove', moveHandler);
-                document.removeEventListener('touchend', endHandler);
-                resetUIHideTimer();
-            };
-            
-            document.addEventListener('touchmove', moveHandler, { passive: false });
-            document.addEventListener('touchend', endHandler);
-            
-            resetUIHideTimer();
-        }
-        
-        // 切换播放/暂停
+
+        // --- 核心播放逻辑 ---
         function togglePlayPause() {
-            if (!currentVideoUrl) {
-                refreshVideo();
-                return;
-            }
-            
             if (videoElement.paused) {
-                videoElement.play().catch(e => {
-                    console.error("播放失败:", e);
-                    showHint("播放失败，正在重试...");
-                    refreshVideo();
-                });
+                videoElement.play().catch(e => console.log("等待用户交互"));
             } else {
                 videoElement.pause();
             }
-            
-            resetUIHideTimer();
         }
-        
-        // 更新播放/暂停图标
-        function updatePlayPauseIcon() {
+
+        function updatePlayState() {
             if (isPlaying) {
                 playPauseIcon.textContent = 'pause';
-                bigPlayButton.innerHTML = '<i class="material-icons">pause</i>';
+                bigPlayButton.classList.add('hidden');
             } else {
                 playPauseIcon.textContent = 'play_arrow';
-                bigPlayButton.innerHTML = '<i class="material-icons">play_arrow</i>';
+                bigPlayButton.classList.remove('hidden');
             }
         }
-        
-        // 切换静音
+
         function toggleMute() {
             videoElement.muted = !videoElement.muted;
             isMuted = videoElement.muted;
-            updateVolumeIcon();
-            
-            if (isMuted) {
-                showHint("已静音");
-            } else {
-                showHint("取消静音");
-            }
-            
-            resetUIHideTimer();
+            volumeIcon.textContent = isMuted ? 'volume_off' : 'volume_up';
+            showHint(isMuted ? "已静音" : "取消静音");
         }
-        
-        // 更新音量图标
-        function updateVolumeIcon() {
-            if (isMuted || videoElement.volume === 0) {
-                volumeIcon.textContent = 'volume_off';
-            } else if (videoElement.volume < 0.5) {
-                volumeIcon.textContent = 'volume_down';
-            } else {
-                volumeIcon.textContent = 'volume_up';
-            }
-            
-            if (!isMuted) {
-                volumeSlider.value = videoElement.volume;
-            }
-        }
-        
-        // 开始拖动进度条
+
+        // --- 进度条逻辑 ---
         function startSeek(e) {
-            if (!currentVideoUrl) return;
-            
             isDraggingProgress = true;
             seekTo(e);
             
             const moveHandler = (moveEvent) => {
-                if (isDraggingProgress) {
-                    seekTo(moveEvent);
-                }
+                if (isDraggingProgress) seekTo(moveEvent);
             };
-            
             const endHandler = () => {
                 isDraggingProgress = false;
                 document.removeEventListener('mousemove', moveHandler);
                 document.removeEventListener('touchmove', moveHandler);
                 document.removeEventListener('mouseup', endHandler);
                 document.removeEventListener('touchend', endHandler);
-                resetUIHideTimer();
             };
             
             document.addEventListener('mousemove', moveHandler);
-            document.addEventListener('touchmove', moveHandler);
+            document.addEventListener('touchmove', moveHandler, {passive: false});
             document.addEventListener('mouseup', endHandler);
             document.addEventListener('touchend', endHandler);
-            
-            resetUIHideTimer();
         }
-        
-        // 跳转到指定位置
+
+        function handleTouchSeek(e) {
+            e.preventDefault();
+            startSeek(e.touches[0]);
+        }
+
         function seekTo(event) {
-            if (!currentVideoUrl) return;
-            
             const rect = progressContainer.getBoundingClientRect();
-            let clientX;
-            
-            if (event.type && event.type.includes('mouse')) {
-                clientX = event.clientX;
-            } else if (event.clientX !== undefined) {
-                clientX = event.clientX;
-            } else if (event.touches && event.touches[0]) {
-                clientX = event.touches[0].clientX;
-            } else {
-                return;
-            }
-            
+            let clientX = event.clientX !== undefined ? event.clientX : (event.touches ? event.touches[0].clientX : 0);
             const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-            
             progressBar.style.width = percent * 100 + '%';
             videoElement.currentTime = percent * videoElement.duration;
-            
             currentTimeElement.textContent = formatTime(videoElement.currentTime);
         }
-        
-        // 更新进度条
+
         function updateProgress() {
-            if (!isDraggingProgress && !videoElement.paused && currentVideoUrl) {
+            if (!isDraggingProgress && videoElement.duration) {
                 const percent = (videoElement.currentTime / videoElement.duration) * 100;
                 progressBar.style.width = percent + '%';
                 currentTimeElement.textContent = formatTime(videoElement.currentTime);
             }
         }
-        
-        // 切换全屏
+
+        function formatTime(seconds) {
+            if (isNaN(seconds) || !isFinite(seconds)) return "0:00";
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
         function toggleFullscreen() {
-            if (!isFullscreen) {
-                if (playerContainer.requestFullscreen) {
-                    playerContainer.requestFullscreen();
-                } else if (playerContainer.webkitRequestFullscreen) {
-                    playerContainer.webkitRequestFullscreen();
-                } else if (playerContainer.msRequestFullscreen) {
-                    playerContainer.msRequestFullscreen();
-                }
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (playerContainer.requestFullscreen) playerContainer.requestFullscreen();
+                else if (playerContainer.webkitRequestFullscreen) playerContainer.webkitRequestFullscreen();
                 fullscreenIcon.textContent = 'fullscreen_exit';
-                isFullscreen = true;
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
                 fullscreenIcon.textContent = 'fullscreen';
-                isFullscreen = false;
             }
+        }
+
+        // --- 数据获取与切换 ---
+        function selectVideoType(tabElement, type, name) {
+            if (currentVideoType === type) return;
             
-            resetUIHideTimer();
-        }
-        
-        // 全屏变化事件
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-        document.addEventListener('msfullscreenchange', handleFullscreenChange);
-        
-        function handleFullscreenChange() {
-            isFullscreen = !!(document.fullscreenElement || 
-                              document.webkitFullscreenElement || 
-                              document.msFullscreenElement);
-            fullscreenIcon.textContent = isFullscreen ? 'fullscreen_exit' : 'fullscreen';
-        }
-        
-        // 处理键盘按键
-        function handleKeyPress(e) {
-            if (!currentVideoUrl) return;
-            
-            switch(e.key) {
-                case ' ':
-                case 'k':
-                case 'K':
-                    e.preventDefault();
-                    togglePlayPause();
-                    break;
-                case 'm':
-                case 'M':
-                    e.preventDefault();
-                    toggleMute();
-                    break;
-                case 'f':
-                case 'F':
-                    e.preventDefault();
-                    toggleFullscreen();
-                    break;
-                case 'r':
-                case 'R':
-                    e.preventDefault();
-                    refreshVideo();
-                    break;
-                case 't':
-                case 'T':
-                    e.preventDefault();
-                    toggleTypeDropdown();
-                    break;
-                case 's':
-                case 'S':
-                    e.preventDefault();
-                    toggleSettingsDropdown();
-                    break;
-                case 'ArrowLeft':
-                    e.preventDefault();
-                    videoElement.currentTime = Math.max(0, videoElement.currentTime - 5);
-                    resetUIHideTimer();
-                    break;
-                case 'ArrowRight':
-                    e.preventDefault();
-                    videoElement.currentTime = Math.min(videoElement.duration, videoElement.currentTime + 5);
-                    resetUIHideTimer();
-                    break;
-                case 'ArrowUp':
-                    e.preventDefault();
-                    videoElement.volume = Math.min(1, videoElement.volume + 0.1);
-                    volumeSlider.value = videoElement.volume;
-                    updateVolumeIcon();
-                    resetUIHideTimer();
-                    break;
-                case 'ArrowDown':
-                    e.preventDefault();
-                    videoElement.volume = Math.max(0, videoElement.volume - 0.1);
-                    volumeSlider.value = videoElement.volume;
-                    updateVolumeIcon();
-                    resetUIHideTimer();
-                    break;
-            }
-        }
-        
-        // 视频结束事件处理
-        function onVideoEnded() {
-            setTimeout(() => {
-                refreshVideo();
-            }, 1000);
-        }
-        
-        // 切换类型下拉菜单
-        function toggleTypeDropdown() {
-            typeDropdown.classList.toggle('show');
-            settingsDropdown.classList.remove('show');
-            overlay.classList.toggle('show');
-            resetUIHideTimer();
-        }
-        
-        // 切换设置下拉菜单
-        function toggleSettingsDropdown() {
-            settingsDropdown.classList.toggle('show');
-            typeDropdown.classList.remove('show');
-            overlay.classList.toggle('show');
-            resetUIHideTimer();
-        }
-        
-        // 关闭所有下拉菜单
-        function closeAllDropdowns() {
-            typeDropdown.classList.remove('show');
-            settingsDropdown.classList.remove('show');
-            overlay.classList.remove('show');
-            resetUIHideTimer();
-        }
-        
-        // 选择视频类型
-        function selectVideoType(type, name) {
-            if (currentVideoType === type) {
-                closeAllDropdowns();
-                return;
-            }
+            typeTabs.forEach(t => t.classList.remove('active'));
+            tabElement.classList.add('active');
+            tabElement.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
             
             currentVideoType = type;
             currentVideoName = name;
-            
-            selectedTypeText.textContent = name;
-            
-            typeOptions.forEach(option => {
-                if (option.dataset.type === type) {
-                    option.classList.add('active');
-                } else {
-                    option.classList.remove('active');
-                }
-            });
-            
-            requestCounter = 0;
             refreshVideo();
-            closeAllDropdowns();
         }
-        
-        // 选择刷新按钮位置
-        function selectRefreshButtonPosition(position, name) {
-            if (refreshButtonPosition === position) {
-                closeAllDropdowns();
-                return;
+
+        async function fetchFreshVideoUrl(type, customCounter = null) {
+            const counter = customCounter || requestCounter;
+            const t = Date.now();
+            const r = Math.random().toString(36).substring(7);
+            
+            const jsonApiUrl = `${API_BASE_URL}?type=json&id=${type}&_t=${t}_${counter}_${r}`;
+            
+            try {
+                const response = await fetch(jsonApiUrl);
+                const data = await response.json();
+                
+                let freshUrl = '';
+                if (data && data.url) freshUrl = data.url;
+                else if (data && data.video_url) freshUrl = data.video_url;
+                else if (data && data.data && data.data.url) freshUrl = data.data.url;
+                
+                if (freshUrl) return freshUrl;
+                throw new Error("无法从JSON解析到有效URL");
+            } catch (e) {
+                console.warn("JSON解析失败，尝试回退到直连格式:", e);
+                return `${API_BASE_URL}?type=mp4&id=${type}&_t=${t}_${counter}`;
             }
-            
-            refreshButtonPosition = position;
-            setRefreshButtonPosition(position);
-            localStorage.setItem('refreshButtonPosition', position);
-            showHint(`刷新按钮位置已设置为${name}`);
-            closeAllDropdowns();
         }
-        
-        // 设置刷新按钮位置
-        function setRefreshButtonPosition(position) {
-            refreshButtonContainer.classList.remove('position-left', 'position-center', 'position-right');
-            refreshButtonContainer.classList.add(`position-${position}`);
+
+        async function refreshVideo() {
+            if (isRefreshing) return;
+            isRefreshing = true;
+            refreshBtn.classList.add('loading');
+            loadingSpinner.style.display = 'block';
+            requestCounter++;
             
-            settingsOptions.forEach(option => {
-                if (option.dataset.position === position) {
-                    option.classList.add('active');
-                } else {
-                    option.classList.remove('active');
-                }
+            try {
+                const freshUrl = await fetchFreshVideoUrl(currentVideoType);
+                playVideoUrl(freshUrl);
+            } catch (error) {
+                showHint("获取视频失败，请重试");
+            } finally {
+                setTimeout(() => {
+                    refreshBtn.classList.remove('loading');
+                    isRefreshing = false;
+                }, 500);
+            }
+        }
+
+        function playVideoUrl(url) {
+            loadingSpinner.style.display = 'block';
+            videoElement.src = url;
+            videoElement.load();
+            videoElement.play().catch(() => {
+                bigPlayButton.classList.remove('hidden');
             });
         }
-        
-        // 刷新视频（切换到下一个视频）
-        function refreshVideo() {
-            if (isRefreshing) return;
-            
-            isRefreshing = true;
-            refreshButton.classList.add('loading');
-            requestCounter++;
-            showHint("正在加载视频...");
-            
-            fetchVideoFromAPI(currentVideoType)
-                .then(videoUrl => {
-                    if (videoUrl) {
-                        playVideo(videoUrl);
-                        showHint(`已切换到${currentVideoName}`);
-                    } else {
-                        throw new Error('无法获取视频URL');
-                    }
-                })
-                .catch(error => {
-                    console.error("刷新视频失败:", error);
-                    showHint("获取视频失败，请重试");
-                    errorMessage.classList.add('show');
-                })
-                .finally(() => {
-                    setTimeout(() => {
-                        refreshButton.classList.remove('loading');
-                        isRefreshing = false;
-                    }, 500);
-                });
-            
-            resetUIHideTimer();
-        }
-        
-        // 从API获取视频
-        async function fetchVideoFromAPI(type) {
-            try {
-                loadingSpinner.style.display = 'block';
-                
-                const timestamp = Date.now();
-                const random = Math.random().toString(36).substring(7);
-                const apiUrl = `${API_BASE_URL}?type=mp4&id=${type}&_t=${timestamp}_${requestCounter}_${random}`;
-                
-                console.log("请求视频API:", apiUrl);
-                return apiUrl;
-                
-            } catch (error) {
-                console.error("API请求失败:", error);
-                
-                try {
-                    const timestamp = Date.now();
-                    const random = Math.random().toString(36).substring(7);
-                    const jsonApiUrl = `${API_BASE_URL}?type=json&id=${type}&_t=${timestamp}_${requestCounter}_${random}`;
-                    console.log("尝试JSON API:", jsonApiUrl);
-                    
-                    const response = await fetch(jsonApiUrl, {
-                        method: 'GET',
-                        mode: 'cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`JSON API请求失败`);
-                    }
-                    
-                    const data = await response.json();
-                    console.log("JSON响应:", data);
-                    
-                    let videoUrl = null;
-                    
-                    if (data && data.url) {
-                        videoUrl = data.url;
-                    } else if (data && data.data && data.data.url) {
-                        videoUrl = data.data.url;
-                    } else if (data && data.video_url) {
-                        videoUrl = data.video_url;
-                    }
-                    
-                    if (videoUrl) {
-                        const timestamp = Date.now();
-                        const random = Math.random().toString(36).substring(7);
-                        return `${videoUrl}${videoUrl.includes('?') ? '&' : '?'}_t=${timestamp}_${requestCounter}_${random}`;
-                    } else {
-                        throw new Error('无法解析视频URL');
-                    }
-                    
-                } catch (jsonError) {
-                    console.error("JSON API也失败:", jsonError);
-                    throw jsonError;
-                }
-            } finally {
-                loadingSpinner.style.display = 'none';
-            }
-        }
-        
-        // 播放视频
-        function playVideo(videoUrl) {
-            currentVideoUrl = videoUrl;
-            
-            if (videoElement.src && videoElement.src.startsWith('blob:')) {
-                URL.revokeObjectURL(videoElement.src);
-            }
-            
-            videoElement.pause();
-            videoElement.currentTime = 0;
-            
-            const timestamp = Date.now();
-            const random = Math.random().toString(36).substring(7);
-            const uniqueVideoUrl = `${videoUrl}${videoUrl.includes('?') ? '&' : '?'}_nocache=${timestamp}_${random}`;
-            
-            videoElement.src = uniqueVideoUrl;
-            videoElement.load();
-            
-            bigPlayButton.classList.remove('hidden');
-            
-            const playPromise = videoElement.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.catch(e => {
-                    console.log("自动播放被阻止，需要用户交互");
-                    showHint("点击播放按钮开始播放");
-                });
-            }
-        }
-        
-        // 显示提示
-        function showHint(message) {
-            hint.textContent = message;
+
+        function showHint(msg) {
+            hint.textContent = msg;
             hint.classList.add('show');
-            
-            setTimeout(() => {
-                hint.classList.remove('show');
-            }, 2000);
+            setTimeout(() => hint.classList.remove('show'), 2000);
         }
-        
-        // 隐藏提示
-        function hideHint() {
-            hint.classList.remove('show');
-        }
-        
-        // 格式化时间 (秒 -> 分:秒)
-        function formatTime(seconds) {
-            if (isNaN(seconds) || seconds === Infinity) return "0:00";
-            
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
-        
-        // 初始化播放器
-        initPlayer();
+
+        // 启动
+        init();
     </script>
 </body>
 </html>
