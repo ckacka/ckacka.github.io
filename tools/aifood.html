@@ -17,7 +17,7 @@
         
         /* 严格遵循官方 Slideview 结构与计算 */
         .weui-slideview { position: relative; overflow: hidden; }
-        .weui-slideview__left { position: relative; z-index: 10; background-color: var(--weui-BG-2); transition: transform .3s; width: 100%; }
+        .weui-slideview__left { position: relative; z-index: 10; background-color: var(--weui-BG-2); transition: transform .3s ease; width: 100%; }
         .weui-slideview__right { position: absolute; right: 0; top: 0; bottom: 0; z-index: 1; }
         .weui-slideview__btn__wrap { display: flex; height: 100%; }
         .weui-slideview__btn { display: flex; align-items: center; justify-content: center; width: 75px; color: #FFF; background-color: var(--weui-RED); text-decoration: none; font-size: 17px; }
@@ -35,6 +35,14 @@
         /* 确保 svg 颜色跟随主题 */
         .weui-tabbar__icon svg { fill: var(--weui-FG-1); width: 100%; height: 100%; }
         .weui-bar__item_on .weui-tabbar__icon svg { fill: var(--weui-BRAND); }
+
+        /* 空状态统一背景样式 */
+        #favoriteEmpty {
+            background-color: var(--weui-BG-2);
+            height: 100%;
+            padding-top: 60px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body ontouchstart>
@@ -52,38 +60,34 @@
                 </div>
                 <div class="weui-form__control-area">
                     <div class="weui-cells__group weui-cells__group_form">
-                        <div class="weui-cells__title">现有食材 (必填)</div>
                         <div class="weui-cells weui-cells_form">
+                            <!-- 现有食材 -->
                             <div class="weui-cell weui-cell_active">
+                                <div class="weui-cell__hd">
+                                    <label class="weui-label">现有食材</label>
+                                </div>
                                 <div class="weui-cell__bd">
-                                    <textarea id="ingredients" class="weui-textarea" placeholder="例如：辣椒、猪肉..." rows="2"></textarea>
-                                    <div class="weui-textarea-counter"><span></span></div>
+                                    <input id="ingredients" class="weui-input" type="text" placeholder="如：辣椒、猪肉 (必填)" />
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="weui-cells__title">口味偏好 (选填)</div>
-                        <div class="weui-cells weui-cells_form">
+                            
+                            <!-- 口味偏好 -->
                             <div class="weui-cell weui-cell_active">
+                                <div class="weui-cell__hd">
+                                    <label class="weui-label">口味偏好</label>
+                                </div>
                                 <div class="weui-cell__bd">
-                                    <input id="taste" class="weui-input" type="text" placeholder="例如：香辣下饭..." />
+                                    <input id="taste" class="weui-input" type="text" placeholder="如：香辣下饭 (选填)" />
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- 菜品风格滑块 -->
-                        <div class="weui-cells__title">菜品风格：<span id="styleText" style="color: var(--weui-BRAND);">日常家常</span></div>
-                        <div class="weui-cells weui-cells_form">
-                            <div class="weui-cell weui-cell_active">
+                            <!-- 菜品风格模拟选择框 (符合 WeUI 官方 Select 规范) -->
+                            <div class="weui-cell weui-cell_active weui-cell_select weui-cell_select-after" id="showStylePickerBtn">
+                                <div class="weui-cell__hd">
+                                    <label class="weui-label">菜品风格</label>
+                                </div>
                                 <div class="weui-cell__bd">
-                                    <div class="weui-slider-box">
-                                        <div class="weui-slider" id="styleSlider">
-                                            <div class="weui-slider__inner">
-                                                <div style="width: 20%;" class="weui-slider__track"></div>
-                                                <div style="left: 20%;" class="weui-slider__handler"></div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <div class="weui-select" id="styleSelectText">日常家常</div>
                                 </div>
                             </div>
                         </div>
@@ -96,7 +100,7 @@
         </div>
 
         <!-- 菜谱库 -->
-        <div id="favoritePanel">
+        <div id="favoritePanel" style="height: 100%;">
             <div class="weui-search-bar" id="searchBar">
                 <form class="weui-search-bar__form">
                     <div class="weui-search-bar__box">
@@ -113,11 +117,11 @@
             </div>
             
             <!-- 使用 WeUI 官方 Msg 组件作为空状态 -->
-            <div class="weui-msg" id="favoriteEmpty" style="display: none; padding-top: 60px;">
+            <div class="weui-msg" id="favoriteEmpty" style="display: none;">
                 <div class="weui-msg__icon-area"><i class="weui-icon-info weui-icon_msg"></i></div>
                 <div class="weui-msg__text-area">
-                    <h2 class="weui-msg__title">暂无菜谱</h2>
-                    <p class="weui-msg__desc">菜谱库空空如也，快去生成你的第一道专属菜谱吧</p>
+                    <h2 class="weui-msg__title">暂无数据</h2>
+                    <p class="weui-msg__desc"></p>
                 </div>
             </div>
             
@@ -135,9 +139,11 @@
                 </div>
                 <div class="weui-form__control-area">
                     <div class="weui-cells__group weui-cells__group_form">
-                        <div class="weui-cells__title">API Key (密钥)</div>
                         <div class="weui-cells weui-cells_form">
                             <div class="weui-cell weui-cell_active">
+                                <div class="weui-cell__hd">
+                                    <label class="weui-label">API Key</label>
+                                </div>
                                 <div class="weui-cell__bd">
                                     <input id="apiKeyInput" class="weui-input" type="password" placeholder="请输入 sk-..." />
                                 </div>
@@ -222,7 +228,7 @@
     
     let currentGeneratedRecipe = null; 
     let currentViewingRecipeId = null;
-    let currentStylePercent = 20; // 默认滑块值
+    let selectedStyleText = '日常家常';
 
     // 主题适配
     function applyTheme() {
@@ -272,19 +278,26 @@
         if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
         renderFavoriteList('');
 
-        // 初始化 WeUI 滑块
-        weui.slider('#styleSlider', {
-            step: 1,
-            defaultValue: 20,
-            onChange: function(percent) {
-                currentStylePercent = percent;
-                let text = '极简家常';
-                if (percent > 15) text = '日常家常';
-                if (percent > 45) text = '精致美味';
-                if (percent > 70) text = '餐厅级别';
-                if (percent > 85) text = '国宴正式';
-                document.getElementById('styleText').innerText = text;
-            }
+        // 绑定模拟选择框点击唤起 WeUI Picker
+        document.getElementById('showStylePickerBtn').addEventListener('click', function () {
+            weui.picker([{
+                label: '极简家常', value: '极简家常'
+            }, {
+                label: '日常家常', value: '日常家常'
+            }, {
+                label: '精致美味', value: '精致美味'
+            }, {
+                label: '餐厅级别', value: '餐厅级别'
+            }, {
+                label: '国宴正式', value: '国宴正式'
+            }], {
+                defaultValue: [selectedStyleText],
+                onConfirm: function (result) {
+                    selectedStyleText = result[0].value;
+                    document.getElementById('styleSelectText').innerText = selectedStyleText;
+                },
+                title: '选择菜品风格'
+            });
         });
     });
 
@@ -304,13 +317,12 @@
         const taste = document.getElementById('taste').value.trim();
         if (!ingredients) return weui.topTips('请至少输入一样食材');
 
-        // 将滑块百分比转化为大语言模型易懂的 Prompt
         let stylePrompt = "普通家常菜";
-        if (currentStylePercent <= 15) stylePrompt = "极简做法，追求极致速度和便捷，不需要复杂厨具和高超技巧，适合新手和懒人。";
-        else if (currentStylePercent <= 45) stylePrompt = "标准的日常家常菜做法，接地气，好吃下饭。";
-        else if (currentStylePercent <= 70) stylePrompt = "精致的家宴做法，步骤稍多，注重口味层次和家常摆盘。";
-        else if (currentStylePercent <= 85) stylePrompt = "高级餐厅级别的做法，包含进阶的烹饪技巧和调味搭配。";
-        else stylePrompt = "国宴/顶级正式宴席标准，极度考究食材处理、摆盘美学和严谨的烹饪技法。";
+        if (selectedStyleText === '极简家常') stylePrompt = "极简做法，追求极致速度和便捷，不需要复杂厨具和高超技巧，适合新手和懒人。";
+        else if (selectedStyleText === '日常家常') stylePrompt = "标准的日常家常菜做法，接地气，好吃下饭。";
+        else if (selectedStyleText === '精致美味') stylePrompt = "精致的家宴做法，步骤稍多，注重口味层次和家常摆盘。";
+        else if (selectedStyleText === '餐厅级别') stylePrompt = "高级餐厅级别的做法，包含进阶的烹饪技巧 and 调味搭配。";
+        else if (selectedStyleText === '国宴正式') stylePrompt = "国宴/顶级正式宴席标准，极度考究食材处理、摆盘美学和严谨的烹饪技法。";
 
         const loading = weui.loading('大厨正在思考');
 
@@ -435,29 +447,67 @@
         }
     }
 
+    // 【核心修复】高精度全流程手势追踪，完美契合移动端纵向滚动与横向左滑的冲突
     function bindSlideEvents() {
         const items = document.querySelectorAll('.weui-slideview');
         items.forEach(item => {
-            let startX, startY;
+            let startX = 0;
+            let startY = 0;
+            let isSliding = false;
+
             item.addEventListener('touchstart', e => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
-            }, {passive: true});
+                isSliding = true;
+            }, { passive: true });
+
+            item.addEventListener('touchmove', e => {
+                if (!isSliding) return;
+                const moveX = e.touches[0].clientX;
+                const moveY = e.touches[0].clientY;
+                
+                const diffX = startX - moveX;
+                const diffY = Math.abs(startY - moveY);
+
+                // 如果横向滑动距离大于纵向，说明用户明确是在左滑，必须阻止系统默认的页面滚动
+                if (diffX > 10 && diffX > diffY) {
+                    if (e.cancelable) e.preventDefault(); 
+                }
+            }, { passive: false }); // 必须设置为 false 才能生效 preventDefault
+
             item.addEventListener('touchend', e => {
+                if (!isSliding) return;
+                isSliding = false;
+                
                 const endX = e.changedTouches[0].clientX;
                 const endY = e.changedTouches[0].clientY;
-                if (Math.abs(endY - startY) > 30) return; 
-                if (startX - endX > 40) {
+                
+                const diffX = startX - endX;
+                const diffY = Math.abs(startY - endY);
+
+                // 过滤掉纵向的大幅误触滚动
+                if (diffY > 40) return;
+
+                // 判定阈值：向左划动超过 35 像素则打开
+                if (diffX > 35) {
+                    // 先收起其它已经打开的行
                     document.querySelectorAll('.slide-open').forEach(el => el.classList.remove('slide-open'));
                     item.classList.add('slide-open');
-                } else if (endX - startX > 40) {
+                } 
+                // 向右划动超过 35 像素则收回
+                else if (diffX < -35) {
                     item.classList.remove('slide-open');
                 }
-            }, {passive: true});
+            }, { passive: true });
         });
     }
 
     window.openSavedRecipe = function(id) {
+        const slideItem = document.getElementById(`slide_${id}`);
+        if(slideItem && slideItem.classList.contains('slide-open')){
+            slideItem.classList.remove('slide-open');
+            return;
+        }
         const recipe = RecipeManager.getAll().find(r => r.id === id);
         if (recipe) openRecipeDetail(recipe, false);
     };
@@ -491,7 +541,7 @@
     };
 
     window.deleteRecipe = function(event, id) {
-        event.stopPropagation();
+        event.stopPropagation(); // 阻止冒泡，防止触发详情弹窗
         weui.confirm('确定要删除这篇菜谱吗？', function () {
             RecipeManager.remove(id);
             renderFavoriteList(document.getElementById('searchInput').value);
@@ -499,9 +549,20 @@
         });
     };
 
+    // 初始化 WeUI 搜索栏
     weui.searchBar('#searchBar');
+    
+    // 监听输入事件
     document.getElementById('searchInput').addEventListener('input', function(e) {
         renderFavoriteList(e.target.value.trim());
+    });
+
+    document.getElementById('searchClear').addEventListener('click', function() {
+        renderFavoriteList('');
+    });
+
+    document.getElementById('searchCancel').addEventListener('click', function() {
+        renderFavoriteList('');
     });
 
     function switchTab(tabName) {
