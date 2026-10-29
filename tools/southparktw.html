@@ -693,33 +693,65 @@
         }
       });
 
-      /* ---------- 网络状态提示 ---------- */
-      let offlineNotice = null;
+      /* ---------- 网络状态提示（断网/恢复均自动消失） ---------- */
+      let offlineNotice = null;     // 断网提示实例
+      let onlineNotice = null;      // 恢复提示实例
+      let onlineTimer = null;       // 恢复提示的强制关闭定时器
+
+      const closeOfflineNotice = () => {
+        if (offlineNotice) {
+          try { offlineNotice.close(); } catch (e) { /* 忽略 */ }
+          offlineNotice = null;
+        }
+      };
 
       const showOfflineNotice = () => {
-        if (offlineNotice) return;
+        if (offlineNotice) return;      // 避免重复叠加
+        // 断网提示 3 秒后自动消失，不再一直挂载
         offlineNotice = TDesign.NotifyPlugin.warning({
           title: '网络连接已断开',
           content: '请检查网络后重试',
-          duration: 0,
+          duration: 3000,
           placement: 'top-right'
         });
+        // 3.1 秒后清理引用（实例已由组件自身关闭）
+        setTimeout(() => { offlineNotice = null; }, 3200);
       };
 
-      const hideOfflineNotice = () => {
-        if (offlineNotice) {
-          offlineNotice.close();
-          offlineNotice = null;
+      const showOnlineNotice = () => {
+        // 1. 网络恢复：若断网提示还在，立即关闭
+        closeOfflineNotice();
+
+        // 2. 清理上一次恢复提示与定时器
+        if (onlineTimer) {
+          clearTimeout(onlineTimer);
+          onlineTimer = null;
         }
-        TDesign.NotifyPlugin.success({
+        if (onlineNotice) {
+          try { onlineNotice.close(); } catch (e) { /* 忽略 */ }
+          onlineNotice = null;
+        }
+
+        // 3. 显示恢复提示（3 秒后自动消失）
+        onlineNotice = TDesign.NotifyPlugin.success({
           title: '网络连接已恢复',
-          duration: 2000,
+          content: '播放将自动继续',
+          duration: 3000,
           placement: 'top-right'
         });
+
+        // 4. 双重保险：3.1 秒后强制关闭并清理引用
+        onlineTimer = setTimeout(() => {
+          if (onlineNotice) {
+            try { onlineNotice.close(); } catch (e) { /* 忽略 */ }
+            onlineNotice = null;
+          }
+          onlineTimer = null;
+        }, 3100);
       };
 
       const onOnline = () => {
-        hideOfflineNotice();
+        showOnlineNotice();
         initPlayer(activeIndex.value);
         if (mysteryVisible.value && !mysteryPlayer) {
           initMysteryPlayer();
@@ -777,6 +809,7 @@
         window.removeEventListener('offline', showOfflineNotice);
         window.removeEventListener('online', onOnline);
         media.removeEventListener('change', onSystemChange);
+        if (onlineTimer) clearTimeout(onlineTimer);
       });
 
       return {
