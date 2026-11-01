@@ -12,7 +12,7 @@
       padding: 0;
       width: 100%;
       height: 100%;
-      overflow: hidden;      /* 关键：整页不滚动、不横向溢出 */
+      overflow: hidden;
     }
     *, *::before, *::after { box-sizing: border-box; }
     body {
@@ -31,7 +31,7 @@
       overflow: hidden;
     }
 
-    /* ===== 顶栏：flex-shrink:0，永远在顶部 ===== */
+    /* ===== 顶栏 ===== */
     .app-header {
       flex-shrink: 0;
       height: 56px;
@@ -47,7 +47,7 @@
     .app-header h3 { margin: 0; font-weight: 500; font-size: 18px; }
     .header-left { display: flex; align-items: center; gap: 8px; }
 
-    /* ===== 主区域：占满剩余高度，禁止溢出 ===== */
+    /* ===== 主区域 ===== */
     .app-layout {
       flex: 1;
       min-height: 0;
@@ -56,12 +56,12 @@
       flex-direction: row;
     }
 
-    /* ===== 侧边栏：固定宽度 + 禁止溢出 ===== */
+    /* ===== 侧边栏 ===== */
     .app-aside {
       flex-shrink: 0 !important;
       width: 270px;
       height: 100%;
-      overflow: hidden;              /* 侧边栏内容不会溢出到外面 */
+      overflow: hidden;
       border-right: 1px solid var(--td-component-stroke);
       background: var(--td-bg-color-container);
       transition: background-color 0.3s ease, border-color 0.3s ease;
@@ -70,13 +70,12 @@
       height: 100%;
       overflow: hidden;
     }
-    /* 底部“关于”区域 */
     .menu-footer {
       padding: 12px;
       border-top: 1px solid var(--td-component-stroke);
     }
 
-    /* ===== 内容区外层：不滚动，仅作 flex 容器 ===== */
+    /* ===== 内容区 ===== */
     .app-content-outer {
       flex: 1;
       min-width: 0;
@@ -85,8 +84,6 @@
       display: flex;
       flex-direction: column;
     }
-
-    /* ===== 内容区实际滚动容器：唯一允许滚动的地方 ===== */
     .app-content-inner {
       flex: 1;
       overflow-y: auto;
@@ -118,7 +115,7 @@
     .app-name { font-size: 14px; font-weight: 500; text-align: center; margin-bottom: 4px; }
     .app-desc { font-size: 12px; text-align: center; color: var(--td-text-color-secondary); line-height: 1.4; min-height: 34px; }
 
-    /* ===== 返回顶部按钮：56x56 正常尺寸 ===== */
+    /* ===== 返回顶部 ===== */
     .back-top.t-button {
       position: fixed;
       right: 24px; bottom: 24px;
@@ -140,7 +137,7 @@
 <body>
 
 <div id="app">
-  <!-- 顶栏：永久置顶 -->
+  <!-- 顶栏 -->
   <header class="app-header">
     <div class="header-left">
       <t-button v-if="isMobile" variant="text" shape="square" @click="drawerVisible = true">
@@ -156,10 +153,13 @@
   </header>
 
   <t-layout class="app-layout">
-    <!-- 侧边栏：固定宽，禁止溢出 -->
+    <!-- 侧边栏：带图标 -->
     <t-aside v-if="!isMobile" width="270px" class="app-aside">
       <t-menu v-model="filterCategory" class="aside-menu">
         <t-menu-item v-for="c in categories" :key="c" :value="c">
+          <template #icon>
+            <t-icon :name="categoryIcons[c] || 'app'" />
+          </template>
           {{ c }}
         </t-menu-item>
         <template #operations>
@@ -173,7 +173,7 @@
       </t-menu>
     </t-aside>
 
-    <!-- 内容区：只有 inner div 滚动 -->
+    <!-- 内容区 -->
     <t-content
       class="app-content-outer"
       style="flex: 1; min-width: 0; overflow: hidden; padding: 0; display: flex; flex-direction: column;"
@@ -206,7 +206,7 @@
     </t-content>
   </t-layout>
 
-  <!-- 移动端抽屉 -->
+  <!-- 移动端抽屉：菜单也带图标 -->
   <t-drawer
     v-model:visible="drawerVisible"
     placement="left"
@@ -221,6 +221,9 @@
       @change="drawerVisible = false"
     >
       <t-menu-item v-for="c in categories" :key="c" :value="c">
+        <template #icon>
+          <t-icon :name="categoryIcons[c] || 'app'" />
+        </template>
         {{ c }}
       </t-menu-item>
       <template #operations>
@@ -255,7 +258,9 @@
   >
     <p>树洞应用市场 v3.0</p>
     <p style="color: var(--td-text-color-secondary); font-size: 13px; margin-top: 10px;">
-     
+      基于 TDesign 组件库构建，自动跟随系统深色模式，支持手动切换。
+    </p>
+  </t-dialog>
 </div>
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -295,6 +300,27 @@
     { id: 29, name: "EMS邮政快递",  desc: "EMS邮政快递",  icon: "send",        category: "快递", url: "https://s1zc8m.smartapps.cn/" },
     { id: 30, name: "京东快递",     desc: "京东快递",     icon: "send",        category: "快递", url: "https://3lasz2.smartapps.cn/" }
   ];
+
+  // 分类 -> TDesign 图标映射
+  const categoryIcons = {
+    '全部': 'app',
+    '百科': 'book',
+    '视频': 'video',
+    '新闻': 'file',
+    '工具': 'tools',
+    '问答': 'chat',
+    '社交': 'user',
+    '汽车': 'location',
+    '快递': 'send',
+    '美食': 'shop',
+    '文档': 'file',
+    '音频': 'play-circle',
+    '购物': 'cart',
+    '教育': 'education',
+    '旅游': 'map',
+    '金融': 'chart-bar',
+    '经验': 'lightbulb'
+  };
 
   const app = createApp({
     setup() {
@@ -342,7 +368,6 @@
       };
       const toggleTheme = () => applyTheme(!isDark.value, true);
 
-      // 滚动监听：contentRef 是原生 div，scrollTop 可靠
       const onContentScroll = () => {
         const el = contentRef.value;
         if (el) showBackTop.value = el.scrollTop > 300;
@@ -371,8 +396,8 @@
 
       return {
         searchText, filterCategory, isDark, showBackTop, aboutVisible, drawerVisible,
-        isMobile, contentRef, categories, filteredTools, openApp, openAbout,
-        toggleTheme, scrollToTop, onContentScroll
+        isMobile, contentRef, categories, filteredTools, categoryIcons,
+        openApp, openAbout, toggleTheme, scrollToTop, onContentScroll
       };
     }
   });
