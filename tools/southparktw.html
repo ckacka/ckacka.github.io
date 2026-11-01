@@ -130,7 +130,7 @@
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       width: 100%;
       padding: 10px 12px;
       border: none;
@@ -149,15 +149,23 @@
       color: var(--td-brand-color, #0052d9);
       font-weight: 600;
     }
-    .nav-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-      opacity: .55;
+
+    /* 侧边栏图标（统一播放图标） */
+    .nav-icon {
+      width: 16px;
+      height: 16px;
       flex-shrink: 0;
+      opacity: .7;
+      transition: opacity .2s ease;
     }
-    .nav-item.active .nav-dot { opacity: 1; }
+    .nav-item:hover .nav-icon { opacity: .9; }
+    .nav-item.active .nav-icon { opacity: 1; }
+
+    .nav-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     /* ---------- 内容区 ---------- */
     .main {
@@ -180,11 +188,19 @@
       line-height: 1.4;
     }
 
-    /* 播放器 */
-    .player-wrap { width: 100%; }
+    /* ---------- 播放器 ---------- */
+    .player-wrap {
+      width: 100%;
+      max-width: 100%;
+      /* 大屏自适应：宽度上限 = 可视高度能容纳的 16:9 宽度，
+         避免播放器被撑得过高导致控制条 / 进度条溢出 */
+      max-width: min(100%, max(320px, calc((100dvh - 200px) * 16 / 9)));
+    }
     .player-panel { width: 100%; }
+
     .player-box {
       width: 100%;
+      max-width: 100%;
       aspect-ratio: 16 / 9;
       background: #000;
       border-radius: 10px;
@@ -192,6 +208,21 @@
       position: relative;
       box-shadow: 0 4px 14px rgba(0, 0, 0, .15);
     }
+
+    /* 约束播放器内部节点，防止进度条 / 控制条横向溢出 */
+    .player-box > * {
+      max-width: 100% !important;
+      box-sizing: border-box;
+    }
+    .player-box video,
+    .player-box iframe {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      object-fit: contain;
+    }
+
     .status-layer {
       position: absolute;
       inset: 0;
@@ -238,11 +269,11 @@
       flex: 1 1 0;
       min-width: 0;
     }
+    /* 支付宝 / 微信二维码统一高度，保证两张图等高 */
     .qr-box img {
       width: 100%;
       max-width: 130px;
-      height: auto;
-      max-height: 200px;
+      height: 200px;
       object-fit: contain;
       border-radius: 8px;
       margin: 0 auto 8px;
@@ -287,7 +318,7 @@
       }
       .qr-box img {
         max-width: 110px;
-        max-height: 170px;
+        height: 170px;
       }
     }
   </style>
@@ -370,8 +401,14 @@
             :class="{ active: activeIndex === i }"
             @click="selectSeason(i)"
           >
-            <span class="nav-dot"></span>
-            <span>{{ s.label }}</span>
+            <!-- 统一播放图标 -->
+            <svg class="nav-icon" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M10.2 8.4l5.4 3.6-5.4 3.6z" />
+            </svg>
+            <span class="nav-label">{{ s.label }}</span>
           </button>
         </nav>
       </aside>
@@ -417,8 +454,14 @@
           :class="{ active: activeIndex === i }"
           @click="selectSeason(i)"
         >
-          <span class="nav-dot"></span>
-          <span>{{ s.label }}</span>
+          <!-- 统一播放图标 -->
+          <svg class="nav-icon" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M10.2 8.4l5.4 3.6-5.4 3.6z" />
+          </svg>
+          <span class="nav-label">{{ s.label }}</span>
         </button>
       </nav>
     </div>
@@ -707,22 +750,18 @@
 
       const showOfflineNotice = () => {
         if (offlineNotice) return;      // 避免重复叠加
-        // 断网提示 3 秒后自动消失，不再一直挂载
         offlineNotice = TDesign.NotifyPlugin.warning({
           title: '网络连接已断开',
           content: '请检查网络后重试',
           duration: 3000,
           placement: 'top-right'
         });
-        // 3.1 秒后清理引用（实例已由组件自身关闭）
         setTimeout(() => { offlineNotice = null; }, 3200);
       };
 
       const showOnlineNotice = () => {
-        // 1. 网络恢复：若断网提示还在，立即关闭
         closeOfflineNotice();
 
-        // 2. 清理上一次恢复提示与定时器
         if (onlineTimer) {
           clearTimeout(onlineTimer);
           onlineTimer = null;
@@ -732,7 +771,6 @@
           onlineNotice = null;
         }
 
-        // 3. 显示恢复提示（3 秒后自动消失）
         onlineNotice = TDesign.NotifyPlugin.success({
           title: '网络连接已恢复',
           content: '播放将自动继续',
@@ -740,7 +778,6 @@
           placement: 'top-right'
         });
 
-        // 4. 双重保险：3.1 秒后强制关闭并清理引用
         onlineTimer = setTimeout(() => {
           if (onlineNotice) {
             try { onlineNotice.close(); } catch (e) { /* 忽略 */ }
