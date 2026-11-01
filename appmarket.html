@@ -59,7 +59,7 @@
     /* ===== 侧边栏：固定宽度 + 禁止溢出 ===== */
     .app-aside {
       flex-shrink: 0 !important;
-      width: 232px;
+      width: 270px;
       height: 100%;
       overflow: hidden;              /* 侧边栏内容不会溢出到外面 */
       border-right: 1px solid var(--td-component-stroke);
@@ -157,7 +157,7 @@
 
   <t-layout class="app-layout">
     <!-- 侧边栏：固定宽，禁止溢出 -->
-    <t-aside v-if="!isMobile" width="232px" class="app-aside">
+    <t-aside v-if="!isMobile" width="270px" class="app-aside">
       <t-menu v-model="filterCategory" class="aside-menu">
         <t-menu-item v-for="c in categories" :key="c" :value="c">
           {{ c }}
@@ -210,7 +210,7 @@
   <t-drawer
     v-model:visible="drawerVisible"
     placement="left"
-    :size="232"
+    :size="270"
     header="分类"
     :footer="false"
     :body-style="{ padding: 0 }"
@@ -255,9 +255,7 @@
   >
     <p>树洞应用市场 v3.0</p>
     <p style="color: var(--td-text-color-secondary); font-size: 13px; margin-top: 10px;">
-      基于 TDesign 组件库构建，自动跟随系统深色模式，支持手动切换。
-    </p>
-  </t-dialog>
+     
 </div>
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
