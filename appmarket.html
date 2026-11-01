@@ -1,555 +1,386 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#6750A4">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <title>树洞应用市场</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            /* --- Material Design 3 Color Tokens (Light) --- */
-            --md-sys-color-primary: #6750A4;
-            --md-sys-color-on-primary: #FFFFFF;
-            --md-sys-color-primary-container: #EADDFF;
-            --md-sys-color-on-primary-container: #21005D;
-            
-            --md-sys-color-secondary: #625B71;
-            --md-sys-color-secondary-container: #E8DEF8;
-            --md-sys-color-on-secondary-container: #1D192B;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>树洞应用市场</title>
+  <link rel="stylesheet" href="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.css" />
+  <style>
+    /* ===== 全局：禁止任何页面级滚动，防止侧边栏被拖动 ===== */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;      /* 关键：整页不滚动、不横向溢出 */
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      background: var(--td-bg-color-page);
+      color: var(--td-text-color-primary);
+      font-family: var(--td-font-family);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-            --md-sys-color-surface: #FDF8FD;
-            --md-sys-color-surface-container-low: #F7F2FA;
-            --md-sys-color-surface-container: #F3EDF7;
-            --md-sys-color-surface-container-high: #ECE6F0;
-            
-            --md-sys-color-on-surface: #1C1B1F;
-            --md-sys-color-on-surface-variant: #49454F;
-            --md-sys-color-outline: #79747E;
-            --md-sys-color-outline-variant: #C4C7C5;
+    /* ===== 根容器：100vh flex column，顶栏永久置顶 ===== */
+    #app {
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-            --md-sys-color-error: #B3261E;
-            --md-sys-color-on-error: #FFFFFF;
+    /* ===== 顶栏：flex-shrink:0，永远在顶部 ===== */
+    .app-header {
+      flex-shrink: 0;
+      height: 56px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--td-component-stroke);
+      background: var(--td-bg-color-container);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      z-index: 10;
+    }
+    .app-header h3 { margin: 0; font-weight: 500; font-size: 18px; }
+    .header-left { display: flex; align-items: center; gap: 8px; }
 
-            /* --- 样式变量 --- */
-            --radius-full: 9999px;
-            --radius-lg: 24px;
-            --radius-md: 16px;
-            --radius-sm: 8px;
-            
-            --transition-standard: 0.3s cubic-bezier(0.2, 0.0, 0, 1.0);
-        }
+    /* ===== 主区域：占满剩余高度，禁止溢出 ===== */
+    .app-layout {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex !important;
+      flex-direction: row;
+    }
 
-        [data-theme="dark"] {
-            /* --- Material Design 3 Color Tokens (Dark) --- */
-            --md-sys-color-primary: #D0BCFF;
-            --md-sys-color-on-primary: #381E72;
-            --md-sys-color-primary-container: #4F378B;
-            --md-sys-color-on-primary-container: #EADDFF;
-            
-            --md-sys-color-secondary: #CCC2DC;
-            --md-sys-color-secondary-container: #4A4458;
-            --md-sys-color-on-secondary-container: #E8DEF8;
+    /* ===== 侧边栏：固定宽度 + 禁止溢出 ===== */
+    .app-aside {
+      flex-shrink: 0 !important;
+      width: 232px;
+      height: 100%;
+      overflow: hidden;              /* 侧边栏内容不会溢出到外面 */
+      border-right: 1px solid var(--td-component-stroke);
+      background: var(--td-bg-color-container);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    .app-aside .t-menu {
+      height: 100%;
+      overflow: hidden;
+    }
+    /* 底部“关于”区域 */
+    .menu-footer {
+      padding: 12px;
+      border-top: 1px solid var(--td-component-stroke);
+    }
 
-            --md-sys-color-surface: #141218;
-            --md-sys-color-surface-container-low: #1D1B20;
-            --md-sys-color-surface-container: #211F26;
-            --md-sys-color-surface-container-high: #2B2930;
-            
-            --md-sys-color-on-surface: #E6E1E5;
-            --md-sys-color-on-surface-variant: #CAC4D0;
-            --md-sys-color-outline: #938F99;
-            --md-sys-color-outline-variant: #444746;
-            
-            --md-sys-color-error: #F2B8B5;
-            --md-sys-color-on-error: #601410;
-        }
+    /* ===== 内容区外层：不滚动，仅作 flex 容器 ===== */
+    .app-content-outer {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      padding: 0 !important;
+      display: flex;
+      flex-direction: column;
+    }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            font-family: 'Roboto', 'PingFang SC', system-ui, sans-serif;
-            background-color: var(--md-sys-color-surface);
-            color: var(--md-sys-color-on-surface);
-            transition: background-color 0.3s ease, color 0.3s ease;
-            min-height: 100vh;
-        }
+    /* ===== 内容区实际滚动容器：唯一允许滚动的地方 ===== */
+    .app-content-inner {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 0;
+      padding: 24px;
+    }
 
-        /* Material Symbols 设置 */
-        .material-symbols-rounded {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            display: inline-block;
-            vertical-align: middle;
-        }
-        .material-symbols-rounded.filled { font-variation-settings: 'FILL' 1; }
+    /* ===== 卡片网格 ===== */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    .app-card {
+      cursor: pointer;
+      height: 100%;
+      transition: transform 0.2s ease;
+    }
+    .app-card:active { transform: scale(0.98); }
+    .app-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: var(--td-brand-color-light);
+      color: var(--td-brand-color);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+    }
+    .app-name { font-size: 14px; font-weight: 500; text-align: center; margin-bottom: 4px; }
+    .app-desc { font-size: 12px; text-align: center; color: var(--td-text-color-secondary); line-height: 1.4; min-height: 34px; }
 
-        /* --- 通用容器 --- */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 16px;
-            width: 100%;
-        }
+    /* ===== 返回顶部按钮：56x56 正常尺寸 ===== */
+    .back-top.t-button {
+      position: fixed;
+      right: 24px; bottom: 24px;
+      width: 56px; height: 56px;
+      padding: 0;
+      z-index: 1000;
+      box-shadow: var(--td-shadow-3);
+    }
 
-        /* --- 顶部栏 (App Bar) --- */
-        .app-bar {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background-color: rgba(var(--md-sys-color-surface), 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            transition: box-shadow var(--transition-standard), background-color var(--transition-standard);
-        }
-
-        .app-bar.scrolled {
-            background-color: var(--md-sys-color-surface-container);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .app-bar-title {
-            font-size: 22px;
-            font-weight: 400;
-            color: var(--md-sys-color-on-surface);
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--md-sys-color-on-surface-variant);
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        @media (hover: hover) {
-            .icon-btn:hover { background-color: rgba(128, 128, 128, 0.1); color: var(--md-sys-color-on-surface); }
-            .chip:hover { background-color: rgba(128,128,128, 0.08); }
-            .tool-card:hover { transform: translateY(-4px); background-color: var(--md-sys-color-surface-container); }
-        }
-
-        /* --- 搜索与筛选 --- */
-        .filters-section {
-            padding: 8px 0 8px;  /* 减少底部内边距，缩小与网格的间距 */
-            position: sticky;
-            top: 64px;
-            z-index: 900;
-            background-color: var(--md-sys-color-surface);
-            transition: background-color var(--transition-standard);
-        }
-        
-        .app-bar.scrolled ~ .page-content .filters-section {
-             background-color: var(--md-sys-color-surface-container);
-        }
-
-        .search-bar {
-            display: flex; align-items: center;
-            background-color: var(--md-sys-color-surface-container-high);
-            border-radius: var(--radius-full);
-            padding: 0 16px;
-            height: 56px;
-            margin-bottom: 12px;  /* 略微减少搜索框和标签间距 */
-        }
-
-        .search-input {
-            flex: 1; border: none; background: none;
-            font-size: 16px; color: var(--md-sys-color-on-surface);
-            height: 100%; outline: none; margin-left: 12px;
-        }
-        
-        .search-icon { color: var(--md-sys-color-on-surface-variant); }
-
-        .category-scroll {
-            display: flex; gap: 8px;
-            overflow-x: auto; padding-bottom: 4px;
-            scrollbar-width: none;
-        }
-        .category-scroll::-webkit-scrollbar { display: none; }
-
-        .chip {
-            background-color: transparent;
-            border: 1px solid var(--md-sys-color-outline);
-            color: var(--md-sys-color-on-surface-variant);
-            border-radius: 8px;
-            padding: 6px 16px;
-            font-size: 14px; font-weight: 500;
-            cursor: pointer; white-space: nowrap;
-            transition: all 0.2s;
-        }
-
-        .chip.active {
-            background-color: var(--md-sys-color-secondary-container);
-            color: var(--md-sys-color-on-secondary-container);
-            border-color: transparent;
-        }
-
-        /* --- 工具卡片网格 (已移除标题，调整顶部间距) --- */
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 16px;
-            margin-top: 16px;  /* 保持适当间距，替代之前标题占位 */
-        }
-
-        @media (min-width: 600px) {
-            .tools-grid {
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-                gap: 24px;
-                margin-top: 20px;
-            }
-        }
-
-        .tool-card {
-            position: relative;
-            background-color: var(--md-sys-color-surface-container-low);
-            border-radius: var(--radius-md);
-            padding: 24px 16px;
-            display: flex; flex-direction: column; align-items: center;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
-            user-select: none;
-        }
-
-        .tool-card:active { transform: scale(0.98); }
-
-        .tool-icon {
-            font-size: 32px; margin-bottom: 12px;
-            color: var(--md-sys-color-primary);
-            background-color: var(--md-sys-color-primary-container);
-            width: 56px; height: 56px;
-            border-radius: 16px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        
-        .tool-icon span { font-size: 28px; color: var(--md-sys-color-on-primary-container); }
-
-        .tool-name { font-size: 16px; font-weight: 500; margin-bottom: 4px; color: var(--md-sys-color-on-surface); }
-        .tool-desc { font-size: 12px; color: var(--md-sys-color-on-surface-variant); opacity: 0.8; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-        /* --- 返回顶部按钮 --- */
-        .back-to-top {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            background-color: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-            border: none;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: opacity 0.2s, transform 0.2s, background-color 0.2s;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 1100;
-            font-size: 24px;
-        }
-        .back-to-top.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .back-to-top:active {
-            transform: scale(0.92);
-        }
-        @media (hover: hover) {
-            .back-to-top:hover {
-                background-color: var(--md-sys-color-secondary-container);
-                color: var(--md-sys-color-on-secondary-container);
-            }
-        }
-
-        /* --- 模态框 --- */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5); z-index: 2000;
-            align-items: center; justify-content: center; padding: 16px;
-            backdrop-filter: blur(4px);
-        }
-        .modal.show { display: flex; animation: fadeModal 0.2s; }
-        @keyframes fadeModal { from { opacity: 0; } to { opacity: 1; } }
-
-        .modal-content {
-            background-color: var(--md-sys-color-surface-container);
-            border-radius: 28px; width: 100%; max-width: 400px;
-            max-height: 85vh; display: flex; flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-
-        .modal-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { padding: 0 24px 24px; overflow-y: auto; }
-        
-        .btn {
-            height: 40px; padding: 0 24px; border-radius: 20px;
-            font-weight: 500; border: none; cursor: pointer;
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            font-family: inherit; font-size: 14px;
-        }
-        .btn-text { background: none; color: var(--md-sys-color-primary); }
-
-        /* --- 关于模态框 --- */
-        .about-modal .modal-content {
-            max-width: 320px;
-        }
-    </style>
+    /* ===== 移动端 ===== */
+    @media (max-width: 767px) {
+      .app-header { padding: 0 16px; }
+      .app-content-inner { padding: 16px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+      .back-top.t-button { right: 16px; bottom: 16px; }
+    }
+  </style>
 </head>
 <body>
 
-    <header class="app-bar" id="appBar">
-        <h1 class="app-bar-title">树洞应用市场</h1>
-        <button class="icon-btn" id="themeToggle" aria-label="切换主题">
-            <span class="material-symbols-rounded" id="themeIcon">dark_mode</span>
-        </button>
-    </header>
-
-    <div class="page-content active" id="homePage">
-        <div class="filters-section">
-            <div class="container">
-                <div class="search-bar">
-                    <span class="material-symbols-rounded search-icon">search</span>
-                    <input type="text" class="search-input" id="searchInput" placeholder="搜索应用...">
-                </div>
-                <div class="category-scroll" id="categoryFilters"></div>
-            </div>
-        </div>
-
-        <div class="container">
-            <!-- 已移除原“所有应用”标题，调整了上方间距 -->
-            <div class="tools-grid" id="toolsGrid"></div>
-        </div>
+<div id="app">
+  <!-- 顶栏：永久置顶 -->
+  <header class="app-header">
+    <div class="header-left">
+      <t-button v-if="isMobile" variant="text" shape="square" @click="drawerVisible = true">
+        <template #icon><t-icon name="menu" size="22px" /></template>
+      </t-button>
+      <h3>树洞应用市场</h3>
     </div>
+    <t-tooltip :content="isDark ? '切换到浅色模式' : '切换到深色模式'">
+      <t-button variant="text" shape="circle" @click="toggleTheme">
+        <template #icon><t-icon :name="isDark ? 'sunny' : 'moon'" size="20px" /></template>
+      </t-button>
+    </t-tooltip>
+  </header>
 
-    <!-- 返回顶部按钮 -->
-    <button class="back-to-top" id="backToTop" aria-label="返回顶部">
-        <span class="material-symbols-rounded">arrow_upward</span>
-    </button>
+  <t-layout class="app-layout">
+    <!-- 侧边栏：固定宽，禁止溢出 -->
+    <t-aside v-if="!isMobile" width="232px" class="app-aside">
+      <t-menu v-model="filterCategory" class="aside-menu">
+        <t-menu-item v-for="c in categories" :key="c" :value="c">
+          {{ c }}
+        </t-menu-item>
+        <template #operations>
+          <div class="menu-footer">
+            <t-button variant="outline" block @click="aboutVisible = true">
+              <template #icon><t-icon name="info-circle" /></template>
+              关于
+            </t-button>
+          </div>
+        </template>
+      </t-menu>
+    </t-aside>
 
-    <!-- 关于模态框 -->
-    <div class="modal about-modal" id="aboutModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">关于</h3>
-            </div>
-            <div class="modal-body">
-                <p>树洞应用市场 v3.0</p>
-                <p style="margin-top: 10px; opacity: 0.7; font-size: 14px;">基于 Material Design 3 设计规范构建。自动跟随系统深色模式，支持手动切换。</p>
-            </div>
-            <div style="padding: 16px 24px; text-align: right;">
-                <button class="btn btn-text" id="closeAbout">关闭</button>
-            </div>
+    <!-- 内容区：只有 inner div 滚动 -->
+    <t-content
+      class="app-content-outer"
+      style="flex: 1; min-width: 0; overflow: hidden; padding: 0; display: flex; flex-direction: column;"
+    >
+      <div class="app-content-inner" ref="contentRef" @scroll="onContentScroll">
+        <t-input
+          v-model="searchText"
+          placeholder="搜索应用..."
+          clearable
+          style="margin-bottom: 20px; max-width: 400px;"
+        >
+          <template #prefix-icon><t-icon name="search" /></template>
+        </t-input>
+
+        <div v-if="filteredTools.length > 0" class="grid">
+          <t-card
+            v-for="tool in filteredTools"
+            :key="tool.id"
+            hover-shadow
+            class="app-card"
+            @click="openApp(tool)"
+          >
+            <div class="app-icon"><t-icon :name="tool.icon" size="24px" /></div>
+            <div class="app-name">{{ tool.name }}</div>
+            <div class="app-desc">{{ tool.desc }}</div>
+          </t-card>
         </div>
-    </div>
+        <t-empty v-else description="未找到相关内容" />
+      </div>
+    </t-content>
+  </t-layout>
 
-    <script>
-        // --- 数据源 (保持不变) ---
-        const toolsData = [
-            { id: 1, name: "百度百科", desc: "百度百科", icon: "edit_note", category: "百科", url: "https://vhsagj.smartapps.baidu.com/" },
-            { id: 2, name: "芒果TV", desc: "芒果TV", icon: "live_tv", category: "视频", url: "https://gbmqsu.smartapps.cn/" },
-            { id: 3, name: "新浪新闻", desc: "新浪新闻", icon: "newspaper", category: "新闻", url: "https://05vig8.smartapps.cn/" },
-            { id: 4, name: "番茄时钟", desc: "番茄时钟", icon: "timer", category: "工具", url: "https://eiv7ds.smartapps.cn/" },
-            { id: 5, name: "爱奇艺", desc: "爱奇艺", icon: "live_tv", category: "视频", url: "https://ich5p0.smartapps.cn/" },
-            { id: 6, name: "百度知道", desc: "百度知道", icon: "question_answer", category: "问答", url: "https://sa93g4.smartapps.baidu.com/" },
-            { id: 7, name: "小红书", desc: "小红书", icon: "photo_library", category: "社交", url: "https://km6pli.smartapps.cn/" },
-            { id: 8, name: "汽车之家", desc: "汽车之家", icon: "directions_car", category: "汽车", url: "https://kj1e9g.smartapps.cn/" },
-            { id: 9, name: "顺丰速递", desc: "顺丰速递", icon: "local_shipping", category: "快递", url: "https://exiavs.smartapps.cn/" },
-            { id: 10, name: "豆果美食", desc: "豆果美食", icon: "restaurant", category: "美食", url: "https://wl4c3m.smartapps.cn/" },
-            { id: 11, name: "ZAKER新闻", desc: "ZAKER新闻", icon: "newspaper", category: "新闻", url: "https://1qxtps.smartapps.cn/" },
-            { id: 12, name: "百度文库", desc: "百度文库", icon: "library_books", category: "文档", url: "https://6viyij.smartapps.baidu.com/" },
-            { id: 13, name: "喜马拉雅", desc: "喜马拉雅", icon: "headphones", category: "音频", url: "https://3ch6m4.smartapps.cn/" },
-            { id: 14, name: "当当", desc: "当当", icon: "shopping_cart", category: "购物", url: "https://uepcuz.smartapps.cn/" },
-            { id: 15, name: "百度汉语诗词", desc: "百度汉语诗词", icon: "library_books", category: "教育", url: "https://zpdmxc.smartapps.baidu.com/" },
-            { id: 16, name: "携程旅行", desc: "携程旅行", icon: "flight", category: "旅游", url: "https://2dn9ap.smartapps.cn/" },
-            { id: 17, name: "搜狐网", desc: "搜狐网", icon: "newspaper", category: "新闻", url: "https://2ly4hg.smartapps.cn/" },
-            { id: 18, name: "邮编君", desc: "邮编君", icon: "location_on", category: "工具", url: "https://1yz5q1.smartapps.cn/" },
-            { id: 19, name: "爱查快递", desc: "爱查快递", icon: "local_shipping", category: "快递", url: "https://f64h5p.smartapps.cn/" },
-            { id: 20, name: "圆通速递+", desc: "圆通速递+", icon: "local_shipping", category: "快递", url: "https://0b06o1.smartapps.cn/" },
-            { id: 21, name: "搜狐视频", desc: "搜狐视频", icon: "live_tv", category: "视频", url: "https://e84oah.smartapps.cn/" },
-            { id: 22, name: "百度作文", desc: "百度作文", icon: "create", category: "教育", url: "https://nyhqkz.smartapps.baidu.com/" },
-            { id: 23, name: "百度贴吧", desc: "百度贴吧", icon: "forum", category: "社交", url: "https://byokpg.smartapps.baidu.com/" },
-            { id: 24, name: "新浪微博", desc: "新浪微博", icon: "chat", category: "社交", url: "https://ivomzm.smartapps.cn/" },
-            { id: 25, name: "百度股市通", desc: "百度股市通", icon: "trending_up", category: "金融", url: "https://pqa9p2.smartapps.baidu.com/" },
-            { id: 26, name: "百度经验", desc: "百度经验", icon: "lightbulb", category: "经验", url: "https://7dapi7.smartapps.baidu.com/" },
-            { id: 27, name: "风行视频", desc: "风行视频", icon: "live_tv", category: "视频", url: "https://2wuwzp.smartapps.cn/" },
-            { id: 28, name: "马蜂窝", desc: "马蜂窝", icon: "flight", category: "旅游", url: "https://r58h90.smartapps.cn/" },
-            { id: 29, name: "EMS邮政快递", desc: "EMS邮政快递", icon: "local_shipping", category: "快递", url: "https://s1zc8m.smartapps.cn/" },
-            { id: 30, name: "京东快递", desc: "京东快递", icon: "local_shipping", category: "快递", url: "https://3lasz2.smartapps.cn/" }
-        ];
+  <!-- 移动端抽屉 -->
+  <t-drawer
+    v-model:visible="drawerVisible"
+    placement="left"
+    :size="232"
+    header="分类"
+    :footer="false"
+    :body-style="{ padding: 0 }"
+  >
+    <t-menu
+      v-model="filterCategory"
+      style="height: 100%"
+      @change="drawerVisible = false"
+    >
+      <t-menu-item v-for="c in categories" :key="c" :value="c">
+        {{ c }}
+      </t-menu-item>
+      <template #operations>
+        <div class="menu-footer">
+          <t-button variant="outline" block @click="openAbout">
+            <template #icon><t-icon name="info-circle" /></template>
+            关于
+          </t-button>
+        </div>
+      </template>
+    </t-menu>
+  </t-drawer>
 
-        // --- 状态 ---
-        const state = {
-            filterCategory: '全部',
-            searchText: ''
-        };
+  <!-- 返回顶部 -->
+  <t-button
+    v-if="showBackTop"
+    class="back-top"
+    shape="circle"
+    theme="primary"
+    @click="scrollToTop"
+  >
+    <template #icon><t-icon name="arrow-up" size="24px" /></template>
+  </t-button>
 
-        const dom = {
-            appBar: document.getElementById('appBar'),
-            toolsGrid: document.getElementById('toolsGrid'),
-            catFilters: document.getElementById('categoryFilters')
-        };
+  <!-- 关于弹窗 -->
+  <t-dialog
+    v-model:visible="aboutVisible"
+    header="关于"
+    :footer="false"
+    :lock="false"
+    :width="isMobile ? '90vw' : '320px'"
+  >
+    <p>树洞应用市场 v3.0</p>
+    <p style="color: var(--td-text-color-secondary); font-size: 13px; margin-top: 10px;">
+      基于 TDesign 组件库构建，自动跟随系统深色模式，支持手动切换。
+    </p>
+  </t-dialog>
+</div>
 
-        // --- 主题管理 (自适应系统深色模式) ---
-        function applyTheme(theme) {
-            // theme: 'light' 或 'dark'
-            document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
-            const icon = document.getElementById('themeIcon');
-            icon.innerText = theme === 'dark' ? 'light_mode' : 'dark_mode'; // 图标表示可切换到的模式
-            // 保存用户偏好，但注意：系统变化时如果无存储则不覆盖，因此存储代表手动设置
-            localStorage.setItem('theme', theme);
-        }
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.js"></script>
+<script>
+  const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
 
-        // 初始化主题：优先使用localStorage，否则跟随系统
-        function initTheme() {
-            const stored = localStorage.getItem('theme');
-            if (stored) {
-                applyTheme(stored);
-            } else {
-                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                applyTheme(systemDark ? 'dark' : 'light');
-            }
-        }
+  const toolsData = [
+    { id: 1,  name: "百度百科",     desc: "百度百科",     icon: "browse",      category: "百科", url: "https://vhsagj.smartapps.baidu.com/" },
+    { id: 2,  name: "芒果TV",       desc: "芒果TV",       icon: "tv",          category: "视频", url: "https://gbmqsu.smartapps.cn/" },
+    { id: 3,  name: "新浪新闻",     desc: "新浪新闻",     icon: "file",        category: "新闻", url: "https://05vig8.smartapps.cn/" },
+    { id: 4,  name: "番茄时钟",     desc: "番茄时钟",     icon: "time",        category: "工具", url: "https://eiv7ds.smartapps.cn/" },
+    { id: 5,  name: "爱奇艺",       desc: "爱奇艺",       icon: "tv",          category: "视频", url: "https://ich5p0.smartapps.cn/" },
+    { id: 6,  name: "百度知道",     desc: "百度知道",     icon: "chat",        category: "问答", url: "https://sa93g4.smartapps.baidu.com/" },
+    { id: 7,  name: "小红书",       desc: "小红书",       icon: "image",       category: "社交", url: "https://km6pli.smartapps.cn/" },
+    { id: 8,  name: "汽车之家",     desc: "汽车之家",     icon: "location",    category: "汽车", url: "https://kj1e9g.smartapps.cn/" },
+    { id: 9,  name: "顺丰速递",     desc: "顺丰速递",     icon: "send",        category: "快递", url: "https://exiavs.smartapps.cn/" },
+    { id: 10, name: "豆果美食",     desc: "豆果美食",     icon: "shop",        category: "美食", url: "https://wl4c3m.smartapps.cn/" },
+    { id: 11, name: "ZAKER新闻",    desc: "ZAKER新闻",    icon: "file",        category: "新闻", url: "https://1qxtps.smartapps.cn/" },
+    { id: 12, name: "百度文库",     desc: "百度文库",     icon: "file",        category: "文档", url: "https://6viyij.smartapps.baidu.com/" },
+    { id: 13, name: "喜马拉雅",     desc: "喜马拉雅",     icon: "play-circle", category: "音频", url: "https://3ch6m4.smartapps.cn/" },
+    { id: 14, name: "当当",         desc: "当当",         icon: "cart",        category: "购物", url: "https://uepcuz.smartapps.cn/" },
+    { id: 15, name: "百度汉语诗词", desc: "百度汉语诗词", icon: "file",        category: "教育", url: "https://zpdmxc.smartapps.baidu.com/" },
+    { id: 16, name: "携程旅行",     desc: "携程旅行",     icon: "location",    category: "旅游", url: "https://2dn9ap.smartapps.cn/" },
+    { id: 17, name: "搜狐网",       desc: "搜狐网",       icon: "file",        category: "新闻", url: "https://2ly4hg.smartapps.cn/" },
+    { id: 18, name: "邮编君",       desc: "邮编君",       icon: "location",    category: "工具", url: "https://1yz5q1.smartapps.cn/" },
+    { id: 19, name: "爱查快递",     desc: "爱查快递",     icon: "send",        category: "快递", url: "https://f64h5p.smartapps.cn/" },
+    { id: 20, name: "圆通速递+",    desc: "圆通速递+",    icon: "send",        category: "快递", url: "https://0b06o1.smartapps.cn/" },
+    { id: 21, name: "搜狐视频",     desc: "搜狐视频",     icon: "tv",          category: "视频", url: "https://e84oah.smartapps.cn/" },
+    { id: 22, name: "百度作文",     desc: "百度作文",     icon: "edit",        category: "教育", url: "https://nyhqkz.smartapps.baidu.com/" },
+    { id: 23, name: "百度贴吧",     desc: "百度贴吧",     icon: "chat",        category: "社交", url: "https://byokpg.smartapps.baidu.com/" },
+    { id: 24, name: "新浪微博",     desc: "新浪微博",     icon: "chat",        category: "社交", url: "https://ivomzm.smartapps.cn/" },
+    { id: 25, name: "百度股市通",   desc: "百度股市通",   icon: "chart-bar",   category: "金融", url: "https://pqa9p2.smartapps.baidu.com/" },
+    { id: 26, name: "百度经验",     desc: "百度经验",     icon: "info-circle", category: "经验", url: "https://7dapi7.smartapps.baidu.com/" },
+    { id: 27, name: "风行视频",     desc: "风行视频",     icon: "tv",          category: "视频", url: "https://2wuwzp.smartapps.cn/" },
+    { id: 28, name: "马蜂窝",       desc: "马蜂窝",       icon: "location",    category: "旅游", url: "https://r58h90.smartapps.cn/" },
+    { id: 29, name: "EMS邮政快递",  desc: "EMS邮政快递",  icon: "send",        category: "快递", url: "https://s1zc8m.smartapps.cn/" },
+    { id: 30, name: "京东快递",     desc: "京东快递",     icon: "send",        category: "快递", url: "https://3lasz2.smartapps.cn/" }
+  ];
 
-        // 监听系统主题变化 (仅当用户没有手动存储时才自动切换)
-        const systemMedia = window.matchMedia('(prefers-color-scheme: dark)');
-        function handleSystemThemeChange(e) {
-            if (!localStorage.getItem('theme')) {
-                // 无手动设置时跟随系统
-                applyTheme(e.matches ? 'dark' : 'light');
-            }
-        }
-        systemMedia.addEventListener('change', handleSystemThemeChange);
+  const app = createApp({
+    setup() {
+      const searchText = ref('');
+      const filterCategory = ref('全部');
+      const isDark = ref(false);
+      const showBackTop = ref(false);
+      const aboutVisible = ref(false);
+      const drawerVisible = ref(false);
+      const contentRef = ref(null);
 
-        // --- 渲染首页 (移除了标题h2，只渲染分类和卡片) ---
-        function renderHome() {
-            // 分类筛选器
-            const cats = ['全部', ...new Set(toolsData.map(t => t.category))];
-            dom.catFilters.innerHTML = cats.map(c => 
-                `<button class="chip ${state.filterCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`
-            ).join('');
+      const mqlLayout = window.matchMedia('(max-width: 767px)');
+      const isMobile = ref(mqlLayout.matches);
+      const onLayoutChange = (e) => {
+        isMobile.value = e.matches;
+        if (!e.matches) drawerVisible.value = false;
+      };
 
-            renderTools(dom.toolsGrid);
-        }
+      const categories = computed(() => ['全部', ...new Set(toolsData.map(t => t.category))]);
 
-        function renderTools(targetGrid) {
-            targetGrid.innerHTML = '';
-            const filtered = toolsData.filter(t => {
-                const matchCat = state.filterCategory === '全部' || t.category === state.filterCategory;
-                const matchText = t.name.toLowerCase().includes(state.searchText) || t.desc.toLowerCase().includes(state.searchText);
-                return matchCat && matchText;
-            });
-
-            if (filtered.length === 0) {
-                targetGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--md-sys-color-outline);">未找到相关内容</div>`;
-                return;
-            }
-
-            filtered.forEach(tool => {
-                const el = document.createElement('div');
-                el.className = 'tool-card';
-                el.innerHTML = `
-                    <div class="tool-icon"><span class="material-symbols-rounded">${tool.icon}</span></div>
-                    <div class="tool-name">${tool.name}</div>
-                    <div class="tool-desc">${tool.desc}</div>
-                `;
-                el.onclick = () => { 
-                    if (tool.url) {
-                        window.open(tool.url, '_self');
-                    } else {
-                        alert(`应用 ${tool.name} 缺少链接信息。`);
-                    }
-                };
-                targetGrid.appendChild(el);
-            });
-        }
-
-        // 全局设置分类
-        window.setCategory = (cat) => {
-            state.filterCategory = cat;
-            renderHome();
-        };
-
-        // --- 返回顶部逻辑 ---
-        const backTopBtn = document.getElementById('backToTop');
-        function toggleBackToTop() {
-            if (window.scrollY > 300) {
-                backTopBtn.classList.add('visible');
-            } else {
-                backTopBtn.classList.remove('visible');
-            }
-        }
-        window.addEventListener('scroll', toggleBackToTop);
-        backTopBtn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+      const filteredTools = computed(() => {
+        const kw = searchText.value.trim().toLowerCase();
+        return toolsData.filter(t => {
+          const matchCat = filterCategory.value === '全部' || t.category === filterCategory.value;
+          const matchText = !kw || t.name.toLowerCase().includes(kw) || t.desc.toLowerCase().includes(kw);
+          return matchCat && matchText;
         });
+      });
 
-        // --- 初始化 ---
-        function init() {
-            // Service Worker (可选)
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
-                });
-            }
-            
-            // 主题初始化
-            initTheme();
+      const openApp = (tool) => {
+        if (tool.url) window.open(tool.url, '_self');
+        else TDesign.MessagePlugin.warning(`应用 ${tool.name} 缺少链接信息。`);
+      };
 
-            // 主题切换按钮 (单击手动切换并保存)
-            document.getElementById('themeToggle').onclick = () => {
-                const currentTheme = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                applyTheme(newTheme);
-                // 手动设置后localStorage已保存，系统监听不会覆盖
-            };
+      const openAbout = () => {
+        drawerVisible.value = false;
+        aboutVisible.value = true;
+      };
 
-            // 搜索功能
-            document.getElementById('searchInput').oninput = (e) => {
-                state.searchText = e.target.value.toLowerCase().trim();
-                renderHome();
-            };
+      const applyTheme = (dark, save = true) => {
+        if (dark) document.documentElement.setAttribute('theme-mode', 'dark');
+        else document.documentElement.removeAttribute('theme-mode');
+        isDark.value = dark;
+        if (save) localStorage.setItem('theme', dark ? 'dark' : 'light');
+      };
+      const toggleTheme = () => applyTheme(!isDark.value, true);
 
-            // 滚动效果 (appBar阴影)
-            window.addEventListener('scroll', () => {
-                dom.appBar.classList.toggle('scrolled', window.scrollY > 10);
-            });
+      // 滚动监听：contentRef 是原生 div，scrollTop 可靠
+      const onContentScroll = () => {
+        const el = contentRef.value;
+        if (el) showBackTop.value = el.scrollTop > 300;
+      };
+      const scrollToTop = () => {
+        const el = contentRef.value;
+        if (el) el.scrollTo({ top: 0, behavior: 'smooth' });
+      };
 
-            // 关于模态框 (双击主题按钮打开)
-            const toggleModal = (id, show) => document.getElementById(id).classList.toggle('show', show);
-            document.getElementById('themeToggle').ondblclick = (e) => {
-                e.stopPropagation(); // 避免冒泡干扰
-                toggleModal('aboutModal', true);
-            };
-            document.getElementById('closeAbout').onclick = () => toggleModal('aboutModal', false);
-            
-            window.onclick = (e) => {
-                if(e.target.classList.contains('modal')) e.target.classList.remove('show');
-            };
+      const mqlTheme = window.matchMedia('(prefers-color-scheme: dark)');
+      const onSystemThemeChange = (e) => {
+        if (!localStorage.getItem('theme')) applyTheme(e.matches, false);
+      };
 
-            // 初次渲染
-            renderHome();
+      onMounted(() => {
+        const stored = localStorage.getItem('theme');
+        applyTheme(stored ? stored === 'dark' : mqlTheme.matches, false);
+        mqlTheme.addEventListener('change', onSystemThemeChange);
+        mqlLayout.addEventListener('change', onLayoutChange);
+      });
 
-            // 确保返回顶部按钮初始状态
-            toggleBackToTop();
-        }
+      onUnmounted(() => {
+        mqlTheme.removeEventListener('change', onSystemThemeChange);
+        mqlLayout.removeEventListener('change', onLayoutChange);
+      });
 
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+      return {
+        searchText, filterCategory, isDark, showBackTop, aboutVisible, drawerVisible,
+        isMobile, contentRef, categories, filteredTools, openApp, openAbout,
+        toggleTheme, scrollToTop, onContentScroll
+      };
+    }
+  });
+
+  app.use(TDesign);
+  app.mount('#app');
+</script>
 </body>
 </html>
