@@ -130,7 +130,7 @@
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       width: 100%;
       padding: 10px 12px;
       border: none;
@@ -150,22 +150,16 @@
       font-weight: 600;
     }
 
-    /* 侧边栏图标（统一播放图标） */
+    /* 侧边栏统一播放图标 */
     .nav-icon {
       width: 16px;
       height: 16px;
       flex-shrink: 0;
-      opacity: .7;
+      opacity: .55;
       transition: opacity .2s ease;
     }
-    .nav-item:hover .nav-icon { opacity: .9; }
+    .nav-item:hover .nav-icon { opacity: .8; }
     .nav-item.active .nav-icon { opacity: 1; }
-
-    .nav-label {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
 
     /* ---------- 内容区 ---------- */
     .main {
@@ -188,16 +182,11 @@
       line-height: 1.4;
     }
 
-    /* ---------- 播放器（大屏充满宽度） ---------- */
-    .player-wrap {
-      width: 100%;
-      max-width: 100%;
-    }
+    /* ---------- 播放器（完全按你给的代码） ---------- */
+    .player-wrap { width: 100%; }
     .player-panel { width: 100%; }
-
     .player-box {
       width: 100%;
-      max-width: 100%;
       aspect-ratio: 16 / 9;
       background: #000;
       border-radius: 10px;
@@ -206,7 +195,7 @@
       box-shadow: 0 4px 14px rgba(0, 0, 0, .15);
     }
 
-    /* 约束播放器内部节点，防止进度条 / 控制条横向溢出 */
+    /* 只约束播放器内部节点，防止控制条 / 进度条横向超出容器 */
     .player-box > * {
       max-width: 100% !important;
       box-sizing: border-box;
@@ -298,23 +287,8 @@
       text-align: right;
     }
 
-    /* ---------- 海外版弹窗 ---------- */
-    /* 播放器充满弹窗宽度 */
-    .mystery-player-wrap {
-      width: 100%;
-      max-width: 100%;
-    }
-    .mystery-player-wrap .player-box {
-      border-radius: 8px;
-      /* 防止超高时进度条超出视口，限制最大高度，超出则以 letterbox 方式呈现 */
-      max-height: calc(100dvh - 180px);
-    }
-
-    /* 收紧海外版弹窗内边距，给播放器更多空间 */
-    .mystery-dialog .t-dialog__body,
-    .mystery-dialog .t-dialog__body--no-padding {
-      padding: 12px !important;
-    }
+    .mystery-player-wrap { width: 100%; }
+    .mystery-player-wrap .player-box { border-radius: 8px; }
 
     /* ---------- 小屏适配 ---------- */
     @media (max-width: 767px) {
@@ -331,13 +305,6 @@
       .qr-box img {
         max-width: 110px;
         height: 170px;
-      }
-      .mystery-dialog .t-dialog__body,
-      .mystery-dialog .t-dialog__body--no-padding {
-        padding: 8px !important;
-      }
-      .mystery-player-wrap .player-box {
-        max-height: calc(100dvh - 140px);
       }
     }
   </style>
@@ -420,13 +387,14 @@
             :class="{ active: activeIndex === i }"
             @click="selectSeason(i)"
           >
+            <!-- 统一播放图标 -->
             <svg class="nav-icon" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="1.8"
                  stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="9" />
               <path d="M10.2 8.4l5.4 3.6-5.4 3.6z" />
             </svg>
-            <span class="nav-label">{{ s.label }}</span>
+            <span>{{ s.label }}</span>
           </button>
         </nav>
       </aside>
@@ -472,25 +440,25 @@
           :class="{ active: activeIndex === i }"
           @click="selectSeason(i)"
         >
+          <!-- 统一播放图标 -->
           <svg class="nav-icon" viewBox="0 0 24 24"
                fill="none" stroke="currentColor" stroke-width="1.8"
                stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="9" />
             <path d="M10.2 8.4l5.4 3.6-5.4 3.6z" />
           </svg>
-          <span class="nav-label">{{ s.label }}</span>
+          <span>{{ s.label }}</span>
         </button>
       </nav>
     </div>
   </t-drawer>
 
-  <!-- ===== 海外版弹窗（宽度加大） ===== -->
+  <!-- ===== 海外版弹窗 ===== -->
   <t-dialog
     v-model:visible="mysteryVisible"
     header="海外版"
     :footer="false"
-    width="min(94vw, 1200px)"
-    class="mystery-dialog"
+    width="680px"
     destroy-on-close
   >
     <div class="mystery-player-wrap">
@@ -754,7 +722,7 @@
         }
       });
 
-      /* ---------- 网络状态提示 ---------- */
+      /* ---------- 网络状态提示（断网/恢复均自动消失） ---------- */
       let offlineNotice = null;
       let onlineNotice = null;
       let onlineTimer = null;
