@@ -188,13 +188,10 @@
       line-height: 1.4;
     }
 
-    /* ---------- 播放器 ---------- */
+    /* ---------- 播放器（大屏充满宽度） ---------- */
     .player-wrap {
       width: 100%;
       max-width: 100%;
-      /* 大屏自适应：宽度上限 = 可视高度能容纳的 16:9 宽度，
-         避免播放器被撑得过高导致控制条 / 进度条溢出 */
-      max-width: min(100%, max(320px, calc((100dvh - 200px) * 16 / 9)));
     }
     .player-panel { width: 100%; }
 
@@ -301,8 +298,23 @@
       text-align: right;
     }
 
-    .mystery-player-wrap { width: 100%; }
-    .mystery-player-wrap .player-box { border-radius: 8px; }
+    /* ---------- 海外版弹窗 ---------- */
+    /* 播放器充满弹窗宽度 */
+    .mystery-player-wrap {
+      width: 100%;
+      max-width: 100%;
+    }
+    .mystery-player-wrap .player-box {
+      border-radius: 8px;
+      /* 防止超高时进度条超出视口，限制最大高度，超出则以 letterbox 方式呈现 */
+      max-height: calc(100dvh - 180px);
+    }
+
+    /* 收紧海外版弹窗内边距，给播放器更多空间 */
+    .mystery-dialog .t-dialog__body,
+    .mystery-dialog .t-dialog__body--no-padding {
+      padding: 12px !important;
+    }
 
     /* ---------- 小屏适配 ---------- */
     @media (max-width: 767px) {
@@ -319,6 +331,13 @@
       .qr-box img {
         max-width: 110px;
         height: 170px;
+      }
+      .mystery-dialog .t-dialog__body,
+      .mystery-dialog .t-dialog__body--no-padding {
+        padding: 8px !important;
+      }
+      .mystery-player-wrap .player-box {
+        max-height: calc(100dvh - 140px);
       }
     }
   </style>
@@ -401,7 +420,6 @@
             :class="{ active: activeIndex === i }"
             @click="selectSeason(i)"
           >
-            <!-- 统一播放图标 -->
             <svg class="nav-icon" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="1.8"
                  stroke-linecap="round" stroke-linejoin="round">
@@ -454,7 +472,6 @@
           :class="{ active: activeIndex === i }"
           @click="selectSeason(i)"
         >
-          <!-- 统一播放图标 -->
           <svg class="nav-icon" viewBox="0 0 24 24"
                fill="none" stroke="currentColor" stroke-width="1.8"
                stroke-linecap="round" stroke-linejoin="round">
@@ -467,12 +484,13 @@
     </div>
   </t-drawer>
 
-  <!-- ===== 海外版弹窗 ===== -->
+  <!-- ===== 海外版弹窗（宽度加大） ===== -->
   <t-dialog
     v-model:visible="mysteryVisible"
     header="海外版"
     :footer="false"
-    width="680px"
+    width="min(94vw, 1200px)"
+    class="mystery-dialog"
     destroy-on-close
   >
     <div class="mystery-player-wrap">
@@ -736,10 +754,10 @@
         }
       });
 
-      /* ---------- 网络状态提示（断网/恢复均自动消失） ---------- */
-      let offlineNotice = null;     // 断网提示实例
-      let onlineNotice = null;      // 恢复提示实例
-      let onlineTimer = null;       // 恢复提示的强制关闭定时器
+      /* ---------- 网络状态提示 ---------- */
+      let offlineNotice = null;
+      let onlineNotice = null;
+      let onlineTimer = null;
 
       const closeOfflineNotice = () => {
         if (offlineNotice) {
@@ -749,7 +767,7 @@
       };
 
       const showOfflineNotice = () => {
-        if (offlineNotice) return;      // 避免重复叠加
+        if (offlineNotice) return;
         offlineNotice = TDesign.NotifyPlugin.warning({
           title: '网络连接已断开',
           content: '请检查网络后重试',
