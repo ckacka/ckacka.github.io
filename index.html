@@ -2,9 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0052d9">
-<link rel="manifest" href="manifest.json">
 <title>树洞工具箱</title>
 <link rel="stylesheet" href="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.css">
 <style>
@@ -45,7 +44,7 @@
   .app-bar-right { display: flex; align-items: center; flex-shrink: 0; }
 
   .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; width: 100%; }
-  .page-wrap { flex: 1; padding-bottom: 120px; }
+  .page-wrap { flex: 1; padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
   .section-title { font-size: 18px; font-weight: 600; margin: 18px 0 8px; }
   .empty-tip {
     grid-column: 1 / -1; text-align: center; padding: 40px;
@@ -56,12 +55,31 @@
     position: sticky; top: calc(64px + env(safe-area-inset-top));
     z-index: 90; background: var(--td-bg-color-page); padding: 6px 0;
   }
-  .category-tabs .t-tabs__content { display: none; }
-  .category-tabs .t-tabs__nav { padding-left: 0; }
+  .category-scroll {
+    display: flex; gap: 8px; overflow-x: auto; padding: 4px 0;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .category-scroll::-webkit-scrollbar { display: none; }
+  .category-chip {
+    flex-shrink: 0; padding: 6px 14px; border-radius: 999px;
+    border: 1px solid var(--td-component-stroke);
+    background: var(--td-bg-color-container);
+    color: var(--td-text-color-secondary);
+    font-size: 14px; font-family: inherit; cursor: pointer; white-space: nowrap;
+    transition: background-color .2s, color .2s, border-color .2s;
+  }
+  .category-chip:hover { background: var(--td-bg-color-container-hover); }
+  .category-chip:focus-visible {
+    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
+  }
+  .category-chip.active {
+    background: var(--td-brand-color); color: #fff;
+    border-color: var(--td-brand-color);
+  }
 
   .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 12px; padding: 12px 0;
   }
   @media (min-width: 600px) {
@@ -77,6 +95,9 @@
   }
   .tool-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
   .tool-card:active { transform: scale(.97); }
+  .tool-card:focus-visible {
+    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
+  }
   .tool-icon {
     width: 52px; height: 52px; border-radius: 14px;
     background: var(--td-brand-color-light);
@@ -98,6 +119,9 @@
     transition: background-color .2s, color .2s;
   }
   .favorite-btn:hover { background: var(--td-bg-color-container-hover); }
+  .favorite-btn:focus-visible {
+    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
+  }
   .favorite-btn.favorited { color: var(--td-error-color); }
 
   .discover-wrap { padding-top: 12px; }
@@ -116,9 +140,14 @@
     display: flex; align-items: center; justify-content: center;
     background: var(--td-bg-color-container); z-index: 1;
   }
+  .iframe-error { text-align: center; padding: 16px; max-width: 280px; }
+  .iframe-error p {
+    margin: 0 0 12px; font-size: 13px; line-height: 1.6;
+    color: var(--td-text-color-secondary);
+  }
 
   .capsule-bar {
-    position: fixed; left: 50%; bottom: 24px;
+    position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom));
     transform: translateX(-50%); z-index: 500;
     display: flex; gap: 4px; padding: 6px;
     border-radius: 999px;
@@ -139,11 +168,14 @@
     box-shadow: 0 4px 12px rgba(0,82,217,.3);
   }
   .capsule-item:not(.active):hover { background: var(--td-bg-color-container-hover); }
+  .capsule-item:focus-visible {
+    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
+  }
   @media (max-width: 400px) {
     .capsule-item { padding: 9px 12px; font-size: 13px; gap: 4px; }
   }
 
-  .back-top { position: fixed; right: 20px; bottom: 100px; z-index: 400; }
+  .back-top { position: fixed; right: 20px; bottom: calc(100px + env(safe-area-inset-bottom)); z-index: 400; }
 
   .drawer-profile {
     display: flex; align-items: center; gap: 14px;
@@ -175,6 +207,10 @@
     padding: 14px 4px; cursor: pointer;
     border-bottom: 1px solid var(--td-component-stroke);
     color: var(--td-text-color-primary);
+  }
+  .drawer-menu-item:focus-visible {
+    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
+    border-radius: 6px;
   }
   .drawer-menu-item:last-child { border-bottom: none; }
   .menu-text { flex: 1; font-size: 14px; font-weight: 500; }
@@ -246,7 +282,7 @@
 <div id="app">
   <div class="app-shell" :class="{ shifted: drawerVisible && isWide }">
     <header class="app-bar" :class="{ scrolled }">
-      <t-button variant="text" shape="square" @click="drawerVisible = true">
+      <t-button variant="text" shape="square" @click="drawerVisible = true" aria-label="打开菜单">
         <t-icon name="menu" size="22px"></t-icon>
       </t-button>
       <div class="app-bar-middle">
@@ -259,26 +295,49 @@
         <h1 v-else class="app-bar-title">发现</h1>
       </div>
       <div class="app-bar-right">
-        <t-button v-if="currentPage === 'discover'" variant="text" shape="square" @click="openSettings">
+        <t-button v-if="currentPage === 'discover'" variant="text" shape="square" @click="openSettings" aria-label="卡片管理">
           <t-icon name="setting" size="20px"></t-icon>
         </t-button>
       </div>
     </header>
 
     <main class="page-wrap">
+      <!-- 首页 -->
       <template v-if="currentPage === 'home'">
         <div class="filters-section">
           <div class="container">
-            <t-tabs v-model="filterCategory" class="category-tabs" :space-evenly="false">
-              <t-tab-panel v-for="cat in categories" :key="cat" :value="cat" :label="cat"></t-tab-panel>
-            </t-tabs>
+            <div class="category-scroll" role="tablist" aria-label="工具分类">
+              <button
+                v-for="cat in categories"
+                :key="cat"
+                type="button"
+                role="tab"
+                class="category-chip"
+                :class="{ active: filterCategory === cat }"
+                :aria-selected="filterCategory === cat"
+                @click="filterCategory = cat">
+                {{ cat }}
+              </button>
+            </div>
           </div>
         </div>
         <div class="container">
           <div class="tools-grid">
-            <div v-for="tool in filteredTools" :key="tool.id" class="tool-card" @click="openTool(tool)">
-              <button class="favorite-btn" :class="{ favorited: favorites.includes(tool.id) }"
-                @click.stop="toggleFav(tool.id)">
+            <div
+              v-for="tool in filteredTools"
+              :key="tool.id"
+              class="tool-card"
+              role="button"
+              tabindex="0"
+              @click="openTool(tool)"
+              @keydown.enter.prevent="openTool(tool)"
+              @keydown.space.prevent="openTool(tool)">
+              <button
+                class="favorite-btn"
+                :class="{ favorited: favorites.includes(tool.id) }"
+                :aria-label="favorites.includes(tool.id) ? '取消收藏' : '收藏'"
+                @click.stop="toggleFav(tool.id)"
+                @keydown.stop>
                 <t-icon :name="favorites.includes(tool.id) ? 'heart-filled' : 'heart'" size="18px"></t-icon>
               </button>
               <div class="tool-icon"><t-icon :name="tool.icon" size="26px"></t-icon></div>
@@ -290,6 +349,7 @@
         </div>
       </template>
 
+      <!-- 发现 -->
       <template v-else-if="currentPage === 'discover'">
         <div class="container discover-wrap">
           <t-collapse v-if="discoverCards.length" v-model="expandedCards">
@@ -300,17 +360,26 @@
                     <t-icon :name="card.icon" size="20px"></t-icon>
                     <span>{{ card.title }}</span>
                   </div>
-                  <t-button variant="text" shape="square" @click.stop.prevent="openExternal(card.url)">
+                  <t-button variant="text" shape="square" @click.stop.prevent="openExternal(card.url)" aria-label="在新窗口打开">
                     <t-icon name="jump" size="18px"></t-icon>
                   </t-button>
                 </div>
               </template>
               <div class="webview-wrap">
-                <div v-if="!iframeLoaded[card.id]" class="webview-loading">
-                  <t-loading size="small"></t-loading>
+                <div v-if="iframeStatus[card.id] !== 'loaded'" class="webview-loading">
+                  <div v-if="iframeStatus[card.id] === 'error'" class="iframe-error">
+                    <p>页面加载失败，可能不支持被嵌入。你可以尝试在新窗口打开。</p>
+                    <t-button theme="primary" size="small" @click="openExternal(card.url)">
+                      在新窗口打开
+                    </t-button>
+                  </div>
+                  <t-loading v-else size="small"></t-loading>
                 </div>
-                <iframe v-if="expandedCards.includes(card.id)" :src="card.url"
-                  class="webview" @load="iframeLoaded[card.id] = true"></iframe>
+                <iframe
+                  v-if="expandedCards.includes(card.id)"
+                  :src="card.url"
+                  class="webview"
+                  @load="onIframeLoad(card.id)"></iframe>
               </div>
             </t-collapse-panel>
           </t-collapse>
@@ -318,12 +387,25 @@
         </div>
       </template>
 
+      <!-- 我的 -->
       <template v-else-if="currentPage === 'profile'">
         <div class="container">
           <h2 class="section-title">我的收藏</h2>
           <div class="tools-grid">
-            <div v-for="tool in favoriteTools" :key="tool.id" class="tool-card" @click="openTool(tool)">
-              <button class="favorite-btn favorited" @click.stop="toggleFav(tool.id)">
+            <div
+              v-for="tool in favoriteTools"
+              :key="tool.id"
+              class="tool-card"
+              role="button"
+              tabindex="0"
+              @click="openTool(tool)"
+              @keydown.enter.prevent="openTool(tool)"
+              @keydown.space.prevent="openTool(tool)">
+              <button
+                class="favorite-btn favorited"
+                aria-label="取消收藏"
+                @click.stop="toggleFav(tool.id)"
+                @keydown.stop>
                 <t-icon name="heart-filled" size="18px"></t-icon>
               </button>
               <div class="tool-icon"><t-icon :name="tool.icon" size="26px"></t-icon></div>
@@ -337,16 +419,26 @@
     </main>
   </div>
 
-  <nav class="capsule-bar">
-    <div v-for="tab in tabs" :key="tab.key" class="capsule-item"
-      :class="{ active: currentPage === tab.key }" @click="switchPage(tab.key)">
+  <nav class="capsule-bar" aria-label="主导航">
+    <div
+      v-for="tab in tabs"
+      :key="tab.key"
+      class="capsule-item"
+      :class="{ active: currentPage === tab.key }"
+      role="button"
+      tabindex="0"
+      :aria-label="tab.label"
+      :aria-current="currentPage === tab.key ? 'page' : undefined"
+      @click="switchPage(tab.key)"
+      @keydown.enter.prevent="switchPage(tab.key)"
+      @keydown.space.prevent="switchPage(tab.key)">
       <t-icon :name="tab.icon" size="18px"></t-icon>
       <span>{{ tab.label }}</span>
     </div>
   </nav>
 
   <div v-show="showBackTop" class="back-top">
-    <t-button shape="circle" theme="primary" @click="scrollTop">
+    <t-button shape="circle" theme="primary" @click="scrollTop" aria-label="返回顶部">
       <t-icon name="arrow-up" size="20px"></t-icon>
     </t-button>
   </div>
@@ -358,9 +450,10 @@
     </template>
 
     <div class="drawer-profile">
-      <div class="drawer-avatar" @click="onAvatarClick">
+      <div class="drawer-avatar" @click="onAvatarClick" role="button" tabindex="0" aria-label="用户头像"
+        @keydown.enter.prevent="onAvatarClick" @keydown.space.prevent="onAvatarClick">
         <t-icon name="user" size="26px"></t-icon>
-        <span v-if="eggCount > 0" class="click-counter">{{ eggCount }}</span>
+        <span v-if="eggCount >= 3" class="click-counter">{{ eggCount }}</span>
       </div>
       <div>
         <div class="drawer-name">欢迎使用</div>
@@ -374,17 +467,20 @@
         <div class="menu-text">深色模式</div>
         <t-switch v-model="isDark" @change="onThemeChange"></t-switch>
       </div>
-      <div class="drawer-menu-item" @click="openClearCache">
+      <div class="drawer-menu-item" role="button" tabindex="0" @click="openClearCache"
+        @keydown.enter.prevent="openClearCache" @keydown.space.prevent="openClearCache">
         <t-icon name="delete" size="20px"></t-icon>
         <div class="menu-text">重置应用</div>
         <t-icon name="chevron-right" class="menu-arrow"></t-icon>
       </div>
-      <div v-if="!isPwaInstalled" class="drawer-menu-item" @click="showInstallDialog">
+      <div v-if="!isPwaInstalled" class="drawer-menu-item" role="button" tabindex="0" @click="showInstallDialog"
+        @keydown.enter.prevent="showInstallDialog" @keydown.space.prevent="showInstallDialog">
         <t-icon name="download" size="20px"></t-icon>
         <div class="menu-text">安装应用</div>
         <t-icon name="chevron-right" class="menu-arrow"></t-icon>
       </div>
-      <div class="drawer-menu-item" @click="openAbout">
+      <div class="drawer-menu-item" role="button" tabindex="0" @click="openAbout"
+        @keydown.enter.prevent="openAbout" @keydown.space.prevent="openAbout">
         <t-icon name="info-circle" size="20px"></t-icon>
         <div class="menu-text">关于应用</div>
         <t-icon name="chevron-right" class="menu-arrow"></t-icon>
@@ -394,7 +490,7 @@
     <template #footer>
       <div class="drawer-footer">
         <div>树洞工具箱 · 用心倾听每一个声音</div>
-        <div class="drawer-footer-sub">© 2026 基于 TDesign 构建</div>
+        <div class="drawer-footer-sub">© {{ currentYear }} 基于 TDesign 构建</div>
       </div>
     </template>
   </t-drawer>
@@ -425,10 +521,10 @@
       <t-tab-panel value="manage" label="列表">
         <div v-for="(card, index) in discoverCards" :key="card.id" class="manage-item">
           <div class="order-btns">
-            <t-button variant="text" size="small" :disabled="index === 0" @click="moveCard(index, -1)">
+            <t-button variant="text" size="small" :disabled="index === 0" @click="moveCard(index, -1)" aria-label="上移">
               <t-icon name="chevron-up"></t-icon>
             </t-button>
-            <t-button variant="text" size="small" :disabled="index === discoverCards.length - 1" @click="moveCard(index, 1)">
+            <t-button variant="text" size="small" :disabled="index === discoverCards.length - 1" @click="moveCard(index, 1)" aria-label="下移">
               <t-icon name="chevron-down"></t-icon>
             </t-button>
           </div>
@@ -436,10 +532,10 @@
             <div class="manage-title">{{ card.title }}</div>
             <div class="manage-url">{{ card.url }}</div>
           </div>
-          <t-button variant="text" size="small" @click="editCard(card.id)">
+          <t-button variant="text" size="small" @click="editCard(card.id)" aria-label="编辑">
             <t-icon name="edit" size="18px"></t-icon>
           </t-button>
-          <t-button variant="text" size="small" theme="danger" @click="askDelete(card.id)">
+          <t-button variant="text" size="small" theme="danger" @click="askDelete(card.id)" aria-label="删除">
             <t-icon name="delete" size="18px"></t-icon>
           </t-button>
         </div>
@@ -504,9 +600,15 @@
 <script src="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.js"></script>
 <script>
 const { createApp, ref, computed, watch, onMounted } = Vue;
-const MessagePlugin = TDesign.MessagePlugin || TDesign.Message;
 
-// ===== 工具数据（原版 22 项，仅图标换成 TDesign 图标名） =====
+// MessagePlugin 兜底，防止库差异导致 undefined 调用报错
+const MessagePlugin = (TDesign && TDesign.MessagePlugin) || {
+  warning: (m) => console.warn('[warn]', m),
+  success: (m) => console.log('[success]', m),
+  error: (m) => console.error('[error]', m)
+};
+
+// ===== 工具数据 =====
 const toolsData = [
   { id: 1, name: "妙笔生花", desc: "AI 辅助的文本创作工具", icon: "edit", category: "AI", url: "https://ckacka.github.io/tools/mbsh.html" },
   { id: 2, name: "菜谱助手", desc: "智能菜谱生成与查询", icon: "file", category: "AI", url: "https://ckacka.github.io/tools/aifood.html" },
@@ -539,6 +641,23 @@ const defaultCards = [
   { id: 103, title: "每天认识一种文物", url: "https://ysxwyzl.4dage.com/4dwall/index.html", icon: "flag", expanded: false }
 ];
 
+// ===== localStorage 安全读写 =====
+const safeGetArray = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const val = JSON.parse(raw);
+    return Array.isArray(val) ? val : fallback;
+  } catch (e) {
+    console.warn(`localStorage[${key}] 解析失败，已使用默认值`, e);
+    return fallback;
+  }
+};
+const safeSet = (key, val) => {
+  try { localStorage.setItem(key, val); }
+  catch (e) { console.warn(`localStorage[${key}] 写入失败`, e); }
+};
+
 const app = createApp({
   setup() {
     // ===== 基础状态 =====
@@ -546,9 +665,11 @@ const app = createApp({
     const filterCategory = ref('全部');
     const searchText = ref('');
     const favoriteSearchText = ref('');
-    const iframeLoaded = ref({});
+    const iframeStatus = ref({}); // { [id]: 'loading' | 'loaded' | 'error' }
+    const iframeTimers = {};      // 非响应式计时器池
     const scrolled = ref(false);
     const showBackTop = ref(false);
+    const currentYear = new Date().getFullYear();
 
     // ===== 主题 =====
     const isDark = ref(false);
@@ -557,11 +678,9 @@ const app = createApp({
     const isWide = ref(window.innerWidth >= 1024);
     const drawerVisible = ref(isWide.value);
 
-    // ===== 收藏 & 发现卡片（localStorage） =====
-    const favorites = ref(JSON.parse(localStorage.getItem('favs') || '[]'));
-    const discoverCards = ref(JSON.parse(localStorage.getItem('cards') || JSON.stringify(defaultCards)));
-
-    // 展开状态：由 discoverCards 里的 expanded 字段初始化为数组（兼容 t-collapse 的 v-model）
+    // ===== 收藏 & 发现卡片 =====
+    const favorites = ref(safeGetArray('favs', []));
+    const discoverCards = ref(safeGetArray('cards', JSON.parse(JSON.stringify(defaultCards))));
     const expandedCards = ref(discoverCards.value.filter(c => c.expanded).map(c => c.id));
 
     // ===== 弹窗 =====
@@ -583,7 +702,7 @@ const app = createApp({
     // ===== 缓存统计 =====
     const cacheStats = ref({ favCount: 0, cardCount: 0, size: '0 KB' });
 
-    // ===== 彩蛋 =====
+    // ===== 彩蛋（仅内存，不持久化） =====
     const eggCount = ref(0);
     let eggLastClickTime = 0;
     let eggTimer = null;
@@ -615,20 +734,60 @@ const app = createApp({
 
     // ===== 持久化 =====
     const saveState = () => {
-      localStorage.setItem('favs', JSON.stringify(favorites.value));
-      localStorage.setItem('cards', JSON.stringify(discoverCards.value));
+      safeSet('favs', JSON.stringify(favorites.value));
+      safeSet('cards', JSON.stringify(discoverCards.value));
     };
     watch(favorites, saveState, { deep: true });
     watch(discoverCards, saveState, { deep: true });
 
-    // 展开状态同步回 card.expanded 并持久化
-    // 只清理已折叠卡片的 iframe 加载状态，避免已加载的 iframe 被 loading 遮罩永久覆盖
+    // ===== iframe 状态管理 =====
+    const clearIframeTimers = () => {
+      Object.keys(iframeTimers).forEach(k => {
+        clearTimeout(iframeTimers[k]);
+        delete iframeTimers[k];
+      });
+    };
+
+    const startIframeTimeout = (id) => {
+      if (iframeTimers[id]) clearTimeout(iframeTimers[id]);
+      iframeStatus.value[id] = 'loading';
+      iframeTimers[id] = setTimeout(() => {
+        if (iframeStatus.value[id] !== 'loaded') {
+          iframeStatus.value[id] = 'error';
+        }
+        delete iframeTimers[id];
+      }, 8000);
+    };
+
+    const onIframeLoad = (id) => {
+      if (iframeTimers[id]) {
+        clearTimeout(iframeTimers[id]);
+        delete iframeTimers[id];
+      }
+      iframeStatus.value[id] = 'loaded';
+    };
+
+    // 展开状态同步 + iframe 状态维护
     watch(expandedCards, (ids) => {
       discoverCards.value.forEach(c => { c.expanded = ids.includes(c.id); });
-      Object.keys(iframeLoaded.value).forEach((id) => {
-        if (!ids.includes(Number(id))) delete iframeLoaded.value[id];
+
+      // 清理已收起的 iframe 状态与计时器
+      Object.keys(iframeStatus.value).forEach(k => {
+        if (!ids.includes(Number(k))) {
+          delete iframeStatus.value[k];
+          if (iframeTimers[k]) {
+            clearTimeout(iframeTimers[k]);
+            delete iframeTimers[k];
+          }
+        }
       });
-      saveState();
+
+      // 为新展开的启动超时兜底
+      ids.forEach(id => {
+        if (iframeStatus.value[id] !== 'loaded' && iframeStatus.value[id] !== 'loading') {
+          startIframeTimeout(id);
+        }
+      });
     }, { deep: true });
 
     // ===== 收藏 =====
@@ -638,14 +797,23 @@ const app = createApp({
       else favorites.value.push(id);
     };
 
-    // ===== 打开工具 =====
+    // ===== 打开工具（新窗口，避免 PWA 内丢失返回路径） =====
     const openTool = (tool) => {
-      if (tool.url) window.open(tool.url, '_self');
+      if (tool.url) window.open(tool.url, '_blank', 'noopener');
       else MessagePlugin.warning(`工具 ${tool.name} 缺少链接信息。`);
     };
 
-    // ===== 页面切换 =====
+    // ===== 页面切换（离开 discover 时重置 iframe 状态） =====
     const switchPage = (page) => {
+      if (page !== 'discover') {
+        iframeStatus.value = {};
+        clearIframeTimers();
+      } else {
+        // 进入 discover：为已展开的卡片启动超时
+        expandedCards.value.forEach(id => {
+          if (iframeStatus.value[id] !== 'loaded') startIframeTimeout(id);
+        });
+      }
       currentPage.value = page;
       window.scrollTo(0, 0);
     };
@@ -655,14 +823,13 @@ const app = createApp({
 
     // ===== 主题 =====
     const applyTheme = (theme) => {
-      isDark.value = theme === 'dark';
       if (theme === 'dark') document.documentElement.setAttribute('theme-mode', 'dark');
       else document.documentElement.removeAttribute('theme-mode');
     };
     const onThemeChange = (value) => {
       const theme = value ? 'dark' : 'light';
       applyTheme(theme);
-      localStorage.setItem('theme', theme);
+      try { localStorage.setItem('theme', theme); } catch (e) { /* ignore */ }
     };
 
     // ===== 卡片管理 =====
@@ -706,30 +873,34 @@ const app = createApp({
 
     const confirmDelete = () => {
       if (pendingDeleteId.value == null) return;
-      discoverCards.value = discoverCards.value.filter(c => c.id !== pendingDeleteId.value);
+      const id = pendingDeleteId.value;
+      discoverCards.value = discoverCards.value.filter(c => c.id !== id);
+      expandedCards.value = expandedCards.value.filter(x => x !== id);
+      delete iframeStatus.value[id];
+      if (iframeTimers[id]) { clearTimeout(iframeTimers[id]); delete iframeTimers[id]; }
       pendingDeleteId.value = null;
       deleteVisible.value = false;
       MessagePlugin.success('已删除');
     };
 
+    // 排序时先收起所有面板，避免 iframe DOM 移动导致重新加载
     const moveCard = (index, dir) => {
       const arr = [...discoverCards.value];
       const target = index + dir;
       if (target < 0 || target >= arr.length) return;
+      expandedCards.value = [];
       [arr[index], arr[target]] = [arr[target], arr[index]];
       discoverCards.value = arr;
     };
 
-    const openExternal = (url) => window.open(url, '_blank');
+    const openExternal = (url) => window.open(url, '_blank', 'noopener');
 
     // ===== 清除数据 =====
     const getStorageSize = () => {
       let total = 0;
-      for (const k in localStorage) {
-        if (Object.prototype.hasOwnProperty.call(localStorage, k)) {
-          total += (localStorage.getItem(k) || '').length * 2;
-        }
-      }
+      Object.keys(localStorage).forEach(k => {
+        total += (localStorage.getItem(k) || '').length * 2;
+      });
       return (total / 1024).toFixed(2) + ' KB';
     };
 
@@ -747,37 +918,41 @@ const app = createApp({
       clearCacheVisible.value = false;
       clearing.value = true;
       try {
-        localStorage.clear();
-        sessionStorage.clear();
+        try { localStorage.clear(); } catch (e) { /* ignore */ }
+        try { sessionStorage.clear(); } catch (e) { /* ignore */ }
         if (window.indexedDB) {
           try {
             const dbs = indexedDB.databases ? await indexedDB.databases() : [];
             for (const d of dbs) if (d.name) indexedDB.deleteDatabase(d.name);
           } catch (e) {
-            ['myDatabase', 'cacheDb', 'appData'].forEach(n => indexedDB.deleteDatabase(n));
+            ['myDatabase', 'cacheDb', 'appData'].forEach(n => {
+              try { indexedDB.deleteDatabase(n); } catch (_) { /* ignore */ }
+            });
           }
         }
         if ('serviceWorker' in navigator) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          for (const r of regs) await r.unregister();
-          if ('caches' in window) {
-            const names = await caches.keys();
-            for (const n of names) await caches.delete(n);
-          }
+          try {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            for (const r of regs) await r.unregister();
+            if ('caches' in window) {
+              const names = await caches.keys();
+              for (const n of names) await caches.delete(n);
+            }
+          } catch (e) { /* ignore */ }
         }
         document.cookie.split(';').forEach(c => {
           const p = c.indexOf('=');
           const name = p > -1 ? c.substring(0, p).trim() : c.trim();
           document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         });
-        await new Promise(r => setTimeout(r, 1000));
-        setTimeout(() => {
-          window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now();
-          window.location.reload();
-        }, 1500);
+        await new Promise(r => setTimeout(r, 800));
+        // 用 location.replace 保留 hash，避免双次导航
+        const url = new URL(location.href);
+        url.searchParams.set('t', Date.now());
+        location.replace(url.toString());
       } catch (e) {
         console.error('清除数据时出错:', e);
-        setTimeout(() => window.location.reload(), 1500);
+        setTimeout(() => location.reload(), 1000);
       }
     };
 
@@ -787,22 +962,17 @@ const app = createApp({
       if (!isWide.value) drawerVisible.value = false;
     };
 
-    // ===== 彩蛋：3 秒内点击头像 10 次 =====
+    // ===== 彩蛋：3 秒内点击头像 10 次（仅内存计数） =====
     const onAvatarClick = () => {
       const now = Date.now();
       if (now - eggLastClickTime > 3000) eggCount.value = 0;
       eggCount.value++;
       eggLastClickTime = now;
-      localStorage.setItem('easterEggClickCount', eggCount.value);
       if (eggTimer) clearTimeout(eggTimer);
-      eggTimer = setTimeout(() => {
-        eggCount.value = 0;
-        localStorage.setItem('easterEggClickCount', 0);
-      }, 3000);
+      eggTimer = setTimeout(() => { eggCount.value = 0; }, 3000);
       if (eggCount.value >= 10) {
         easterVisible.value = true;
         eggCount.value = 0;
-        localStorage.setItem('easterEggClickCount', 0);
       }
     };
 
@@ -851,20 +1021,25 @@ const app = createApp({
     onMounted(() => {
       // 主题初始化
       const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) applyTheme(savedTheme);
-      else applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      if (savedTheme) {
+        isDark.value = savedTheme === 'dark';
+        applyTheme(savedTheme);
+      } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        isDark.value = prefersDark;
+        applyTheme(prefersDark ? 'dark' : 'light');
+      }
 
-      // 系统主题跟随（用户没手动设置时）
+      // 系统主题跟随（用户未手动设置时）
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
       const onMqChange = (e) => {
-        if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light');
+        if (!localStorage.getItem('theme')) {
+          isDark.value = e.matches;
+          applyTheme(e.matches ? 'dark' : 'light');
+        }
       };
       if (mq.addEventListener) mq.addEventListener('change', onMqChange);
       else if (mq.addListener) mq.addListener(onMqChange);
-
-      // 彩蛋计数恢复
-      const savedCount = parseInt(localStorage.getItem('easterEggClickCount') || '0');
-      if (savedCount > 0) eggCount.value = savedCount;
 
       // PWA 状态
       isIos.value = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -893,23 +1068,17 @@ const app = createApp({
       const wideMq = window.matchMedia('(min-width: 1024px)');
       const onWideChange = (e) => {
         isWide.value = e.matches;
-        if (e.matches) drawerVisible.value = true;
+        // 宽屏默认打开、窄屏默认关闭，避免缩屏后被抽屉遮挡
+        drawerVisible.value = e.matches;
       };
       if (wideMq.addEventListener) wideMq.addEventListener('change', onWideChange);
       else if (wideMq.addListener) wideMq.addListener(onWideChange);
-
-      // Service Worker（如存在）
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js').catch(() => {});
-        });
-      }
     });
 
     return {
       // 状态
       currentPage, filterCategory, searchText, favoriteSearchText,
-      expandedCards, iframeLoaded, scrolled, showBackTop,
+      expandedCards, iframeStatus, scrolled, showBackTop, currentYear,
       isDark, isWide, drawerVisible,
       favorites, discoverCards,
       settingsVisible, settingsTab, deleteVisible, aboutVisible,
@@ -924,6 +1093,7 @@ const app = createApp({
       askDelete, confirmDelete, moveCard, openExternal,
       openClearCache, confirmClearCache, openAbout,
       onAvatarClick, showInstallDialog, doInstall,
+      onIframeLoad,
       // 标签栏
       tabs: [
         { key: 'home', label: '首页', icon: 'home' },
