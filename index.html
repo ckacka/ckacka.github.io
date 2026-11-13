@@ -69,12 +69,9 @@
     transition: background-color .2s, color .2s, border-color .2s;
   }
   .category-chip:hover { background: var(--td-bg-color-container-hover); }
-  .category-chip:focus-visible {
-    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
-  }
+  .category-chip:focus-visible { outline: 2px solid var(--td-brand-color); outline-offset: 2px; }
   .category-chip.active {
-    background: var(--td-brand-color); color: #fff;
-    border-color: var(--td-brand-color);
+    background: var(--td-brand-color); color: #fff; border-color: var(--td-brand-color);
   }
 
   .tools-grid {
@@ -95,9 +92,7 @@
   }
   .tool-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
   .tool-card:active { transform: scale(.97); }
-  .tool-card:focus-visible {
-    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
-  }
+  .tool-card:focus-visible { outline: 2px solid var(--td-brand-color); outline-offset: 2px; }
   .tool-icon {
     width: 52px; height: 52px; border-radius: 14px;
     background: var(--td-brand-color-light);
@@ -119,9 +114,7 @@
     transition: background-color .2s, color .2s;
   }
   .favorite-btn:hover { background: var(--td-bg-color-container-hover); }
-  .favorite-btn:focus-visible {
-    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
-  }
+  .favorite-btn:focus-visible { outline: 2px solid var(--td-brand-color); outline-offset: 2px; }
   .favorite-btn.favorited { color: var(--td-error-color); }
 
   .discover-wrap { padding-top: 12px; }
@@ -168,9 +161,7 @@
     box-shadow: 0 4px 12px rgba(0,82,217,.3);
   }
   .capsule-item:not(.active):hover { background: var(--td-bg-color-container-hover); }
-  .capsule-item:focus-visible {
-    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
-  }
+  .capsule-item:focus-visible { outline: 2px solid var(--td-brand-color); outline-offset: 2px; }
   @media (max-width: 400px) {
     .capsule-item { padding: 9px 12px; font-size: 13px; gap: 4px; }
   }
@@ -208,10 +199,7 @@
     border-bottom: 1px solid var(--td-component-stroke);
     color: var(--td-text-color-primary);
   }
-  .drawer-menu-item:focus-visible {
-    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
-    border-radius: 6px;
-  }
+  .drawer-menu-item:focus-visible { outline: 2px solid var(--td-brand-color); outline-offset: 2px; border-radius: 6px; }
   .drawer-menu-item:last-child { border-bottom: none; }
   .menu-text { flex: 1; font-size: 14px; font-weight: 500; }
   .menu-arrow { color: var(--td-text-color-placeholder); }
@@ -302,7 +290,6 @@
     </header>
 
     <main class="page-wrap">
-      <!-- 首页 -->
       <template v-if="currentPage === 'home'">
         <div class="filters-section">
           <div class="container">
@@ -349,7 +336,6 @@
         </div>
       </template>
 
-      <!-- 发现 -->
       <template v-else-if="currentPage === 'discover'">
         <div class="container discover-wrap">
           <t-collapse v-if="discoverCards.length" v-model="expandedCards">
@@ -387,7 +373,6 @@
         </div>
       </template>
 
-      <!-- 我的 -->
       <template v-else-if="currentPage === 'profile'">
         <div class="container">
           <h2 class="section-title">我的收藏</h2>
@@ -601,14 +586,12 @@
 <script>
 const { createApp, ref, computed, watch, onMounted } = Vue;
 
-// MessagePlugin 兜底，防止库差异导致 undefined 调用报错
 const MessagePlugin = (TDesign && TDesign.MessagePlugin) || {
   warning: (m) => console.warn('[warn]', m),
   success: (m) => console.log('[success]', m),
   error: (m) => console.error('[error]', m)
 };
 
-// ===== 工具数据 =====
 const toolsData = [
   { id: 1, name: "妙笔生花", desc: "AI 辅助的文本创作工具", icon: "edit", category: "AI", url: "https://ckacka.github.io/tools/mbsh.html" },
   { id: 2, name: "菜谱助手", desc: "智能菜谱生成与查询", icon: "file", category: "AI", url: "https://ckacka.github.io/tools/aifood.html" },
@@ -634,14 +617,12 @@ const toolsData = [
   { id: 22, name: "Aunt's call", desc: "おばさんからの電話", icon: "help-circle", category: "未分类", url: "https://ckacka.github.io/tools/egg/call.html" }
 ];
 
-// ===== 默认发现卡片 =====
 const defaultCards = [
   { id: 101, title: "计算器", url: "https://tool.browser.qq.com/calculator?addressbar=hide&callfrom=gongjuxiang", icon: "app", expanded: false },
   { id: 102, title: "今日快讯", url: "https://mb.yidianzixun.com/channel/Qoh9nRIW0gl%20ZrDkZU5T8Q?s=mb&appid=mibrowser&articletype%20=1&mibusinessld=miuibrowser&env=production", icon: "file", expanded: false },
   { id: 103, title: "每天认识一种文物", url: "https://ysxwyzl.4dage.com/4dwall/index.html", icon: "flag", expanded: false }
 ];
 
-// ===== localStorage 安全读写 =====
 const safeGetArray = (key, fallback) => {
   try {
     const raw = localStorage.getItem(key);
@@ -660,30 +641,26 @@ const safeSet = (key, val) => {
 
 const app = createApp({
   setup() {
-    // ===== 基础状态 =====
     const currentPage = ref('home');
     const filterCategory = ref('全部');
     const searchText = ref('');
     const favoriteSearchText = ref('');
-    const iframeStatus = ref({}); // { [id]: 'loading' | 'loaded' | 'error' }
-    const iframeTimers = {};      // 非响应式计时器池
+    const iframeStatus = ref({});
+    const iframeTimers = {};
     const scrolled = ref(false);
     const showBackTop = ref(false);
     const currentYear = new Date().getFullYear();
 
-    // ===== 主题 =====
     const isDark = ref(false);
 
-    // ===== 响应式 / Drawer =====
+    // ✅ 大屏默认展开 drawer，小屏默认收起
     const isWide = ref(window.innerWidth >= 1024);
     const drawerVisible = ref(isWide.value);
 
-    // ===== 收藏 & 发现卡片 =====
     const favorites = ref(safeGetArray('favs', []));
     const discoverCards = ref(safeGetArray('cards', JSON.parse(JSON.stringify(defaultCards))));
     const expandedCards = ref(discoverCards.value.filter(c => c.expanded).map(c => c.id));
 
-    // ===== 弹窗 =====
     const settingsVisible = ref(false);
     const settingsTab = ref('add');
     const deleteVisible = ref(false);
@@ -693,27 +670,19 @@ const app = createApp({
     const pwaVisible = ref(false);
     const clearing = ref(false);
 
-    // ===== 删除确认 =====
     const pendingDeleteId = ref(null);
-
-    // ===== 表单 =====
     const form = ref({ id: null, title: '', url: '', icon: '' });
-
-    // ===== 缓存统计 =====
     const cacheStats = ref({ favCount: 0, cardCount: 0, size: '0 KB' });
 
-    // ===== 彩蛋（仅内存，不持久化） =====
     const eggCount = ref(0);
     let eggLastClickTime = 0;
     let eggTimer = null;
 
-    // ===== PWA =====
     const isPwaInstalled = ref(false);
     const isIos = ref(false);
     let deferredPrompt = null;
     const pwaConfig = ref({ title: '安装应用', desc: '', icon: 'download', cancelText: '取消', install: false });
 
-    // ===== 计算属性 =====
     const categories = computed(() => ['全部', ...new Set(toolsData.map(t => t.category))]);
 
     const filteredTools = computed(() => {
@@ -732,7 +701,6 @@ const app = createApp({
         .filter(t => !kw || t.name.toLowerCase().includes(kw) || t.desc.toLowerCase().includes(kw));
     });
 
-    // ===== 持久化 =====
     const saveState = () => {
       safeSet('favs', JSON.stringify(favorites.value));
       safeSet('cards', JSON.stringify(discoverCards.value));
@@ -740,7 +708,6 @@ const app = createApp({
     watch(favorites, saveState, { deep: true });
     watch(discoverCards, saveState, { deep: true });
 
-    // ===== iframe 状态管理 =====
     const clearIframeTimers = () => {
       Object.keys(iframeTimers).forEach(k => {
         clearTimeout(iframeTimers[k]);
@@ -752,37 +719,26 @@ const app = createApp({
       if (iframeTimers[id]) clearTimeout(iframeTimers[id]);
       iframeStatus.value[id] = 'loading';
       iframeTimers[id] = setTimeout(() => {
-        if (iframeStatus.value[id] !== 'loaded') {
-          iframeStatus.value[id] = 'error';
-        }
+        if (iframeStatus.value[id] !== 'loaded') iframeStatus.value[id] = 'error';
         delete iframeTimers[id];
       }, 8000);
     };
 
     const onIframeLoad = (id) => {
-      if (iframeTimers[id]) {
-        clearTimeout(iframeTimers[id]);
-        delete iframeTimers[id];
-      }
+      if (iframeTimers[id]) { clearTimeout(iframeTimers[id]); delete iframeTimers[id]; }
       iframeStatus.value[id] = 'loaded';
     };
 
-    // 展开状态同步 + iframe 状态维护
     watch(expandedCards, (ids) => {
       discoverCards.value.forEach(c => { c.expanded = ids.includes(c.id); });
 
-      // 清理已收起的 iframe 状态与计时器
       Object.keys(iframeStatus.value).forEach(k => {
         if (!ids.includes(Number(k))) {
           delete iframeStatus.value[k];
-          if (iframeTimers[k]) {
-            clearTimeout(iframeTimers[k]);
-            delete iframeTimers[k];
-          }
+          if (iframeTimers[k]) { clearTimeout(iframeTimers[k]); delete iframeTimers[k]; }
         }
       });
 
-      // 为新展开的启动超时兜底
       ids.forEach(id => {
         if (iframeStatus.value[id] !== 'loaded' && iframeStatus.value[id] !== 'loading') {
           startIframeTimeout(id);
@@ -790,26 +746,22 @@ const app = createApp({
       });
     }, { deep: true });
 
-    // ===== 收藏 =====
     const toggleFav = (id) => {
       const i = favorites.value.indexOf(id);
       if (i > -1) favorites.value.splice(i, 1);
       else favorites.value.push(id);
     };
 
-    // ===== 打开工具（新窗口，避免 PWA 内丢失返回路径） =====
     const openTool = (tool) => {
       if (tool.url) window.open(tool.url, '_blank', 'noopener');
       else MessagePlugin.warning(`工具 ${tool.name} 缺少链接信息。`);
     };
 
-    // ===== 页面切换（离开 discover 时重置 iframe 状态） =====
     const switchPage = (page) => {
       if (page !== 'discover') {
         iframeStatus.value = {};
         clearIframeTimers();
       } else {
-        // 进入 discover：为已展开的卡片启动超时
         expandedCards.value.forEach(id => {
           if (iframeStatus.value[id] !== 'loaded') startIframeTimeout(id);
         });
@@ -818,10 +770,8 @@ const app = createApp({
       window.scrollTo(0, 0);
     };
 
-    // ===== 返回顶部 =====
     const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // ===== 主题 =====
     const applyTheme = (theme) => {
       if (theme === 'dark') document.documentElement.setAttribute('theme-mode', 'dark');
       else document.documentElement.removeAttribute('theme-mode');
@@ -829,10 +779,9 @@ const app = createApp({
     const onThemeChange = (value) => {
       const theme = value ? 'dark' : 'light';
       applyTheme(theme);
-      try { localStorage.setItem('theme', theme); } catch (e) { /* ignore */ }
+      try { localStorage.setItem('theme', theme); } catch (e) {}
     };
 
-    // ===== 卡片管理 =====
     const openSettings = () => {
       settingsVisible.value = true;
       settingsTab.value = 'add';
@@ -848,9 +797,7 @@ const app = createApp({
       if (!t || !u) { MessagePlugin.warning('请输入标题和链接'); return; }
       if (id) {
         const idx = discoverCards.value.findIndex(c => c.id === id);
-        if (idx > -1) {
-          discoverCards.value[idx] = { ...discoverCards.value[idx], title: t, url: u, icon: ic };
-        }
+        if (idx > -1) discoverCards.value[idx] = { ...discoverCards.value[idx], title: t, url: u, icon: ic };
       } else {
         discoverCards.value.push({ id: Date.now(), title: t, url: u, icon: ic, expanded: false });
       }
@@ -866,10 +813,7 @@ const app = createApp({
       settingsTab.value = 'add';
     };
 
-    const askDelete = (id) => {
-      pendingDeleteId.value = id;
-      deleteVisible.value = true;
-    };
+    const askDelete = (id) => { pendingDeleteId.value = id; deleteVisible.value = true; };
 
     const confirmDelete = () => {
       if (pendingDeleteId.value == null) return;
@@ -883,7 +827,6 @@ const app = createApp({
       MessagePlugin.success('已删除');
     };
 
-    // 排序时先收起所有面板，避免 iframe DOM 移动导致重新加载
     const moveCard = (index, dir) => {
       const arr = [...discoverCards.value];
       const target = index + dir;
@@ -895,7 +838,6 @@ const app = createApp({
 
     const openExternal = (url) => window.open(url, '_blank', 'noopener');
 
-    // ===== 清除数据 =====
     const getStorageSize = () => {
       let total = 0;
       Object.keys(localStorage).forEach(k => {
@@ -918,15 +860,15 @@ const app = createApp({
       clearCacheVisible.value = false;
       clearing.value = true;
       try {
-        try { localStorage.clear(); } catch (e) { /* ignore */ }
-        try { sessionStorage.clear(); } catch (e) { /* ignore */ }
+        try { localStorage.clear(); } catch (e) {}
+        try { sessionStorage.clear(); } catch (e) {}
         if (window.indexedDB) {
           try {
             const dbs = indexedDB.databases ? await indexedDB.databases() : [];
             for (const d of dbs) if (d.name) indexedDB.deleteDatabase(d.name);
           } catch (e) {
             ['myDatabase', 'cacheDb', 'appData'].forEach(n => {
-              try { indexedDB.deleteDatabase(n); } catch (_) { /* ignore */ }
+              try { indexedDB.deleteDatabase(n); } catch (_) {}
             });
           }
         }
@@ -938,7 +880,7 @@ const app = createApp({
               const names = await caches.keys();
               for (const n of names) await caches.delete(n);
             }
-          } catch (e) { /* ignore */ }
+          } catch (e) {}
         }
         document.cookie.split(';').forEach(c => {
           const p = c.indexOf('=');
@@ -946,7 +888,6 @@ const app = createApp({
           document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         });
         await new Promise(r => setTimeout(r, 800));
-        // 用 location.replace 保留 hash，避免双次导航
         const url = new URL(location.href);
         url.searchParams.set('t', Date.now());
         location.replace(url.toString());
@@ -956,13 +897,11 @@ const app = createApp({
       }
     };
 
-    // ===== 关于 =====
     const openAbout = () => {
       aboutVisible.value = true;
       if (!isWide.value) drawerVisible.value = false;
     };
 
-    // ===== 彩蛋：3 秒内点击头像 10 次（仅内存计数） =====
     const onAvatarClick = () => {
       const now = Date.now();
       if (now - eggLastClickTime > 3000) eggCount.value = 0;
@@ -970,38 +909,28 @@ const app = createApp({
       eggLastClickTime = now;
       if (eggTimer) clearTimeout(eggTimer);
       eggTimer = setTimeout(() => { eggCount.value = 0; }, 3000);
-      if (eggCount.value >= 10) {
-        easterVisible.value = true;
-        eggCount.value = 0;
-      }
+      if (eggCount.value >= 10) { easterVisible.value = true; eggCount.value = 0; }
     };
 
-    // ===== PWA =====
     const showInstallDialog = () => {
       if (!isWide.value) drawerVisible.value = false;
       if (isIos.value) {
         pwaConfig.value = {
-          title: '安装到主屏幕',
-          icon: 'share',
+          title: '安装到主屏幕', icon: 'share',
           desc: '1. 点击浏览器底部或顶部的分享按钮<br>2. 在弹出菜单中选择 <strong>"添加到主屏幕"</strong>',
-          cancelText: '知道了',
-          install: false
+          cancelText: '知道了', install: false
         };
       } else if (deferredPrompt) {
         pwaConfig.value = {
-          title: '安装应用',
-          icon: 'download',
+          title: '安装应用', icon: 'download',
           desc: '将树洞工具箱安装到您的设备，获得更快捷的访问体验。',
-          cancelText: '取消',
-          install: true
+          cancelText: '取消', install: true
         };
       } else {
         pwaConfig.value = {
-          title: '提示',
-          icon: 'info-circle',
+          title: '提示', icon: 'info-circle',
           desc: '您的浏览器不支持快速安装，您可以尝试使用浏览器菜单中的"添加到主屏幕"功能。',
-          cancelText: '知道了',
-          install: false
+          cancelText: '知道了', install: false
         };
       }
       pwaVisible.value = true;
@@ -1017,9 +946,7 @@ const app = createApp({
       });
     };
 
-    // ===== 生命周期 =====
     onMounted(() => {
-      // 主题初始化
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme) {
         isDark.value = savedTheme === 'dark';
@@ -1030,7 +957,6 @@ const app = createApp({
         applyTheme(prefersDark ? 'dark' : 'light');
       }
 
-      // 系统主题跟随（用户未手动设置时）
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
       const onMqChange = (e) => {
         if (!localStorage.getItem('theme')) {
@@ -1041,7 +967,6 @@ const app = createApp({
       if (mq.addEventListener) mq.addEventListener('change', onMqChange);
       else if (mq.addListener) mq.addListener(onMqChange);
 
-      // PWA 状态
       isIos.value = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       isPwaInstalled.value = window.matchMedia('(display-mode: standalone)').matches ||
@@ -1056,7 +981,6 @@ const app = createApp({
         deferredPrompt = null;
       });
 
-      // 滚动监听
       const onScroll = () => {
         scrolled.value = window.scrollY > 10;
         showBackTop.value = window.scrollY > 300;
@@ -1064,11 +988,10 @@ const app = createApp({
       window.addEventListener('scroll', onScroll, { passive: true });
       onScroll();
 
-      // 大屏 / 小屏切换
+      // ✅ 宽窄屏切换：变宽 → 展开，变窄 → 收起
       const wideMq = window.matchMedia('(min-width: 1024px)');
       const onWideChange = (e) => {
         isWide.value = e.matches;
-        // 宽屏默认打开、窄屏默认关闭，避免缩屏后被抽屉遮挡
         drawerVisible.value = e.matches;
       };
       if (wideMq.addEventListener) wideMq.addEventListener('change', onWideChange);
@@ -1076,7 +999,6 @@ const app = createApp({
     });
 
     return {
-      // 状态
       currentPage, filterCategory, searchText, favoriteSearchText,
       expandedCards, iframeStatus, scrolled, showBackTop, currentYear,
       isDark, isWide, drawerVisible,
@@ -1085,16 +1007,13 @@ const app = createApp({
       clearCacheVisible, easterVisible, pwaVisible, clearing,
       form, cacheStats, eggCount,
       isPwaInstalled, pwaConfig,
-      // 计算
       categories, filteredTools, favoriteTools,
-      // 方法
       toggleFav, openTool, switchPage, scrollTop,
       onThemeChange, openSettings, resetForm, saveCard, editCard,
       askDelete, confirmDelete, moveCard, openExternal,
       openClearCache, confirmClearCache, openAbout,
       onAvatarClick, showInstallDialog, doInstall,
       onIframeLoad,
-      // 标签栏
       tabs: [
         { key: 'home', label: '首页', icon: 'home' },
         { key: 'discover', label: '发现', icon: 'app' },
