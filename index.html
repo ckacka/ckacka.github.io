@@ -245,14 +245,6 @@
     margin-bottom: 6px; color: var(--td-text-color-secondary);
   }
 
-  .cache-info {
-    background: var(--td-bg-color-secondarycontainer);
-    border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;
-  }
-  .cache-row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
-  .cache-row .label { color: var(--td-text-color-secondary); }
-  .cache-row .value { font-weight: 500; }
-
   .easter-iframe {
     width: 100%; height: 250px; border: none; display: block;
     border-radius: 8px; background: #fff;
@@ -260,14 +252,6 @@
 
   .pwa-icon { display: flex; justify-content: center; margin-bottom: 12px; color: var(--td-brand-color); }
   .pwa-desc { font-size: 14px; line-height: 1.7; color: var(--td-text-color-secondary); }
-
-  .loading-overlay {
-    position: fixed; inset: 0; z-index: 3000;
-    background: rgba(0,0,0,.5);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 16px; color: #fff; font-size: 15px;
-    backdrop-filter: blur(4px);
-  }
 
   @media (max-width: 576px) {
     .app-bar-title { font-size: 17px; }
@@ -457,7 +441,7 @@
       </div>
       <div>
         <div class="drawer-name">欢迎使用</div>
-        <div class="drawer-version">版本号：v3.0</div>
+        <div class="drawer-version">版本号：v4.0</div>
       </div>
     </div>
 
@@ -466,12 +450,6 @@
         <t-icon name="moon" size="20px"></t-icon>
         <div class="menu-text">深色模式</div>
         <t-switch v-model="isDark" @change="onThemeChange"></t-switch>
-      </div>
-      <div class="drawer-menu-item" role="button" tabindex="0" @click="openClearCache"
-        @keydown.enter.prevent="openClearCache" @keydown.space.prevent="openClearCache">
-        <t-icon name="delete" size="20px"></t-icon>
-        <div class="menu-text">重置应用</div>
-        <t-icon name="chevron-right" class="menu-arrow"></t-icon>
       </div>
       <div v-if="!isPwaInstalled" class="drawer-menu-item" role="button" tabindex="0" @click="showInstallDialog"
         @keydown.enter.prevent="showInstallDialog" @keydown.space.prevent="showInstallDialog">
@@ -489,8 +467,8 @@
 
     <template #footer>
       <div class="drawer-footer">
-        <div>树洞工具箱 · 用心倾听每一个声音</div>
-        <div class="drawer-footer-sub">© {{ currentYear }} 基于 TDesign 构建</div>
+        <div>树洞工具箱 ©2026 基于TDesign构建</div>
+        <div class="drawer-footer-sub">UID: {{ userUID }}</div>
       </div>
     </template>
   </t-drawer>
@@ -555,25 +533,10 @@
   </t-dialog>
 
   <t-dialog v-model:visible="aboutVisible" header="关于" :footer="false" width="320px">
-    <p style="margin:0 0 8px;font-size:15px;font-weight:500;">树洞工具箱 v3.0</p>
+    <p style="margin:0 0 8px;font-size:15px;font-weight:500;">树洞工具箱 v4.0</p>
     <p style="margin:0;font-size:14px;color:var(--td-text-color-secondary);line-height:1.7;">
       一个安静的工具箱，基于 TDesign 构建。
     </p>
-  </t-dialog>
-
-  <t-dialog v-model:visible="clearCacheVisible" header="清除全部数据" :footer="false" width="360px">
-    <div class="cache-info">
-      <div class="cache-row"><span class="label">收藏数据</span><span class="value">{{ cacheStats.favCount }} 项</span></div>
-      <div class="cache-row"><span class="label">发现卡片</span><span class="value">{{ cacheStats.cardCount }} 项</span></div>
-      <div class="cache-row"><span class="label">本地存储</span><span class="value">{{ cacheStats.size }}</span></div>
-    </div>
-    <p style="margin:0 0 20px;font-size:14px;line-height:1.7;color:var(--td-text-color-secondary);">
-      此操作将清除所有本地存储的数据，包括收藏、发现卡片、主题设置等，并重新加载页面。此操作不可撤销。
-    </p>
-    <div style="display:flex;gap:12px;">
-      <t-button variant="outline" block @click="clearCacheVisible = false">取消</t-button>
-      <t-button theme="danger" block @click="confirmClearCache">清除全部数据</t-button>
-    </div>
   </t-dialog>
 
   <t-dialog v-model:visible="easterVisible" :header="false" :footer="false" width="min(520px, 92vw)">
@@ -589,11 +552,6 @@
       <t-button v-if="pwaConfig.install" theme="primary" block @click="doInstall">安装</t-button>
     </div>
   </t-dialog>
-
-  <div v-if="clearing" class="loading-overlay">
-    <t-loading size="large"></t-loading>
-    <div>正在清除数据并重新加载...</div>
-  </div>
 </div>
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -653,9 +611,34 @@ const safeGetArray = (key, fallback) => {
     return fallback;
   }
 };
+
 const safeSet = (key, val) => {
-  try { localStorage.setItem(key, val); }
-  catch (e) { console.warn(`localStorage[${key}] 写入失败`, e); }
+  try {
+    localStorage.setItem(key, val);
+  } catch (e) {
+    console.warn(`localStorage[${key}] 写入失败`, e);
+  }
+};
+
+// ===== 生成并保存 9 位 UID =====
+const getUserUID = () => {
+  try {
+    let uid = localStorage.getItem('userUID');
+
+    // 已有 UID 且格式正确时直接使用
+    if (uid && /^\d{9}$/.test(uid)) {
+      return uid;
+    }
+
+    // 没有 UID 或格式不正确时重新生成
+    uid = String(Math.floor(100000000 + Math.random() * 900000000));
+    localStorage.setItem('userUID', uid);
+
+    return uid;
+  } catch (e) {
+    // 浏览器禁止本地存储时的备用方案
+    return String(Math.floor(100000000 + Math.random() * 900000000));
+  }
 };
 
 const app = createApp({
@@ -665,11 +648,14 @@ const app = createApp({
     const filterCategory = ref('全部');
     const searchText = ref('');
     const favoriteSearchText = ref('');
-    const iframeStatus = ref({}); // { [id]: 'loading' | 'loaded' | 'error' }
-    const iframeTimers = {};      // 非响应式计时器池
+    const iframeStatus = ref({});
+    const iframeTimers = {};
     const scrolled = ref(false);
     const showBackTop = ref(false);
     const currentYear = new Date().getFullYear();
+
+    // ===== 用户 UID =====
+    const userUID = ref(getUserUID());
 
     // ===== 主题 =====
     const isDark = ref(false);
@@ -688,19 +674,14 @@ const app = createApp({
     const settingsTab = ref('add');
     const deleteVisible = ref(false);
     const aboutVisible = ref(false);
-    const clearCacheVisible = ref(false);
     const easterVisible = ref(false);
     const pwaVisible = ref(false);
-    const clearing = ref(false);
 
     // ===== 删除确认 =====
     const pendingDeleteId = ref(null);
 
     // ===== 表单 =====
     const form = ref({ id: null, title: '', url: '', icon: '' });
-
-    // ===== 缓存统计 =====
-    const cacheStats = ref({ favCount: 0, cardCount: 0, size: '0 KB' });
 
     // ===== 彩蛋（仅内存，不持久化） =====
     const eggCount = ref(0);
@@ -711,7 +692,13 @@ const app = createApp({
     const isPwaInstalled = ref(false);
     const isIos = ref(false);
     let deferredPrompt = null;
-    const pwaConfig = ref({ title: '安装应用', desc: '', icon: 'download', cancelText: '取消', install: false });
+    const pwaConfig = ref({
+      title: '安装应用',
+      desc: '',
+      icon: 'download',
+      cancelText: '取消',
+      install: false
+    });
 
     // ===== 计算属性 =====
     const categories = computed(() => ['全部', ...new Set(toolsData.map(t => t.category))]);
@@ -737,6 +724,7 @@ const app = createApp({
       safeSet('favs', JSON.stringify(favorites.value));
       safeSet('cards', JSON.stringify(discoverCards.value));
     };
+
     watch(favorites, saveState, { deep: true });
     watch(discoverCards, saveState, { deep: true });
 
@@ -750,7 +738,9 @@ const app = createApp({
 
     const startIframeTimeout = (id) => {
       if (iframeTimers[id]) clearTimeout(iframeTimers[id]);
+
       iframeStatus.value[id] = 'loading';
+
       iframeTimers[id] = setTimeout(() => {
         if (iframeStatus.value[id] !== 'loaded') {
           iframeStatus.value[id] = 'error';
@@ -769,12 +759,15 @@ const app = createApp({
 
     // 展开状态同步 + iframe 状态维护
     watch(expandedCards, (ids) => {
-      discoverCards.value.forEach(c => { c.expanded = ids.includes(c.id); });
+      discoverCards.value.forEach(c => {
+        c.expanded = ids.includes(c.id);
+      });
 
       // 清理已收起的 iframe 状态与计时器
       Object.keys(iframeStatus.value).forEach(k => {
         if (!ids.includes(Number(k))) {
           delete iframeStatus.value[k];
+
           if (iframeTimers[k]) {
             clearTimeout(iframeTimers[k]);
             delete iframeTimers[k];
@@ -793,43 +786,63 @@ const app = createApp({
     // ===== 收藏 =====
     const toggleFav = (id) => {
       const i = favorites.value.indexOf(id);
-      if (i > -1) favorites.value.splice(i, 1);
-      else favorites.value.push(id);
+
+      if (i > -1) {
+        favorites.value.splice(i, 1);
+      } else {
+        favorites.value.push(id);
+      }
     };
 
-    // ===== 打开工具（新窗口，避免 PWA 内丢失返回路径） =====
+    // ===== 打开工具 =====
     const openTool = (tool) => {
-      if (tool.url) window.open(tool.url, '_blank', 'noopener');
-      else MessagePlugin.warning(`工具 ${tool.name} 缺少链接信息。`);
+      if (tool.url) {
+        window.open(tool.url, '_blank', 'noopener');
+      } else {
+        MessagePlugin.warning(`工具 ${tool.name} 缺少链接信息。`);
+      }
     };
 
-    // ===== 页面切换（离开 discover 时重置 iframe 状态） =====
+    // ===== 页面切换 =====
     const switchPage = (page) => {
       if (page !== 'discover') {
         iframeStatus.value = {};
         clearIframeTimers();
       } else {
-        // 进入 discover：为已展开的卡片启动超时
         expandedCards.value.forEach(id => {
-          if (iframeStatus.value[id] !== 'loaded') startIframeTimeout(id);
+          if (iframeStatus.value[id] !== 'loaded') {
+            startIframeTimeout(id);
+          }
         });
       }
+
       currentPage.value = page;
       window.scrollTo(0, 0);
     };
 
     // ===== 返回顶部 =====
-    const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    const scrollTop = () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     // ===== 主题 =====
     const applyTheme = (theme) => {
-      if (theme === 'dark') document.documentElement.setAttribute('theme-mode', 'dark');
-      else document.documentElement.removeAttribute('theme-mode');
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('theme-mode', 'dark');
+      } else {
+        document.documentElement.removeAttribute('theme-mode');
+      }
     };
+
     const onThemeChange = (value) => {
       const theme = value ? 'dark' : 'light';
       applyTheme(theme);
-      try { localStorage.setItem('theme', theme); } catch (e) { /* ignore */ }
+
+      try {
+        localStorage.setItem('theme', theme);
+      } catch (e) {
+        // ignore
+      }
     };
 
     // ===== 卡片管理 =====
@@ -838,22 +851,43 @@ const app = createApp({
       settingsTab.value = 'add';
       resetForm();
     };
-    const resetForm = () => { form.value = { id: null, title: '', url: '', icon: '' }; };
+
+    const resetForm = () => {
+      form.value = { id: null, title: '', url: '', icon: '' };
+    };
 
     const saveCard = () => {
       const { id, title, url, icon } = form.value;
       const t = (title || '').trim();
       const u = (url || '').trim();
       const ic = (icon || '').trim() || 'app';
-      if (!t || !u) { MessagePlugin.warning('请输入标题和链接'); return; }
+
+      if (!t || !u) {
+        MessagePlugin.warning('请输入标题和链接');
+        return;
+      }
+
       if (id) {
         const idx = discoverCards.value.findIndex(c => c.id === id);
+
         if (idx > -1) {
-          discoverCards.value[idx] = { ...discoverCards.value[idx], title: t, url: u, icon: ic };
+          discoverCards.value[idx] = {
+            ...discoverCards.value[idx],
+            title: t,
+            url: u,
+            icon: ic
+          };
         }
       } else {
-        discoverCards.value.push({ id: Date.now(), title: t, url: u, icon: ic, expanded: false });
+        discoverCards.value.push({
+          id: Date.now(),
+          title: t,
+          url: u,
+          icon: ic,
+          expanded: false
+        });
       }
+
       MessagePlugin.success('保存成功');
       resetForm();
       settingsTab.value = 'manage';
@@ -862,7 +896,14 @@ const app = createApp({
     const editCard = (id) => {
       const c = discoverCards.value.find(x => x.id === id);
       if (!c) return;
-      form.value = { id: c.id, title: c.title, url: c.url, icon: c.icon };
+
+      form.value = {
+        id: c.id,
+        title: c.title,
+        url: c.url,
+        icon: c.icon
+      };
+
       settingsTab.value = 'add';
     };
 
@@ -873,13 +914,22 @@ const app = createApp({
 
     const confirmDelete = () => {
       if (pendingDeleteId.value == null) return;
+
       const id = pendingDeleteId.value;
+
       discoverCards.value = discoverCards.value.filter(c => c.id !== id);
       expandedCards.value = expandedCards.value.filter(x => x !== id);
+
       delete iframeStatus.value[id];
-      if (iframeTimers[id]) { clearTimeout(iframeTimers[id]); delete iframeTimers[id]; }
+
+      if (iframeTimers[id]) {
+        clearTimeout(iframeTimers[id]);
+        delete iframeTimers[id];
+      }
+
       pendingDeleteId.value = null;
       deleteVisible.value = false;
+
       MessagePlugin.success('已删除');
     };
 
@@ -887,89 +937,47 @@ const app = createApp({
     const moveCard = (index, dir) => {
       const arr = [...discoverCards.value];
       const target = index + dir;
+
       if (target < 0 || target >= arr.length) return;
+
       expandedCards.value = [];
+
       [arr[index], arr[target]] = [arr[target], arr[index]];
       discoverCards.value = arr;
     };
 
-    const openExternal = (url) => window.open(url, '_blank', 'noopener');
-
-    // ===== 清除数据 =====
-    const getStorageSize = () => {
-      let total = 0;
-      Object.keys(localStorage).forEach(k => {
-        total += (localStorage.getItem(k) || '').length * 2;
-      });
-      return (total / 1024).toFixed(2) + ' KB';
-    };
-
-    const openClearCache = () => {
-      cacheStats.value = {
-        favCount: favorites.value.length,
-        cardCount: discoverCards.value.length,
-        size: getStorageSize()
-      };
-      clearCacheVisible.value = true;
-      if (!isWide.value) drawerVisible.value = false;
-    };
-
-    const confirmClearCache = async () => {
-      clearCacheVisible.value = false;
-      clearing.value = true;
-      try {
-        try { localStorage.clear(); } catch (e) { /* ignore */ }
-        try { sessionStorage.clear(); } catch (e) { /* ignore */ }
-        if (window.indexedDB) {
-          try {
-            const dbs = indexedDB.databases ? await indexedDB.databases() : [];
-            for (const d of dbs) if (d.name) indexedDB.deleteDatabase(d.name);
-          } catch (e) {
-            ['myDatabase', 'cacheDb', 'appData'].forEach(n => {
-              try { indexedDB.deleteDatabase(n); } catch (_) { /* ignore */ }
-            });
-          }
-        }
-        if ('serviceWorker' in navigator) {
-          try {
-            const regs = await navigator.serviceWorker.getRegistrations();
-            for (const r of regs) await r.unregister();
-            if ('caches' in window) {
-              const names = await caches.keys();
-              for (const n of names) await caches.delete(n);
-            }
-          } catch (e) { /* ignore */ }
-        }
-        document.cookie.split(';').forEach(c => {
-          const p = c.indexOf('=');
-          const name = p > -1 ? c.substring(0, p).trim() : c.trim();
-          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        });
-        await new Promise(r => setTimeout(r, 800));
-        // 用 location.replace 保留 hash，避免双次导航
-        const url = new URL(location.href);
-        url.searchParams.set('t', Date.now());
-        location.replace(url.toString());
-      } catch (e) {
-        console.error('清除数据时出错:', e);
-        setTimeout(() => location.reload(), 1000);
-      }
+    const openExternal = (url) => {
+      window.open(url, '_blank', 'noopener');
     };
 
     // ===== 关于 =====
     const openAbout = () => {
       aboutVisible.value = true;
-      if (!isWide.value) drawerVisible.value = false;
+
+      if (!isWide.value) {
+        drawerVisible.value = false;
+      }
     };
 
-    // ===== 彩蛋：3 秒内点击头像 10 次（仅内存计数） =====
+    // ===== 彩蛋：3 秒内点击头像 10 次 =====
     const onAvatarClick = () => {
       const now = Date.now();
-      if (now - eggLastClickTime > 3000) eggCount.value = 0;
+
+      if (now - eggLastClickTime > 3000) {
+        eggCount.value = 0;
+      }
+
       eggCount.value++;
       eggLastClickTime = now;
-      if (eggTimer) clearTimeout(eggTimer);
-      eggTimer = setTimeout(() => { eggCount.value = 0; }, 3000);
+
+      if (eggTimer) {
+        clearTimeout(eggTimer);
+      }
+
+      eggTimer = setTimeout(() => {
+        eggCount.value = 0;
+      }, 3000);
+
       if (eggCount.value >= 10) {
         easterVisible.value = true;
         eggCount.value = 0;
@@ -978,7 +986,10 @@ const app = createApp({
 
     // ===== PWA =====
     const showInstallDialog = () => {
-      if (!isWide.value) drawerVisible.value = false;
+      if (!isWide.value) {
+        drawerVisible.value = false;
+      }
+
       if (isIos.value) {
         pwaConfig.value = {
           title: '安装到主屏幕',
@@ -1004,14 +1015,23 @@ const app = createApp({
           install: false
         };
       }
+
       pwaVisible.value = true;
     };
 
     const doInstall = () => {
-      if (!deferredPrompt) { pwaVisible.value = false; return; }
+      if (!deferredPrompt) {
+        pwaVisible.value = false;
+        return;
+      }
+
       deferredPrompt.prompt();
+
       deferredPrompt.userChoice.then((res) => {
-        if (res.outcome === 'accepted') isPwaInstalled.value = true;
+        if (res.outcome === 'accepted') {
+          isPwaInstalled.value = true;
+        }
+
         deferredPrompt = null;
         pwaVisible.value = false;
       });
@@ -1021,6 +1041,7 @@ const app = createApp({
     onMounted(() => {
       // 主题初始化
       const savedTheme = localStorage.getItem('theme');
+
       if (savedTheme) {
         isDark.value = savedTheme === 'dark';
         applyTheme(savedTheme);
@@ -1032,18 +1053,24 @@ const app = createApp({
 
       // 系统主题跟随（用户未手动设置时）
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
+
       const onMqChange = (e) => {
         if (!localStorage.getItem('theme')) {
           isDark.value = e.matches;
           applyTheme(e.matches ? 'dark' : 'light');
         }
       };
-      if (mq.addEventListener) mq.addEventListener('change', onMqChange);
-      else if (mq.addListener) mq.addListener(onMqChange);
+
+      if (mq.addEventListener) {
+        mq.addEventListener('change', onMqChange);
+      } else if (mq.addListener) {
+        mq.addListener(onMqChange);
+      }
 
       // PWA 状态
       isIos.value = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
       isPwaInstalled.value = window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone === true;
 
@@ -1051,6 +1078,7 @@ const app = createApp({
         e.preventDefault();
         deferredPrompt = e;
       });
+
       window.addEventListener('appinstalled', () => {
         isPwaInstalled.value = true;
         deferredPrompt = null;
@@ -1061,39 +1089,83 @@ const app = createApp({
         scrolled.value = window.scrollY > 10;
         showBackTop.value = window.scrollY > 300;
       };
+
       window.addEventListener('scroll', onScroll, { passive: true });
       onScroll();
 
       // 大屏 / 小屏切换
       const wideMq = window.matchMedia('(min-width: 1024px)');
+
       const onWideChange = (e) => {
         isWide.value = e.matches;
-        // 宽屏默认打开、窄屏默认关闭，避免缩屏后被抽屉遮挡
         drawerVisible.value = e.matches;
       };
-      if (wideMq.addEventListener) wideMq.addEventListener('change', onWideChange);
-      else if (wideMq.addListener) wideMq.addListener(onWideChange);
+
+      if (wideMq.addEventListener) {
+        wideMq.addEventListener('change', onWideChange);
+      } else if (wideMq.addListener) {
+        wideMq.addListener(onWideChange);
+      }
     });
 
     return {
       // 状态
-      currentPage, filterCategory, searchText, favoriteSearchText,
-      expandedCards, iframeStatus, scrolled, showBackTop, currentYear,
-      isDark, isWide, drawerVisible,
-      favorites, discoverCards,
-      settingsVisible, settingsTab, deleteVisible, aboutVisible,
-      clearCacheVisible, easterVisible, pwaVisible, clearing,
-      form, cacheStats, eggCount,
-      isPwaInstalled, pwaConfig,
+      currentPage,
+      filterCategory,
+      searchText,
+      favoriteSearchText,
+      expandedCards,
+      iframeStatus,
+      scrolled,
+      showBackTop,
+      currentYear,
+      userUID,
+
+      isDark,
+      isWide,
+      drawerVisible,
+
+      favorites,
+      discoverCards,
+
+      settingsVisible,
+      settingsTab,
+      deleteVisible,
+      aboutVisible,
+      easterVisible,
+      pwaVisible,
+
+      form,
+      eggCount,
+
+      isPwaInstalled,
+      pwaConfig,
+
       // 计算
-      categories, filteredTools, favoriteTools,
+      categories,
+      filteredTools,
+      favoriteTools,
+
       // 方法
-      toggleFav, openTool, switchPage, scrollTop,
-      onThemeChange, openSettings, resetForm, saveCard, editCard,
-      askDelete, confirmDelete, moveCard, openExternal,
-      openClearCache, confirmClearCache, openAbout,
-      onAvatarClick, showInstallDialog, doInstall,
+      toggleFav,
+      openTool,
+      switchPage,
+      scrollTop,
+      onThemeChange,
+      openSettings,
+      resetForm,
+      saveCard,
+      editCard,
+      askDelete,
+      confirmDelete,
+      moveCard,
+      openExternal,
+      openAbout,
+      onAvatarClick,
+      showInstallDialog,
+      doInstall,
       onIframeLoad,
+
       // 标签栏
       tabs: [
         { key: 'home', label: '首页', icon: 'home' },
