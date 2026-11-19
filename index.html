@@ -3,283 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0052d9">
+<meta name="theme-color" content="#6750A4">
+<meta name="description" content="一个集合了常用小工具和网页应用的工具箱。">
+
+<!-- PWA 配置 -->
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/images/icon-192.png">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="树洞工具箱">
+
 <title>树洞工具箱</title>
 <link rel="stylesheet" href="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.css">
+
 <style>
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
-    background: var(--td-bg-color-page);
-    color: var(--td-text-color-primary);
-    transition: background-color .3s, color .3s;
-    min-height: 100vh;
-  }
-  #app { min-height: 100vh; }
-  .t-dialog { max-width: 92vw; }
-
-  .app-shell {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    transition: margin-left .3s cubic-bezier(.2, 0, 0, 1);
-  }
-  .app-shell.shifted { margin-left: 280px; }
-
-  .app-bar {
-    position: sticky; top: 0; z-index: 100;
-    display: flex; align-items: center; gap: 6px;
-    height: 64px; padding: 0 12px;
-    padding-top: env(safe-area-inset-top);
-    box-sizing: content-box;
-    background: var(--td-bg-color-container);
-    border-bottom: 1px solid var(--td-component-stroke);
-    transition: box-shadow .3s, background-color .3s;
-  }
-  .app-bar.scrolled { box-shadow: 0 2px 10px rgba(0,0,0,.08); }
-  .app-bar-middle { flex: 1; min-width: 0; display: flex; align-items: center; }
-  .app-bar-middle .t-input { width: 100%; }
-  .app-bar-title { font-size: 18px; font-weight: 600; margin: 0; }
-  .app-bar-right { display: flex; align-items: center; flex-shrink: 0; }
-
-  .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; width: 100%; }
-  .page-wrap { flex: 1; padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
-  .section-title { font-size: 18px; font-weight: 600; margin: 18px 0 8px; }
-  .empty-tip {
-    grid-column: 1 / -1; text-align: center; padding: 40px;
-    color: var(--td-text-color-placeholder); font-size: 14px;
-  }
-
-  .filters-section {
-    position: sticky; top: calc(64px + env(safe-area-inset-top));
-    z-index: 90; background: var(--td-bg-color-page); padding: 6px 0;
-  }
-  .category-scroll {
-    display: flex; gap: 8px; overflow-x: auto; padding: 4px 0;
-    scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  }
-  .category-scroll::-webkit-scrollbar { display: none; }
-  .category-chip {
-    flex-shrink: 0; padding: 6px 14px; border-radius: 999px;
-    border: 1px solid var(--td-component-stroke);
-    background: var(--td-bg-color-container);
-    color: var(--td-text-color-secondary);
-    font-size: 14px; font-family: inherit; cursor: pointer; white-space: nowrap;
-    transition: background-color .2s, color .2s, border-color .2s;
-  }
-  .category-chip:hover { background: var(--td-bg-color-container-hover); }
-  .category-chip:focus-visible {
-    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
-  }
-  .category-chip.active {
-    background: var(--td-brand-color); color: #fff;
-    border-color: var(--td-brand-color);
-  }
-
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 12px; padding: 12px 0;
-  }
-  @media (min-width: 600px) {
-    .tools-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
-  }
-  .tool-card {
-    position: relative; display: flex; flex-direction: column;
-    align-items: center; text-align: center; padding: 20px 12px;
-    border-radius: 16px; background: var(--td-bg-color-container);
-    border: 1px solid var(--td-component-stroke);
-    cursor: pointer; user-select: none;
-    transition: transform .2s, box-shadow .2s;
-  }
-  .tool-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
-  .tool-card:active { transform: scale(.97); }
-  .tool-card:focus-visible {
-    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
-  }
-  .tool-icon {
-    width: 52px; height: 52px; border-radius: 14px;
-    background: var(--td-brand-color-light);
-    color: var(--td-brand-color);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 10px;
-  }
-  .tool-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
-  .tool-desc {
-    font-size: 12px; line-height: 1.4; color: var(--td-text-color-secondary);
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  }
-  .favorite-btn {
-    position: absolute; top: 6px; right: 6px;
-    width: 30px; height: 30px; border-radius: 50%;
-    border: none; background: transparent; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--td-text-color-placeholder); z-index: 2;
-    transition: background-color .2s, color .2s;
-  }
-  .favorite-btn:hover { background: var(--td-bg-color-container-hover); }
-  .favorite-btn:focus-visible {
-    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
-  }
-  .favorite-btn.favorited { color: var(--td-error-color); }
-
-  .discover-wrap { padding-top: 12px; }
-  .discover-header {
-    display: flex; align-items: center; justify-content: space-between;
-    width: 100%; gap: 8px;
-  }
-  .discover-title {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 15px; font-weight: 500; color: var(--td-text-color-primary);
-  }
-  .webview-wrap { position: relative; width: 100%; height: 500px; }
-  .webview { width: 100%; height: 500px; border: none; display: block; }
-  .webview-loading {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--td-bg-color-container); z-index: 1;
-  }
-  .iframe-error { text-align: center; padding: 16px; max-width: 280px; }
-  .iframe-error p {
-    margin: 0 0 12px; font-size: 13px; line-height: 1.6;
-    color: var(--td-text-color-secondary);
-  }
-
-  .capsule-bar {
-    position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom));
-    transform: translateX(-50%); z-index: 500;
-    display: flex; gap: 4px; padding: 6px;
-    border-radius: 999px;
-    background: var(--td-bg-color-container);
-    box-shadow: 0 6px 24px rgba(0,0,0,.14), 0 0 0 1px var(--td-component-stroke);
-    backdrop-filter: blur(12px);
-  }
-  .capsule-item {
-    display: flex; align-items: center; gap: 6px;
-    padding: 10px 18px; border-radius: 999px;
-    font-size: 14px; font-weight: 500;
-    color: var(--td-text-color-secondary);
-    cursor: pointer; user-select: none;
-    transition: all .25s; white-space: nowrap;
-  }
-  .capsule-item.active {
-    background: var(--td-brand-color); color: #fff;
-    box-shadow: 0 4px 12px rgba(0,82,217,.3);
-  }
-  .capsule-item:not(.active):hover { background: var(--td-bg-color-container-hover); }
-  .capsule-item:focus-visible {
-    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
-  }
-  @media (max-width: 400px) {
-    .capsule-item { padding: 9px 12px; font-size: 13px; gap: 4px; }
-  }
-
-  .back-top { position: fixed; right: 20px; bottom: calc(100px + env(safe-area-inset-bottom)); z-index: 400; }
-
-  .drawer-profile {
-    display: flex; align-items: center; gap: 14px;
-    padding: 8px 0 18px;
-    border-bottom: 1px solid var(--td-component-stroke);
-  }
-  .drawer-avatar {
-    position: relative; width: 52px; height: 52px;
-    border-radius: 50%;
-    background: var(--td-brand-color-light);
-    color: var(--td-brand-color);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; flex-shrink: 0;
-    transition: transform .2s;
-  }
-  .drawer-avatar:active { transform: scale(.92); }
-  .drawer-name { font-size: 15px; font-weight: 600; }
-  .drawer-version { font-size: 12px; color: var(--td-text-color-secondary); margin-top: 4px; }
-  .click-counter {
-    position: absolute; top: -4px; right: -4px;
-    min-width: 20px; height: 20px; padding: 0 4px;
-    border-radius: 10px; background: var(--td-brand-color);
-    color: #fff; font-size: 12px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .drawer-menu { padding: 8px 0; }
-  .drawer-menu-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 4px; cursor: pointer;
-    border-bottom: 1px solid var(--td-component-stroke);
-    color: var(--td-text-color-primary);
-  }
-  .drawer-menu-item:focus-visible {
-    outline: 2px solid var(--td-brand-color); outline-offset: 2px;
-    border-radius: 6px;
-  }
-  .drawer-menu-item:last-child { border-bottom: none; }
-  .menu-text { flex: 1; font-size: 14px; font-weight: 500; }
-  .menu-arrow { color: var(--td-text-color-placeholder); }
-  .drawer-footer {
-    text-align: center; font-size: 12px; line-height: 1.8;
-    color: var(--td-text-color-placeholder); padding: 8px 0;
-  }
-  .drawer-footer-sub { font-size: 11px; opacity: .8; }
-
-  .manage-item {
-    display: flex; align-items: center; gap: 6px;
-    padding: 10px 4px;
-    border-bottom: 1px solid var(--td-component-stroke);
-  }
-  .manage-item:last-child { border-bottom: none; }
-  .order-btns { display: flex; flex-direction: column; }
-  .manage-info { flex: 1; min-width: 0; }
-  .manage-title {
-    font-size: 14px; font-weight: 500;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .manage-url {
-    font-size: 11px; color: var(--td-text-color-placeholder);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    margin-top: 2px;
-  }
-
-  .form-item { margin-bottom: 14px; }
-  .form-label {
-    display: block; font-size: 13px; font-weight: 500;
-    margin-bottom: 6px; color: var(--td-text-color-secondary);
-  }
-
-  .easter-iframe {
-    width: 100%; height: 250px; border: none; display: block;
-    border-radius: 8px; background: #fff;
-  }
-
-  .pwa-icon { display: flex; justify-content: center; margin-bottom: 12px; color: var(--td-brand-color); }
-  .pwa-desc { font-size: 14px; line-height: 1.7; color: var(--td-text-color-secondary); }
-
-  @media (max-width: 576px) {
-    .app-bar-title { font-size: 17px; }
-    .tool-card { padding: 16px 10px; }
-    .tool-icon { width: 46px; height: 46px; border-radius: 12px; }
-    .tool-name { font-size: 14px; }
-    .webview-wrap, .webview { height: 420px; }
-  }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',system-ui,sans-serif;background:var(--td-bg-color-page);color:var(--td-text-color-primary);transition:background-color .3s,color .3s;min-height:100vh}
+#app{min-height:100vh}
+.t-dialog{max-width:92vw}
+.app-shell{min-height:100vh;display:flex;flex-direction:column;transition:margin-left .3s}
+.app-shell.shifted{margin-left:280px}
+.app-bar{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:6px;height:64px;padding:0 12px;padding-top:env(safe-area-inset-top);box-sizing:content-box;background:var(--td-bg-color-container);border-bottom:1px solid var(--td-component-stroke)}
+.app-bar.scrolled{box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.app-bar-middle{flex:1;min-width:0;display:flex;align-items:center}
+.app-bar-middle .t-input{width:100%}
+.app-bar-title{font-size:18px;font-weight:600;margin:0}
+.app-bar-right{display:flex;align-items:center;flex-shrink:0}
+.container{max-width:1200px;margin:0 auto;padding:0 16px;width:100%}
+.page-wrap{flex:1;padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+.section-title{font-size:18px;font-weight:600;margin:18px 0 8px}
+.empty-tip{grid-column:1/-1;text-align:center;padding:40px;color:var(--td-text-color-placeholder);font-size:14px}
+.filters-section{position:sticky;top:calc(64px + env(safe-area-inset-top));z-index:90;background:var(--td-bg-color-page);padding:6px 0}
+.category-scroll{display:flex;gap:8px;overflow-x:auto;padding:4px 0;scrollbar-width:none}
+.category-scroll::-webkit-scrollbar{display:none}
+.category-chip{flex-shrink:0;padding:6px 14px;border-radius:999px;border:1px solid var(--td-component-stroke);background:var(--td-bg-color-container);color:var(--td-text-color-secondary);font-size:14px;font-family:inherit;cursor:pointer;white-space:nowrap}
+.category-chip.active{background:var(--td-brand-color);color:#fff;border-color:var(--td-brand-color)}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;padding:12px 0}
+@media(min-width:600px){.tools-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}}
+.tool-card{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 12px;border-radius:16px;background:var(--td-bg-color-container);border:1px solid var(--td-component-stroke);cursor:pointer;user-select:none;transition:transform .2s,box-shadow .2s}
+.tool-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.tool-card:active{transform:scale(.97)}
+.tool-icon{width:52px;height:52px;border-radius:14px;background:var(--td-brand-color-light);color:var(--td-brand-color);display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.tool-name{font-size:15px;font-weight:500;margin-bottom:4px}
+.tool-desc{font-size:12px;line-height:1.4;color:var(--td-text-color-secondary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.favorite-btn{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--td-text-color-placeholder);z-index:2}
+.favorite-btn.favorited{color:var(--td-error-color)}
+.discover-wrap{padding-top:12px}
+.discover-header{display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px}
+.discover-title{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500}
+.webview-wrap{position:relative;width:100%;height:500px}
+.webview{width:100%;height:500px;border:none;display:block}
+.webview-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--td-bg-color-container);z-index:1}
+.iframe-error{text-align:center;padding:16px;max-width:280px}
+.iframe-error p{margin:0 0 12px;font-size:13px;line-height:1.6;color:var(--td-text-color-secondary)}
+.capsule-bar{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:500;display:flex;gap:4px;padding:6px;border-radius:999px;background:var(--td-bg-color-container);box-shadow:0 6px 24px rgba(0,0,0,.14),0 0 0 1px var(--td-component-stroke);backdrop-filter:blur(12px)}
+.capsule-item{display:flex;align-items:center;gap:6px;padding:10px 18px;border-radius:999px;font-size:14px;font-weight:500;color:var(--td-text-color-secondary);cursor:pointer;user-select:none;transition:all .25s;white-space:nowrap}
+.capsule-item.active{background:var(--td-brand-color);color:#fff;box-shadow:0 4px 12px rgba(103,80,164,.3)}
+.capsule-item:not(.active):hover{background:var(--td-bg-color-container-hover)}
+@media(max-width:400px){.capsule-item{padding:9px 12px;font-size:13px;gap:4px}}
+.back-top{position:fixed;right:20px;bottom:calc(100px + env(safe-area-inset-bottom));z-index:400}
+.drawer-profile{display:flex;align-items:center;gap:14px;padding:8px 0 18px;border-bottom:1px solid var(--td-component-stroke)}
+.drawer-avatar{position:relative;width:52px;height:52px;border-radius:50%;background:var(--td-brand-color-light);color:var(--td-brand-color);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.drawer-name{font-size:15px;font-weight:600}
+.drawer-version{font-size:12px;color:var(--td-text-color-secondary);margin-top:4px}
+.click-counter{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 4px;border-radius:10px;background:var(--td-brand-color);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.drawer-menu{padding:8px 0}
+.drawer-menu-item{display:flex;align-items:center;gap:12px;padding:14px 4px;cursor:pointer;border-bottom:1px solid var(--td-component-stroke);color:var(--td-text-color-primary)}
+.drawer-menu-item:last-child{border-bottom:none}
+.menu-text{flex:1;font-size:14px;font-weight:500}
+.menu-arrow{color:var(--td-text-color-placeholder)}
+.drawer-footer{text-align:center;font-size:12px;line-height:1.8;color:var(--td-text-color-placeholder);padding:8px 0}
+.drawer-footer-sub{font-size:11px;opacity:.8;word-break:break-all}
+.manage-item{display:flex;align-items:center;gap:6px;padding:10px 4px;border-bottom:1px solid var(--td-component-stroke)}
+.manage-item:last-child{border-bottom:none}
+.order-btns{display:flex;flex-direction:column}
+.manage-info{flex:1;min-width:0}
+.manage-title{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.manage-url{font-size:11px;color:var(--td-text-color-placeholder);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.form-item{margin-bottom:14px}
+.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--td-text-color-secondary)}
+.easter-iframe{width:100%;height:250px;border:none;display:block;border-radius:8px;background:#fff}
+.pwa-icon{display:flex;justify-content:center;margin-bottom:12px;color:var(--td-brand-color)}
+.pwa-desc{font-size:14px;line-height:1.7;color:var(--td-text-color-secondary)}
+@media(max-width:576px){.app-bar-title{font-size:17px}.tool-card{padding:16px 10px}.tool-icon{width:46px;height:46px;border-radius:12px}.tool-name{font-size:14px}.webview-wrap,.webview{height:420px}}
 </style>
 </head>
+
 <body>
 <div id="app">
-  <div class="app-shell" :class="{ shifted: drawerVisible && isWide }">
-    <header class="app-bar" :class="{ scrolled }">
-      <t-button variant="text" shape="square" @click="drawerVisible = true" aria-label="打开菜单">
+  <div class="app-shell" :class="{shifted:drawerVisible && isWide}">
+    <header class="app-bar" :class="{scrolled}">
+      <t-button variant="text" shape="square" @click="drawerVisible=true" aria-label="打开菜单">
         <t-icon name="menu" size="22px"></t-icon>
       </t-button>
+
       <div class="app-bar-middle">
-        <t-input v-if="currentPage === 'home'" v-model="searchText" borderless clearable placeholder="搜索工具...">
+        <t-input v-if="currentPage==='home'" v-model="searchText" borderless clearable placeholder="搜索工具...">
           <template #prefixIcon><t-icon name="search"></t-icon></template>
         </t-input>
-        <t-input v-else-if="currentPage === 'profile'" v-model="favoriteSearchText" borderless clearable placeholder="搜索收藏...">
+        <t-input v-else-if="currentPage==='profile'" v-model="favoriteSearchText" borderless clearable placeholder="搜索收藏...">
           <template #prefixIcon><t-icon name="search"></t-icon></template>
         </t-input>
         <h1 v-else class="app-bar-title">发现</h1>
       </div>
+
       <div class="app-bar-right">
-        <t-button v-if="currentPage === 'discover'" variant="text" shape="square" @click="openSettings" aria-label="卡片管理">
+        <t-button v-if="currentPage==='discover'" variant="text" shape="square" @click="openSettings" aria-label="卡片管理">
           <t-icon name="setting" size="20px"></t-icon>
         </t-button>
       </div>
@@ -287,54 +118,40 @@
 
     <main class="page-wrap">
       <!-- 首页 -->
-      <template v-if="currentPage === 'home'">
+      <template v-if="currentPage==='home'">
         <div class="filters-section">
           <div class="container">
             <div class="category-scroll" role="tablist" aria-label="工具分类">
-              <button
-                v-for="cat in categories"
-                :key="cat"
-                type="button"
-                role="tab"
-                class="category-chip"
-                :class="{ active: filterCategory === cat }"
-                :aria-selected="filterCategory === cat"
-                @click="filterCategory = cat">
-                {{ cat }}
+              <button v-for="cat in categories" :key="cat" type="button" role="tab"
+                class="category-chip" :class="{active:filterCategory===cat}"
+                :aria-selected="filterCategory===cat" @click="filterCategory=cat">
+                {{cat}}
               </button>
             </div>
           </div>
         </div>
+
         <div class="container">
           <div class="tools-grid">
-            <div
-              v-for="tool in filteredTools"
-              :key="tool.id"
-              class="tool-card"
-              role="button"
-              tabindex="0"
-              @click="openTool(tool)"
-              @keydown.enter.prevent="openTool(tool)"
-              @keydown.space.prevent="openTool(tool)">
-              <button
-                class="favorite-btn"
-                :class="{ favorited: favorites.includes(tool.id) }"
-                :aria-label="favorites.includes(tool.id) ? '取消收藏' : '收藏'"
-                @click.stop="toggleFav(tool.id)"
-                @keydown.stop>
-                <t-icon :name="favorites.includes(tool.id) ? 'heart-filled' : 'heart'" size="18px"></t-icon>
+            <div v-for="tool in filteredTools" :key="tool.id" class="tool-card"
+              role="button" tabindex="0" @click="openTool(tool)"
+              @keydown.enter.prevent="openTool(tool)" @keydown.space.prevent="openTool(tool)">
+              <button class="favorite-btn" :class="{favorited:favorites.includes(tool.id)}"
+                :aria-label="favorites.includes(tool.id)?'取消收藏':'收藏'"
+                @click.stop="toggleFav(tool.id)" @keydown.stop>
+                <t-icon :name="favorites.includes(tool.id)?'heart-filled':'heart'" size="18px"></t-icon>
               </button>
               <div class="tool-icon"><t-icon :name="tool.icon" size="26px"></t-icon></div>
-              <div class="tool-name">{{ tool.name }}</div>
-              <div class="tool-desc">{{ tool.desc }}</div>
+              <div class="tool-name">{{tool.name}}</div>
+              <div class="tool-desc">{{tool.desc}}</div>
             </div>
-            <div v-if="filteredTools.length === 0" class="empty-tip">未找到相关内容</div>
+            <div v-if="filteredTools.length===0" class="empty-tip">未找到相关内容</div>
           </div>
         </div>
       </template>
 
       <!-- 发现 -->
-      <template v-else-if="currentPage === 'discover'">
+      <template v-else-if="currentPage==='discover'">
         <div class="container discover-wrap">
           <t-collapse v-if="discoverCards.length" v-model="expandedCards">
             <t-collapse-panel v-for="card in discoverCards" :key="card.id" :value="card.id">
@@ -342,28 +159,25 @@
                 <div class="discover-header">
                   <div class="discover-title">
                     <t-icon :name="card.icon" size="20px"></t-icon>
-                    <span>{{ card.title }}</span>
+                    <span>{{card.title}}</span>
                   </div>
-                  <t-button variant="text" shape="square" @click.stop.prevent="openExternal(card.url)" aria-label="在新窗口打开">
+                  <t-button variant="text" shape="square"
+                    @click.stop.prevent="openExternal(card.url)" aria-label="在新窗口打开">
                     <t-icon name="jump" size="18px"></t-icon>
                   </t-button>
                 </div>
               </template>
+
               <div class="webview-wrap">
-                <div v-if="iframeStatus[card.id] !== 'loaded'" class="webview-loading">
-                  <div v-if="iframeStatus[card.id] === 'error'" class="iframe-error">
+                <div v-if="iframeStatus[card.id]!=='loaded'" class="webview-loading">
+                  <div v-if="iframeStatus[card.id]==='error'" class="iframe-error">
                     <p>页面加载失败，可能不支持被嵌入。你可以尝试在新窗口打开。</p>
-                    <t-button theme="primary" size="small" @click="openExternal(card.url)">
-                      在新窗口打开
-                    </t-button>
+                    <t-button theme="primary" size="small" @click="openExternal(card.url)">在新窗口打开</t-button>
                   </div>
                   <t-loading v-else size="small"></t-loading>
                 </div>
-                <iframe
-                  v-if="expandedCards.includes(card.id)"
-                  :src="card.url"
-                  class="webview"
-                  @load="onIframeLoad(card.id)"></iframe>
+                <iframe v-if="expandedCards.includes(card.id)" :src="card.url"
+                  class="webview" @load="onIframeLoad(card.id)"></iframe>
               </div>
             </t-collapse-panel>
           </t-collapse>
@@ -372,52 +186,37 @@
       </template>
 
       <!-- 我的 -->
-      <template v-else-if="currentPage === 'profile'">
+      <template v-else-if="currentPage==='profile'">
         <div class="container">
           <h2 class="section-title">我的收藏</h2>
           <div class="tools-grid">
-            <div
-              v-for="tool in favoriteTools"
-              :key="tool.id"
-              class="tool-card"
-              role="button"
-              tabindex="0"
-              @click="openTool(tool)"
-              @keydown.enter.prevent="openTool(tool)"
-              @keydown.space.prevent="openTool(tool)">
-              <button
-                class="favorite-btn favorited"
-                aria-label="取消收藏"
-                @click.stop="toggleFav(tool.id)"
-                @keydown.stop>
+            <div v-for="tool in favoriteTools" :key="tool.id" class="tool-card"
+              role="button" tabindex="0" @click="openTool(tool)"
+              @keydown.enter.prevent="openTool(tool)" @keydown.space.prevent="openTool(tool)">
+              <button class="favorite-btn favorited" aria-label="取消收藏"
+                @click.stop="toggleFav(tool.id)" @keydown.stop>
                 <t-icon name="heart-filled" size="18px"></t-icon>
               </button>
               <div class="tool-icon"><t-icon :name="tool.icon" size="26px"></t-icon></div>
-              <div class="tool-name">{{ tool.name }}</div>
-              <div class="tool-desc">{{ tool.desc }}</div>
+              <div class="tool-name">{{tool.name}}</div>
+              <div class="tool-desc">{{tool.desc}}</div>
             </div>
-            <div v-if="favoriteTools.length === 0" class="empty-tip">还没有收藏任何工具</div>
+            <div v-if="favoriteTools.length===0" class="empty-tip">还没有收藏任何工具</div>
           </div>
         </div>
       </template>
     </main>
   </div>
 
+  <!-- 底部导航 -->
   <nav class="capsule-bar" aria-label="主导航">
-    <div
-      v-for="tab in tabs"
-      :key="tab.key"
-      class="capsule-item"
-      :class="{ active: currentPage === tab.key }"
-      role="button"
-      tabindex="0"
-      :aria-label="tab.label"
-      :aria-current="currentPage === tab.key ? 'page' : undefined"
-      @click="switchPage(tab.key)"
-      @keydown.enter.prevent="switchPage(tab.key)"
+    <div v-for="tab in tabs" :key="tab.key" class="capsule-item"
+      :class="{active:currentPage===tab.key}" role="button" tabindex="0"
+      :aria-label="tab.label" :aria-current="currentPage===tab.key?'page':undefined"
+      @click="switchPage(tab.key)" @keydown.enter.prevent="switchPage(tab.key)"
       @keydown.space.prevent="switchPage(tab.key)">
       <t-icon :name="tab.icon" size="18px"></t-icon>
-      <span>{{ tab.label }}</span>
+      <span>{{tab.label}}</span>
     </div>
   </nav>
 
@@ -427,21 +226,23 @@
     </t-button>
   </div>
 
+  <!-- 侧边栏 -->
   <t-drawer v-model:visible="drawerVisible" placement="left" size="280px"
     :show-overlay="!isWide" :prevent-scroll-through="!isWide">
     <template #header>
-      <span style="font-size:18px;font-weight:600;">树洞工具箱</span>
+      <span style="font-size:18px;font-weight:600">树洞工具箱</span>
     </template>
 
     <div class="drawer-profile">
-      <div class="drawer-avatar" @click="onAvatarClick" role="button" tabindex="0" aria-label="用户头像"
-        @keydown.enter.prevent="onAvatarClick" @keydown.space.prevent="onAvatarClick">
+      <div class="drawer-avatar" @click="onAvatarClick" role="button" tabindex="0"
+        aria-label="用户头像" @keydown.enter.prevent="onAvatarClick"
+        @keydown.space.prevent="onAvatarClick">
         <t-icon name="user" size="26px"></t-icon>
-        <span v-if="eggCount >= 3" class="click-counter">{{ eggCount }}</span>
+        <span v-if="eggCount>=3" class="click-counter">{{eggCount}}</span>
       </div>
       <div>
         <div class="drawer-name">欢迎使用</div>
-        <div class="drawer-version">版本号：v4.0</div>
+        <div class="drawer-version">版本号：v3.0</div>
       </div>
     </div>
 
@@ -451,12 +252,15 @@
         <div class="menu-text">深色模式</div>
         <t-switch v-model="isDark" @change="onThemeChange"></t-switch>
       </div>
-      <div v-if="!isPwaInstalled" class="drawer-menu-item" role="button" tabindex="0" @click="showInstallDialog"
-        @keydown.enter.prevent="showInstallDialog" @keydown.space.prevent="showInstallDialog">
+
+      <div v-if="!isPwaInstalled" class="drawer-menu-item" role="button" tabindex="0"
+        @click="showInstallDialog" @keydown.enter.prevent="showInstallDialog"
+        @keydown.space.prevent="showInstallDialog">
         <t-icon name="download" size="20px"></t-icon>
         <div class="menu-text">安装应用</div>
         <t-icon name="chevron-right" class="menu-arrow"></t-icon>
       </div>
+
       <div class="drawer-menu-item" role="button" tabindex="0" @click="openAbout"
         @keydown.enter.prevent="openAbout" @keydown.space.prevent="openAbout">
         <t-icon name="info-circle" size="20px"></t-icon>
@@ -468,47 +272,46 @@
     <template #footer>
       <div class="drawer-footer">
         <div>树洞工具箱 ©2026 基于TDesign构建</div>
-        <div class="drawer-footer-sub">UID: {{ userUID }}</div>
+        <div class="drawer-footer-sub">UID: {{userUID}}</div>
       </div>
     </template>
   </t-drawer>
 
+  <!-- 卡片管理 -->
   <t-dialog v-model:visible="settingsVisible" header="卡片管理" :footer="false" width="420px">
     <t-tabs v-model="settingsTab">
       <t-tab-panel value="add" label="新增">
         <div class="form-item">
           <label class="form-label">标题</label>
-          <t-input v-model="form.title" placeholder="例如：每日新闻" />
+          <t-input v-model="form.title" placeholder="例如：每日新闻"></t-input>
         </div>
         <div class="form-item">
           <label class="form-label">链接 URL</label>
-          <t-input v-model="form.url" placeholder="https://..." />
+          <t-input v-model="form.url" placeholder="https://..."></t-input>
         </div>
         <div class="form-item">
           <label class="form-label">图标（TDesign 图标名）</label>
-          <t-input v-model="form.icon" placeholder="选填，默认 app" />
+          <t-input v-model="form.icon" placeholder="选填，默认 app"></t-input>
         </div>
         <t-button theme="primary" block @click="saveCard">
-          {{ form.id ? '更新卡片' : '保存卡片' }}
+          {{form.id?'更新卡片':'保存卡片'}}
         </t-button>
-        <t-button v-if="form.id" variant="text" block style="margin-top:8px;" @click="resetForm">
-          取消编辑
-        </t-button>
+        <t-button v-if="form.id" variant="text" block style="margin-top:8px" @click="resetForm">取消编辑</t-button>
       </t-tab-panel>
 
       <t-tab-panel value="manage" label="列表">
-        <div v-for="(card, index) in discoverCards" :key="card.id" class="manage-item">
+        <div v-for="(card,index) in discoverCards" :key="card.id" class="manage-item">
           <div class="order-btns">
-            <t-button variant="text" size="small" :disabled="index === 0" @click="moveCard(index, -1)" aria-label="上移">
+            <t-button variant="text" size="small" :disabled="index===0" @click="moveCard(index,-1)" aria-label="上移">
               <t-icon name="chevron-up"></t-icon>
             </t-button>
-            <t-button variant="text" size="small" :disabled="index === discoverCards.length - 1" @click="moveCard(index, 1)" aria-label="下移">
+            <t-button variant="text" size="small" :disabled="index===discoverCards.length-1" @click="moveCard(index,1)" aria-label="下移">
               <t-icon name="chevron-down"></t-icon>
             </t-button>
           </div>
           <div class="manage-info">
-            <div class="manage-title">{{ card.title }}</div>
-            <div class="manage-url">{{ card.url }}</div>
+            <div class="manage-title">{{card.title}}</div>
+            <div class="manage-url">{{card.url}}</div>
           </div>
           <t-button variant="text" size="small" @click="editCard(card.id)" aria-label="编辑">
             <t-icon name="edit" size="18px"></t-icon>
@@ -517,38 +320,41 @@
             <t-icon name="delete" size="18px"></t-icon>
           </t-button>
         </div>
-        <div v-if="discoverCards.length === 0" style="text-align:center;padding:20px;color:var(--td-text-color-placeholder);">
-          暂无卡片
-        </div>
+        <div v-if="discoverCards.length===0" style="text-align:center;padding:20px;color:var(--td-text-color-placeholder)">暂无卡片</div>
       </t-tab-panel>
     </t-tabs>
   </t-dialog>
 
+  <!-- 删除确认 -->
   <t-dialog v-model:visible="deleteVisible" header="确认删除" :footer="false" width="320px">
-    <p style="margin:0 0 20px;font-size:14px;">确定要删除此卡片吗？此操作不可撤销。</p>
-    <div style="display:flex;gap:12px;">
-      <t-button variant="outline" block @click="deleteVisible = false">取消</t-button>
+    <p style="margin:0 0 20px;font-size:14px">确定要删除此卡片吗？此操作不可撤销。</p>
+    <div style="display:flex;gap:12px">
+      <t-button variant="outline" block @click="deleteVisible=false">取消</t-button>
       <t-button theme="danger" block @click="confirmDelete">删除</t-button>
     </div>
   </t-dialog>
 
+  <!-- 关于 -->
   <t-dialog v-model:visible="aboutVisible" header="关于" :footer="false" width="320px">
-    <p style="margin:0 0 8px;font-size:15px;font-weight:500;">树洞工具箱 v4.0</p>
-    <p style="margin:0;font-size:14px;color:var(--td-text-color-secondary);line-height:1.7;">
+    <p style="margin:0 0 8px;font-size:15px;font-weight:500">树洞工具箱 v3.0</p>
+    <p style="margin:0;font-size:14px;color:var(--td-text-color-secondary);line-height:1.7">
       一个安静的工具箱，基于 TDesign 构建。
     </p>
+    <p style="margin:12px 0 0;font-size:12px;color:var(--td-text-color-placeholder)">UID：{{userUID}}</p>
   </t-dialog>
 
-  <t-dialog v-model:visible="easterVisible" :header="false" :footer="false" width="min(520px, 92vw)">
+  <!-- 彩蛋 -->
+  <t-dialog v-model:visible="easterVisible" :header="false" :footer="false" width="min(520px,92vw)">
     <iframe v-if="easterVisible" class="easter-iframe"
       src="https://dinosaur.game/zh/dinosaur-game" allow="fullscreen"></iframe>
   </t-dialog>
 
+  <!-- PWA 安装提示 -->
   <t-dialog v-model:visible="pwaVisible" :header="pwaConfig.title" :footer="false" width="360px">
     <div class="pwa-icon"><t-icon :name="pwaConfig.icon" size="40px"></t-icon></div>
     <p class="pwa-desc" v-html="pwaConfig.desc"></p>
-    <div style="display:flex;gap:12px;margin-top:20px;">
-      <t-button variant="outline" block @click="pwaVisible = false">{{ pwaConfig.cancelText }}</t-button>
+    <div style="display:flex;gap:12px;margin-top:20px">
+      <t-button variant="outline" block @click="pwaVisible=false">{{pwaConfig.cancelText}}</t-button>
       <t-button v-if="pwaConfig.install" theme="primary" block @click="doInstall">安装</t-button>
     </div>
   </t-dialog>
@@ -556,627 +362,456 @@
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.js"></script>
-<script>
-const { createApp, ref, computed, watch, onMounted } = Vue;
 
-// MessagePlugin 兜底，防止库差异导致 undefined 调用报错
-const MessagePlugin = (TDesign && TDesign.MessagePlugin) || {
-  warning: (m) => console.warn('[warn]', m),
-  success: (m) => console.log('[success]', m),
-  error: (m) => console.error('[error]', m)
+<script>
+const {createApp,ref,computed,watch,onMounted}=Vue;
+
+const MessagePlugin=(TDesign&&TDesign.MessagePlugin)||{
+  warning:m=>console.warn('[warn]',m),
+  success:m=>console.log('[success]',m),
+  error:m=>console.error('[error]',m)
 };
 
 // ===== 工具数据 =====
-const toolsData = [
-  { id: 1, name: "妙笔生花", desc: "AI 辅助的文本创作工具", icon: "edit", category: "AI", url: "https://ckacka.github.io/tools/mbsh.html" },
-  { id: 2, name: "菜谱助手", desc: "智能菜谱生成与查询", icon: "file", category: "AI", url: "https://ckacka.github.io/tools/aifood.html" },
-  { id: 3, name: "树洞应用市场", desc: "一个万能口袋", icon: "shop", category: "应用市场", url: "https://ckacka.github.io/appmarket.html" },
-  { id: 4, name: "二维码生成器", desc: "快速生成二维码", icon: "qrcode", category: "二维码", url: "https://ckacka.github.io/tools/qrcode.html" },
-  { id: 5, name: "商务候车区查询", desc: "查询铁路商务候车区", icon: "location", category: "铁路", url: "https://ckacka.github.io/tools/railwayswz.html" },
-  { id: 6, name: "铁路温馨服务", desc: "铁路相关服务查询", icon: "flag", category: "铁路", url: "https://ckacka.github.io/tools/railwaywxfw.html" },
-  { id: 7, name: "树洞便签", desc: "清爽的记事便签", icon: "file", category: "文字", url: "https://ckacka.github.io/tools/sdnote.html" },
-  { id: 8, name: "随机生词", desc: "随机生成词汇", icon: "swap", category: "文字", url: "https://ckacka.github.io/tools/sjsc.html" },
-  { id: 9, name: "南苑台配", desc: "音视频播放与服务", icon: "video", category: "音视频", url: "https://ckacka.github.io/tools/southparktw.html" },
-  { id: 10, name: "数字电视", desc: "在线数字电视与广播", icon: "tv", category: "音视频", url: "https://ckacka.github.io/tools/tvradio.html" },
-  { id: 11, name: "视频播放器", desc: "在线视频播放", icon: "play", category: "音视频", url: "https://ckacka.github.io/tools/videoplayer.html" },
-  { id: 12, name: "免费小说王", desc: "免费小说王", icon: "book", category: "小说", url: "https://ckacka.github.io/tools/freebooks.html" },
-  { id: 13, name: "树洞翻译", desc: "让语言不再是沟通的壁垒", icon: "translate", category: "翻译", url: "https://ckacka.github.io/tools/translate.html" },
-  { id: 14, name: "树洞翻译急救包", desc: "出国翻译急救包", icon: "help-circle", category: "翻译", url: "https://ckacka.github.io/tools/tsos.html" },
-  { id: 15, name: "树洞短视频", desc: "这里有一些好「康」的～", icon: "play-circle", category: "音视频", url: "https://ckacka.github.io/tools/shortvideo.html" },
-  { id: 16, name: "树洞天气助手", desc: "冷暖先知", icon: "cloud", category: "天气", url: "https://ckacka.github.io/tools/weather.html" },
-  { id: 17, name: "复古相机", desc: "复古3GS相机", icon: "camera", category: "相机", url: "https://ckacka.github.io/tools/oldcamera.html" },
-  { id: 18, name: "隐秘的档案", desc: "休闲小游戏", icon: "gamepad", category: "游戏", url: "https://ckacka.github.io/games/ymdda.html" },
-  { id: 19, name: "宇宙生日映像", desc: "查看你出生那晚的星空", icon: "star", category: "查询", url: "https://ckacka.github.io/tools/universebirthday.html" },
-  { id: 20, name: "宝贝回家", desc: "寻找走失儿童", icon: "heart", category: "公益", url: "https://ckacka.github.io/tools/babycomehome.html" },
-  { id: 21, name: "屏幕尺子", desc: "精准测量物体尺寸", icon: "fullscreen", category: "测量", url: "https://ckacka.github.io/tools/ruler.html" },
-  { id: 22, name: "Aunt's call", desc: "おばさんからの電話", icon: "help-circle", category: "未分类", url: "https://ckacka.github.io/tools/egg/call.html" }
+const toolsData=[
+{id:1,name:"妙笔生花",desc:"AI 辅助的文本创作工具",icon:"edit",category:"AI",url:"https://ckacka.github.io/tools/mbsh.html"},
+{id:2,name:"菜谱助手",desc:"智能菜谱生成与查询",icon:"file",category:"AI",url:"https://ckacka.github.io/tools/aifood.html"},
+{id:3,name:"树洞应用市场",desc:"一个万能口袋",icon:"shop",category:"应用市场",url:"https://ckacka.github.io/appmarket.html"},
+{id:4,name:"二维码生成器",desc:"快速生成二维码",icon:"qrcode",category:"二维码",url:"https://ckacka.github.io/tools/qrcode.html"},
+{id:5,name:"商务候车区查询",desc:"查询铁路商务候车区",icon:"location",category:"铁路",url:"https://ckacka.github.io/tools/railwayswz.html"},
+{id:6,name:"铁路温馨服务",desc:"铁路相关服务查询",icon:"flag",category:"铁路",url:"https://ckacka.github.io/tools/railwaywxfw.html"},
+{id:7,name:"树洞便签",desc:"清爽的记事便签",icon:"file",category:"文字",url:"https://ckacka.github.io/tools/sdnote.html"},
+{id:8,name:"随机生词",desc:"随机生成词汇",icon:"swap",category:"文字",url:"https://ckacka.github.io/tools/sjsc.html"},
+{id:9,name:"南苑台配",desc:"音视频播放与服务",icon:"video",category:"音视频",url:"https://ckacka.github.io/tools/southparktw.html"},
+{id:10,name:"数字电视",desc:"在线数字电视与广播",icon:"tv",category:"音视频",url:"https://ckacka.github.io/tools/tvradio.html"},
+{id:11,name:"视频播放器",desc:"在线视频播放",icon:"play",category:"音视频",url:"https://ckacka.github.io/tools/videoplayer.html"},
+{id:12,name:"免费小说王",desc:"免费小说王",icon:"book",category:"小说",url:"https://ckacka.github.io/tools/freebooks.html"},
+{id:13,name:"树洞翻译",desc:"让语言不再是沟通的壁垒",icon:"translate",category:"翻译",url:"https://ckacka.github.io/tools/translate.html"},
+{id:14,name:"树洞翻译急救包",desc:"出国翻译急救包",icon:"help-circle",category:"翻译",url:"https://ckacka.github.io/tools/tsos.html"},
+{id:15,name:"树洞短视频",desc:"这里有一些好「康」的～",icon:"play-circle",category:"音视频",url:"https://ckacka.github.io/tools/shortvideo.html"},
+{id:16,name:"树洞天气助手",desc:"冷暖先知",icon:"cloud",category:"天气",url:"https://ckacka.github.io/tools/weather.html"},
+{id:17,name:"复古相机",desc:"复古3GS相机",icon:"camera",category:"相机",url:"https://ckacka.github.io/tools/oldcamera.html"},
+{id:18,name:"隐秘的档案",desc:"休闲小游戏",icon:"gamepad",category:"游戏",url:"https://ckacka.github.io/games/ymdda.html"},
+{id:19,name:"宇宙生日映像",desc:"查看你出生那晚的星空",icon:"star",category:"查询",url:"https://ckacka.github.io/tools/universebirthday.html"},
+{id:20,name:"宝贝回家",desc:"寻找走失儿童",icon:"heart",category:"公益",url:"https://ckacka.github.io/tools/babycomehome.html"},
+{id:21,name:"屏幕尺子",desc:"精准测量物体尺寸",icon:"fullscreen",category:"测量",url:"https://ckacka.github.io/tools/ruler.html"},
+{id:22,name:"Aunt's call",desc:"おばさんからの電話",icon:"help-circle",category:"未分类",url:"https://ckacka.github.io/tools/egg/call.html"}
 ];
 
 // ===== 默认发现卡片 =====
-const defaultCards = [
-  { id: 101, title: "计算器", url: "https://tool.browser.qq.com/calculator?addressbar=hide&callfrom=gongjuxiang", icon: "app", expanded: false },
-  { id: 102, title: "今日快讯", url: "https://mb.yidianzixun.com/channel/Qoh9nRIW0gl%20ZrDkZU5T8Q?s=mb&appid=mibrowser&articletype%20=1&mibusinessld=miuibrowser&env=production", icon: "file", expanded: false },
-  { id: 103, title: "每天认识一种文物", url: "https://ysxwyzl.4dage.com/4dwall/index.html", icon: "flag", expanded: false }
+const defaultCards=[
+{id:101,title:"计算器",url:"https://tool.browser.qq.com/calculator?addressbar=hide&callfrom=gongjuxiang",icon:"app",expanded:false},
+{id:102,title:"今日快讯",url:"https://mb.yidianzixun.com/channel/Qoh9nRIW0gl%20ZrDkZU5T8Q?s=mb&appid=mibrowser&articletype%20=1&mibusinessld=miuibrowser&env=production",icon:"file",expanded:false},
+{id:103,title:"每天认识一种文物",url:"https://ysxwyzl.4dage.com/4dwall/index.html",icon:"flag",expanded:false}
 ];
 
-// ===== localStorage 安全读写 =====
-const safeGetArray = (key, fallback) => {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    const val = JSON.parse(raw);
-    return Array.isArray(val) ? val : fallback;
-  } catch (e) {
-    console.warn(`localStorage[${key}] 解析失败，已使用默认值`, e);
+// ===== 本地存储安全读写 =====
+const safeGetArray=(key,fallback)=>{
+  try{
+    const raw=localStorage.getItem(key);
+    if(!raw)return fallback;
+    const val=JSON.parse(raw);
+    return Array.isArray(val)?val:fallback;
+  }catch(e){
+    console.warn(`localStorage[${key}] 解析失败`,e);
     return fallback;
   }
 };
+const safeSet=(key,val)=>{
+  try{localStorage.setItem(key,val)}
+  catch(e){console.warn(`localStorage[${key}] 写入失败`,e)}
+};
 
-const safeSet = (key, val) => {
-  try {
-    localStorage.setItem(key, val);
-  } catch (e) {
-    console.warn(`localStorage[${key}] 写入失败`, e);
+// ===== 用户 UID =====
+const getUserUID=()=>{
+  try{
+    let uid=localStorage.getItem('userUID');
+    if(!uid||!/^\d{9}$/.test(uid)){
+      uid=String(Math.floor(100000000+Math.random()*900000000));
+      localStorage.setItem('userUID',uid);
+    }
+    return uid;
+  }catch(e){
+    return String(Math.floor(100000000+Math.random()*900000000));
   }
 };
 
-// ===== 生成并保存 9 位 UID =====
-const getUserUID = () => {
-  try {
-    let uid = localStorage.getItem('userUID');
+const app=createApp({
+setup(){
+  // 基础状态
+  const currentPage=ref('home');
+  const filterCategory=ref('全部');
+  const searchText=ref('');
+  const favoriteSearchText=ref('');
+  const iframeStatus=ref({});
+  const iframeTimers={};
+  const scrolled=ref(false);
+  const showBackTop=ref(false);
+  const currentYear=new Date().getFullYear();
+  const userUID=ref(getUserUID());
 
-    // 已有 UID 且格式正确时直接使用
-    if (uid && /^\d{9}$/.test(uid)) {
-      return uid;
+  // 主题
+  const isDark=ref(false);
+
+  // Drawer
+  const isWide=ref(window.innerWidth>=1024);
+  const drawerVisible=ref(isWide.value);
+
+  // 收藏与发现卡片
+  const favorites=ref(safeGetArray('favs',[]));
+  const discoverCards=ref(safeGetArray('cards',JSON.parse(JSON.stringify(defaultCards))));
+  const expandedCards=ref(discoverCards.value.filter(c=>c.expanded).map(c=>c.id));
+
+  // 弹窗
+  const settingsVisible=ref(false);
+  const settingsTab=ref('add');
+  const deleteVisible=ref(false);
+  const aboutVisible=ref(false);
+  const easterVisible=ref(false);
+  const pwaVisible=ref(false);
+
+  const pendingDeleteId=ref(null);
+  const form=ref({id:null,title:'',url:'',icon:''});
+
+  // 彩蛋
+  const eggCount=ref(0);
+  let eggLastClickTime=0;
+  let eggTimer=null;
+
+  // PWA
+  const isPwaInstalled=ref(false);
+  const isIos=ref(false);
+  let deferredPrompt=null;
+  const pwaConfig=ref({title:'安装应用',desc:'',icon:'download',cancelText:'取消',install:false});
+
+  // 计算属性
+  const categories=computed(()=>['全部',...new Set(toolsData.map(t=>t.category))]);
+
+  const filteredTools=computed(()=>{
+    const kw=searchText.value.toLowerCase().trim();
+    return toolsData.filter(t=>{
+      const matchCat=filterCategory.value==='全部'||t.category===filterCategory.value;
+      const matchText=!kw||t.name.toLowerCase().includes(kw)||t.desc.toLowerCase().includes(kw);
+      return matchCat&&matchText;
+    });
+  });
+
+  const favoriteTools=computed(()=>{
+    const kw=favoriteSearchText.value.toLowerCase().trim();
+    return toolsData.filter(t=>favorites.value.includes(t.id))
+      .filter(t=>!kw||t.name.toLowerCase().includes(kw)||t.desc.toLowerCase().includes(kw));
+  });
+
+  // 持久化
+  const saveState=()=>{
+    safeSet('favs',JSON.stringify(favorites.value));
+    safeSet('cards',JSON.stringify(discoverCards.value));
+  };
+  watch(favorites,saveState,{deep:true});
+  watch(discoverCards,saveState,{deep:true});
+
+  // iframe 状态
+  const clearIframeTimers=()=>{
+    Object.keys(iframeTimers).forEach(k=>{
+      clearTimeout(iframeTimers[k]);
+      delete iframeTimers[k];
+    });
+  };
+
+  const startIframeTimeout=id=>{
+    if(iframeTimers[id])clearTimeout(iframeTimers[id]);
+    iframeStatus.value[id]='loading';
+    iframeTimers[id]=setTimeout(()=>{
+      if(iframeStatus.value[id]!=='loaded')iframeStatus.value[id]='error';
+      delete iframeTimers[id];
+    },8000);
+  };
+
+  const onIframeLoad=id=>{
+    if(iframeTimers[id]){
+      clearTimeout(iframeTimers[id]);
+      delete iframeTimers[id];
+    }
+    iframeStatus.value[id]='loaded';
+  };
+
+  watch(expandedCards,ids=>{
+    discoverCards.value.forEach(c=>{c.expanded=ids.includes(c.id)});
+    Object.keys(iframeStatus.value).forEach(k=>{
+      if(!ids.includes(Number(k))){
+        delete iframeStatus.value[k];
+        if(iframeTimers[k]){
+          clearTimeout(iframeTimers[k]);
+          delete iframeTimers[k];
+        }
+      }
+    });
+    ids.forEach(id=>{
+      if(iframeStatus.value[id]!=='loaded'&&iframeStatus.value[id]!=='loading'){
+        startIframeTimeout(id);
+      }
+    });
+  },{deep:true});
+
+  // 收藏
+  const toggleFav=id=>{
+    const i=favorites.value.indexOf(id);
+    if(i>-1)favorites.value.splice(i,1);
+    else favorites.value.push(id);
+  };
+
+  // 打开工具
+  const openTool=tool=>{
+    if(tool.url)window.open(tool.url,'_blank','noopener');
+    else MessagePlugin.warning(`工具 ${tool.name} 缺少链接信息。`);
+  };
+
+  // 页面切换
+  const switchPage=page=>{
+    if(page!=='discover'){
+      iframeStatus.value={};
+      clearIframeTimers();
+    }else{
+      expandedCards.value.forEach(id=>{
+        if(iframeStatus.value[id]!=='loaded')startIframeTimeout(id);
+      });
+    }
+    currentPage.value=page;
+    window.scrollTo(0,0);
+  };
+
+  // 返回顶部
+  const scrollTop=()=>window.scrollTo({top:0,behavior:'smooth'});
+
+  // 主题
+  const applyTheme=theme=>{
+    if(theme==='dark')document.documentElement.setAttribute('theme-mode','dark');
+    else document.documentElement.removeAttribute('theme-mode');
+  };
+
+  const onThemeChange=value=>{
+    const theme=value?'dark':'light';
+    applyTheme(theme);
+    try{localStorage.setItem('theme',theme)}catch(e){}
+  };
+
+  // 卡片管理
+  const openSettings=()=>{
+    settingsVisible.value=true;
+    settingsTab.value='add';
+    resetForm();
+  };
+
+  const resetForm=()=>{form.value={id:null,title:'',url:'',icon:''}};
+
+  const saveCard=()=>{
+    const {id,title,url,icon}=form.value;
+    const t=(title||'').trim();
+    const u=(url||'').trim();
+    const ic=(icon||'').trim()||'app';
+
+    if(!t||!u){
+      MessagePlugin.warning('请输入标题和链接');
+      return;
     }
 
-    // 没有 UID 或格式不正确时重新生成
-    uid = String(Math.floor(100000000 + Math.random() * 900000000));
-    localStorage.setItem('userUID', uid);
+    if(id){
+      const idx=discoverCards.value.findIndex(c=>c.id===id);
+      if(idx>-1)discoverCards.value[idx]={...discoverCards.value[idx],title:t,url:u,icon:ic};
+    }else{
+      discoverCards.value.push({id:Date.now(),title:t,url:u,icon:ic,expanded:false});
+    }
 
-    return uid;
-  } catch (e) {
-    // 浏览器禁止本地存储时的备用方案
-    return String(Math.floor(100000000 + Math.random() * 900000000));
-  }
-};
+    MessagePlugin.success('保存成功');
+    resetForm();
+    settingsTab.value='manage';
+  };
 
-const app = createApp({
-  setup() {
-    // ===== 基础状态 =====
-    const currentPage = ref('home');
-    const filterCategory = ref('全部');
-    const searchText = ref('');
-    const favoriteSearchText = ref('');
-    const iframeStatus = ref({});
-    const iframeTimers = {};
-    const scrolled = ref(false);
-    const showBackTop = ref(false);
-    const currentYear = new Date().getFullYear();
+  const editCard=id=>{
+    const c=discoverCards.value.find(x=>x.id===id);
+    if(!c)return;
+    form.value={id:c.id,title:c.title,url:c.url,icon:c.icon};
+    settingsTab.value='add';
+  };
 
-    // ===== 用户 UID =====
-    const userUID = ref(getUserUID());
+  const askDelete=id=>{
+    pendingDeleteId.value=id;
+    deleteVisible.value=true;
+  };
 
-    // ===== 主题 =====
-    const isDark = ref(false);
+  const confirmDelete=()=>{
+    if(pendingDeleteId.value==null)return;
+    const id=pendingDeleteId.value;
+    discoverCards.value=discoverCards.value.filter(c=>c.id!==id);
+    expandedCards.value=expandedCards.value.filter(x=>x!==id);
+    delete iframeStatus.value[id];
+    if(iframeTimers[id]){
+      clearTimeout(iframeTimers[id]);
+      delete iframeTimers[id];
+    }
+    pendingDeleteId.value=null;
+    deleteVisible.value=false;
+    MessagePlugin.success('已删除');
+  };
 
-    // ===== 响应式 / Drawer =====
-    const isWide = ref(window.innerWidth >= 1024);
-    const drawerVisible = ref(isWide.value);
+  const moveCard=(index,dir)=>{
+    const arr=[...discoverCards.value];
+    const target=index+dir;
+    if(target<0||target>=arr.length)return;
+    expandedCards.value=[];
+    [arr[index],arr[target]]=[arr[target],arr[index]];
+    discoverCards.value=arr;
+  };
 
-    // ===== 收藏 & 发现卡片 =====
-    const favorites = ref(safeGetArray('favs', []));
-    const discoverCards = ref(safeGetArray('cards', JSON.parse(JSON.stringify(defaultCards))));
-    const expandedCards = ref(discoverCards.value.filter(c => c.expanded).map(c => c.id));
+  const openExternal=url=>window.open(url,'_blank','noopener');
 
-    // ===== 弹窗 =====
-    const settingsVisible = ref(false);
-    const settingsTab = ref('add');
-    const deleteVisible = ref(false);
-    const aboutVisible = ref(false);
-    const easterVisible = ref(false);
-    const pwaVisible = ref(false);
+  // 关于
+  const openAbout=()=>{
+    aboutVisible.value=true;
+    if(!isWide.value)drawerVisible.value=false;
+  };
 
-    // ===== 删除确认 =====
-    const pendingDeleteId = ref(null);
+  // 彩蛋
+  const onAvatarClick=()=>{
+    const now=Date.now();
+    if(now-eggLastClickTime>3000)eggCount.value=0;
+    eggCount.value++;
+    eggLastClickTime=now;
+    if(eggTimer)clearTimeout(eggTimer);
+    eggTimer=setTimeout(()=>{eggCount.value=0},3000);
+    if(eggCount.value>=10){
+      easterVisible.value=true;
+      eggCount.value=0;
+    }
+  };
 
-    // ===== 表单 =====
-    const form = ref({ id: null, title: '', url: '', icon: '' });
+  // PWA 安装
+  const showInstallDialog=()=>{
+    if(!isWide.value)drawerVisible.value=false;
 
-    // ===== 彩蛋（仅内存，不持久化） =====
-    const eggCount = ref(0);
-    let eggLastClickTime = 0;
-    let eggTimer = null;
+    if(isIos.value){
+      pwaConfig.value={
+        title:'安装到主屏幕',
+        icon:'share',
+        desc:'1. 点击浏览器底部或顶部的分享按钮<br>2. 在弹出菜单中选择 <strong>"添加到主屏幕"</strong>',
+        cancelText:'知道了',
+        install:false
+      };
+    }else if(deferredPrompt){
+      pwaConfig.value={
+        title:'安装应用',
+        icon:'download',
+        desc:'将树洞工具箱安装到您的设备，获得更快捷的访问体验。',
+        cancelText:'取消',
+        install:true
+      };
+    }else{
+      pwaConfig.value={
+        title:'提示',
+        icon:'info-circle',
+        desc:'您的浏览器暂不支持快速安装，可以尝试使用浏览器菜单中的“添加到主屏幕”功能。',
+        cancelText:'知道了',
+        install:false
+      };
+    }
+    pwaVisible.value=true;
+  };
 
-    // ===== PWA =====
-    const isPwaInstalled = ref(false);
-    const isIos = ref(false);
-    let deferredPrompt = null;
-    const pwaConfig = ref({
-      title: '安装应用',
-      desc: '',
-      icon: 'download',
-      cancelText: '取消',
-      install: false
+  const doInstall=()=>{
+    if(!deferredPrompt){
+      pwaVisible.value=false;
+      return;
+    }
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(res=>{
+      if(res.outcome==='accepted')isPwaInstalled.value=true;
+      deferredPrompt=null;
+      pwaVisible.value=false;
+    });
+  };
+
+  // 生命周期
+  onMounted(()=>{
+    // 初始化主题
+    const savedTheme=localStorage.getItem('theme');
+    if(savedTheme){
+      isDark.value=savedTheme==='dark';
+      applyTheme(savedTheme);
+    }else{
+      const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+      isDark.value=prefersDark;
+      applyTheme(prefersDark?'dark':'light');
+    }
+
+    // 跟随系统主题
+    const mq=window.matchMedia('(prefers-color-scheme: dark)');
+    const onMqChange=e=>{
+      if(!localStorage.getItem('theme')){
+        isDark.value=e.matches;
+        applyTheme(e.matches?'dark':'light');
+      }
+    };
+    if(mq.addEventListener)mq.addEventListener('change',onMqChange);
+    else if(mq.addListener)mq.addListener(onMqChange);
+
+    // PWA 状态
+    isIos.value=/iPad|iPhone|iPod/.test(navigator.userAgent)||
+      (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+
+    isPwaInstalled.value=window.matchMedia('(display-mode: standalone)').matches||
+      window.navigator.standalone===true;
+
+    window.addEventListener('beforeinstallprompt',e=>{
+      e.preventDefault();
+      deferredPrompt=e;
     });
 
-    // ===== 计算属性 =====
-    const categories = computed(() => ['全部', ...new Set(toolsData.map(t => t.category))]);
-
-    const filteredTools = computed(() => {
-      const kw = searchText.value.toLowerCase().trim();
-      return toolsData.filter(t => {
-        const matchCat = filterCategory.value === '全部' || t.category === filterCategory.value;
-        const matchText = !kw || t.name.toLowerCase().includes(kw) || t.desc.toLowerCase().includes(kw);
-        return matchCat && matchText;
-      });
+    window.addEventListener('appinstalled',()=>{
+      isPwaInstalled.value=true;
+      deferredPrompt=null;
     });
 
-    const favoriteTools = computed(() => {
-      const kw = favoriteSearchText.value.toLowerCase().trim();
-      return toolsData
-        .filter(t => favorites.value.includes(t.id))
-        .filter(t => !kw || t.name.toLowerCase().includes(kw) || t.desc.toLowerCase().includes(kw));
-    });
-
-    // ===== 持久化 =====
-    const saveState = () => {
-      safeSet('favs', JSON.stringify(favorites.value));
-      safeSet('cards', JSON.stringify(discoverCards.value));
+    // 滚动监听
+    const onScroll=()=>{
+      scrolled.value=window.scrollY>10;
+      showBackTop.value=window.scrollY>300;
     };
+    window.addEventListener('scroll',onScroll,{passive:true});
+    onScroll();
 
-    watch(favorites, saveState, { deep: true });
-    watch(discoverCards, saveState, { deep: true });
-
-    // ===== iframe 状态管理 =====
-    const clearIframeTimers = () => {
-      Object.keys(iframeTimers).forEach(k => {
-        clearTimeout(iframeTimers[k]);
-        delete iframeTimers[k];
-      });
+    // 大屏 / 小屏切换
+    const wideMq=window.matchMedia('(min-width: 1024px)');
+    const onWideChange=e=>{
+      isWide.value=e.matches;
+      drawerVisible.value=e.matches;
     };
-
-    const startIframeTimeout = (id) => {
-      if (iframeTimers[id]) clearTimeout(iframeTimers[id]);
-
-      iframeStatus.value[id] = 'loading';
-
-      iframeTimers[id] = setTimeout(() => {
-        if (iframeStatus.value[id] !== 'loaded') {
-          iframeStatus.value[id] = 'error';
-        }
-        delete iframeTimers[id];
-      }, 8000);
-    };
-
-    const onIframeLoad = (id) => {
-      if (iframeTimers[id]) {
-        clearTimeout(iframeTimers[id]);
-        delete iframeTimers[id];
-      }
-      iframeStatus.value[id] = 'loaded';
-    };
-
-    // 展开状态同步 + iframe 状态维护
-    watch(expandedCards, (ids) => {
-      discoverCards.value.forEach(c => {
-        c.expanded = ids.includes(c.id);
-      });
-
-      // 清理已收起的 iframe 状态与计时器
-      Object.keys(iframeStatus.value).forEach(k => {
-        if (!ids.includes(Number(k))) {
-          delete iframeStatus.value[k];
-
-          if (iframeTimers[k]) {
-            clearTimeout(iframeTimers[k]);
-            delete iframeTimers[k];
-          }
-        }
-      });
-
-      // 为新展开的启动超时兜底
-      ids.forEach(id => {
-        if (iframeStatus.value[id] !== 'loaded' && iframeStatus.value[id] !== 'loading') {
-          startIframeTimeout(id);
-        }
-      });
-    }, { deep: true });
-
-    // ===== 收藏 =====
-    const toggleFav = (id) => {
-      const i = favorites.value.indexOf(id);
-
-      if (i > -1) {
-        favorites.value.splice(i, 1);
-      } else {
-        favorites.value.push(id);
-      }
-    };
-
-    // ===== 打开工具 =====
-    const openTool = (tool) => {
-      if (tool.url) {
-        window.open(tool.url, '_blank', 'noopener');
-      } else {
-        MessagePlugin.warning(`工具 ${tool.name} 缺少链接信息。`);
-      }
-    };
-
-    // ===== 页面切换 =====
-    const switchPage = (page) => {
-      if (page !== 'discover') {
-        iframeStatus.value = {};
-        clearIframeTimers();
-      } else {
-        expandedCards.value.forEach(id => {
-          if (iframeStatus.value[id] !== 'loaded') {
-            startIframeTimeout(id);
-          }
-        });
-      }
-
-      currentPage.value = page;
-      window.scrollTo(0, 0);
-    };
-
-    // ===== 返回顶部 =====
-    const scrollTop = () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // ===== 主题 =====
-    const applyTheme = (theme) => {
-      if (theme === 'dark') {
-        document.documentElement.setAttribute('theme-mode', 'dark');
-      } else {
-        document.documentElement.removeAttribute('theme-mode');
-      }
-    };
-
-    const onThemeChange = (value) => {
-      const theme = value ? 'dark' : 'light';
-      applyTheme(theme);
-
-      try {
-        localStorage.setItem('theme', theme);
-      } catch (e) {
-        // ignore
-      }
-    };
-
-    // ===== 卡片管理 =====
-    const openSettings = () => {
-      settingsVisible.value = true;
-      settingsTab.value = 'add';
-      resetForm();
-    };
-
-    const resetForm = () => {
-      form.value = { id: null, title: '', url: '', icon: '' };
-    };
-
-    const saveCard = () => {
-      const { id, title, url, icon } = form.value;
-      const t = (title || '').trim();
-      const u = (url || '').trim();
-      const ic = (icon || '').trim() || 'app';
-
-      if (!t || !u) {
-        MessagePlugin.warning('请输入标题和链接');
-        return;
-      }
-
-      if (id) {
-        const idx = discoverCards.value.findIndex(c => c.id === id);
-
-        if (idx > -1) {
-          discoverCards.value[idx] = {
-            ...discoverCards.value[idx],
-            title: t,
-            url: u,
-            icon: ic
-          };
-        }
-      } else {
-        discoverCards.value.push({
-          id: Date.now(),
-          title: t,
-          url: u,
-          icon: ic,
-          expanded: false
-        });
-      }
-
-      MessagePlugin.success('保存成功');
-      resetForm();
-      settingsTab.value = 'manage';
-    };
-
-    const editCard = (id) => {
-      const c = discoverCards.value.find(x => x.id === id);
-      if (!c) return;
-
-      form.value = {
-        id: c.id,
-        title: c.title,
-        url: c.url,
-        icon: c.icon
-      };
-
-      settingsTab.value = 'add';
-    };
-
-    const askDelete = (id) => {
-      pendingDeleteId.value = id;
-      deleteVisible.value = true;
-    };
-
-    const confirmDelete = () => {
-      if (pendingDeleteId.value == null) return;
-
-      const id = pendingDeleteId.value;
-
-      discoverCards.value = discoverCards.value.filter(c => c.id !== id);
-      expandedCards.value = expandedCards.value.filter(x => x !== id);
-
-      delete iframeStatus.value[id];
-
-      if (iframeTimers[id]) {
-        clearTimeout(iframeTimers[id]);
-        delete iframeTimers[id];
-      }
-
-      pendingDeleteId.value = null;
-      deleteVisible.value = false;
-
-      MessagePlugin.success('已删除');
-    };
-
-    // 排序时先收起所有面板，避免 iframe DOM 移动导致重新加载
-    const moveCard = (index, dir) => {
-      const arr = [...discoverCards.value];
-      const target = index + dir;
-
-      if (target < 0 || target >= arr.length) return;
-
-      expandedCards.value = [];
-
-      [arr[index], arr[target]] = [arr[target], arr[index]];
-      discoverCards.value = arr;
-    };
-
-    const openExternal = (url) => {
-      window.open(url, '_blank', 'noopener');
-    };
-
-    // ===== 关于 =====
-    const openAbout = () => {
-      aboutVisible.value = true;
-
-      if (!isWide.value) {
-        drawerVisible.value = false;
-      }
-    };
-
-    // ===== 彩蛋：3 秒内点击头像 10 次 =====
-    const onAvatarClick = () => {
-      const now = Date.now();
-
-      if (now - eggLastClickTime > 3000) {
-        eggCount.value = 0;
-      }
-
-      eggCount.value++;
-      eggLastClickTime = now;
-
-      if (eggTimer) {
-        clearTimeout(eggTimer);
-      }
-
-      eggTimer = setTimeout(() => {
-        eggCount.value = 0;
-      }, 3000);
-
-      if (eggCount.value >= 10) {
-        easterVisible.value = true;
-        eggCount.value = 0;
-      }
-    };
-
-    // ===== PWA =====
-    const showInstallDialog = () => {
-      if (!isWide.value) {
-        drawerVisible.value = false;
-      }
-
-      if (isIos.value) {
-        pwaConfig.value = {
-          title: '安装到主屏幕',
-          icon: 'share',
-          desc: '1. 点击浏览器底部或顶部的分享按钮<br>2. 在弹出菜单中选择 <strong>"添加到主屏幕"</strong>',
-          cancelText: '知道了',
-          install: false
-        };
-      } else if (deferredPrompt) {
-        pwaConfig.value = {
-          title: '安装应用',
-          icon: 'download',
-          desc: '将树洞工具箱安装到您的设备，获得更快捷的访问体验。',
-          cancelText: '取消',
-          install: true
-        };
-      } else {
-        pwaConfig.value = {
-          title: '提示',
-          icon: 'info-circle',
-          desc: '您的浏览器不支持快速安装，您可以尝试使用浏览器菜单中的"添加到主屏幕"功能。',
-          cancelText: '知道了',
-          install: false
-        };
-      }
-
-      pwaVisible.value = true;
-    };
-
-    const doInstall = () => {
-      if (!deferredPrompt) {
-        pwaVisible.value = false;
-        return;
-      }
-
-      deferredPrompt.prompt();
-
-      deferredPrompt.userChoice.then((res) => {
-        if (res.outcome === 'accepted') {
-          isPwaInstalled.value = true;
-        }
-
-        deferredPrompt = null;
-        pwaVisible.value = false;
-      });
-    };
-
-    // ===== 生命周期 =====
-    onMounted(() => {
-      // 主题初始化
-      const savedTheme = localStorage.getItem('theme');
-
-      if (savedTheme) {
-        isDark.value = savedTheme === 'dark';
-        applyTheme(savedTheme);
-      } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        isDark.value = prefersDark;
-        applyTheme(prefersDark ? 'dark' : 'light');
-      }
-
-      // 系统主题跟随（用户未手动设置时）
-      const mq = window.matchMedia('(prefers-color-scheme: dark)');
-
-      const onMqChange = (e) => {
-        if (!localStorage.getItem('theme')) {
-          isDark.value = e.matches;
-          applyTheme(e.matches ? 'dark' : 'light');
-        }
-      };
-
-      if (mq.addEventListener) {
-        mq.addEventListener('change', onMqChange);
-      } else if (mq.addListener) {
-        mq.addListener(onMqChange);
-      }
-
-      // PWA 状态
-      isIos.value = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-      isPwaInstalled.value = window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true;
-
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-      });
-
-      window.addEventListener('appinstalled', () => {
-        isPwaInstalled.value = true;
-        deferredPrompt = null;
-      });
-
-      // 滚动监听
-      const onScroll = () => {
-        scrolled.value = window.scrollY > 10;
-        showBackTop.value = window.scrollY > 300;
-      };
-
-      window.addEventListener('scroll', onScroll, { passive: true });
-      onScroll();
-
-      // 大屏 / 小屏切换
-      const wideMq = window.matchMedia('(min-width: 1024px)');
-
-      const onWideChange = (e) => {
-        isWide.value = e.matches;
-        drawerVisible.value = e.matches;
-      };
-
-      if (wideMq.addEventListener) {
-        wideMq.addEventListener('change', onWideChange);
-      } else if (wideMq.addListener) {
-        wideMq.addListener(onWideChange);
-      }
-    });
-
-    return {
-      // 状态
-      currentPage,
-      filterCategory,
-      searchText,
-      favoriteSearchText,
-      expandedCards,
-      iframeStatus,
-      scrolled,
-      showBackTop,
-      currentYear,
-      userUID,
-
-      isDark,
-      isWide,
-      drawerVisible,
-
-      favorites,
-      discoverCards,
-
-      settingsVisible,
-      settingsTab,
-      deleteVisible,
-      aboutVisible,
-      easterVisible,
-      pwaVisible,
-
-      form,
-      eggCount,
-
-      isPwaInstalled,
-      pwaConfig,
-
-      // 计算
-      categories,
-      filteredTools,
-      favoriteTools,
-
-      // 方法
-      toggleFav,
-      openTool,
-      switchPage,
-      scrollTop,
-      onThemeChange,
-      openSettings,
-      resetForm,
-      saveCard,
-      editCard,
-      askDelete,
-      confirmDelete,
-      moveCard,
-      openExternal,
-      openAbout,
-      onAvatarClick,
-      showInstallDialog,
-      doInstall,
-      onIframeLoad,
-
-      // 标签栏
-      tabs: [
-        { key: 'home', label: '首页', icon: 'home' },
-        { key: 'discover', label: '发现', icon: 'app' },
-        { key: 'profile', label: '我的', icon: 'user' }
-      ]
-    };
-  }
+    if(wideMq.addEventListener)wideMq.addEventListener('change',onWideChange);
+    else if(wideMq.addListener)wideMq.addListener(onWideChange);
+  });
+
+  return{
+    currentPage,filterCategory,searchText,favoriteSearchText,
+    expandedCards,iframeStatus,scrolled,showBackTop,currentYear,userUID,
+    isDark,isWide,drawerVisible,
+    favorites,discoverCards,
+    settingsVisible,settingsTab,deleteVisible,aboutVisible,
+    easterVisible,pwaVisible,
+    form,eggCount,isPwaInstalled,pwaConfig,
+    categories,filteredTools,favoriteTools,
+    toggleFav,openTool,switchPage,scrollTop,
+    onThemeChange,openSettings,resetForm,saveCard,editCard,
+    askDelete,confirmDelete,moveCard,openExternal,openAbout,
+    onAvatarClick,showInstallDialog,doInstall,onIframeLoad,
+    tabs:[
+      {key:'home',label:'首页',icon:'home'},
+      {key:'discover',label:'发现',icon:'app'},
+      {key:'profile',label:'我的',icon:'user'}
+    ]
+  };
+}
 });
 
-app.use(TDesign.default || TDesign);
+app.use(TDesign.default||TDesign);
 app.mount('#app');
 </script>
 </body>
