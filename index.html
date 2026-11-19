@@ -1,8 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
 <meta name="theme-color" content="#6750A4">
 <meta name="description" content="一个集合了常用小工具和网页应用的工具箱。">
 
@@ -10,22 +12,39 @@
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/images/icon-192.png">
 <link rel="apple-touch-icon" href="/images/icon-192.png">
+
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="树洞工具箱">
 
 <title>树洞工具箱</title>
+
 <link rel="stylesheet" href="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.css">
 
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',system-ui,sans-serif;background:var(--td-bg-color-page);color:var(--td-text-color-primary);transition:background-color .3s,color .3s;min-height:100vh}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+  background:var(--td-bg-color-page);
+  color:var(--td-text-color-primary);
+  transition:background-color .3s,color .3s;
+  min-height:100vh
+}
 #app{min-height:100vh}
 .t-dialog{max-width:92vw}
 .app-shell{min-height:100vh;display:flex;flex-direction:column;transition:margin-left .3s}
 .app-shell.shifted{margin-left:280px}
-.app-bar{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:6px;height:64px;padding:0 12px;padding-top:env(safe-area-inset-top);box-sizing:content-box;background:var(--td-bg-color-container);border-bottom:1px solid var(--td-component-stroke)}
+.app-bar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;gap:6px;
+  height:64px;padding:0 12px;
+  padding-top:env(safe-area-inset-top);
+  box-sizing:content-box;
+  background:var(--td-bg-color-container);
+  border-bottom:1px solid var(--td-component-stroke)
+}
 .app-bar.scrolled{box-shadow:0 2px 10px rgba(0,0,0,.08)}
 .app-bar-middle{flex:1;min-width:0;display:flex;align-items:center}
 .app-bar-middle .t-input{width:100%}
@@ -34,60 +53,173 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
 .container{max-width:1200px;margin:0 auto;padding:0 16px;width:100%}
 .page-wrap{flex:1;padding-bottom:calc(120px + env(safe-area-inset-bottom))}
 .section-title{font-size:18px;font-weight:600;margin:18px 0 8px}
-.empty-tip{grid-column:1/-1;text-align:center;padding:40px;color:var(--td-text-color-placeholder);font-size:14px}
-.filters-section{position:sticky;top:calc(64px + env(safe-area-inset-top));z-index:90;background:var(--td-bg-color-page);padding:6px 0}
-.category-scroll{display:flex;gap:8px;overflow-x:auto;padding:4px 0;scrollbar-width:none}
+.empty-tip{
+  grid-column:1/-1;text-align:center;padding:40px;
+  color:var(--td-text-color-placeholder);font-size:14px
+}
+.filters-section{
+  position:sticky;top:calc(64px + env(safe-area-inset-top));
+  z-index:90;background:var(--td-bg-color-page);padding:6px 0
+}
+.category-scroll{
+  display:flex;gap:8px;overflow-x:auto;padding:4px 0;
+  scrollbar-width:none
+}
 .category-scroll::-webkit-scrollbar{display:none}
-.category-chip{flex-shrink:0;padding:6px 14px;border-radius:999px;border:1px solid var(--td-component-stroke);background:var(--td-bg-color-container);color:var(--td-text-color-secondary);font-size:14px;font-family:inherit;cursor:pointer;white-space:nowrap}
-.category-chip.active{background:var(--td-brand-color);color:#fff;border-color:var(--td-brand-color)}
-.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;padding:12px 0}
-@media(min-width:600px){.tools-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}}
-.tool-card{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 12px;border-radius:16px;background:var(--td-bg-color-container);border:1px solid var(--td-component-stroke);cursor:pointer;user-select:none;transition:transform .2s,box-shadow .2s}
+.category-chip{
+  flex-shrink:0;padding:6px 14px;border-radius:999px;
+  border:1px solid var(--td-component-stroke);
+  background:var(--td-bg-color-container);
+  color:var(--td-text-color-secondary);
+  font-size:14px;font-family:inherit;cursor:pointer;white-space:nowrap
+}
+.category-chip.active{
+  background:var(--td-brand-color);color:#fff;
+  border-color:var(--td-brand-color)
+}
+.tools-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:12px;padding:12px 0
+}
+@media(min-width:600px){
+  .tools-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+}
+.tool-card{
+  position:relative;display:flex;flex-direction:column;
+  align-items:center;text-align:center;padding:20px 12px;
+  border-radius:16px;background:var(--td-bg-color-container);
+  border:1px solid var(--td-component-stroke);
+  cursor:pointer;user-select:none;
+  transition:transform .2s,box-shadow .2s
+}
 .tool-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
 .tool-card:active{transform:scale(.97)}
-.tool-icon{width:52px;height:52px;border-radius:14px;background:var(--td-brand-color-light);color:var(--td-brand-color);display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.tool-icon{
+  width:52px;height:52px;border-radius:14px;
+  background:var(--td-brand-color-light);
+  color:var(--td-brand-color);
+  display:flex;align-items:center;justify-content:center;margin-bottom:10px
+}
 .tool-name{font-size:15px;font-weight:500;margin-bottom:4px}
-.tool-desc{font-size:12px;line-height:1.4;color:var(--td-text-color-secondary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.favorite-btn{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--td-text-color-placeholder);z-index:2}
+.tool-desc{
+  font-size:12px;line-height:1.4;color:var(--td-text-color-secondary);
+  display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden
+}
+.favorite-btn{
+  position:absolute;top:6px;right:6px;width:30px;height:30px;
+  border-radius:50%;border:none;background:transparent;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--td-text-color-placeholder);z-index:2
+}
 .favorite-btn.favorited{color:var(--td-error-color)}
 .discover-wrap{padding-top:12px}
-.discover-header{display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px}
+.discover-header{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;gap:8px
+}
 .discover-title{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500}
 .webview-wrap{position:relative;width:100%;height:500px}
 .webview{width:100%;height:500px;border:none;display:block}
-.webview-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--td-bg-color-container);z-index:1}
+.webview-loading{
+  position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;background:var(--td-bg-color-container);z-index:1
+}
 .iframe-error{text-align:center;padding:16px;max-width:280px}
-.iframe-error p{margin:0 0 12px;font-size:13px;line-height:1.6;color:var(--td-text-color-secondary)}
-.capsule-bar{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:500;display:flex;gap:4px;padding:6px;border-radius:999px;background:var(--td-bg-color-container);box-shadow:0 6px 24px rgba(0,0,0,.14),0 0 0 1px var(--td-component-stroke);backdrop-filter:blur(12px)}
-.capsule-item{display:flex;align-items:center;gap:6px;padding:10px 18px;border-radius:999px;font-size:14px;font-weight:500;color:var(--td-text-color-secondary);cursor:pointer;user-select:none;transition:all .25s;white-space:nowrap}
-.capsule-item.active{background:var(--td-brand-color);color:#fff;box-shadow:0 4px 12px rgba(103,80,164,.3)}
+.iframe-error p{
+  margin:0 0 12px;font-size:13px;line-height:1.6;
+  color:var(--td-text-color-secondary)
+}
+.capsule-bar{
+  position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));
+  transform:translateX(-50%);z-index:500;display:flex;gap:4px;
+  padding:6px;border-radius:999px;background:var(--td-bg-color-container);
+  box-shadow:0 6px 24px rgba(0,0,0,.14),0 0 0 1px var(--td-component-stroke);
+  backdrop-filter:blur(12px)
+}
+.capsule-item{
+  display:flex;align-items:center;gap:6px;padding:10px 18px;
+  border-radius:999px;font-size:14px;font-weight:500;
+  color:var(--td-text-color-secondary);cursor:pointer;
+  user-select:none;transition:all .25s;white-space:nowrap
+}
+.capsule-item.active{
+  background:var(--td-brand-color);color:#fff;
+  box-shadow:0 4px 12px rgba(103,80,164,.3)
+}
 .capsule-item:not(.active):hover{background:var(--td-bg-color-container-hover)}
-@media(max-width:400px){.capsule-item{padding:9px 12px;font-size:13px;gap:4px}}
-.back-top{position:fixed;right:20px;bottom:calc(100px + env(safe-area-inset-bottom));z-index:400}
-.drawer-profile{display:flex;align-items:center;gap:14px;padding:8px 0 18px;border-bottom:1px solid var(--td-component-stroke)}
-.drawer-avatar{position:relative;width:52px;height:52px;border-radius:50%;background:var(--td-brand-color-light);color:var(--td-brand-color);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+@media(max-width:400px){
+  .capsule-item{padding:9px 12px;font-size:13px;gap:4px}
+}
+.back-top{
+  position:fixed;right:20px;
+  bottom:calc(100px + env(safe-area-inset-bottom));z-index:400
+}
+.drawer-profile{
+  display:flex;align-items:center;gap:14px;
+  padding:8px 0 18px;border-bottom:1px solid var(--td-component-stroke)
+}
+.drawer-avatar{
+  position:relative;width:52px;height:52px;border-radius:50%;
+  background:var(--td-brand-color-light);color:var(--td-brand-color);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0
+}
 .drawer-name{font-size:15px;font-weight:600}
 .drawer-version{font-size:12px;color:var(--td-text-color-secondary);margin-top:4px}
-.click-counter{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 4px;border-radius:10px;background:var(--td-brand-color);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.click-counter{
+  position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;
+  padding:0 4px;border-radius:10px;background:var(--td-brand-color);
+  color:#fff;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center
+}
 .drawer-menu{padding:8px 0}
-.drawer-menu-item{display:flex;align-items:center;gap:12px;padding:14px 4px;cursor:pointer;border-bottom:1px solid var(--td-component-stroke);color:var(--td-text-color-primary)}
+.drawer-menu-item{
+  display:flex;align-items:center;gap:12px;padding:14px 4px;
+  cursor:pointer;border-bottom:1px solid var(--td-component-stroke);
+  color:var(--td-text-color-primary)
+}
 .drawer-menu-item:last-child{border-bottom:none}
 .menu-text{flex:1;font-size:14px;font-weight:500}
 .menu-arrow{color:var(--td-text-color-placeholder)}
-.drawer-footer{text-align:center;font-size:12px;line-height:1.8;color:var(--td-text-color-placeholder);padding:8px 0}
+.drawer-footer{
+  text-align:center;font-size:12px;line-height:1.8;
+  color:var(--td-text-color-placeholder);padding:8px 0
+}
 .drawer-footer-sub{font-size:11px;opacity:.8;word-break:break-all}
-.manage-item{display:flex;align-items:center;gap:6px;padding:10px 4px;border-bottom:1px solid var(--td-component-stroke)}
+.manage-item{
+  display:flex;align-items:center;gap:6px;
+  padding:10px 4px;border-bottom:1px solid var(--td-component-stroke)
+}
 .manage-item:last-child{border-bottom:none}
 .order-btns{display:flex;flex-direction:column}
 .manage-info{flex:1;min-width:0}
-.manage-title{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.manage-url{font-size:11px;color:var(--td-text-color-placeholder);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.manage-title{
+  font-size:14px;font-weight:500;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis
+}
+.manage-url{
+  font-size:11px;color:var(--td-text-color-placeholder);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px
+}
 .form-item{margin-bottom:14px}
-.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--td-text-color-secondary)}
-.easter-iframe{width:100%;height:250px;border:none;display:block;border-radius:8px;background:#fff}
+.form-label{
+  display:block;font-size:13px;font-weight:500;
+  margin-bottom:6px;color:var(--td-text-color-secondary)
+}
+.easter-iframe{
+  width:100%;height:250px;border:none;display:block;
+  border-radius:8px;background:#fff
+}
 .pwa-icon{display:flex;justify-content:center;margin-bottom:12px;color:var(--td-brand-color)}
 .pwa-desc{font-size:14px;line-height:1.7;color:var(--td-text-color-secondary)}
-@media(max-width:576px){.app-bar-title{font-size:17px}.tool-card{padding:16px 10px}.tool-icon{width:46px;height:46px;border-radius:12px}.tool-name{font-size:14px}.webview-wrap,.webview{height:420px}}
+@media(max-width:576px){
+  .app-bar-title{font-size:17px}
+  .tool-card{padding:16px 10px}
+  .tool-icon{width:46px;height:46px;border-radius:12px}
+  .tool-name{font-size:14px}
+  .webview-wrap,.webview{height:420px}
+}
 </style>
 </head>
 
@@ -220,6 +352,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     </div>
   </nav>
 
+  <!-- 返回顶部 -->
   <div v-show="showBackTop" class="back-top">
     <t-button shape="circle" theme="primary" @click="scrollTop" aria-label="返回顶部">
       <t-icon name="arrow-up" size="20px"></t-icon>
@@ -242,7 +375,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
       </div>
       <div>
         <div class="drawer-name">欢迎使用</div>
-        <div class="drawer-version">版本号：v3.0</div>
+        <div class="drawer-version">版本号：v4.0</div>
       </div>
     </div>
 
@@ -336,7 +469,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
 
   <!-- 关于 -->
   <t-dialog v-model:visible="aboutVisible" header="关于" :footer="false" width="320px">
-    <p style="margin:0 0 8px;font-size:15px;font-weight:500">树洞工具箱 v3.0</p>
+    <p style="margin:0 0 8px;font-size:15px;font-weight:500">树洞工具箱 v4.0</p>
     <p style="margin:0;font-size:14px;color:var(--td-text-color-secondary);line-height:1.7">
       一个安静的工具箱，基于 TDesign 构建。
     </p>
@@ -417,6 +550,7 @@ const safeGetArray=(key,fallback)=>{
     return fallback;
   }
 };
+
 const safeSet=(key,val)=>{
   try{localStorage.setItem(key,val)}
   catch(e){console.warn(`localStorage[${key}] 写入失败`,e)}
@@ -436,6 +570,29 @@ const getUserUID=()=>{
   }
 };
 
+// ===== Service Worker 注册 =====
+const registerServiceWorker=()=>{
+  if(!('serviceWorker' in navigator))return;
+
+  if(!window.isSecureContext){
+    console.warn('Service Worker 需要 HTTPS 或 localhost 环境');
+    return;
+  }
+
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(registration=>{
+      console.log('Service Worker 注册成功:',registration.scope);
+
+      // 检查是否有新版本
+      registration.update().catch(error=>{
+        console.warn('Service Worker 更新检查失败:',error);
+      });
+    })
+    .catch(error=>{
+      console.error('Service Worker 注册失败:',error);
+    });
+};
+
 const app=createApp({
 setup(){
   // 基础状态
@@ -447,7 +604,6 @@ setup(){
   const iframeTimers={};
   const scrolled=ref(false);
   const showBackTop=ref(false);
-  const currentYear=new Date().getFullYear();
   const userUID=ref(getUserUID());
 
   // 主题
@@ -482,7 +638,13 @@ setup(){
   const isPwaInstalled=ref(false);
   const isIos=ref(false);
   let deferredPrompt=null;
-  const pwaConfig=ref({title:'安装应用',desc:'',icon:'download',cancelText:'取消',install:false});
+  const pwaConfig=ref({
+    title:'安装应用',
+    desc:'',
+    icon:'download',
+    cancelText:'取消',
+    install:false
+  });
 
   // 计算属性
   const categories=computed(()=>['全部',...new Set(toolsData.map(t=>t.category))]);
@@ -491,7 +653,9 @@ setup(){
     const kw=searchText.value.toLowerCase().trim();
     return toolsData.filter(t=>{
       const matchCat=filterCategory.value==='全部'||t.category===filterCategory.value;
-      const matchText=!kw||t.name.toLowerCase().includes(kw)||t.desc.toLowerCase().includes(kw);
+      const matchText=!kw||
+        t.name.toLowerCase().includes(kw)||
+        t.desc.toLowerCase().includes(kw);
       return matchCat&&matchText;
     });
   });
@@ -499,7 +663,9 @@ setup(){
   const favoriteTools=computed(()=>{
     const kw=favoriteSearchText.value.toLowerCase().trim();
     return toolsData.filter(t=>favorites.value.includes(t.id))
-      .filter(t=>!kw||t.name.toLowerCase().includes(kw)||t.desc.toLowerCase().includes(kw));
+      .filter(t=>!kw||
+        t.name.toLowerCase().includes(kw)||
+        t.desc.toLowerCase().includes(kw));
   });
 
   // 持久化
@@ -507,6 +673,7 @@ setup(){
     safeSet('favs',JSON.stringify(favorites.value));
     safeSet('cards',JSON.stringify(discoverCards.value));
   };
+
   watch(favorites,saveState,{deep:true});
   watch(discoverCards,saveState,{deep:true});
 
@@ -520,9 +687,13 @@ setup(){
 
   const startIframeTimeout=id=>{
     if(iframeTimers[id])clearTimeout(iframeTimers[id]);
+
     iframeStatus.value[id]='loading';
+
     iframeTimers[id]=setTimeout(()=>{
-      if(iframeStatus.value[id]!=='loaded')iframeStatus.value[id]='error';
+      if(iframeStatus.value[id]!=='loaded'){
+        iframeStatus.value[id]='error';
+      }
       delete iframeTimers[id];
     },8000);
   };
@@ -536,16 +707,21 @@ setup(){
   };
 
   watch(expandedCards,ids=>{
-    discoverCards.value.forEach(c=>{c.expanded=ids.includes(c.id)});
+    discoverCards.value.forEach(c=>{
+      c.expanded=ids.includes(c.id);
+    });
+
     Object.keys(iframeStatus.value).forEach(k=>{
       if(!ids.includes(Number(k))){
         delete iframeStatus.value[k];
+
         if(iframeTimers[k]){
           clearTimeout(iframeTimers[k]);
           delete iframeTimers[k];
         }
       }
     });
+
     ids.forEach(id=>{
       if(iframeStatus.value[id]!=='loaded'&&iframeStatus.value[id]!=='loading'){
         startIframeTimeout(id);
@@ -562,8 +738,11 @@ setup(){
 
   // 打开工具
   const openTool=tool=>{
-    if(tool.url)window.open(tool.url,'_blank','noopener');
-    else MessagePlugin.warning(`工具 ${tool.name} 缺少链接信息。`);
+    if(tool.url){
+      window.open(tool.url,'_blank','noopener');
+    }else{
+      MessagePlugin.warning(`工具 ${tool.name} 缺少链接信息。`);
+    }
   };
 
   // 页面切换
@@ -573,9 +752,12 @@ setup(){
       clearIframeTimers();
     }else{
       expandedCards.value.forEach(id=>{
-        if(iframeStatus.value[id]!=='loaded')startIframeTimeout(id);
+        if(iframeStatus.value[id]!=='loaded'){
+          startIframeTimeout(id);
+        }
       });
     }
+
     currentPage.value=page;
     window.scrollTo(0,0);
   };
@@ -585,14 +767,20 @@ setup(){
 
   // 主题
   const applyTheme=theme=>{
-    if(theme==='dark')document.documentElement.setAttribute('theme-mode','dark');
-    else document.documentElement.removeAttribute('theme-mode');
+    if(theme==='dark'){
+      document.documentElement.setAttribute('theme-mode','dark');
+    }else{
+      document.documentElement.removeAttribute('theme-mode');
+    }
   };
 
   const onThemeChange=value=>{
     const theme=value?'dark':'light';
     applyTheme(theme);
-    try{localStorage.setItem('theme',theme)}catch(e){}
+
+    try{
+      localStorage.setItem('theme',theme);
+    }catch(e){}
   };
 
   // 卡片管理
@@ -602,7 +790,9 @@ setup(){
     resetForm();
   };
 
-  const resetForm=()=>{form.value={id:null,title:'',url:'',icon:''}};
+  const resetForm=()=>{
+    form.value={id:null,title:'',url:'',icon:''};
+  };
 
   const saveCard=()=>{
     const {id,title,url,icon}=form.value;
@@ -617,9 +807,22 @@ setup(){
 
     if(id){
       const idx=discoverCards.value.findIndex(c=>c.id===id);
-      if(idx>-1)discoverCards.value[idx]={...discoverCards.value[idx],title:t,url:u,icon:ic};
+      if(idx>-1){
+        discoverCards.value[idx]={
+          ...discoverCards.value[idx],
+          title:t,
+          url:u,
+          icon:ic
+        };
+      }
     }else{
-      discoverCards.value.push({id:Date.now(),title:t,url:u,icon:ic,expanded:false});
+      discoverCards.value.push({
+        id:Date.now(),
+        title:t,
+        url:u,
+        icon:ic,
+        expanded:false
+      });
     }
 
     MessagePlugin.success('保存成功');
@@ -630,7 +833,14 @@ setup(){
   const editCard=id=>{
     const c=discoverCards.value.find(x=>x.id===id);
     if(!c)return;
-    form.value={id:c.id,title:c.title,url:c.url,icon:c.icon};
+
+    form.value={
+      id:c.id,
+      title:c.title,
+      url:c.url,
+      icon:c.icon
+    };
+
     settingsTab.value='add';
   };
 
@@ -641,14 +851,18 @@ setup(){
 
   const confirmDelete=()=>{
     if(pendingDeleteId.value==null)return;
+
     const id=pendingDeleteId.value;
+
     discoverCards.value=discoverCards.value.filter(c=>c.id!==id);
     expandedCards.value=expandedCards.value.filter(x=>x!==id);
     delete iframeStatus.value[id];
+
     if(iframeTimers[id]){
       clearTimeout(iframeTimers[id]);
       delete iframeTimers[id];
     }
+
     pendingDeleteId.value=null;
     deleteVisible.value=false;
     MessagePlugin.success('已删除');
@@ -657,7 +871,9 @@ setup(){
   const moveCard=(index,dir)=>{
     const arr=[...discoverCards.value];
     const target=index+dir;
+
     if(target<0||target>=arr.length)return;
+
     expandedCards.value=[];
     [arr[index],arr[target]]=[arr[target],arr[index]];
     discoverCards.value=arr;
@@ -668,17 +884,29 @@ setup(){
   // 关于
   const openAbout=()=>{
     aboutVisible.value=true;
-    if(!isWide.value)drawerVisible.value=false;
+
+    if(!isWide.value){
+      drawerVisible.value=false;
+    }
   };
 
   // 彩蛋
   const onAvatarClick=()=>{
     const now=Date.now();
-    if(now-eggLastClickTime>3000)eggCount.value=0;
+
+    if(now-eggLastClickTime>3000){
+      eggCount.value=0;
+    }
+
     eggCount.value++;
     eggLastClickTime=now;
+
     if(eggTimer)clearTimeout(eggTimer);
-    eggTimer=setTimeout(()=>{eggCount.value=0},3000);
+
+    eggTimer=setTimeout(()=>{
+      eggCount.value=0;
+    },3000);
+
     if(eggCount.value>=10){
       easterVisible.value=true;
       eggCount.value=0;
@@ -687,7 +915,9 @@ setup(){
 
   // PWA 安装
   const showInstallDialog=()=>{
-    if(!isWide.value)drawerVisible.value=false;
+    if(!isWide.value){
+      drawerVisible.value=false;
+    }
 
     if(isIos.value){
       pwaConfig.value={
@@ -714,6 +944,7 @@ setup(){
         install:false
       };
     }
+
     pwaVisible.value=true;
   };
 
@@ -722,9 +953,18 @@ setup(){
       pwaVisible.value=false;
       return;
     }
+
     deferredPrompt.prompt();
+
     deferredPrompt.userChoice.then(res=>{
-      if(res.outcome==='accepted')isPwaInstalled.value=true;
+      if(res.outcome==='accepted'){
+        isPwaInstalled.value=true;
+      }
+
+      deferredPrompt=null;
+      pwaVisible.value=false;
+    }).catch(error=>{
+      console.warn('PWA 安装流程失败:',error);
       deferredPrompt=null;
       pwaVisible.value=false;
     });
@@ -732,8 +972,16 @@ setup(){
 
   // 生命周期
   onMounted(()=>{
+    // 注册 Service Worker
+    registerServiceWorker();
+
     // 初始化主题
-    const savedTheme=localStorage.getItem('theme');
+    let savedTheme=null;
+
+    try{
+      savedTheme=localStorage.getItem('theme');
+    }catch(e){}
+
     if(savedTheme){
       isDark.value=savedTheme==='dark';
       applyTheme(savedTheme);
@@ -745,14 +993,25 @@ setup(){
 
     // 跟随系统主题
     const mq=window.matchMedia('(prefers-color-scheme: dark)');
+
     const onMqChange=e=>{
-      if(!localStorage.getItem('theme')){
+      let hasSavedTheme=false;
+
+      try{
+        hasSavedTheme=!!localStorage.getItem('theme');
+      }catch(error){}
+
+      if(!hasSavedTheme){
         isDark.value=e.matches;
         applyTheme(e.matches?'dark':'light');
       }
     };
-    if(mq.addEventListener)mq.addEventListener('change',onMqChange);
-    else if(mq.addListener)mq.addListener(onMqChange);
+
+    if(mq.addEventListener){
+      mq.addEventListener('change',onMqChange);
+    }else if(mq.addListener){
+      mq.addListener(onMqChange);
+    }
 
     // PWA 状态
     isIos.value=/iPad|iPhone|iPod/.test(navigator.userAgent)||
@@ -776,22 +1035,28 @@ setup(){
       scrolled.value=window.scrollY>10;
       showBackTop.value=window.scrollY>300;
     };
+
     window.addEventListener('scroll',onScroll,{passive:true});
     onScroll();
 
     // 大屏 / 小屏切换
     const wideMq=window.matchMedia('(min-width: 1024px)');
+
     const onWideChange=e=>{
       isWide.value=e.matches;
       drawerVisible.value=e.matches;
     };
-    if(wideMq.addEventListener)wideMq.addEventListener('change',onWideChange);
-    else if(wideMq.addListener)wideMq.addListener(onWideChange);
+
+    if(wideMq.addEventListener){
+      wideMq.addEventListener('change',onWideChange);
+    }else if(wideMq.addListener){
+      wideMq.addListener(onWideChange);
+    }
   });
 
   return{
     currentPage,filterCategory,searchText,favoriteSearchText,
-    expandedCards,iframeStatus,scrolled,showBackTop,currentYear,userUID,
+    expandedCards,iframeStatus,scrolled,showBackTop,userUID,
     isDark,isWide,drawerVisible,
     favorites,discoverCards,
     settingsVisible,settingsTab,deleteVisible,aboutVisible,
