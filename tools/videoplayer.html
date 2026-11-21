@@ -1,314 +1,505 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
-    <title>视频播放器</title>
-    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.25/weui.min.css"/>
-    <style>
-        /* --- 全局样式 --- */
-        body, html {
-            height: 100%;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        /* 这里的背景色和文字颜色已经使用了 WeUI 变量，会自动适配 */
-        body {
-            background-color: var(--weui-BG-0);
-            color: var(--weui-FG-0);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>视频播放器</title>
+  <link rel="stylesheet" href="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.6.15/hls.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+    body {
+      font-family: var(--td-font-family);
+      background: var(--td-bg-color-page);
+      color: var(--td-text-color-primary);
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color .3s, color .3s;
+    }
+    #app {
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-        /* --- 视频容器 (16:9) --- */
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-            padding-bottom: 56.25%;
-            background: #000; /* 视频背景始终由黑色保持沉浸感 */
-        }
-        .video-content {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
+    /* ===== 顶栏 ===== */
+    .app-header {
+      flex-shrink: 0;
+      height: 56px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--td-component-stroke);
+      background: var(--td-bg-color-container);
+      z-index: 10;
+      transition: background-color .3s, border-color .3s;
+    }
+    .header-left, .header-right { display: flex; align-items: center; gap: 8px; }
+    .app-header h3 { margin: 0; font-weight: 500; font-size: 18px; }
 
-        /* --- 诊断组件优化 (关键修改) --- */
-        .diagnostic-dialog {
-            max-height: 85vh !important;
-            height: 85vh !important;
-            display: flex;
-            flex-direction: column;
-            /* 弹窗整体背景也跟随主题 */
-            background-color: var(--weui-BG-2); 
-        }
+    /* ===== 主布局 ===== */
+    .app-layout {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex !important;
+      flex-direction: row;
+    }
 
-        .diagnostic-body {
-            padding: 0 !important;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            /* [修改点]：之前是 #fff，现在改为跟随主题的背景色 */
-            background-color: var(--weui-BG-2); 
-        }
+    /* ===== 侧边栏 ===== */
+    .app-aside {
+      flex-shrink: 0 !important;
+      height: 100%;
+      overflow: hidden;
+      border-right: 1px solid var(--td-component-stroke);
+      background: var(--td-bg-color-container);
+      display: flex;
+      flex-direction: column;
+      transition: background-color .3s, border-color .3s;
+    }
 
-        iframe.full-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            flex: 1;
-            /* 防止 iframe 加载前闪白 */
-            background-color: transparent; 
-        }
+    /* 侧边栏顶部行 */
+    .aside-header {
+      flex-shrink: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px 0 20px;
+      border-bottom: 1px solid var(--td-component-stroke);
+    }
+    .aside-header .aside-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--td-text-color-primary);
+      white-space: nowrap;
+    }
 
-        /* 错误提示条 */
-        .weui-toptips { display: none; }
-    </style>
+    /* 菜单区 */
+    .aside-menu-wrap {
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .aside-menu-wrap .t-menu {
+      width: 100%;
+      border-right: none;
+    }
+
+    /* ===== 内容区 ===== */
+    .app-content-outer {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      padding: 0 !important;
+      display: flex;
+      flex-direction: column;
+    }
+    .app-content-inner {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 0;
+      padding: 24px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .app-content-inner.fill {
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== 视频区域 ===== */
+    .video-stage {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      position: relative;
+      overflow: hidden;
+      background: #000;
+      border-radius: 8px;
+    }
+    .video-element {
+      width: 100%; height: 100%;
+      display: block; object-fit: contain;
+    }
+
+    /* ===== 视频源设置卡片 ===== */
+    .video-setting-card { margin-top: 12px; border-radius: 8px; }
+    .video-setting-card .t-card__header { padding: 12px 16px 4px; }
+    .video-setting-card .t-card__body { padding: 8px 16px 16px; }
+
+    /* 确定并播放按钮 */
+    .confirm-button {
+      margin-top: 12px;
+    }
+
+    /* ===== 诊断页面 ===== */
+    .diag-wrap {
+      flex: 1; min-height: 0; width: 100%;
+      position: relative; display: flex; overflow: hidden;
+      background: var(--td-bg-color-container);
+    }
+    .diag-frame { width: 100%; height: 100%; flex: 1; border: none; display: block; }
+    .diag-loading {
+      position: absolute; inset: 0; z-index: 2;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--td-bg-color-page);
+    }
+
+    /* ===== 移动端 ===== */
+    @media (max-width: 767px) {
+      .app-header { padding: 0 16px; }
+      .app-header h3 { font-size: 16px; }
+      .app-content-inner { padding: 16px; }
+      .app-content-inner.fill { padding: 0; }
+      .video-setting-card .t-card__header { padding: 10px 12px 4px; }
+      .video-setting-card .t-card__body { padding: 6px 12px 14px; }
+    }
+  </style>
 </head>
-<body data-weui-theme="light">
 
-    <div class="weui-toptips weui-toptips_warn" id="topTips">错误提示</div>
+<body>
+<div id="app">
 
-    <div class="page">
-        <div class="weui-panel weui-panel_access">
-            <div class="weui-panel__hd">视频播放器</div>
-            <div class="weui-panel__bd">
-                <div class="weui-media-box weui-media-box_text" style="padding: 0;">
-                    <div class="video-wrapper">
-                        <video id="myVideo" class="video-content" controls playsinline webkit-playsinline x5-video-player-type="h5-page">
-                            <source src="https://ckacka.github.io/djs.mp4" type="video/mp4">
-                        </video>
-                    </div>
-                </div>
+  <!-- ===== 顶栏 ===== -->
+  <header class="app-header">
+    <div class="header-left">
+      <t-button v-if="isMobile" variant="text" shape="square" @click="drawerVisible = true">
+        <t-icon name="menu" size="22px" />
+      </t-button>
+      <h3>视频播放器</h3>
+    </div>
+    <div class="header-right">
+      <!-- 重置播放器：图标 + 文字 -->
+      <t-button
+        v-if="activeMenu === 'player'"
+        theme="danger"
+        variant="outline"
+        size="small"
+        @click="handleReset"
+      >
+        <t-icon name="refresh" />
+        重置播放器
+      </t-button>
+    </div>
+  </header>
+
+  <t-layout class="app-layout">
+
+    <!-- ===== 侧边栏 ===== -->
+    <t-aside v-if="!isMobile" width="220px" class="app-aside">
+
+      <!-- 顶部行：导航菜单 + 暗色切换 -->
+      <div class="aside-header">
+        <span class="aside-title">导航菜单</span>
+        <t-tooltip :content="isDark ? '切换为浅色模式' : '切换为深色模式'">
+          <t-button variant="text" shape="circle" @click="toggleTheme">
+            <t-icon :name="isDark ? 'sunny' : 'moon'" size="20px" />
+          </t-button>
+        </t-tooltip>
+      </div>
+
+      <!-- 菜单 -->
+      <div class="aside-menu-wrap">
+        <t-menu v-model="activeMenu">
+          <t-menu-item
+            v-for="item in menus"
+            :key="item.value"
+            :value="item.value"
+          >
+            <template #icon><t-icon :name="item.icon" size="20px" /></template>
+            {{ item.label }}
+          </t-menu-item>
+        </t-menu>
+      </div>
+    </t-aside>
+
+    <!-- ===== 内容区 ===== -->
+    <t-content class="app-content-outer">
+      <div class="app-content-inner" :class="{ fill: activeMenu === 'diagnostic' }">
+
+        <template v-if="activeMenu === 'player'">
+          <div class="video-stage">
+            <video
+              ref="videoRef"
+              class="video-element"
+              controls
+              playsinline
+              webkit-playsinline
+              x5-video-player-type="h5-page"
+              preload="metadata"
+            ></video>
+          </div>
+
+          <!-- 视频源设置：地址栏 + 下方“确定并播放”按钮 -->
+          <t-card title="视频源设置" :bordered="false" class="video-setting-card">
+            <t-input
+              v-model="urlInput"
+              placeholder="请输入 MP4 / M3U8 视频地址"
+              clearable
+              @enter="loadVideo"
+            />
+
+            <!-- ★ 按钮：用默认插槽放图标 + 文字（不用 template #icon） -->
+            <t-button
+              theme="primary"
+              block
+              size="large"
+              :loading="loading"
+              class="confirm-button"
+              @click="loadVideo"
+            >
+              <t-icon name="play-circle" />
+              确定并播放
+            </t-button>
+          </t-card>
+        </template>
+
+        <template v-else>
+          <div class="diag-wrap">
+            <div v-if="diagLoading" class="diag-loading">
+              <t-loading size="24px" text="加载诊断工具..." />
             </div>
-        </div>
+            <iframe
+              ref="diagFrameRef"
+              class="diag-frame"
+              :src="diagSrc"
+              @load="onDiagLoad"
+              title="视频疑难诊断"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </template>
+      </div>
+    </t-content>
+  </t-layout>
 
-        <div class="weui-cells__title">视频源设置</div>
-        <div class="weui-cells weui-cells_form">
-            <div class="weui-cell weui-cell_active">
-                <div class="weui-cell__hd"><label class="weui-label">视频地址</label></div>
-                <div class="weui-cell__bd">
-                    <input id="urlInput" class="weui-input" type="url" placeholder="输入 mp4/m3u8 地址"/>
-                </div>
-                <div class="weui-cell__ft">
-                    <button class="weui-btn_reset weui-btn_icon" id="clearBtn">
-                        <i class="weui-icon-clear"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+  <!-- ===== 移动端抽屉 ===== -->
+  <t-drawer
+    v-model:visible="drawerVisible"
+    placement="left"
+    :size="270"
+    :footer="false"
+    :body-style="{ padding: 0, display: 'flex', flexDirection: 'column', height: '100%' }"
+  >
+    <template #header>
+      <div class="aside-header" style="flex: 1; border-bottom: none; padding: 0;">
+        <span class="aside-title">导航菜单</span>
+        <t-button variant="text" shape="circle" @click="toggleTheme">
+          <t-icon :name="isDark ? 'sunny' : 'moon'" size="20px" />
+        </t-button>
+      </div>
+    </template>
 
-        <div class="weui-btn-area">
-            <a href="javascript:" class="weui-btn weui-btn_primary" id="btnLoad">加载播放</a>
-            <a href="javascript:" class="weui-btn weui-btn_default" id="btnMore">更多选项</a>
-        </div>
+    <div class="aside-menu-wrap">
+      <t-menu v-model="activeMenu" @change="drawerVisible = false">
+        <t-menu-item
+          v-for="item in menus"
+          :key="item.value"
+          :value="item.value"
+        >
+          <template #icon><t-icon :name="item.icon" size="20px" /></template>
+          {{ item.label }}
+        </t-menu-item>
+      </t-menu>
     </div>
+  </t-drawer>
 
-    <div id="loadingToast" style="display: none;">
-        <div class="weui-mask_transparent"></div>
-        <div class="weui-toast">
-            <i class="weui-loading weui-icon_toast"></i>
-            <p class="weui-toast__content">加载中</p>
-        </div>
-    </div>
+</div>
 
-    <div id="toast" style="display: none;">
-        <div class="weui-mask_transparent"></div>
-        <div class="weui-toast">
-            <i class="weui-icon-success-no-circle weui-icon_toast"></i>
-            <p class="weui-toast__content" id="toastMsg">已完成</p>
-        </div>
-    </div>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.js"></script>
+<script src="https://unpkg.com/@tdesign/icons-vue/dist/index.umd.js"></script>
 
-    <div class="js_dialog" id="iosDialog" style="display: none;">
-        <div class="weui-mask"></div>
-        <div class="weui-dialog">
-            <div class="weui-dialog__hd"><strong class="weui-dialog__title" id="dialogTitle">标题</strong></div>
-            <div class="weui-dialog__bd" id="dialogContent">内容</div>
-            <div class="weui-dialog__ft">
-                <a href="javascript:" class="weui-dialog__btn weui-dialog__btn_default" id="dialogCancel">取消</a>
-                <a href="javascript:" class="weui-dialog__btn weui-dialog__btn_primary" id="dialogConfirm">确定</a>
-            </div>
-        </div>
-    </div>
+<script>
+  const { createApp, ref, computed, nextTick, watch, onMounted, onUnmounted } = Vue;
+  const { MessagePlugin, DialogPlugin } = TDesign;
 
-    <div class="weui-mask" id="asMask" style="display: none; opacity: 0; transition: opacity .3s;"></div>
-    <div class="weui-actionsheet" id="asMenu">
-        <div class="weui-actionsheet__title">
-            <p class="weui-actionsheet__title-text">更多选项</p>
-        </div>
-        <div class="weui-actionsheet__menu">
-            <div class="weui-actionsheet__cell" id="menuDiag">疑难诊断工具</div>
-            <div class="weui-actionsheet__cell weui-actionsheet__cell_warn" id="menuReset">重置播放器</div>
-        </div>
-        <div class="weui-actionsheet__action">
-            <div class="weui-actionsheet__cell" id="menuCancel">取消</div>
-        </div>
-    </div>
+  const app = createApp({
+    setup() {
+      const screenWidth = ref(window.innerWidth);
+      const isMobile = computed(() => screenWidth.value < 768);
+      const drawerVisible = ref(false);
+      const activeMenu = ref('player');
 
-    <div class="js_dialog" id="diagnosticDialog" style="display: none;">
-        <div class="weui-mask" id="diagMask"></div>
-        <div class="weui-half-screen-dialog diagnostic-dialog" style="transition: transform .3s; transform: translateY(100%);">
-            <div class="weui-half-screen-dialog__hd">
-                <div class="weui-half-screen-dialog__hd__side" id="diagCloseBtn">
-                    <button class="weui-icon-btn">关闭<i class="weui-icon-close-thin"></i></button>
-                </div>
-                <div class="weui-half-screen-dialog__hd__main">
-                    <strong class="weui-half-screen-dialog__title">播放器诊断工具</strong>
-                </div>
-            </div>
-            <div class="weui-half-screen-dialog__bd diagnostic-body">
-                <iframe id="diagFrame" class="full-frame" src="about:blank"></iframe>
-            </div>
-        </div>
-    </div>
+      /* 暗色模式 */
+      let savedTheme = 'auto';
+      try { savedTheme = localStorage.getItem('theme-mode') || 'auto'; } catch (e) {}
+      if (!['auto', 'light', 'dark'].includes(savedTheme)) savedTheme = 'auto';
 
-    <script type="text/javascript">
-        // 1. 初始化 DOM 查询简写
-        const $ = (sel) => document.querySelector(sel);
-        
-        // 2. 核心：深色模式适配逻辑
-        // 监听系统的颜色偏好
-        const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
-        
-        // 设置主题函数：切换 body 上的 data-weui-theme 属性
-        const setTheme = (isDark) => {
-            document.body.setAttribute('data-weui-theme', isDark ? 'dark' : 'light');
-        };
+      const systemDark = ref(!!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches));
+      const themeMode = ref(savedTheme);
 
-        // 初始化时执行一次
-        setTheme(themeMedia.matches);
+      const isDark = computed({
+        get() {
+          return themeMode.value === 'auto' ? systemDark.value : themeMode.value === 'dark';
+        },
+        set(v) { themeMode.value = v ? 'dark' : 'light'; }
+      });
 
-        // 监听变化（当用户在系统设置里切换模式时自动响应）
-        themeMedia.addEventListener('change', e => setTheme(e.matches));
+      const applyTheme = () => {
+        const dark = isDark.value;
+        if (dark) document.documentElement.setAttribute('theme-mode', 'dark');
+        else document.documentElement.removeAttribute('theme-mode');
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', dark ? '#151515' : '#ffffff');
+      };
 
-        // --- 以下为业务逻辑 (保持不变) ---
-        const DEFAULT_VIDEO = "https://ckacka.github.io/djs.mp4";
-        const DIAG_URL = "https://video.aliyuncs.com/player-detection/index.html?";
+      watch([themeMode, systemDark], () => {
+        try { localStorage.setItem('theme-mode', themeMode.value); } catch (e) {}
+        applyTheme();
+      }, { immediate: true });
 
-        const els = {
-            video: $('#myVideo'),
-            input: $('#urlInput'),
-            topTips: $('#topTips'),
-            loading: $('#loadingToast'),
-            toast: $('#toast'),
-            dialog: $('#iosDialog'),
-            asMask: $('#asMask'),
-            asMenu: $('#asMenu'),
-            diagDialog: $('#diagnosticDialog'),
-            diagInner: $('.weui-half-screen-dialog'),
-            diagFrame: $('#diagFrame')
-        };
+      const toggleTheme = () => { isDark.value = !isDark.value; };
 
-        function loadVideo() {
-            const url = els.input.value.trim();
-            if (!url) { showTopTips('请输入视频地址'); return; }
-            if (!/^https?:\/\/.+/.test(url)) { showTopTips('请输入以 http｜https 开头的有效地址'); return; }
+      let darkMq = null;
+      const onSystemThemeChange = (e) => { systemDark.value = e.matches; };
 
-            toggleLoading(true);
-            setTimeout(() => {
-                els.video.src = url;
-                els.video.load();
-                const playPromise = els.video.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        toggleLoading(false);
-                        showToast('开始播放');
-                    }).catch(error => {
-                        toggleLoading(false);
-                        console.error(error);
-                        showDialog('加载失败', '无法播放，请检查地址有效性或跨域限制。');
-                    });
+      /* 播放器 */
+      const DEFAULT_VIDEO = 'https://ckacka.github.io/djs.mp4';
+      const DIAG_URL = 'https://video.aliyuncs.com/player-detection/index.html?';
+
+      const videoRef = ref(null);
+      const urlInput = ref('');
+      const loading = ref(false);
+      let hlsInstance = null;
+
+      const diagFrameRef = ref(null);
+      const diagSrc = ref('about:blank');
+      const diagLoaded = ref(false);
+      const diagLoading = ref(false);
+
+      const menus = [
+        { value: 'player', label: '播放器主页', icon: 'play-circle' },
+        { value: 'diagnostic', label: '疑难诊断', icon: 'error-circle' }
+      ];
+
+      const loadVideo = async () => {
+        const url = urlInput.value.trim();
+        if (!url) { MessagePlugin.warning('请输入视频地址'); return; }
+        if (!/^https?:\/\/.+/i.test(url)) { MessagePlugin.warning('请输入以 http:// 或 https:// 开头的有效地址'); return; }
+
+        loading.value = true;
+        try {
+          const video = videoRef.value;
+          if (!video) throw new Error('Video element not found');
+          if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+          video.pause(); video.removeAttribute('src'); video.load();
+
+          const isHls = url.toLowerCase().includes('.m3u8');
+          if (isHls) {
+            if (video.canPlayType('application/vnd.apple.mpegurl')) {
+              video.src = url;
+              await video.play();
+              MessagePlugin.success('开始播放 (原生 HLS)');
+            } else if (window.Hls && Hls.isSupported()) {
+              hlsInstance = new Hls();
+              hlsInstance.loadSource(url);
+              hlsInstance.attachMedia(video);
+              hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(() => {}); });
+              hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+                if (!data.fatal) return;
+                switch (data.type) {
+                  case Hls.ErrorTypes.NETWORK_ERROR: hlsInstance.startLoad(); break;
+                  case Hls.ErrorTypes.MEDIA_ERROR: hlsInstance.recoverMediaError(); break;
+                  default: hlsInstance.destroy(); hlsInstance = null; break;
                 }
-            }, 500);
-        }
-
-        function resetPlayer() {
-            hideActionSheet();
-            showDialog('重置确认', '确定恢复到默认演示视频？', true, () => {
-                els.video.src = DEFAULT_VIDEO;
-                els.video.load();
-                els.input.value = '';
-                showToast('已重置');
-            });
-        }
-
-        function openDiagnostic() {
-            hideActionSheet();
-            if (els.diagFrame.src === 'about:blank') {
-                toggleLoading(true);
-                els.diagFrame.src = DIAG_URL;
-                els.diagFrame.onload = () => toggleLoading(false);
+              });
+              MessagePlugin.success('开始播放 (hls.js)');
+            } else {
+              throw new Error('当前浏览器不支持播放 M3U8 视频');
             }
-            els.diagDialog.style.display = 'block';
-            els.diagInner.offsetHeight; 
-            els.diagInner.style.transform = 'translateY(0)';
+          } else {
+            video.src = url;
+            await video.play();
+            MessagePlugin.success('开始播放');
+          }
+        } catch (error) {
+          console.error('视频加载失败：', error);
+          DialogPlugin.alert({
+            header: '加载失败',
+            body: '无法播放，请检查：\n1. 视频地址是否有效；\n2. 视频格式是否为 MP4 / M3U8；\n3. 网络访问权限（部分 M3U8 流需要 CORS 支持）。',
+            confirmBtn: '知道了', destroyOnClose: true
+          });
+        } finally { loading.value = false; }
+      };
+
+      const handleReset = () => {
+        const dialog = DialogPlugin.confirm({
+          header: '重置确认', body: '确定恢复到默认演示视频？',
+          confirmBtn: '确定', cancelBtn: '取消', destroyOnClose: true,
+          onConfirm: async () => {
+            const video = videoRef.value;
+            if (video) {
+              video.pause();
+              if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+              video.removeAttribute('src'); video.load();
+            }
+            urlInput.value = '';
+            await nextTick();
+            if (videoRef.value) { videoRef.value.src = DEFAULT_VIDEO; videoRef.value.load(); }
+            MessagePlugin.success('已重置');
+            dialog.hide();
+          }
+        });
+      };
+
+      const onDiagLoad = () => { diagLoading.value = false; };
+
+      watch(activeMenu, (value) => {
+        if (isMobile.value) drawerVisible.value = false;
+        if (value === 'diagnostic' && !diagLoaded.value) {
+          diagLoaded.value = true;
+          diagLoading.value = true;
+          diagSrc.value = DIAG_URL;
         }
+      });
 
-        function closeDiagnostic() {
-            els.diagInner.style.transform = 'translateY(100%)';
-            setTimeout(() => els.diagDialog.style.display = 'none', 300);
+      const onResize = () => {
+        screenWidth.value = window.innerWidth;
+        if (!isMobile.value) drawerVisible.value = false;
+      };
+
+      onMounted(() => {
+        darkMq = window.matchMedia('(prefers-color-scheme: dark)');
+        if (darkMq.addEventListener) darkMq.addEventListener('change', onSystemThemeChange);
+        else if (darkMq.addListener) darkMq.addListener(onSystemThemeChange);
+        window.addEventListener('resize', onResize);
+        if (videoRef.value) videoRef.value.src = DEFAULT_VIDEO;
+      });
+
+      onUnmounted(() => {
+        if (darkMq) {
+          if (darkMq.removeEventListener) darkMq.removeEventListener('change', onSystemThemeChange);
+          else if (darkMq.removeListener) darkMq.removeListener(onSystemThemeChange);
         }
+        window.removeEventListener('resize', onResize);
+        if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+      });
 
-        function showTopTips(msg) {
-            els.topTips.innerText = msg;
-            els.topTips.style.display = 'block';
-            setTimeout(() => els.topTips.style.display = 'none', 2000);
-        }
+      return {
+        isMobile, drawerVisible, activeMenu, menus,
+        isDark, themeMode, toggleTheme,
+        videoRef, urlInput, loading, loadVideo, handleReset,
+        diagFrameRef, diagSrc, diagLoading, onDiagLoad
+      };
+    }
+  });
 
-        function toggleLoading(show) { els.loading.style.display = show ? 'block' : 'none'; }
-        
-        function showToast(msg) {
-            $('#toastMsg').innerText = msg;
-            els.toast.style.display = 'block';
-            setTimeout(() => els.toast.style.display = 'none', 1500);
-        }
-
-        function showDialog(title, content, showCancel, onConfirm) {
-            $('#dialogTitle').innerText = title;
-            $('#dialogContent').innerText = content;
-            const $cancel = $('#dialogCancel');
-            const $confirm = $('#dialogConfirm');
-            $cancel.style.display = showCancel ? 'block' : 'none';
-            
-            const newConfirm = $confirm.cloneNode(true);
-            $confirm.parentNode.replaceChild(newConfirm, $confirm);
-            const newCancel = $cancel.cloneNode(true);
-            $cancel.parentNode.replaceChild(newCancel, $cancel);
-
-            newCancel.addEventListener('click', () => els.dialog.style.display = 'none');
-            newConfirm.addEventListener('click', () => {
-                els.dialog.style.display = 'none';
-                if(onConfirm) onConfirm();
-            });
-            els.dialog.style.display = 'block';
-        }
-
-        function showActionSheet() {
-            els.asMask.style.display = 'block';
-            requestAnimationFrame(() => {
-                els.asMask.style.opacity = 1;
-                els.asMenu.classList.add('weui-actionsheet_toggle');
-            });
-        }
-
-        function hideActionSheet() {
-            els.asMask.style.opacity = 0;
-            els.asMenu.classList.remove('weui-actionsheet_toggle');
-            setTimeout(() => els.asMask.style.display = 'none', 300);
-        }
-
-        $('#btnLoad').addEventListener('click', loadVideo);
-        $('#clearBtn').addEventListener('click', () => els.input.value = '');
-        $('#btnMore').addEventListener('click', showActionSheet);
-        els.asMask.addEventListener('click', hideActionSheet);
-        $('#menuCancel').addEventListener('click', hideActionSheet);
-        $('#menuDiag').addEventListener('click', openDiagnostic);
-        $('#menuReset').addEventListener('click', resetPlayer);
-        $('#diagMask').addEventListener('click', closeDiagnostic);
-        $('#diagCloseBtn').addEventListener('click', closeDiagnostic);
-    </script>
+  app.use(TDesign);
+  if (window.TDesignIconsVue) app.use(window.TDesignIconsVue);
+  app.mount('#app');
+</script>
 </body>
 </html>
