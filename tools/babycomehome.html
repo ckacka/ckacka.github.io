@@ -1,451 +1,780 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <title>宝贝回家 - 寻找走失儿童</title>
-    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.25/weui.min.css"/>
-    
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>宝贝回家 · 寻亲信息</title>
+  <link rel="stylesheet" href="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.css">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('baobei_theme') || 'auto';
+        var dark = t === 'dark' || (t === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.setAttribute('theme-mode', 'dark');
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
+  <style>
+    html, body, #app { height: 100%; margin: 0; }
+    body { background: var(--td-bg-color-page); }
 
-    <style>
-        /* 全局重置 */
-        body {
-            background-color: #f3f3f3;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            padding-bottom: 120px; 
-            box-sizing: border-box;
-        }
+    .app-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--td-text-color-primary);
+      white-space: nowrap;
+    }
 
-        /* 毛玻璃风格分享按钮 */
-        .share-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 44px;
-            height: 44px;
-            background: rgba(255, 255, 255, 0.65); 
-            -webkit-backdrop-filter: blur(12px);   
-            backdrop-filter: blur(12px);           
-            border: 1px solid rgba(255, 255, 255, 0.4); 
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); 
-            z-index: 101;
-            cursor: pointer;
-            transition: transform 0.1s, background-color 0.2s;
-        }
-        .share-btn:active {
-            transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.8); 
-        }
-        .share-svg {
-            width: 22px;
-            height: 22px;
-            fill: #333;
-            opacity: 0.85; 
-        }
+    .page-container { max-width: 960px; margin: 0 auto; }
 
-        /* 1. 照片区域 */
-        .photo-wrapper {
-            width: 100%;
-            background-color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px 0;
-            min-height: 250px;
-        }
-        .photo-wrapper img {
-            max-width: 95%;
-            max-height: 350px;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            border-radius: 4px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+    .action-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--td-bg-color-page);
+      border-bottom: 1px solid var(--td-component-stroke);
+    }
+    .action-bar > .t-button { flex: 1; min-width: 0; }
 
-        /* 2. 信息卡片布局 */
-        .info-card {
-            background: #fff;
-            margin: -15px 15px 0 15px;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            position: relative;
-            z-index: 2;
-        }
+    .content-body { padding: 16px; }
 
-        /* 头部：姓名与基础标签 */
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
-        }
-        .name-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-        .tags-group span {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-left: 5px;
-            font-weight: 500;
-        }
-        .tag-sex { background: #e6f2ff; color: #0066cc; }
-        .tag-age { background: #fff7e6; color: #fa8c16; }
+    .info-card {
+      background: var(--td-bg-color-container);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
 
-        /* 列表项优化 */
-        .info-item {
-            margin-bottom: 12px;
-        }
-        .info-label {
-            color: #888;
-            font-size: 13px;
-            margin-bottom: 4px;
-            display: block;
-        }
-        .info-value {
-            color: #333;
-            font-size: 16px;
-            line-height: 1.5;
-            font-weight: 500;
-        }
-        .info-value.address {
-            color: #333;
-        }
+    .info-layout {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
 
-        /* 描述文本 */
-        .desc-box {
-            background: #f9f9f9;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-        .desc-text {
-            color: #555;
-            font-size: 14px;
-            line-height: 1.6;
-            text-align: justify;
-        }
+    .photo-section { flex: 0 0 auto; width: 140px; }
+    .photo-section img {
+      display: block;
+      width: 140px;
+      height: 187px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: var(--td-bg-color-container-hover);
+      border: 1px solid var(--td-component-stroke);
+    }
 
-        /* 3. 底部固定按钮栏 */
-        .fixed-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            width: 100%;
-            background: #fff;
-            padding: 12px 16px;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom));
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            z-index: 100;
-            display: flex;
-            gap: 12px;
-            box-sizing: border-box;
-        }
+    .detail-section { flex: 1; min-width: 0; }
 
-        .btn-secondary {
-            flex: 1;
-            background-color: #f2f2f2;
-            color: #333;
-            border: none;
-            border-radius: 8px;
-            height: 48px;
-            font-size: 16px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-        }
-        .btn-primary {
-            flex: 1.5;
-            background-color: #07c160;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            height: 48px;
-            font-size: 16px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(7, 193, 96, 0.3);
-            cursor: pointer;
-        }
-        .btn-primary:active { opacity: 0.9; }
+    .name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .name-text {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--td-text-color-primary);
+      word-break: break-word;
+      line-height: 1.2;
+    }
 
-        /* 联系电话区域 */
-        .contact-area {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px dashed #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .contact-label { font-size: 14px; color: #666; }
-        .contact-number { font-size: 20px; font-weight: bold; color: #fa5151; }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .info-item {
+      display: flex;
+      align-items: flex-start;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .info-label {
+      flex: 0 0 84px;
+      color: var(--td-text-color-placeholder);
+      font-size: 13px;
+    }
+    .info-value {
+      flex: 1;
+      min-width: 0;
+      color: var(--td-text-color-primary);
+      font-weight: 500;
+      word-break: break-word;
+    }
 
-        /* 拨号图标样式 */
-        .call-icon-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 44px;
-            height: 44px;
-            background-color: #f0fdf4;
-            border-radius: 50%;
-            transition: transform 0.1s, background-color 0.2s;
-        }
-        .call-icon-btn:active {
-            transform: scale(0.95);
-            background-color: #dcfce7;
-        }
-        .call-svg {
-            width: 24px;
-            height: 24px;
-            fill: #07c160;
-        }
+    .desc-block {
+      margin-top: 16px;
+      padding: 14px;
+      background: var(--td-bg-color-container-hover);
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--td-text-color-secondary);
+      word-break: break-word;
+    }
+    .desc-block-label {
+      font-size: 12px;
+      color: var(--td-text-color-placeholder);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
 
-        /* 加载动画 */
-        #loadingToast { display: none; }
-        .weui-toast { min-height: auto; padding: 15px; }
-        
-        /* 隐藏自定义对话框初始状态 */
-        #custom-dialog { display: none; }
-    </style>
+    .source-section {
+      text-align: center;
+      font-size: 12px;
+      color: var(--td-text-color-placeholder);
+      line-height: 1.7;
+      padding: 8px 0;
+    }
+    .source-section a { color: var(--td-brand-color); text-decoration: none; }
+
+    .sharing-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .sharing-mask-box {
+      background: var(--td-bg-color-container);
+      padding: 24px 32px;
+      border-radius: 12px;
+      color: var(--td-text-color-primary);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      min-width: 180px;
+    }
+
+    @media (max-width: 767px) {
+      .action-bar { padding: 10px 12px; gap: 10px; }
+      .content-body { padding: 12px; }
+      .info-card { padding: 14px; border-radius: 10px; }
+      .info-layout { gap: 14px; }
+      .photo-section { width: 100px; }
+      .photo-section img { width: 100px; height: 133px; border-radius: 6px; }
+      .name-text { font-size: 19px; }
+      .name-row { margin-bottom: 10px; gap: 6px; }
+      .info-grid { gap: 6px; }
+      .info-item { font-size: 13px; }
+      .info-label { flex: 0 0 72px; font-size: 12px; }
+      .desc-block { font-size: 13px; padding: 12px; }
+    }
+  </style>
 </head>
 <body>
-
-    <div class="share-btn" id="share-btn" onclick="handleShare()" aria-label="分享海报">
-        <svg class="share-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
-        </svg>
-    </div>
-
-    <div id="capture-target">
-        <div class="photo-wrapper">
-            <img id="baby-img" src="" alt="请等待图片加载..." crossorigin="anonymous" />
+  <div id="app">
+    <t-layout style="height: 100%;">
+      <t-header style="display: flex; align-items: center; justify-content: space-between; padding: 0 16px;">
+        <span class="app-title">宝贝回家 · 寻亲信息</span>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <t-tooltip :content="isDark ? '切换到浅色模式' : '切换到深色模式'">
+            <t-button variant="text" shape="square" @click="toggleTheme">
+              <t-icon :name="isDark ? 'sunny' : 'moon'" size="20px" />
+            </t-button>
+          </t-tooltip>
+          <t-tooltip content="生成分享海报">
+            <t-button variant="text" shape="square" :disabled="initialLoading || sharing" @click="handleShare">
+              <t-icon name="share" size="20px" />
+            </t-button>
+          </t-tooltip>
         </div>
+      </t-header>
 
-        <div class="info-card" id="info-content" style="opacity: 0; transition: opacity 0.5s;">
-            <div class="header-row">
-                <div class="name-title" id="baby-name">加载中</div>
-                <div class="tags-group">
-                    <span class="tag-sex" id="baby-sex">--</span>
-                    <span class="tag-age" id="baby-age">--岁</span>
+      <t-content style="overflow-y: auto;">
+        <div class="page-container">
+          <div class="action-bar">
+            <t-button
+              size="large"
+              theme="primary"
+              :loading="loading"
+              :disabled="initialLoading"
+              @click="fetchBabyInfo"
+            >
+              <template #icon><t-icon name="refresh" /></template>
+              寻找下一位
+            </t-button>
+            <t-button
+              size="large"
+              variant="outline"
+              :disabled="!baby.url || loading || initialLoading"
+              @click="openOriginal"
+            >
+              <template #icon><t-icon name="link" /></template>
+              查看原帖
+            </t-button>
+          </div>
+
+          <div class="content-body">
+            <div class="info-card">
+              <div v-if="initialLoading" style="padding: 60px 20px; text-align: center;">
+                <t-loading size="32px" text="数据加载中…" />
+              </div>
+
+              <template v-else>
+                <div class="info-layout">
+                  <div class="photo-section">
+                    <img
+                      :src="baby.photo"
+                      :alt="baby.name ? baby.name + ' 照片' : '寻亲照片'"
+                      referrerpolicy="no-referrer"
+                      @error="onImgError"
+                    />
+                  </div>
+
+                  <div class="detail-section">
+                    <div class="name-row">
+                      <span class="name-text">{{ baby.name || '未知' }}</span>
+                      <t-space size="6px">
+                        <t-tag v-if="baby.category" theme="primary" variant="light" size="small">
+                          {{ baby.category }}
+                        </t-tag>
+                        <t-tag theme="primary" variant="outline" size="small">
+                          {{ baby.sex || '未知' }}
+                        </t-tag>
+                      </t-space>
+                    </div>
+
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <span class="info-label">出生日期</span>
+                        <span class="info-value">{{ baby.birthDay || '未知' }}</span>
+                      </div>
+                      <div class="info-item">
+                        <span class="info-label">失踪时间</span>
+                        <span class="info-value">{{ baby.lostDay || '未知' }}</span>
+                      </div>
+                      <div class="info-item">
+                        <span class="info-label">失踪地点</span>
+                        <span class="info-value">{{ baby.lostAddress || '未知地点' }}</span>
+                      </div>
+                      <div class="info-item">
+                        <span class="info-label">失踪身高</span>
+                        <span class="info-value">{{ baby.lostHeight || '未知' }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-            </div>
 
-            <div class="info-item">
-                <span class="info-label">失踪时间</span>
-                <div class="info-value" id="baby-time">--</div>
-            </div>
-
-            <div class="info-item">
-                <span class="info-label">失踪地点</span>
-                <div class="info-value address" id="baby-address">--</div>
-            </div>
-
-            <div class="desc-box">
-                <span class="info-label">特征描述：</span>
-                <div class="desc-text" id="baby-feature">--</div>
-            </div>
-
-            <div class="contact-area">
-                <div>
-                    <div class="contact-label">线索联系电话</div>
-                    <div class="contact-number" id="baby-contact">--</div>
+                <div class="desc-block">
+                  <div class="desc-block-label">特征描述</div>
+                  {{ baby.feature || '暂无详细描述' }}
                 </div>
-                
-                <a href="javascript:;" id="call-btn" class="call-icon-btn" aria-label="拨打电话">
-                    <svg class="call-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-2.2 2.2a15.057 15.057 0 0 1-6.59-6.59l2.2-2.21c.28-.26.36-.65.25-1.01A11.36 11.36 0 0 1 8.5 3.99c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/>
-                    </svg>
-                </a>
+              </template>
             </div>
-        </div>
-    </div>
 
-    <div class="fixed-footer">
-        <a id="detail-link" href="javascript:;" target="_blank" class="btn-secondary">查看原帖</a>
-        <button onclick="fetchBabyInfo()" class="btn-primary">寻找下一位</button>
-    </div>
-
-    <div id="loadingToast">
-        <div class="weui-mask_transparent"></div>
-        <div class="weui-toast">
-            <i class="weui-loading weui-icon_toast"></i>
-            <p class="weui-toast__content" id="loading-text">数据加载中</p>
-        </div>
-    </div>
-
-    <div id="custom-dialog">
-        <div class="weui-mask"></div>
-        <div class="weui-dialog">
-            <div class="weui-dialog__bd" id="dialog-content">提示内容</div>
-            <div class="weui-dialog__ft">
-                <a href="javascript:closeDialog();" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+            <div class="source-section">
+              数据来源：宝贝回家公益平台 ·
+              接口由 <a href="https://www.xunjinlu.fun" target="_blank" rel="noopener">寻鲸录</a> 提供
             </div>
+          </div>
         </div>
+      </t-content>
+    </t-layout>
+
+    <div v-if="sharing" class="sharing-mask">
+      <div class="sharing-mask-box">
+        <t-loading size="28px" text="正在生成分享海报…" />
+      </div>
     </div>
+  </div>
 
-    <script>
-        // --- 弹窗控制函数 ---
-        function showDialog(message) {
-            document.getElementById('dialog-content').innerText = message;
-            document.getElementById('custom-dialog').style.display = 'block';
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/tdesign-vue-next/dist/tdesign.min.js"></script>
+  <script src="https://unpkg.com/tdesign-icons-vue-next/dist/index.min.js"></script>
+  <script>
+    const { createApp, ref, reactive, onMounted, onUnmounted } = Vue;
+
+    /* ===================== 工具 ===================== */
+    const PLACEHOLDER = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400">' +
+      '<rect width="300" height="400" fill="#f2f3f5"/>' +
+      '<text x="50%" y="50%" font-family="sans-serif" font-size="16" fill="#999" ' +
+      'text-anchor="middle" dominant-baseline="middle">暂无照片</text></svg>'
+    );
+
+    const API_URL = 'https://api.xunjinlu.fun/api/babygome/index.php';
+
+    function normalizePhotoUrl(url) {
+      if (!url || typeof url !== 'string') return PLACEHOLDER;
+      let u = url.trim();
+      if (!u) return PLACEHOLDER;
+      if (u.startsWith('//')) u = 'https:' + u;
+      else if (u.startsWith('http://')) u = 'https://' + u.slice(7);
+      else if (!/^https?:\/\//i.test(u) && !u.startsWith('data:')) return PLACEHOLDER;
+      return u;
+    }
+
+    function proxifyImageUrl(url) {
+      if (!url || url.startsWith('data:')) return url;
+      return 'https://wsrv.nl/?url=' + encodeURIComponent(url) + '&n=-1';
+    }
+
+    function proxifyImageUrlFallback(url) {
+      if (!url || url.startsWith('data:')) return url;
+      return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+    }
+
+    function loadImageWithCors(url) {
+      return new Promise((resolve) => {
+        if (!url) return resolve(null);
+
+        if (url.startsWith('data:')) {
+          const img = new Image();
+          img.onload  = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = url;
+          return;
         }
 
-        function closeDialog() {
-            document.getElementById('custom-dialog').style.display = 'none';
+        const candidates = [
+          proxifyImageUrl(url),
+          proxifyImageUrlFallback(url)
+        ];
+
+        let idx = 0;
+
+        const tryNext = () => {
+          if (idx >= candidates.length) return resolve(null);
+          const src = candidates[idx++];
+
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.referrerPolicy = 'no-referrer';
+
+          const timer = setTimeout(() => {
+            try { img.src = ''; } catch (e) { /* ignore */ }
+            tryNext();
+          }, 6000);
+
+          img.onload = () => {
+            clearTimeout(timer);
+            if (img.naturalWidth > 0 && img.naturalHeight > 0) resolve(img);
+            else tryNext();
+          };
+          img.onerror = () => {
+            clearTimeout(timer);
+            tryNext();
+          };
+
+          img.src = src;
+        };
+
+        tryNext();
+      });
+    }
+
+    function wrapText(ctx, text, maxWidth) {
+      const chars = String(text || '').split('');
+      const lines = [];
+      let line = '';
+      for (const ch of chars) {
+        if (ch === '\n') { lines.push(line); line = ''; continue; }
+        const test = line + ch;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          lines.push(line);
+          line = ch;
+        } else {
+          line = test;
         }
+      }
+      if (line) lines.push(line);
+      return lines.length ? lines : [''];
+    }
 
-        document.addEventListener('DOMContentLoaded', fetchBabyInfo);
+    function ellipsis(ctx, text, maxW) {
+      const s = String(text || '');
+      if (ctx.measureText(s).width <= maxW) return s;
+      let cut = s;
+      while (cut.length > 1 && ctx.measureText(cut + '…').width > maxW) {
+        cut = cut.slice(0, -1);
+      }
+      return cut + '…';
+    }
 
-        function fetchBabyInfo() {
-            const loading = document.getElementById('loadingToast');
-            const content = document.getElementById('info-content');
-            const loadingText = document.getElementById('loading-text');
-            
-            loadingText.innerText = '数据加载中';
-            loading.style.display = 'block';
-            content.style.opacity = '0.5';
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.arcTo(x + w, y, x + w, y + r, r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+      ctx.lineTo(x + r, y + h);
+      ctx.arcTo(x, y + h, x, y + h - r, r);
+      ctx.lineTo(x, y + r);
+      ctx.arcTo(x, y, x + r, y, r);
+      ctx.closePath();
+    }
 
-            const apiUrl = 'https://api.lolimi.cn/API/baby/gohome?type=json&t=' + new Date().getTime();
+    const FONT_SANS = '"PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
 
-            fetch(apiUrl)
-                .then(res => res.json())
-                .then(res => {
-                    loading.style.display = 'none';
-                    content.style.opacity = '1';
+    /* ===================== Canvas 绘制海报 ===================== */
+    async function drawPoster(baby) {
+      let photo = null;
+      try {
+        photo = await loadImageWithCors(normalizePhotoUrl(baby.photo));
+      } catch (e) {
+        photo = null;
+      }
 
-                    if (res.code === 200 && res.data) {
-                        const d = res.data;
+      const W = 750;
+      const PAD = 48;
+      const CW = W - PAD * 2;
 
-                        document.getElementById('baby-name').innerText = d.name || '未知';
-                        document.getElementById('baby-sex').innerText = d.sex || '未知';
-                        
-                        const age = d.missing_age || d.now_age || '?';
-                        document.getElementById('baby-age').innerText = age + '岁';
+      const measure = document.createElement('canvas').getContext('2d');
+      measure.font = `400 28px ${FONT_SANS}`;
+      const featureLines = wrapText(measure, baby.feature || '暂无详细描述', CW - 48);
 
-                        document.getElementById('baby-time').innerText = d.missing_date || d.born_date || '未知';
-                        document.getElementById('baby-address').innerText = d.missing_address || '未知地点';
+      const canvas = document.createElement('canvas');
+      canvas.width  = W;
+      canvas.height = 4000;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, 4000);
 
-                        const imgEl = document.getElementById('baby-img');
-                        const imgUrl = d.photo || d.md_photo;
-                        imgEl.src = ''; 
-                        
-                        if (imgUrl) {
-                            imgEl.src = imgUrl;
-                            imgEl.onerror = function() {
-                                this.src = 'https://via.placeholder.com/300x400?text=暂无图片';
-                            }
-                        } else {
-                            imgEl.src = 'https://via.placeholder.com/300x400?text=暂无图片';
-                        }
+      let y = 70;
 
-                        document.getElementById('baby-feature').innerText = d.missing_feature || '暂无详细描述';
+      /* 顶部品牌 */
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#0e5cd9';
+      ctx.font = `700 48px ${FONT_SANS}`;
+      ctx.fillText('宝 贝 回 家', W / 2, y);
 
-                        const phone = d.contact || '暂无';
-                        document.getElementById('baby-contact').innerText = phone;
-                        
-                        const callBtn = document.getElementById('call-btn');
-                        if(/\d/.test(phone)) {
-                            callBtn.href = 'tel:' + phone;
-                        } else {
-                            // 替换原生的 alert
-                            callBtn.href = 'javascript:showDialog("该寻亲信息暂无有效联系电话");';
-                        }
+      y += 48;
+      ctx.fillStyle = '#888888';
+      ctx.font = `400 26px ${FONT_SANS}`;
+      ctx.fillText('寻 亲 信 息 · 请帮忙扩散', W / 2, y);
 
-                        const linkBtn = document.getElementById('detail-link');
-                        if (d.url) {
-                            linkBtn.href = d.url;
-                            linkBtn.style.visibility = 'visible';
-                        } else {
-                            linkBtn.href = 'javascript:;';
-                            linkBtn.style.visibility = 'hidden';
-                        }
+      y += 30;
+      ctx.strokeStyle = '#0e5cd9';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(PAD, y);
+      ctx.lineTo(W - PAD, y);
+      ctx.stroke();
 
-                    } else {
-                        // 替换原生的 alert
-                        showDialog('未获取到有效数据，请重试');
-                    }
-                })
-                .catch(err => {
-                    loading.style.display = 'none';
-                    console.error(err);
-                    // 替换原生的 alert
-                    showDialog('网络请求失败，请检查网络设置');
-                });
-        }
+      /* 照片 */
+      y += 32;
+      if (photo) {
+        const photoH = 480;
+        const photoW = photoH * 0.75;
+        const px = (W - photoW) / 2;
+        ctx.save();
+        roundRect(ctx, px, y, photoW, photoH, 16);
+        ctx.clip();
+        ctx.drawImage(photo, px, y, photoW, photoH);
+        ctx.restore();
+        y += photoH + 32;
+      } else {
+        const boxH = 160;
+        ctx.fillStyle = '#f2f3f5';
+        roundRect(ctx, PAD, y, CW, boxH, 12);
+        ctx.fill();
+        ctx.fillStyle = '#999999';
+        ctx.font = `400 26px ${FONT_SANS}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('照片加载失败，请前往原帖查看', W / 2, y + boxH / 2);
+        ctx.textBaseline = 'alphabetic';
+        y += boxH + 32;
+      }
 
-        // --- 处理截图和分享逻辑 ---
-        async function handleShare() {
-            const shareBtn = document.getElementById('share-btn');
-            const loading = document.getElementById('loadingToast');
-            const loadingText = document.getElementById('loading-text');
-            const captureTarget = document.getElementById('capture-target');
+      /* 姓名 + 标签 */
+      y += 60;
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = `700 44px ${FONT_SANS}`;
+      const nameText = baby.name || '未知';
+      ctx.fillText(nameText, PAD, y);
 
-            loadingText.innerText = '正在生成海报...';
-            loading.style.display = 'block';
-            shareBtn.style.visibility = 'hidden';
+      const nameW = ctx.measureText(nameText).width;
+      let tagX = PAD + nameW + 24;
+      const tagH = 44;
+      const tagY = y - 34;
+      const tagFont = `500 22px ${FONT_SANS}`;
+      ctx.font = tagFont;
 
-            try {
-                const canvas = await html2canvas(captureTarget, {
-                    useCORS: true,           
-                    scale: 2,                
-                    backgroundColor: '#f3f3f3' 
-                });
+      const drawTag = (x, text, bg, fg) => {
+        const w = ctx.measureText(text).width + 32;
+        ctx.fillStyle = bg;
+        roundRect(ctx, x, tagY, w, tagH, tagH / 2);
+        ctx.fill();
+        ctx.fillStyle = fg;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, x + 16, tagY + tagH / 2);
+        ctx.textBaseline = 'alphabetic';
+        return w;
+      };
 
-                canvas.toBlob(async (blob) => {
-                    if (!blob) throw new Error('生成图片失败');
-                    const file = new File([blob], 'baobei_share.png', { type: 'image/png' });
-                    
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({
-                            title: '宝贝回家 - 寻找走失儿童',
-                            text: '请帮忙扩散，让宝贝早日回家！',
-                            files: [file]
-                        });
-                    } else {
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'baobei_share_poster.png'; 
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                        // 替换原生的 alert
-                        showDialog('当前环境不支持直接唤起分享，已为您生成海报并尝试保存到相册。您可以手动发送给朋友！');
-                    }
-                }, 'image/png');
+      if (baby.sex) {
+        const w = drawTag(tagX, baby.sex, '#e6f2ff', '#0e5cd9');
+        tagX += w + 12;
+      }
+      if (baby.category) {
+        ctx.font = tagFont;
+        const cat = ellipsis(ctx, baby.category, 200);
+        drawTag(tagX, cat, '#fff7e6', '#fa8c16');
+      }
 
-            } catch (err) {
-                console.error('分享出错:', err);
-                // 替换原生的 alert
-                showDialog('生成分享海报失败，请稍后重试');
-            } finally {
-                shareBtn.style.visibility = 'visible';
-                loading.style.display = 'none';
-                loadingText.innerText = '数据加载中'; 
+      y += 30;
+
+      /* 信息块 */
+      y += 8;
+      const infoBlockY = y;
+      const infoItemH = 64;
+      const infoBlockH = infoItemH * 4 + 40;
+
+      ctx.fillStyle = '#f7f8fa';
+      roundRect(ctx, PAD, infoBlockY, CW, infoBlockH, 12);
+      ctx.fill();
+
+      const items = [
+        ['出生日期',   baby.birthDay],
+        ['失踪时间',   baby.lostDay],
+        ['失踪地点',   baby.lostAddress],
+        ['失踪时身高', baby.lostHeight]
+      ];
+      let iy = infoBlockY + 20;
+      items.forEach(([label, value]) => {
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#8a8a8a';
+        ctx.font = `400 24px ${FONT_SANS}`;
+        ctx.fillText(label, PAD + 24, iy + 34);
+
+        ctx.fillStyle = '#1a1a1a';
+        ctx.font = `500 26px ${FONT_SANS}`;
+        ctx.textAlign = 'right';
+        const v = ellipsis(ctx, value || '未知', CW - 160);
+        ctx.fillText(v, W - PAD - 24, iy + 34);
+        iy += infoItemH;
+      });
+      y = infoBlockY + infoBlockH + 24;
+
+      /* 特征描述块 */
+      const featureBlockY = y;
+      const featurePadTop  = 26;
+      const featureLabelH  = 32;
+      const featureGap     = 14;
+      const lineH          = 40;
+      const featurePadBot  = 26;
+      const featureBlockH  = featurePadTop + featureLabelH + featureGap +
+                             featureLines.length * lineH + featurePadBot;
+
+      ctx.fillStyle = '#f7f8fa';
+      roundRect(ctx, PAD, featureBlockY, CW, featureBlockH, 12);
+      ctx.fill();
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#8a8a8a';
+      ctx.font = `500 24px ${FONT_SANS}`;
+      ctx.fillText('特征描述', PAD + 24, featureBlockY + featurePadTop + 24);
+
+      let fy = featureBlockY + featurePadTop + featureLabelH + featureGap;
+      ctx.fillStyle = '#333333';
+      ctx.font = `400 28px ${FONT_SANS}`;
+      featureLines.forEach(line => {
+        fy += lineH;
+        ctx.fillText(line, PAD + 24, fy - 8);
+      });
+
+      y = featureBlockY + featureBlockH + 40;
+
+      /* 页脚 */
+      ctx.strokeStyle = '#e5e5e5';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(PAD, y);
+      ctx.lineTo(W - PAD, y);
+      ctx.stroke();
+
+      y += 44;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#0e5cd9';
+      ctx.font = `600 30px ${FONT_SANS}`;
+      ctx.fillText('请帮忙扩散，让亲人早日回家', W / 2, y);
+
+      y += 44;
+      ctx.fillStyle = '#999999';
+      ctx.font = `400 24px ${FONT_SANS}`;
+      ctx.fillText('数据来源：宝贝回家公益平台 · baobeihuijia.com', W / 2, y);
+
+      y += 34;
+      ctx.fillText('接口支持：寻鲸录 · xunjinlu.fun', W / 2, y);
+
+      /* 裁剪导出 */
+      const finalH = Math.ceil(y + 48);
+      const out = document.createElement('canvas');
+      out.width  = W;
+      out.height = finalH;
+      out.getContext('2d').drawImage(canvas, 0, 0, W, finalH, 0, 0, W, finalH);
+
+      const blob = await new Promise((resolve, reject) => {
+        out.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/png');
+      });
+
+      return blob;
+    }
+
+    /* ===================== Vue 应用 ===================== */
+    const app = createApp({
+      setup() {
+        const initialLoading = ref(true);
+        const loading        = ref(false);
+        const sharing        = ref(false);
+
+        const baby = reactive({
+          name: '', sex: '', birthDay: '', lostDay: '',
+          lostAddress: '', lostHeight: '', feature: '',
+          photo: PLACEHOLDER, url: '', category: ''
+        });
+
+        /* 主题 */
+        const themeKey  = 'baobei_theme';
+        const themeMode = ref(localStorage.getItem(themeKey) || 'auto');
+        const isDark    = ref(false);
+
+        const applyTheme = () => {
+          let dark;
+          if (themeMode.value === 'auto') {
+            dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          } else {
+            dark = themeMode.value === 'dark';
+          }
+          isDark.value = dark;
+          if (dark) document.documentElement.setAttribute('theme-mode', 'dark');
+          else document.documentElement.removeAttribute('theme-mode');
+        };
+
+        const toggleTheme = () => {
+          themeMode.value = isDark.value ? 'light' : 'dark';
+          localStorage.setItem(themeKey, themeMode.value);
+          applyTheme();
+        };
+
+        applyTheme();
+
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const onSystemThemeChange = () => {
+          if (themeMode.value === 'auto') applyTheme();
+        };
+
+        /* 数据拉取 */
+        const fetchBabyInfo = async () => {
+          if (loading.value) return;
+          loading.value = true;
+          try {
+            const res = await fetch(
+              API_URL + '?type=json&t=' + Date.now(),
+              { headers: { 'Accept': 'application/json' } }
+            );
+            const data = await res.json();
+
+            if (data.code === 200 && data.data) {
+              const d = data.data;
+              baby.name        = d.name        || '未知';
+              baby.sex         = d.sex         || '未知';
+              baby.birthDay    = d.birthDay    || '未知';
+              baby.lostDay     = d.lostDay     || '未知';
+              baby.lostAddress = d.lostAddress || '未知地点';
+              baby.lostHeight  = d.lostHeight  || '未知';
+              baby.feature     = d.feature     || '暂无详细描述';
+              baby.photo       = normalizePhotoUrl(d.photoUrl);
+              baby.url         = d.detailUrl   || '';
+              baby.category    = d.categoryName || '';
+            } else {
+              TDesign.MessagePlugin.warning(
+                (data && data.msg) ? data.msg : '未获取到有效数据，请重试'
+              );
             }
-        }
-    </script>
+          } catch (err) {
+            console.error(err);
+            TDesign.MessagePlugin.error('网络请求失败，请检查网络设置');
+          } finally {
+            loading.value = false;
+            initialLoading.value = false;
+          }
+        };
+
+        const onImgError = (e) => {
+          if (e && e.target) e.target.src = PLACEHOLDER;
+        };
+
+        const openOriginal = () => {
+          if (!baby.url) {
+            TDesign.MessagePlugin.warning('该条记录暂无原帖链接');
+            return;
+          }
+          window.open(baby.url, '_blank', 'noopener');
+        };
+
+        /* 分享 */
+        const handleShare = async () => {
+          if (sharing.value || initialLoading.value) return;
+          sharing.value = true;
+          try {
+            const blob = await drawPoster(baby);
+            const fileName = '宝贝回家_' + (baby.name || '寻亲') + '.png';
+            const file = new File([blob], fileName, { type: 'image/png' });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              try {
+                await navigator.share({
+                  title: '宝贝回家 · 寻亲信息',
+                  text: '请帮忙扩散，让亲人早日回家！',
+                  files: [file]
+                });
+                return;
+              } catch (shareErr) {
+                if (shareErr && shareErr.name === 'AbortError') return;
+              }
+            }
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+            TDesign.MessagePlugin.success('海报已保存到下载目录');
+          } catch (err) {
+            console.error(err);
+            TDesign.MessagePlugin.error('生成海报失败：' + (err.message || '请重试'));
+          } finally {
+            sharing.value = false;
+          }
+        };
+
+        onMounted(() => {
+          fetchBabyInfo();
+          if (mediaQuery.addEventListener) mediaQuery.addEventListener('change', onSystemThemeChange);
+          else if (mediaQuery.addListener) mediaQuery.addListener(onSystemThemeChange);
+        });
+        onUnmounted(() => {
+          if (mediaQuery.removeEventListener) mediaQuery.removeEventListener('change', onSystemThemeChange);
+          else if (mediaQuery.removeListener) mediaQuery.removeListener(onSystemThemeChange);
+        });
+
+        return {
+          initialLoading, loading, sharing, baby, isDark, toggleTheme,
+          fetchBabyInfo, onImgError, openOriginal, handleShare
+        };
+      }
+    });
+
+    if (window.TDesignIcons && window.TDesignIcons.install) {
+      app.use(window.TDesignIcons);
+    }
+    app.use(TDesign);
+    app.mount('#app');
+  </script>
 </body>
 </html>
